@@ -1,39 +1,39 @@
-   ;***************************************************************
-   ;
-   ;  Multicolored sprite and multicolored playfield.
-   ;
+   ;*************************************************
+   ; SETTAGGIO DEL KERNEL
+   ; ------------------------------------------------
+   ; kernel_options :
+   ; player1colors = colorazione del player 1
+   ; pfcolors = colorazione del playfiled
    set kernel_options player1colors pfcolors
 
-   ;***************************************************************
-   ;
-   ;  The game will have 8 banks (32k/4k = 8 banks).
-   ;
+   ;*************************************************
+   ; ALTRI SETTAGGI
+   ; ------------------------------------------------
+   ; romsize = 4k, 8k (2 banhi di memoria)
+   ; pal  = Versione dei colori
+   ; tv = effetto crt
    set romsize 4k
    set pal
 
 
+   ;*************************************************
+   ; COSTANTI (vedi poi INIZIALIZZAZIONE)
+   ; ------------------------------------------------
+   
+   ; abilitazione/disabilitazione dello score
    const pfscore = 1
-
-   ;***************************************************************
-   ;
-   ;  Defines the edges of the playfield for an 8 x 8 sprite.
-   ;  If your sprite is a different size, you'll need to adjust
-   ;  the numbers.
-   ;
-   const _P_Edge_Top = 9
-   const _P_Edge_Bottom = 88
-   const _P_Edge_Left = 1
-   const _P_Edge_Right = 153
-
    ;const noscore = 1
+
+   ; limite dei bordi (suponendo un player di 8 pixel)
+   const _pf_edge_top = 9 
+   const _pf_edge_bottom = 88
+   const _pf_edge_left = 1
+   const _pf_edge_right = 153
 
    ;```````````````````````````````````````````````````````````````
    ;  Assigns a variable to the score background.
    ;
    dim _SC_Back = var45
-
-
-
 
    ;***************************************************************
    ;
@@ -51,10 +51,15 @@
    dim _sc3 = score+2
    dim _addpl = %00010000
 
+   dim lives_centered = 0
+   dim lives_compact = 1
+
    dim frame = 0
    dim posizione = 0
    dim barriera = %0000011111
+   dim statusbarcolor = t
 
+   statusbarcolor = $1C
    ;*************************************************
    ; INIZIALIZZAZIONE
    ; ------------------------------------------------
@@ -70,13 +75,17 @@
    j = 0 : k = 0 : l = 0 : m = 0 : n = 0 : o = 0 : p = 0 : q = 0 : r = 0
    s = 0 : t = 0 : u = 0 : v = 0 : w = 0 : x = 0 : y = 0 : z = 0
 
+   pfscorecolor = $2C
+   pfscore1 = 21
+   pfscore2 = 255
+
    ;*************************************************
    ; TITOLO
    ; ------------------------------------------------
    ; Snack 'n' Roll
    ;*************************************************
 
-__Title_Screen_Playfield
+__main_title
    playfield:
    ................................
    ....XX.........XX.......X..X....
@@ -97,16 +106,16 @@ end
    ;
    pfcolors:
    $22
-   $24
-   $26
-   $28
-   $28
-   $26
-   $24
+   $22
+   $22
+   $22
+   $22
    $22
    $24
-   $28
-   $26
+   $24
+   $24
+   $24
+   $24
 end
 
    player1:
@@ -130,6 +139,17 @@ end
    $24
    $24
 end
+
+   lives:
+   %01000100
+   %11111110
+   %11111110
+   %01111100
+   %00111000
+   %00010000
+   %00010000
+   %00010000
+end
    ;,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,
    ;```````````````````````````````````````````````````````````````
    ;
@@ -145,7 +165,7 @@ end
    player1y = 53
    scorecolor = $5C
 
-__Main_Loop
+__main_loop
 
    ;COLUP0 = $26
    
@@ -239,13 +259,13 @@ end
    ;  Moves player0 sprite with the joystick while keeping the
    ;  sprite within the playfield area.
    ;
-   if joy0up && player1y > _P_Edge_Top then player1y = player1y - 1
+   if joy0up && player1y > _pf_edge_top then player1y = player1y - 1
 
-   if joy0down && player1y < _P_Edge_Bottom then player1y = player1y + 1
+   if joy0down && player1y < _pf_edge_bottom then player1y = player1y + 1
 
-   if joy0left && player1x > _P_Edge_Left then player1x = player1x - 1
+   if joy0left && player1x > _pf_edge_left then player1x = player1x - 1
 
-   if joy0right && player1x < _P_Edge_Right then player1x = player1x + 1
+   if joy0right && player1x < _pf_edge_right then player1x = player1x + 1
 
 
    ;***************************************************************
@@ -255,4 +275,6 @@ end
    drawscreen
 
 
-   goto __Main_Loop
+   goto __main_loop
+
+   inline 6lives.asm
