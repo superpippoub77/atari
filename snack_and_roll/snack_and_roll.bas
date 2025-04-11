@@ -22,7 +22,7 @@
    
    ; pfscore = abilitazione dello score
    const pfscore = 1
-   const pfrowheight=2
+   const pfrowheight=8
    ;const noscore = 1
 
    ; limite dei bordi (suponendo un player di 8 pixel)
@@ -30,22 +30,27 @@
    const _pf_edge_bottom = 88
    const _pf_edge_left = 1
    const _pf_edge_right = 153
-   const pfrowheight=2
+   
+   ; altezza dei blocchi di playfield (eventualmente la tramezza più alta... TO DO)
+   ;const pfrowheight=4
    ;const noscore = 1
 
    ;*************************************************************************
    ; VARIABILI
    ; a -> light (0 = off, 1 = on) => 0 non si vedono gli oggetti, 1 si vedono
+   ; ------------------------------------------------------------------------
    ; b -> level (1 = cucina, ...)
    ; c -> scheme (da 1 a 10, disposizone degli oggetti)
+   ; ........................................................................
    ; d -> diffcult (1, 2, 3, 4) => levocità in cui si muovono gli oggetti
-   ; ------------------------------------------------------------------------
-   dim light = a
-   dim level = b
-   dim scheme = c
-   dim difficult = d
-
-
+   ; ........................................................................
+   ; e -> unit
+   ; f -> decimal
+   ;*************************************************************************
+   dim _light = a
+   dim _lev_scheme = b.c
+   dim _difficult = d
+   dim _speed = e.f
 
    ;```````````````````````````````````````````````````````````````
    ;  Assigns a variable to the score background.
@@ -78,17 +83,18 @@
    dim statusbarcolor = t
 
    statusbarcolor = $1C
-   ;*************************************************
+
+   ;*************************************************************************
    ; INIZIALIZZAZIONE
-   ; ------------------------------------------------
+   ; ------------------------------------------------------------------------
    ; CTRLPF = Control Playfield, Ball, Collisions
-   ; NUSIZ0 = dimesione missile + dimensione player
+   ; NUSIZ(0/1) = dimesione missile + dimensione player (0/1)
    ; REFP0  = Reflection Player 0
    ; COLUP0 = Colore del Player 0
    ; COLUBK = Colore background
-   ;*************************************************
+   ;*************************************************************************
    CTRLPF = $21 : NUSIZ0 = $07 : REFP0 = 0 : COLUBK = 0 : scorecolor = 0 : _SC_Back = 0 : pfscorecolor = 0
-   ;
+
    a = 0 : b = 0 : c = 0 : d = 0 : e = 0 : f = 0 : g = 0 : h = 0 : i = 0
    j = 0 : k = 0 : l = 0 : m = 0 : n = 0 : o = 0 : p = 0 : q = 0 : r = 0
    s = 0 : t = 0 : u = 0 : v = 0 : w = 0 : x = 0 : y = 0 : z = 0
@@ -136,6 +142,26 @@ end
    $24
 end
 
+   player0:
+ %01100110
+ %00100100
+ %00011000
+ %10100101
+ %01001010
+ %01010010
+ %00100100
+ %00011110
+end
+   player0color:
+      $24
+      $26
+      $28
+      $2A
+      $2C
+      $2A
+      $24
+      $24
+end
    player1:
  %01100110
  %00100100
@@ -177,7 +203,12 @@ end
    ;```````````````````````````````````````````````````````````````
 
    COLUBK = 0
+
+
    COLUPF = $0E
+
+   player0x = 40
+   player0y = 53
 
    player1x = 20
    player1y = 53
