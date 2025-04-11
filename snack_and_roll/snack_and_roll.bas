@@ -37,25 +37,32 @@
 
    ;*************************************************************************
    ; VARIABILI
-   ; a -> light (0 = off, 1 = on) => 0 non si vedono gli oggetti, 1 si vedono
+   ; light -> a (0 = off, 1 = on) => 0 non si vedono gli oggetti, 1 si vedono
    ; ------------------------------------------------------------------------
-   ; b -> level (1 = cucina, ...)
-   ; c -> scheme (da 1 a 10, disposizone degli oggetti)
+   ; level -> b (1 = cucina, ...4 = ...) e 5 = Saccehtto finale
+   ; scheme -> c (da 1 a 10, disposizone degli oggetti)
    ; ........................................................................
-   ; d -> diffcult (1, 2, 3, 4) => levocità in cui si muovono gli oggetti
+   ; diffcult -> d (1, 2, 3, 4) => levocità in cui si muovono gli oggetti
    ; ........................................................................
-   ; e -> unit
-   ; f -> decimal
+   ; speed:
+   ; unit -> e
+   ; decimal -> f
+   ; ........................................................................
+   ; timer_cp:
+   ; cup -> e
+   ; plate -> f
+   ; timer:
+   ; gocce cioccolato -> i
    ;*************************************************************************
    dim _light = a
    dim _lev_scheme = b.c
    dim _difficult = d
    dim _speed = e.f
 
-   ;```````````````````````````````````````````````````````````````
-   ;  Assigns a variable to the score background.
-   ;
-   dim _SC_Back = var45
+   dim _timer_cp = g.h
+   dim _timer_g = i
+
+
 
    ;***************************************************************
    ;
@@ -87,19 +94,24 @@
    ;*************************************************************************
    ; INIZIALIZZAZIONE
    ; ------------------------------------------------------------------------
-   ; CTRLPF = Control Playfield, Ball, Collisions
+   ; CTRLPF = P dimensione della palla e F posizione del palyfield rispett
    ; NUSIZ(0/1) = dimesione missile + dimensione player (0/1)
    ; REFP0  = Reflection Player 0
-   ; COLUP0 = Colore del Player 0
+   ; COLUP(0/1) = Colore del Player (0/1)
    ; COLUBK = Colore background
    ;*************************************************************************
-   CTRLPF = $21 : NUSIZ0 = $07 : REFP0 = 0 : COLUBK = 0 : scorecolor = 0 : _SC_Back = 0 : pfscorecolor = 0
+   COLUP0 = $0A : COLUP1 = $0A : CTRLPF = $21 : NUSIZ0 = $07 : REFP0 = 0 : COLUBK = 0 : scorecolor = 0 : pfscorecolor = $2C
 
    a = 0 : b = 0 : c = 0 : d = 0 : e = 0 : f = 0 : g = 0 : h = 0 : i = 0
    j = 0 : k = 0 : l = 0 : m = 0 : n = 0 : o = 0 : p = 0 : q = 0 : r = 0
    s = 0 : t = 0 : u = 0 : v = 0 : w = 0 : x = 0 : y = 0 : z = 0
 
-   pfscorecolor = $2C
+   ;*************************************************************************
+   ; SCORE
+   ; ------------------------------------------------------------------------
+   ; pfscore1 = timer
+   ; pfscore2 = energy
+   ;*************************************************************************
    pfscore1 = 21
    pfscore2 = 255
 
@@ -142,6 +154,15 @@ end
    $24
 end
 
+   ;*************************************************************************
+   ; PLAYER AND SPRITE
+   ; ------------------------------------------------
+   ; player 0 -> Biscotto (nessun colore) => 4 x 4 pixel
+   ; player 1 -> Bocca che mangia (colorata ?? dipende se voglio missile 1)
+   ; missile 0 -> Sacchetto di uscita dal livello 
+   ; missile 1 -> Bonus (randomico sullo schermo a tempo, se attivo)
+   ; ball ->  Bolle del bollitore (un solo colore azzurro)
+   ;*************************************************************************
    player0:
  %01100110
  %00100100
@@ -152,16 +173,7 @@ end
  %00100100
  %00011110
 end
-   player0color:
-      $24
-      $26
-      $28
-      $2A
-      $2C
-      $2A
-      $24
-      $24
-end
+
    player1:
  %01100110
  %00100100
