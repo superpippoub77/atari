@@ -17,11 +17,12 @@
 
 
    ;*************************************************
-   ; COSTANTI (vedi poi INIZIALIZZAZIONE)
+   ; COSTANTI KERNEL (vedi poi INIZIALIZZAZIONE)
    ; ------------------------------------------------
    
-   ; abilitazione/disabilitazione dello score
+   ; pfscore = abilitazione dello score
    const pfscore = 1
+   const pfrowheight=2
    ;const noscore = 1
 
    ; limite dei bordi (suponendo un player di 8 pixel)
@@ -29,6 +30,22 @@
    const _pf_edge_bottom = 88
    const _pf_edge_left = 1
    const _pf_edge_right = 153
+   const pfrowheight=2
+   ;const noscore = 1
+
+   ;*************************************************************************
+   ; VARIABILI
+   ; a -> light (0 = off, 1 = on) => 0 non si vedono gli oggetti, 1 si vedono
+   ; b -> level (1 = cucina, ...)
+   ; c -> scheme (da 1 a 10, disposizone degli oggetti)
+   ; d -> diffcult (1, 2, 3, 4) => levocità in cui si muovono gli oggetti
+   ; ------------------------------------------------------------------------
+   dim light = a
+   dim level = b
+   dim scheme = c
+   dim difficult = d
+
+
 
    ;```````````````````````````````````````````````````````````````
    ;  Assigns a variable to the score background.
@@ -46,6 +63,7 @@
    ;  The thousands and hundreds digits are held by _sc2.
    ;  The tens and ones digits are held by _sc3.
    ;
+
    dim _sc1 = score
    dim _sc2 = score+1
    dim _sc3 = score+2
