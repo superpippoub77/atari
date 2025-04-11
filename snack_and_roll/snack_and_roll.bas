@@ -30,6 +30,8 @@
    const _pf_edge_bottom = 88
    const _pf_edge_left = 1
    const _pf_edge_right = 153
+
+   const _base_color = $2C
    
    ; altezza dei blocchi di playfield (eventualmente la tramezza più alta... TO DO)
    ;const pfrowheight=4
@@ -37,8 +39,9 @@
 
    ;*************************************************************************
    ; VARIABILI
-   ; light -> a (0 = off, 1 = on) => 0 non si vedono gli oggetti, 1 si vedono
    ; ------------------------------------------------------------------------
+   ; light -> a (0 = off, 1 = on) => 0 non si vedono gli oggetti, 1 si vedono
+   ; ........................................................................
    ; level -> b (1 = cucina, ...4 = ...) e 5 = Saccehtto finale
    ; scheme -> c (da 1 a 10, disposizone degli oggetti)
    ; ........................................................................
@@ -81,7 +84,7 @@
    dim _sc3 = score+2
    dim _addpl = %00010000
 
-   dim lives_centered = 0
+   dim lives_centered = 1
    dim lives_compact = 1
 
    dim frame = 0
@@ -100,20 +103,27 @@
    ; COLUP(0/1) = Colore del Player (0/1)
    ; COLUBK = Colore background
    ;*************************************************************************
-   COLUP0 = $0A : COLUP1 = $0A : CTRLPF = $21 : NUSIZ0 = $07 : REFP0 = 0 : COLUBK = 0 : scorecolor = 0 : pfscorecolor = $2C
+   ; SCORE AND LIVES
+   ; ------------------------------------------------------------------------
+   ; pfscore1 => timer (decrementale)
+   ; pfscore2 => energy (incrementale)
+   ; ........................................................................
+   ; lifecolor 
+   ; lives = 128 => 4 lives
+   ;*************************************************************************
+   COLUP0 = $0A : COLUP1 = $0A : CTRLPF = $21 : NUSIZ0 = $07 : REFP0 = 0 : COLUBK = 0 : scorecolor = 0 : pfscorecolor = _base_color : lifecolor = _base_color : lives = 128
 
    a = 0 : b = 0 : c = 0 : d = 0 : e = 0 : f = 0 : g = 0 : h = 0 : i = 0
    j = 0 : k = 0 : l = 0 : m = 0 : n = 0 : o = 0 : p = 0 : q = 0 : r = 0
    s = 0 : t = 0 : u = 0 : v = 0 : w = 0 : x = 0 : y = 0 : z = 0
 
-   ;*************************************************************************
-   ; SCORE
-   ; ------------------------------------------------------------------------
-   ; pfscore1 = timer
-   ; pfscore2 = energy
-   ;*************************************************************************
    pfscore1 = 21
    pfscore2 = 255
+   
+   
+
+
+
 
    ;*************************************************
    ; TITOLO
