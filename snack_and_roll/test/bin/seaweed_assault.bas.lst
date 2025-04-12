@@ -1,4 +1,4 @@
-------- FILE c:\Users\filippo.morano\progetti\atari\snack_and_roll\test\seaweed_assault.bas.asm LEVEL 1 PASS 3
+------- FILE c:\Users\Admin\Documents\atari\snack_and_roll\test\seaweed_assault.bas.asm LEVEL 1 PASS 3
       1  9000 ????						; Provided under the CC0 license. See the included LICENSE.txt for details.
       2  9000 ????
       3  9000 ????				      processor	6502
@@ -33,7 +33,7 @@
      27  9000 ????						;			    used for code assembly.
      28  9000 ????						; 1.04  12/NOV/2003	 Added TIA_BASE_WRITE_ADDRESS and TIA_BASE_READ_ADDRESS for
      29  9000 ????						;			 convenient disassembly/reassembly compatibility for hardware
-     30  9000 ????						;			 mirrored reading/writing differences.	This is more a 
+     30  9000 ????						;			 mirrored reading/writing differences.	This is more a
      31  9000 ????						;			 readability issue, and binary compatibility with disassembled
      32  9000 ????						;			 and reassembled sources.  Per Manuel Rotschkar's suggestion.
      33  9000 ????						; 1.03  12/MAY/2003	 Added SEG segment at end of file to fix old-code compatibility
@@ -75,7 +75,7 @@
      69  9000 ????						; for the mirrored ROM hardware registers.
      70  9000 ????
      71  9000 ????						; Usage: As per above, define the TIA_BASE_READ_ADDRESS and/or TIA_BASE_WRITE_ADDRESS
-     72  9000 ????						; using the -D command-line switch, as required.  If the addresses are not defined, 
+     72  9000 ????						; using the -D command-line switch, as required.  If the addresses are not defined,
      73  9000 ????						; they defaut to the TIA_BASE_ADDRESS.
      74  9000 ????
      75  9000 ????			  -	      IFNCONST	TIA_BASE_READ_ADDRESS
@@ -206,7 +206,7 @@
     200  9000 ????				      SEG
     201  9000 ????
     202  9000 ????						; EOF
-------- FILE c:\Users\filippo.morano\progetti\atari\snack_and_roll\test\seaweed_assault.bas.asm
+------- FILE c:\Users\Admin\Documents\atari\snack_and_roll\test\seaweed_assault.bas.asm
 ------- FILE macro.h LEVEL 2 PASS 3
       0  9000 ????				      include	"macro.h"
       1  9000 ????						; Provided under the CC0 license. See the included LICENSE.txt for details.
@@ -240,13 +240,13 @@
      29  9000 ????						;
      30  9000 ????						; 1.02  14/JUN/2003	 - VERTICAL_SYNC macro added
      31  9000 ????						;			   (standardised macro for vertical synch code)
-     32  9000 ????						; 1.01  22/MAR/2003	 - SLEEP macro added. 
+     32  9000 ????						; 1.01  22/MAR/2003	 - SLEEP macro added.
      33  9000 ????						;			 - NO_ILLEGAL_OPCODES switch implemented
      34  9000 ????						; 1.0	22/MAR/2003		Initial release
      35  9000 ????
-     36  9000 ????						; Note: These macros use illegal opcodes.  To disable illegal opcode usage, 
+     36  9000 ????						; Note: These macros use illegal opcodes.  To disable illegal opcode usage,
      37  9000 ????						;   define the symbol NO_ILLEGAL_OPCODES (-DNO_ILLEGAL_OPCODES=1 on command-line).
-     38  9000 ????						;   If you do not allow illegal opcode usage, you must include this file 
+     38  9000 ????						;   If you do not allow illegal opcode usage, you must include this file
      39  9000 ????						;   *after* including VCS.H (as the non-illegal opcodes access hardware
      40  9000 ????						;   registers and require them to be defined first).
      41  9000 ????
@@ -290,7 +290,7 @@
      79  9000 ????						;-------------------------------------------------------------------------------
      80  9000 ????						; VERTICAL_SYNC
      81  9000 ????						; Original author: Manuel Polik
-     82  9000 ????						; Inserts the code required for a proper 3 scannline 
+     82  9000 ????						; Inserts the code required for a proper 3 scannline
      83  9000 ????						; vertical sync sequence
      84  9000 ????						;
      85  9000 ????						; Note: Alters the accumulator
@@ -357,7 +357,7 @@
     146  9000 ????				      ENDM
     147  9000 ????
     148  9000 ????						; EOF
-------- FILE c:\Users\filippo.morano\progetti\atari\snack_and_roll\test\seaweed_assault.bas.asm
+------- FILE c:\Users\Admin\Documents\atari\snack_and_roll\test\seaweed_assault.bas.asm
 ------- FILE 2600basic.h LEVEL 2 PASS 3
       0  9000 ????				      include	"2600basic.h"
       1  9000 ????						; Provided under the CC0 license. See the included LICENSE.txt for details.
@@ -394,7 +394,7 @@
      27  9000 ????						;			    used for code assembly.
      28  9000 ????						; 1.04  12/NOV/2003	 Added TIA_BASE_WRITE_ADDRESS and TIA_BASE_READ_ADDRESS for
      29  9000 ????						;			 convenient disassembly/reassembly compatibility for hardware
-     30  9000 ????						;			 mirrored reading/writing differences.	This is more a 
+     30  9000 ????						;			 mirrored reading/writing differences.	This is more a
      31  9000 ????						;			 readability issue, and binary compatibility with disassembled
      32  9000 ????						;			 and reassembled sources.  Per Manuel Rotschkar's suggestion.
      33  9000 ????						; 1.03  12/MAY/2003	 Added SEG segment at end of file to fix old-code compatibility
@@ -436,7 +436,7 @@
      69  9000 ????						; for the mirrored ROM hardware registers.
      70  9000 ????
      71  9000 ????						; Usage: As per above, define the TIA_BASE_READ_ADDRESS and/or TIA_BASE_WRITE_ADDRESS
-     72  9000 ????						; using the -D command-line switch, as required.  If the addresses are not defined, 
+     72  9000 ????						; using the -D command-line switch, as required.  If the addresses are not defined,
      73  9000 ????						; they defaut to the TIA_BASE_ADDRESS.
      74  9000 ????
      75  9000 ????			  -	      IFNCONST	TIA_BASE_READ_ADDRESS
@@ -601,13 +601,13 @@
      29  9000 ????						;
      30  9000 ????						; 1.02  14/JUN/2003	 - VERTICAL_SYNC macro added
      31  9000 ????						;			   (standardised macro for vertical synch code)
-     32  9000 ????						; 1.01  22/MAR/2003	 - SLEEP macro added. 
+     32  9000 ????						; 1.01  22/MAR/2003	 - SLEEP macro added.
      33  9000 ????						;			 - NO_ILLEGAL_OPCODES switch implemented
      34  9000 ????						; 1.0	22/MAR/2003		Initial release
      35  9000 ????
-     36  9000 ????						; Note: These macros use illegal opcodes.  To disable illegal opcode usage, 
+     36  9000 ????						; Note: These macros use illegal opcodes.  To disable illegal opcode usage,
      37  9000 ????						;   define the symbol NO_ILLEGAL_OPCODES (-DNO_ILLEGAL_OPCODES=1 on command-line).
-     38  9000 ????						;   If you do not allow illegal opcode usage, you must include this file 
+     38  9000 ????						;   If you do not allow illegal opcode usage, you must include this file
      39  9000 ????						;   *after* including VCS.H (as the non-illegal opcodes access hardware
      40  9000 ????						;   registers and require them to be defined first).
      41  9000 ????
@@ -651,7 +651,7 @@
      79  9000 ????						;-------------------------------------------------------------------------------
      80  9000 ????						; VERTICAL_SYNC
      81  9000 ????						; Original author: Manuel Polik
-     82  9000 ????						; Inserts the code required for a proper 3 scannline 
+     82  9000 ????						; Inserts the code required for a proper 3 scannline
      83  9000 ????						; vertical sync sequence
      84  9000 ????						;
      85  9000 ????						; Note: Alters the accumulator
@@ -1570,7 +1570,7 @@
     232  9000 ????			  -	      else
     233  9000 ????			  -playfield  =	playfieldbase-(pfres-12*(4/pfwidth))*pfwidth
     234  9000 ????				      endif
-------- FILE c:\Users\filippo.morano\progetti\atari\snack_and_roll\test\seaweed_assault.bas.asm
+------- FILE c:\Users\Admin\Documents\atari\snack_and_roll\test\seaweed_assault.bas.asm
 ------- FILE 2600basic_variable_redefs.h LEVEL 2 PASS 3
       0  9000 ????				      include	"2600basic_variable_redefs.h"
       1  9000 ????						; This file contains variable mapping and other information for the current project.
@@ -1928,7 +1928,7 @@
     353  9000 ????	       1f f4	   bankswitch_hotspot =	$1FF4
     354  9000 ????	       00 01	   PFcolors   =	1
     355  9000 ????	       00 01	   player1colors =	1
-------- FILE c:\Users\filippo.morano\progetti\atari\snack_and_roll\test\seaweed_assault.bas.asm
+------- FILE c:\Users\Admin\Documents\atari\snack_and_roll\test\seaweed_assault.bas.asm
       8  9000 ????				      ifconst	bankswitch
       9  9000 ????			  -	      if	bankswitch == 8
      10  9000 ????			  -	      ORG	$1000

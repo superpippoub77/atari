@@ -2,9 +2,9 @@
    ; SETTAGGIO DEL KERNEL
    ; ------------------------------------------------
    ; kernel_options :
-   ; player1colors = colorazione del player 1
+   ; player0colors = colorazione del player 1
    ; pfcolors = colorazione del playfiled
-   set kernel_options player1colors pfcolors
+   set kernel_options pfcolors 
 
    ;*************************************************
    ; ALTRI SETTAGGI
@@ -22,7 +22,7 @@
    
    ; pfscore = abilitazione dello score
    const pfscore = 1
-   const pfrowheight=8
+   ;const pfrowheight=8
    ;const noscore = 1
 
    ; limite dei bordi (suponendo un player di 8 pixel)
@@ -31,12 +31,13 @@
    const _pf_edge_left = 1
    const _pf_edge_right = 153
 
-   const _base_color = $2C
-   
-   ; altezza dei blocchi di playfield (eventualmente la tramezza più alta... TO DO)
-   ;const pfrowheight=4
-   ;const noscore = 1
+   const _base_color = $16
+   const _P0_color = $2C
+   const _P1_color = $68
 
+   const scorefade = 1
+
+   
    ;*************************************************************************
    ; VARIABILI
    ; ------------------------------------------------------------------------
@@ -47,6 +48,8 @@
    ; ........................................................................
    ; diffcult -> d (1, 2, 3, 4) => levocità in cui si muovono gli oggetti
    ; ........................................................................
+   ; score -> l
+   ; ........................................................................
    ; speed:
    ; unit -> e
    ; decimal -> f
@@ -56,6 +59,8 @@
    ; plate -> f
    ; timer:
    ; gocce cioccolato -> i
+   ; timer healt:
+   ; gocce cioccolato -> j
    ;*************************************************************************
    dim _light = a
    dim _lev_scheme = b.c
@@ -64,7 +69,8 @@
 
    dim _timer_cp = g.h
    dim _timer_g = i
-
+   ;dim _timer_h = j
+   dim _start_game = k
 
 
    ;***************************************************************
@@ -79,20 +85,16 @@
    ;  The tens and ones digits are held by _sc3.
    ;
 
-   dim _sc1 = score
+   /* dim _sc1 = score
    dim _sc2 = score+1
-   dim _sc3 = score+2
-   dim _addpl = %00010000
-
-   dim lives_centered = 1
-   dim lives_compact = 1
-
+   dim _sc3 = score+2 */
    dim frame = 0
    dim posizione = 0
-   dim barriera = %0000011111
-   dim statusbarcolor = t
 
-   statusbarcolor = $1C
+
+   dim _pos_p1_x = 30
+   dim _pos_p1_y = 56
+
 
    ;*************************************************************************
    ; INIZIALIZZAZIONE
@@ -111,19 +113,22 @@
    ; lifecolor 
    ; lives = 128 => 4 lives
    ;*************************************************************************
-   COLUP0 = $0A : COLUP1 = $0A : CTRLPF = $21 : NUSIZ0 = $07 : REFP0 = 0 : COLUBK = 0 : scorecolor = 0 : pfscorecolor = _base_color : lifecolor = _base_color : lives = 128
+   COLUP0 = _P0_color
+   COLUP1 = _P1_color
+   NUSIZ0 = $07 : REFP0 = 0 
+   ;COLUBK = 0 
+   COLUPF = $2C
+   scorecolor = _base_color : pfscorecolor = _base_color
+   _start_game = 0
 
    a = 0 : b = 0 : c = 0 : d = 0 : e = 0 : f = 0 : g = 0 : h = 0 : i = 0
    j = 0 : k = 0 : l = 0 : m = 0 : n = 0 : o = 0 : p = 0 : q = 0 : r = 0
    s = 0 : t = 0 : u = 0 : v = 0 : w = 0 : x = 0 : y = 0 : z = 0
 
-   pfscore1 = 21
+   score = 0
+   pfscore1 = 255
    pfscore2 = 255
    
-   
-
-
-
 
    ;*************************************************
    ; TITOLO
@@ -142,7 +147,7 @@ __main_title
    ................................
    .X.......X...............X.X....
    ...X.XX........X.XX..XX..X.X....
-   ...XX..X.......XX...XXXX.X.X....
+   ...XX..X.......XX...X..X.X.X....
    ...X...X.......X.....XX..X.X....
 end
 
@@ -184,38 +189,13 @@ end
  %00011110
 end
 
-   player1:
- %01100110
- %00100100
- %00011000
- %10100101
- %01001010
- %01010010
- %00100100
- %00011110
+   player0:
+   %01111110
+   %10000001
+   %10000001
+   %01111110
 end
 
-   player1color:
-   $24
-   $26
-   $28
-   $2A
-   $2C
-   $2A
-   $24
-   $24
-end
-
-   lives:
-   %01000100
-   %11111110
-   %11111110
-   %01111100
-   %00111000
-   %00010000
-   %00010000
-   %00010000
-end
    ;,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,
    ;```````````````````````````````````````````````````````````````
    ;
@@ -224,23 +204,27 @@ end
    ;,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,
    ;```````````````````````````````````````````````````````````````
 
-   COLUBK = 0
-
-
-   COLUPF = $0E
-
    player0x = 40
-   player0y = 53
+   player0y = 56
 
-   player1x = 20
-   player1y = 53
-   scorecolor = $5C
+   player0x = 20
+   player0y = 56
 
-__main_loop
 
-   ;COLUP0 = $26
+
+   drawscreen
+
+   if !joy0fire && _start_game = 0 then goto __main_title
+
+   _start_game=1
    
+__main_loop
+   _pos_p1_x = player0x
+   _pos_p1_y = player0y
+
    f=f+1
+   scorecolor = f
+
    ;,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,
    ;```````````````````````````````````````````````````````````````
    ;
@@ -266,7 +250,7 @@ __main_loop
    ;```````````````````````````````````````````````````````````````
    ;  Replace "player0x" with whatever you need to check.
    ;
-   temp4 = player0x
+   ;temp4 = player0x
 
    /* _sc1 = 0 : _sc2 = _sc2 & 15
    if temp4 >= 100 then _sc1 = _sc1 + 16 : temp4 = temp4 - 100
@@ -286,7 +270,7 @@ __main_loop
    ;```````````````````````````````````````````````````````````````
    ;  Replace "player0y" with whatever you need to check.
    ;
-   temp4 = player0y
+   ;temp4 = player0y
 
    /* _sc2 = _sc2 & 240 : _sc3 = 0
    if temp4 >= 100 then _sc2 = _sc2 + 1 : temp4 = temp4 - 100
@@ -297,9 +281,9 @@ __main_loop
    if temp4 >= 10 then _sc3 = _sc3 + 16 : temp4 = temp4 - 10
    _sc3 = _sc3 | temp4 */
 
-   if f=20 then f=0
+   ;if f=20 then f=0
 
-   if joy0left || joy0right  then player1:
+   /* if joy0left || joy0right  then player0:
    %00100100
    %00010010
    %00011100
@@ -308,7 +292,7 @@ __main_loop
    %01010010
    %00100100
    %01111100
-end
+end */
 
 
    /* ; aumenta il contatore ogni frame
@@ -324,28 +308,98 @@ end
     ; shifta e disegna nel playfield
     PF0 = barriera << posizione */
 
+   if f<10 then player0:
+   %01111110
+   %10000001
+   %10000001
+   %01111110
+end
+
+   if f>10 then player0:
+   %00000000
+   %01111110
+   %01111110
+   %00000000
+end
+
 
    ;***************************************************************
    ;
    ;  Moves player0 sprite with the joystick while keeping the
    ;  sprite within the playfield area.
    ;
-   if joy0up && player1y > _pf_edge_top then player1y = player1y - 1
+   if joy0up && player0y > _pf_edge_top then player0y = player0y - 1
 
-   if joy0down && player1y < _pf_edge_bottom then player1y = player1y + 1
+   if joy0down && player0y < _pf_edge_bottom then player0y = player0y + 1
 
-   if joy0left && player1x > _pf_edge_left then player1x = player1x - 1
+   if joy0left && player0x > _pf_edge_left then player0x = player0x - 1
 
-   if joy0right && player1x < _pf_edge_right then player1x = player1x + 1
+   if joy0right && player0x < _pf_edge_right then player0x = player0x + 1
+
+   if collision(player0,playfield) then player0x = _pos_p1_x :player0y = _pos_p1_y
 
 
-   ;***************************************************************
-   ;
-   ;  Displays the screen.
-   ;
+   COLUP0 = _P0_color 
+   COLUP1 = _P1_color 
+   COLUPF = $2C
+
+   if f<10 then goto __BackGorund_Level_Begin
+   if f>10 && f<20 then goto __BackGorund_Transitione_Start
+   if f>20 then goto __BackGorund_Transitione_End
+
+
+   if f=10 then goto __Decrease_Left_Time_Health_Bar 
+   goto __Skip_Done
+   
+__Decrease_Left_Time_Health_Bar
+   pfscore1 = pfscore1/2
+   score=l+1
+   ;pfpixel 6 1 flip
+   goto __Skip_Done
+
+__BackGorund_Level_Begin
+   playfield:
+   ................................
+   ................................
+   ................................
+   ................................
+   ................................
+   XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX.
+   XXX...XXXXX..X.X...........XX...
+   .X.....XXXX..X.X..........XXXX..
+   ........XXX..X.X.XXX..XXX.......
+   ...XXX...........XXXX.XXXX......
+   .X.X.X.X.........XXX..XXX.......
+end
+   pfcolors:
+   $24
+   $26
+   $28
+   $D4
+   $26
+   $D4
+   $05
+   $9E
+   $0E
+   $24
+   $26
+end
+   goto __Skip_Done
+
+__BackGorund_Transitione_Start
+   goto __Skip_Done
+
+__BackGorund_Transitione_End
+   goto __Skip_Done
+
+
+__Skip_Done
+   ;if f=10 then player0x = (rand&63) + (rand&31) + (rand&15) + (rand&1) + 21 : player0x = (rand/4) + (rand&31) + (rand&15) + (rand&1) + 21
+   
+   if f=20 then f=0 
+   if pfscore1=0 && f=0 then pfscore1=255
+
+   
+
    drawscreen
-
-
    goto __main_loop
-
-   inline 6lives.asm

@@ -1,4 +1,4 @@
-------- FILE c:\Users\filippo.morano\progetti\atari\snack_and_roll\test\ex_pfpixel_shoot.bas.asm LEVEL 1 PASS 2
+------- FILE c:\Users\Admin\Documents\atari\snack_and_roll\test\ex_pfpixel_shoot.bas.asm LEVEL 1 PASS 2
       1  10000 ????						; Provided under the CC0 license. See the included LICENSE.txt for details.
       2  10000 ????
       3  10000 ????				       processor	6502
@@ -33,7 +33,7 @@
      27  10000 ????						;			    used for code assembly.
      28  10000 ????						; 1.04  12/NOV/2003	 Added TIA_BASE_WRITE_ADDRESS and TIA_BASE_READ_ADDRESS for
      29  10000 ????						;			 convenient disassembly/reassembly compatibility for hardware
-     30  10000 ????						;			 mirrored reading/writing differences.	This is more a 
+     30  10000 ????						;			 mirrored reading/writing differences.	This is more a
      31  10000 ????						;			 readability issue, and binary compatibility with disassembled
      32  10000 ????						;			 and reassembled sources.  Per Manuel Rotschkar's suggestion.
      33  10000 ????						; 1.03  12/MAY/2003	 Added SEG segment at end of file to fix old-code compatibility
@@ -75,7 +75,7 @@
      69  10000 ????						; for the mirrored ROM hardware registers.
      70  10000 ????
      71  10000 ????						; Usage: As per above, define the TIA_BASE_READ_ADDRESS and/or TIA_BASE_WRITE_ADDRESS
-     72  10000 ????						; using the -D command-line switch, as required.  If the addresses are not defined, 
+     72  10000 ????						; using the -D command-line switch, as required.  If the addresses are not defined,
      73  10000 ????						; they defaut to the TIA_BASE_ADDRESS.
      74  10000 ????
      75  10000 ????			   -	       IFNCONST	TIA_BASE_READ_ADDRESS
@@ -206,7 +206,7 @@
     200  10000 ????				       SEG
     201  10000 ????
     202  10000 ????						; EOF
-------- FILE c:\Users\filippo.morano\progetti\atari\snack_and_roll\test\ex_pfpixel_shoot.bas.asm
+------- FILE c:\Users\Admin\Documents\atari\snack_and_roll\test\ex_pfpixel_shoot.bas.asm
 ------- FILE macro.h LEVEL 2 PASS 2
       0  10000 ????				       include	"macro.h"
       1  10000 ????						; Provided under the CC0 license. See the included LICENSE.txt for details.
@@ -240,13 +240,13 @@
      29  10000 ????						;
      30  10000 ????						; 1.02  14/JUN/2003	 - VERTICAL_SYNC macro added
      31  10000 ????						;			   (standardised macro for vertical synch code)
-     32  10000 ????						; 1.01  22/MAR/2003	 - SLEEP macro added. 
+     32  10000 ????						; 1.01  22/MAR/2003	 - SLEEP macro added.
      33  10000 ????						;			 - NO_ILLEGAL_OPCODES switch implemented
      34  10000 ????						; 1.0	22/MAR/2003		Initial release
      35  10000 ????
-     36  10000 ????						; Note: These macros use illegal opcodes.  To disable illegal opcode usage, 
+     36  10000 ????						; Note: These macros use illegal opcodes.  To disable illegal opcode usage,
      37  10000 ????						;   define the symbol NO_ILLEGAL_OPCODES (-DNO_ILLEGAL_OPCODES=1 on command-line).
-     38  10000 ????						;   If you do not allow illegal opcode usage, you must include this file 
+     38  10000 ????						;   If you do not allow illegal opcode usage, you must include this file
      39  10000 ????						;   *after* including VCS.H (as the non-illegal opcodes access hardware
      40  10000 ????						;   registers and require them to be defined first).
      41  10000 ????
@@ -290,7 +290,7 @@
      79  10000 ????						;-------------------------------------------------------------------------------
      80  10000 ????						; VERTICAL_SYNC
      81  10000 ????						; Original author: Manuel Polik
-     82  10000 ????						; Inserts the code required for a proper 3 scannline 
+     82  10000 ????						; Inserts the code required for a proper 3 scannline
      83  10000 ????						; vertical sync sequence
      84  10000 ????						;
      85  10000 ????						; Note: Alters the accumulator
@@ -357,7 +357,7 @@
     146  10000 ????				       ENDM
     147  10000 ????
     148  10000 ????						; EOF
-------- FILE c:\Users\filippo.morano\progetti\atari\snack_and_roll\test\ex_pfpixel_shoot.bas.asm
+------- FILE c:\Users\Admin\Documents\atari\snack_and_roll\test\ex_pfpixel_shoot.bas.asm
 ------- FILE 2600basic.h LEVEL 2 PASS 2
       0  10000 ????				       include	"2600basic.h"
       1  10000 ????						; Provided under the CC0 license. See the included LICENSE.txt for details.
@@ -394,7 +394,7 @@
      27  10000 ????						;			    used for code assembly.
      28  10000 ????						; 1.04  12/NOV/2003	 Added TIA_BASE_WRITE_ADDRESS and TIA_BASE_READ_ADDRESS for
      29  10000 ????						;			 convenient disassembly/reassembly compatibility for hardware
-     30  10000 ????						;			 mirrored reading/writing differences.	This is more a 
+     30  10000 ????						;			 mirrored reading/writing differences.	This is more a
      31  10000 ????						;			 readability issue, and binary compatibility with disassembled
      32  10000 ????						;			 and reassembled sources.  Per Manuel Rotschkar's suggestion.
      33  10000 ????						; 1.03  12/MAY/2003	 Added SEG segment at end of file to fix old-code compatibility
@@ -436,7 +436,7 @@
      69  10000 ????						; for the mirrored ROM hardware registers.
      70  10000 ????
      71  10000 ????						; Usage: As per above, define the TIA_BASE_READ_ADDRESS and/or TIA_BASE_WRITE_ADDRESS
-     72  10000 ????						; using the -D command-line switch, as required.  If the addresses are not defined, 
+     72  10000 ????						; using the -D command-line switch, as required.  If the addresses are not defined,
      73  10000 ????						; they defaut to the TIA_BASE_ADDRESS.
      74  10000 ????
      75  10000 ????			   -	       IFNCONST	TIA_BASE_READ_ADDRESS
@@ -601,13 +601,13 @@
      29  10000 ????						;
      30  10000 ????						; 1.02  14/JUN/2003	 - VERTICAL_SYNC macro added
      31  10000 ????						;			   (standardised macro for vertical synch code)
-     32  10000 ????						; 1.01  22/MAR/2003	 - SLEEP macro added. 
+     32  10000 ????						; 1.01  22/MAR/2003	 - SLEEP macro added.
      33  10000 ????						;			 - NO_ILLEGAL_OPCODES switch implemented
      34  10000 ????						; 1.0	22/MAR/2003		Initial release
      35  10000 ????
-     36  10000 ????						; Note: These macros use illegal opcodes.  To disable illegal opcode usage, 
+     36  10000 ????						; Note: These macros use illegal opcodes.  To disable illegal opcode usage,
      37  10000 ????						;   define the symbol NO_ILLEGAL_OPCODES (-DNO_ILLEGAL_OPCODES=1 on command-line).
-     38  10000 ????						;   If you do not allow illegal opcode usage, you must include this file 
+     38  10000 ????						;   If you do not allow illegal opcode usage, you must include this file
      39  10000 ????						;   *after* including VCS.H (as the non-illegal opcodes access hardware
      40  10000 ????						;   registers and require them to be defined first).
      41  10000 ????
@@ -651,7 +651,7 @@
      79  10000 ????						;-------------------------------------------------------------------------------
      80  10000 ????						; VERTICAL_SYNC
      81  10000 ????						; Original author: Manuel Polik
-     82  10000 ????						; Inserts the code required for a proper 3 scannline 
+     82  10000 ????						; Inserts the code required for a proper 3 scannline
      83  10000 ????						; vertical sync sequence
      84  10000 ????						;
      85  10000 ????						; Note: Alters the accumulator
@@ -968,7 +968,7 @@
     232  10000 ????			   -	       else
     233  10000 ????			   -playfield  =	playfieldbase-(pfres-12*(4/pfwidth))*pfwidth
     234  10000 ????				       endif
-------- FILE c:\Users\filippo.morano\progetti\atari\snack_and_roll\test\ex_pfpixel_shoot.bas.asm
+------- FILE c:\Users\Admin\Documents\atari\snack_and_roll\test\ex_pfpixel_shoot.bas.asm
 ------- FILE 2600basic_variable_redefs.h LEVEL 2 PASS 2
       0  10000 ????				       include	"2600basic_variable_redefs.h"
       1  10000 ????						; This file contains variable mapping and other information for the current project.
@@ -989,7 +989,7 @@
      16  10000 ????
      17  10000 ????		00 80	    _P0_x      =	player0x
      18  10000 ????		00 01	    PFcolorandheight =	1
-------- FILE c:\Users\filippo.morano\progetti\atari\snack_and_roll\test\ex_pfpixel_shoot.bas.asm
+------- FILE c:\Users\Admin\Documents\atari\snack_and_roll\test\ex_pfpixel_shoot.bas.asm
       8  10000 ????			   -	       ifconst	bankswitch
       9  10000 ????			   -	       if	bankswitch == 8
      10  10000 ????			   -	       ORG	$1000
@@ -4482,7 +4482,7 @@
    3271  f69b		       03 c6 00 00	      .byte.b	3, $C6,0,0
    3272  f69f		       03 c8 00 00	      .byte.b	3, $C8,0,0
    3273  f6a3		       03 ca 00 00	      .byte.b	3, $CA,0,0
-   3274  f6a7		       54 00 00 00	      .byte.b	84, $00,0,0
+   3274  f6a7		       35 00 00 00	      .byte.b	53, $00,0,0
    3275  f6ab				  -	      if	(<*) > (<(*+3))
    3276  f6ab				  -	      repeat	($100-<*)
    3277  f6ab				  -	      .byte	0
