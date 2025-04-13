@@ -3327,7 +3327,7 @@
    2158  f426		       86 8a		      STX	player0pointerlo
    2159  f428		       a9 f6		      LDA	#>playerL018_0
    2160  f42a		       85 8b		      STA	player0pointerhi
-   2161  f42c		       a9 07		      LDA	#7
+   2161  f42c		       a9 03		      LDA	#3
    2162  f42e		       85 8e		      STA	player0height
    2163  f430				   .
    2164  f430							; 
@@ -3660,12 +3660,12 @@
    2491  f4d8				   .
    2492  f4d8							; 
    2493  f4d8
-   2494  f4d8				   .L028		;  temp6  =   ( player0y - 9 )  / 8
+   2494  f4d8				   .L028		;  temp6  =   ( player0y - 5 )  / 8
    2495  f4d8
    2496  f4d8							; complex statement detected
    2497  f4d8		       a5 85		      LDA	player0y
    2498  f4da		       38		      SEC
-   2499  f4db		       e9 09		      SBC	#9
+   2499  f4db		       e9 05		      SBC	#5
    2500  f4dd		       4a		      lsr
    2501  f4de		       4a		      lsr
    2502  f4df		       4a		      lsr
@@ -4068,12 +4068,12 @@
    2899  f5cb				   .
    2900  f5cb							; 
    2901  f5cb
-   2902  f5cb				   .L050		;  temp3  =   ( player0y - 8 )  / 8
+   2902  f5cb				   .L050		;  temp3  =   ( player0y - 4 )  / 8
    2903  f5cb
    2904  f5cb							; complex statement detected
    2905  f5cb		       a5 85		      LDA	player0y
    2906  f5cd		       38		      SEC
-   2907  f5ce		       e9 08		      SBC	#8
+   2907  f5ce		       e9 04		      SBC	#4
    2908  f5d0		       4a		      lsr
    2909  f5d1		       4a		      lsr
    2910  f5d2		       4a		      lsr
@@ -4231,12 +4231,12 @@
    3062  f61f				   .
    3063  f61f							; 
    3064  f61f
-   3065  f61f				   .L058		;  temp3  =   ( player0y - 8 )  / 8
+   3065  f61f				   .L058		;  temp3  =   ( player0y - 4 )  / 8
    3066  f61f
    3067  f61f							; complex statement detected
    3068  f61f		       a5 85		      LDA	player0y
    3069  f621		       38		      SEC
-   3070  f622		       e9 08		      SBC	#8
+   3070  f622		       e9 04		      SBC	#4
    3071  f624		       4a		      lsr
    3072  f625		       4a		      lsr
    3073  f626		       4a		      lsr
@@ -4399,266 +4399,262 @@
    3230  f658
    3231  f658				   .L064		;  goto __Start_Restart
    3232  f658		       4c cc f3 	      jmp	.__Start_Restart
-   3233  f65b				  -	      if	(<*) > (<(*+7))
+   3233  f65b				  -	      if	(<*) > (<(*+3))
    3234  f65b				  -	      repeat	($100-<*)
    3235  f65b				  -	      .byte	0
    3236  f65b				  -	      repend
    3237  f65b					      endif
    3238  f65b				   playerL018_0
-   3239  f65b		       3c		      .byte.b	%00111100
-   3240  f65c		       7e		      .byte.b	%01111110
-   3241  f65d		       c3		      .byte.b	%11000011
-   3242  f65e		       bd		      .byte.b	%10111101
-   3243  f65f		       ff		      .byte.b	%11111111
-   3244  f660		       db		      .byte.b	%11011011
-   3245  f661		       7e		      .byte.b	%01111110
-   3246  f662		       3c		      .byte.b	%00111100
-   3247  f663					      if	ECHOFIRST
-      2361 bytes of ROM space left
-   3248  f663					      echo	"    ",[(scoretable - *)]d , "bytes of ROM space left")
-   3249  f663					      endif
-   3250  f663		       00 01	   ECHOFIRST  =	1
-   3251  f663
-   3252  f663
-   3253  f663
-   3254  f663							; Provided under the CC0 license. See the included LICENSE.txt for details.
-   3255  f663
-   3256  f663							; feel free to modify the score graphics - just keep each digit 8 high
-   3257  f663							; and keep the conditional compilation stuff intact
-   3258  f663				  -	      ifconst	ROM2k
-   3259  f663				  -	      ORG	$F7AC-8
-   3260  f663					      else
-   3261  f663				  -	      ifconst	bankswitch
-   3262  f663				  -	      if	bankswitch == 8
-   3263  f663				  -	      ORG	$2F94-bscode_length
-   3264  f663				  -	      RORG	$FF94-bscode_length
-   3265  f663				  -	      endif
-   3266  f663				  -	      if	bankswitch == 16
-   3267  f663				  -	      ORG	$4F94-bscode_length
-   3268  f663				  -	      RORG	$FF94-bscode_length
-   3269  f663				  -	      endif
-   3270  f663				  -	      if	bankswitch == 32
-   3271  f663				  -	      ORG	$8F94-bscode_length
-   3272  f663				  -	      RORG	$FF94-bscode_length
-   3273  f663				  -	      endif
-   3274  f663				  -	      if	bankswitch == 64
-   3275  f663				  -	      ORG	$10F80-bscode_length
-   3276  f663				  -	      RORG	$1FF80-bscode_length
-   3277  f663				  -	      endif
-   3278  f663					      else
-   3279  ff9c					      ORG	$FF9C
-   3280  ff9c					      endif
-   3281  ff9c					      endif
-   3282  ff9c
-   3283  ff9c							; font equates
-   3284  ff9c		       00 01	   .21stcentury =	1
-   3285  ff9c		       00 02	   alarmclock =	2
-   3286  ff9c		       00 03	   handwritten =	3
-   3287  ff9c		       00 04	   interrupted =	4
-   3288  ff9c		       00 05	   retroputer =	5
-   3289  ff9c		       00 06	   whimsey    =	6
-   3290  ff9c		       00 07	   tiny       =	7
-   3291  ff9c		       00 08	   hex	      =	8
-   3292  ff9c
-   3293  ff9c				  -	      ifconst	font
-   3294  ff9c				  -	      if	font == hex
-   3295  ff9c				  -	      ORG	. - 48
-   3296  ff9c				  -	      endif
-   3297  ff9c					      endif
-   3298  ff9c
-   3299  ff9c				   scoretable
-   3300  ff9c
-   3301  ff9c				  -	      ifconst	font
-   3302  ff9c				  -	      if	font == .21stcentury
-   3303  ff9c				  -	      include	"score_graphics.asm.21stcentury"
-   3304  ff9c				  -	      endif
-   3305  ff9c				  -	      if	font == alarmclock
-   3306  ff9c				  -	      include	"score_graphics.asm.alarmclock"
-   3307  ff9c				  -	      endif
-   3308  ff9c				  -	      if	font == handwritten
-   3309  ff9c				  -	      include	"score_graphics.asm.handwritten"
-   3310  ff9c				  -	      endif
-   3311  ff9c				  -	      if	font == interrupted
-   3312  ff9c				  -	      include	"score_graphics.asm.interrupted"
-   3313  ff9c				  -	      endif
-   3314  ff9c				  -	      if	font == retroputer
-   3315  ff9c				  -	      include	"score_graphics.asm.retroputer"
-   3316  ff9c				  -	      endif
-   3317  ff9c				  -	      if	font == whimsey
-   3318  ff9c				  -	      include	"score_graphics.asm.whimsey"
-   3319  ff9c				  -	      endif
-   3320  ff9c				  -	      if	font == tiny
-   3321  ff9c				  -	      include	"score_graphics.asm.tiny"
-   3322  ff9c				  -	      endif
-   3323  ff9c				  -	      if	font == hex
-   3324  ff9c				  -	      include	"score_graphics.asm.hex"
-   3325  ff9c				  -	      endif
-   3326  ff9c					      else		; default font
-   3327  ff9c
-   3328  ff9c		       3c		      .byte.b	%00111100
-   3329  ff9d		       66		      .byte.b	%01100110
-   3330  ff9e		       66		      .byte.b	%01100110
-   3331  ff9f		       66		      .byte.b	%01100110
-   3332  ffa0		       66		      .byte.b	%01100110
-   3333  ffa1		       66		      .byte.b	%01100110
-   3334  ffa2		       66		      .byte.b	%01100110
-   3335  ffa3		       3c		      .byte.b	%00111100
-   3336  ffa4
-   3337  ffa4		       7e		      .byte.b	%01111110
-   3338  ffa5		       18		      .byte.b	%00011000
-   3339  ffa6		       18		      .byte.b	%00011000
-   3340  ffa7		       18		      .byte.b	%00011000
-   3341  ffa8		       18		      .byte.b	%00011000
-   3342  ffa9		       38		      .byte.b	%00111000
-   3343  ffaa		       18		      .byte.b	%00011000
-   3344  ffab		       08		      .byte.b	%00001000
-   3345  ffac
-   3346  ffac		       7e		      .byte.b	%01111110
-   3347  ffad		       60		      .byte.b	%01100000
-   3348  ffae		       60		      .byte.b	%01100000
-   3349  ffaf		       3c		      .byte.b	%00111100
-   3350  ffb0		       06		      .byte.b	%00000110
-   3351  ffb1		       06		      .byte.b	%00000110
-   3352  ffb2		       46		      .byte.b	%01000110
-   3353  ffb3		       3c		      .byte.b	%00111100
-   3354  ffb4
-   3355  ffb4		       3c		      .byte.b	%00111100
-   3356  ffb5		       46		      .byte.b	%01000110
-   3357  ffb6		       06		      .byte.b	%00000110
-   3358  ffb7		       06		      .byte.b	%00000110
-   3359  ffb8		       1c		      .byte.b	%00011100
-   3360  ffb9		       06		      .byte.b	%00000110
-   3361  ffba		       46		      .byte.b	%01000110
-   3362  ffbb		       3c		      .byte.b	%00111100
-   3363  ffbc
-   3364  ffbc		       0c		      .byte.b	%00001100
-   3365  ffbd		       0c		      .byte.b	%00001100
-   3366  ffbe		       7e		      .byte.b	%01111110
-   3367  ffbf		       4c		      .byte.b	%01001100
-   3368  ffc0		       4c		      .byte.b	%01001100
-   3369  ffc1		       2c		      .byte.b	%00101100
-   3370  ffc2		       1c		      .byte.b	%00011100
-   3371  ffc3		       0c		      .byte.b	%00001100
-   3372  ffc4
-   3373  ffc4		       3c		      .byte.b	%00111100
-   3374  ffc5		       46		      .byte.b	%01000110
-   3375  ffc6		       06		      .byte.b	%00000110
-   3376  ffc7		       06		      .byte.b	%00000110
-   3377  ffc8		       3c		      .byte.b	%00111100
-   3378  ffc9		       60		      .byte.b	%01100000
-   3379  ffca		       60		      .byte.b	%01100000
-   3380  ffcb		       7e		      .byte.b	%01111110
-   3381  ffcc
-   3382  ffcc		       3c		      .byte.b	%00111100
-   3383  ffcd		       66		      .byte.b	%01100110
-   3384  ffce		       66		      .byte.b	%01100110
-   3385  ffcf		       66		      .byte.b	%01100110
-   3386  ffd0		       7c		      .byte.b	%01111100
-   3387  ffd1		       60		      .byte.b	%01100000
-   3388  ffd2		       62		      .byte.b	%01100010
-   3389  ffd3		       3c		      .byte.b	%00111100
-   3390  ffd4
-   3391  ffd4		       30		      .byte.b	%00110000
-   3392  ffd5		       30		      .byte.b	%00110000
-   3393  ffd6		       30		      .byte.b	%00110000
-   3394  ffd7		       18		      .byte.b	%00011000
-   3395  ffd8		       0c		      .byte.b	%00001100
-   3396  ffd9		       06		      .byte.b	%00000110
-   3397  ffda		       42		      .byte.b	%01000010
-   3398  ffdb		       3e		      .byte.b	%00111110
-   3399  ffdc
-   3400  ffdc		       3c		      .byte.b	%00111100
-   3401  ffdd		       66		      .byte.b	%01100110
-   3402  ffde		       66		      .byte.b	%01100110
-   3403  ffdf		       66		      .byte.b	%01100110
-   3404  ffe0		       3c		      .byte.b	%00111100
-   3405  ffe1		       66		      .byte.b	%01100110
-   3406  ffe2		       66		      .byte.b	%01100110
-   3407  ffe3		       3c		      .byte.b	%00111100
-   3408  ffe4
-   3409  ffe4		       3c		      .byte.b	%00111100
-   3410  ffe5		       46		      .byte.b	%01000110
-   3411  ffe6		       06		      .byte.b	%00000110
-   3412  ffe7		       3e		      .byte.b	%00111110
-   3413  ffe8		       66		      .byte.b	%01100110
-   3414  ffe9		       66		      .byte.b	%01100110
-   3415  ffea		       66		      .byte.b	%01100110
-   3416  ffeb		       3c		      .byte.b	%00111100
-   3417  ffec
-   3418  ffec					      ifnconst	DPC_kernel_options
-   3419  ffec
-   3420  ffec		       00		      .byte.b	%00000000
-   3421  ffed		       00		      .byte.b	%00000000
-   3422  ffee		       00		      .byte.b	%00000000
-   3423  ffef		       00		      .byte.b	%00000000
-   3424  fff0		       00		      .byte.b	%00000000
-   3425  fff1		       00		      .byte.b	%00000000
-   3426  fff2		       00		      .byte.b	%00000000
-   3427  fff3		       00		      .byte.b	%00000000
+   3239  f65b		       ff		      .byte.b	%11111111
+   3240  f65c		       db		      .byte.b	%11011011
+   3241  f65d		       7e		      .byte.b	%01111110
+   3242  f65e		       3c		      .byte.b	%00111100
+   3243  f65f					      if	ECHOFIRST
+      2365 bytes of ROM space left
+   3244  f65f					      echo	"    ",[(scoretable - *)]d , "bytes of ROM space left")
+   3245  f65f					      endif
+   3246  f65f		       00 01	   ECHOFIRST  =	1
+   3247  f65f
+   3248  f65f
+   3249  f65f
+   3250  f65f							; Provided under the CC0 license. See the included LICENSE.txt for details.
+   3251  f65f
+   3252  f65f							; feel free to modify the score graphics - just keep each digit 8 high
+   3253  f65f							; and keep the conditional compilation stuff intact
+   3254  f65f				  -	      ifconst	ROM2k
+   3255  f65f				  -	      ORG	$F7AC-8
+   3256  f65f					      else
+   3257  f65f				  -	      ifconst	bankswitch
+   3258  f65f				  -	      if	bankswitch == 8
+   3259  f65f				  -	      ORG	$2F94-bscode_length
+   3260  f65f				  -	      RORG	$FF94-bscode_length
+   3261  f65f				  -	      endif
+   3262  f65f				  -	      if	bankswitch == 16
+   3263  f65f				  -	      ORG	$4F94-bscode_length
+   3264  f65f				  -	      RORG	$FF94-bscode_length
+   3265  f65f				  -	      endif
+   3266  f65f				  -	      if	bankswitch == 32
+   3267  f65f				  -	      ORG	$8F94-bscode_length
+   3268  f65f				  -	      RORG	$FF94-bscode_length
+   3269  f65f				  -	      endif
+   3270  f65f				  -	      if	bankswitch == 64
+   3271  f65f				  -	      ORG	$10F80-bscode_length
+   3272  f65f				  -	      RORG	$1FF80-bscode_length
+   3273  f65f				  -	      endif
+   3274  f65f					      else
+   3275  ff9c					      ORG	$FF9C
+   3276  ff9c					      endif
+   3277  ff9c					      endif
+   3278  ff9c
+   3279  ff9c							; font equates
+   3280  ff9c		       00 01	   .21stcentury =	1
+   3281  ff9c		       00 02	   alarmclock =	2
+   3282  ff9c		       00 03	   handwritten =	3
+   3283  ff9c		       00 04	   interrupted =	4
+   3284  ff9c		       00 05	   retroputer =	5
+   3285  ff9c		       00 06	   whimsey    =	6
+   3286  ff9c		       00 07	   tiny       =	7
+   3287  ff9c		       00 08	   hex	      =	8
+   3288  ff9c
+   3289  ff9c				  -	      ifconst	font
+   3290  ff9c				  -	      if	font == hex
+   3291  ff9c				  -	      ORG	. - 48
+   3292  ff9c				  -	      endif
+   3293  ff9c					      endif
+   3294  ff9c
+   3295  ff9c				   scoretable
+   3296  ff9c
+   3297  ff9c				  -	      ifconst	font
+   3298  ff9c				  -	      if	font == .21stcentury
+   3299  ff9c				  -	      include	"score_graphics.asm.21stcentury"
+   3300  ff9c				  -	      endif
+   3301  ff9c				  -	      if	font == alarmclock
+   3302  ff9c				  -	      include	"score_graphics.asm.alarmclock"
+   3303  ff9c				  -	      endif
+   3304  ff9c				  -	      if	font == handwritten
+   3305  ff9c				  -	      include	"score_graphics.asm.handwritten"
+   3306  ff9c				  -	      endif
+   3307  ff9c				  -	      if	font == interrupted
+   3308  ff9c				  -	      include	"score_graphics.asm.interrupted"
+   3309  ff9c				  -	      endif
+   3310  ff9c				  -	      if	font == retroputer
+   3311  ff9c				  -	      include	"score_graphics.asm.retroputer"
+   3312  ff9c				  -	      endif
+   3313  ff9c				  -	      if	font == whimsey
+   3314  ff9c				  -	      include	"score_graphics.asm.whimsey"
+   3315  ff9c				  -	      endif
+   3316  ff9c				  -	      if	font == tiny
+   3317  ff9c				  -	      include	"score_graphics.asm.tiny"
+   3318  ff9c				  -	      endif
+   3319  ff9c				  -	      if	font == hex
+   3320  ff9c				  -	      include	"score_graphics.asm.hex"
+   3321  ff9c				  -	      endif
+   3322  ff9c					      else		; default font
+   3323  ff9c
+   3324  ff9c		       3c		      .byte.b	%00111100
+   3325  ff9d		       66		      .byte.b	%01100110
+   3326  ff9e		       66		      .byte.b	%01100110
+   3327  ff9f		       66		      .byte.b	%01100110
+   3328  ffa0		       66		      .byte.b	%01100110
+   3329  ffa1		       66		      .byte.b	%01100110
+   3330  ffa2		       66		      .byte.b	%01100110
+   3331  ffa3		       3c		      .byte.b	%00111100
+   3332  ffa4
+   3333  ffa4		       7e		      .byte.b	%01111110
+   3334  ffa5		       18		      .byte.b	%00011000
+   3335  ffa6		       18		      .byte.b	%00011000
+   3336  ffa7		       18		      .byte.b	%00011000
+   3337  ffa8		       18		      .byte.b	%00011000
+   3338  ffa9		       38		      .byte.b	%00111000
+   3339  ffaa		       18		      .byte.b	%00011000
+   3340  ffab		       08		      .byte.b	%00001000
+   3341  ffac
+   3342  ffac		       7e		      .byte.b	%01111110
+   3343  ffad		       60		      .byte.b	%01100000
+   3344  ffae		       60		      .byte.b	%01100000
+   3345  ffaf		       3c		      .byte.b	%00111100
+   3346  ffb0		       06		      .byte.b	%00000110
+   3347  ffb1		       06		      .byte.b	%00000110
+   3348  ffb2		       46		      .byte.b	%01000110
+   3349  ffb3		       3c		      .byte.b	%00111100
+   3350  ffb4
+   3351  ffb4		       3c		      .byte.b	%00111100
+   3352  ffb5		       46		      .byte.b	%01000110
+   3353  ffb6		       06		      .byte.b	%00000110
+   3354  ffb7		       06		      .byte.b	%00000110
+   3355  ffb8		       1c		      .byte.b	%00011100
+   3356  ffb9		       06		      .byte.b	%00000110
+   3357  ffba		       46		      .byte.b	%01000110
+   3358  ffbb		       3c		      .byte.b	%00111100
+   3359  ffbc
+   3360  ffbc		       0c		      .byte.b	%00001100
+   3361  ffbd		       0c		      .byte.b	%00001100
+   3362  ffbe		       7e		      .byte.b	%01111110
+   3363  ffbf		       4c		      .byte.b	%01001100
+   3364  ffc0		       4c		      .byte.b	%01001100
+   3365  ffc1		       2c		      .byte.b	%00101100
+   3366  ffc2		       1c		      .byte.b	%00011100
+   3367  ffc3		       0c		      .byte.b	%00001100
+   3368  ffc4
+   3369  ffc4		       3c		      .byte.b	%00111100
+   3370  ffc5		       46		      .byte.b	%01000110
+   3371  ffc6		       06		      .byte.b	%00000110
+   3372  ffc7		       06		      .byte.b	%00000110
+   3373  ffc8		       3c		      .byte.b	%00111100
+   3374  ffc9		       60		      .byte.b	%01100000
+   3375  ffca		       60		      .byte.b	%01100000
+   3376  ffcb		       7e		      .byte.b	%01111110
+   3377  ffcc
+   3378  ffcc		       3c		      .byte.b	%00111100
+   3379  ffcd		       66		      .byte.b	%01100110
+   3380  ffce		       66		      .byte.b	%01100110
+   3381  ffcf		       66		      .byte.b	%01100110
+   3382  ffd0		       7c		      .byte.b	%01111100
+   3383  ffd1		       60		      .byte.b	%01100000
+   3384  ffd2		       62		      .byte.b	%01100010
+   3385  ffd3		       3c		      .byte.b	%00111100
+   3386  ffd4
+   3387  ffd4		       30		      .byte.b	%00110000
+   3388  ffd5		       30		      .byte.b	%00110000
+   3389  ffd6		       30		      .byte.b	%00110000
+   3390  ffd7		       18		      .byte.b	%00011000
+   3391  ffd8		       0c		      .byte.b	%00001100
+   3392  ffd9		       06		      .byte.b	%00000110
+   3393  ffda		       42		      .byte.b	%01000010
+   3394  ffdb		       3e		      .byte.b	%00111110
+   3395  ffdc
+   3396  ffdc		       3c		      .byte.b	%00111100
+   3397  ffdd		       66		      .byte.b	%01100110
+   3398  ffde		       66		      .byte.b	%01100110
+   3399  ffdf		       66		      .byte.b	%01100110
+   3400  ffe0		       3c		      .byte.b	%00111100
+   3401  ffe1		       66		      .byte.b	%01100110
+   3402  ffe2		       66		      .byte.b	%01100110
+   3403  ffe3		       3c		      .byte.b	%00111100
+   3404  ffe4
+   3405  ffe4		       3c		      .byte.b	%00111100
+   3406  ffe5		       46		      .byte.b	%01000110
+   3407  ffe6		       06		      .byte.b	%00000110
+   3408  ffe7		       3e		      .byte.b	%00111110
+   3409  ffe8		       66		      .byte.b	%01100110
+   3410  ffe9		       66		      .byte.b	%01100110
+   3411  ffea		       66		      .byte.b	%01100110
+   3412  ffeb		       3c		      .byte.b	%00111100
+   3413  ffec
+   3414  ffec					      ifnconst	DPC_kernel_options
+   3415  ffec
+   3416  ffec		       00		      .byte.b	%00000000
+   3417  ffed		       00		      .byte.b	%00000000
+   3418  ffee		       00		      .byte.b	%00000000
+   3419  ffef		       00		      .byte.b	%00000000
+   3420  fff0		       00		      .byte.b	%00000000
+   3421  fff1		       00		      .byte.b	%00000000
+   3422  fff2		       00		      .byte.b	%00000000
+   3423  fff3		       00		      .byte.b	%00000000
+   3424  fff4
+   3425  fff4					      endif
+   3426  fff4
+   3427  fff4					      endif
    3428  fff4
-   3429  fff4					      endif
-   3430  fff4
-   3431  fff4					      endif
-   3432  fff4
-   3433  fff4				  -	      ifconst	ROM2k
-   3434  fff4				  -	      ORG	$F7FC
-   3435  fff4					      else
-   3436  fff4				  -	      ifconst	bankswitch
-   3437  fff4				  -	      if	bankswitch == 8
-   3438  fff4				  -	      ORG	$2FF4-bscode_length
+   3429  fff4				  -	      ifconst	ROM2k
+   3430  fff4				  -	      ORG	$F7FC
+   3431  fff4					      else
+   3432  fff4				  -	      ifconst	bankswitch
+   3433  fff4				  -	      if	bankswitch == 8
+   3434  fff4				  -	      ORG	$2FF4-bscode_length
+   3435  fff4				  -	      RORG	$FFF4-bscode_length
+   3436  fff4				  -	      endif
+   3437  fff4				  -	      if	bankswitch == 16
+   3438  fff4				  -	      ORG	$4FF4-bscode_length
    3439  fff4				  -	      RORG	$FFF4-bscode_length
    3440  fff4				  -	      endif
-   3441  fff4				  -	      if	bankswitch == 16
-   3442  fff4				  -	      ORG	$4FF4-bscode_length
+   3441  fff4				  -	      if	bankswitch == 32
+   3442  fff4				  -	      ORG	$8FF4-bscode_length
    3443  fff4				  -	      RORG	$FFF4-bscode_length
    3444  fff4				  -	      endif
-   3445  fff4				  -	      if	bankswitch == 32
-   3446  fff4				  -	      ORG	$8FF4-bscode_length
-   3447  fff4				  -	      RORG	$FFF4-bscode_length
+   3445  fff4				  -	      if	bankswitch == 64
+   3446  fff4				  -	      ORG	$10FE0-bscode_length
+   3447  fff4				  -	      RORG	$1FFE0-bscode_length
    3448  fff4				  -	      endif
-   3449  fff4				  -	      if	bankswitch == 64
-   3450  fff4				  -	      ORG	$10FE0-bscode_length
-   3451  fff4				  -	      RORG	$1FFE0-bscode_length
-   3452  fff4				  -	      endif
-   3453  fff4					      else
-   3454  fffc					      ORG	$FFFC
-   3455  fffc					      endif
-   3456  fffc					      endif
-   3457  fffc							; Provided under the CC0 license. See the included LICENSE.txt for details.
-   3458  fffc
-   3459  fffc				  -	      ifconst	bankswitch
-   3460  fffc				  -	      if	bankswitch == 8
-   3461  fffc				  -	      ORG	$2FFC
+   3449  fff4					      else
+   3450  fffc					      ORG	$FFFC
+   3451  fffc					      endif
+   3452  fffc					      endif
+   3453  fffc							; Provided under the CC0 license. See the included LICENSE.txt for details.
+   3454  fffc
+   3455  fffc				  -	      ifconst	bankswitch
+   3456  fffc				  -	      if	bankswitch == 8
+   3457  fffc				  -	      ORG	$2FFC
+   3458  fffc				  -	      RORG	$FFFC
+   3459  fffc				  -	      endif
+   3460  fffc				  -	      if	bankswitch == 16
+   3461  fffc				  -	      ORG	$4FFC
    3462  fffc				  -	      RORG	$FFFC
    3463  fffc				  -	      endif
-   3464  fffc				  -	      if	bankswitch == 16
-   3465  fffc				  -	      ORG	$4FFC
+   3464  fffc				  -	      if	bankswitch == 32
+   3465  fffc				  -	      ORG	$8FFC
    3466  fffc				  -	      RORG	$FFFC
    3467  fffc				  -	      endif
-   3468  fffc				  -	      if	bankswitch == 32
-   3469  fffc				  -	      ORG	$8FFC
-   3470  fffc				  -	      RORG	$FFFC
-   3471  fffc				  -	      endif
-   3472  fffc				  -	      if	bankswitch == 64
-   3473  fffc				  -	      ORG	$10FF0
-   3474  fffc				  -	      RORG	$1FFF0
-   3475  fffc				  -	      lda	$ffe0	; we use wasted space to assist stella with EF format auto-detection
-   3476  fffc				  -	      ORG	$10FF8
-   3477  fffc				  -	      RORG	$1FFF8
-   3478  fffc				  -	      ifconst	superchip
-   3479  fffc				  -	      .byte	"E","F","S","C"
-   3480  fffc				  -	      else
-   3481  fffc				  -	      .byte	"E","F","E","F"
-   3482  fffc				  -	      endif
-   3483  fffc				  -	      ORG	$10FFC
-   3484  fffc				  -	      RORG	$1FFFC
-   3485  fffc				  -	      endif
-   3486  fffc					      else
-   3487  fffc				  -	      ifconst	ROM2k
-   3488  fffc				  -	      ORG	$F7FC
-   3489  fffc					      else
-   3490  fffc					      ORG	$FFFC
-   3491  fffc					      endif
-   3492  fffc					      endif
-   3493  fffc		       00 f0		      .word.w	(start & $ffff)
-   3494  fffe		       00 f0		      .word.w	(start & $ffff)
+   3468  fffc				  -	      if	bankswitch == 64
+   3469  fffc				  -	      ORG	$10FF0
+   3470  fffc				  -	      RORG	$1FFF0
+   3471  fffc				  -	      lda	$ffe0	; we use wasted space to assist stella with EF format auto-detection
+   3472  fffc				  -	      ORG	$10FF8
+   3473  fffc				  -	      RORG	$1FFF8
+   3474  fffc				  -	      ifconst	superchip
+   3475  fffc				  -	      .byte	"E","F","S","C"
+   3476  fffc				  -	      else
+   3477  fffc				  -	      .byte	"E","F","E","F"
+   3478  fffc				  -	      endif
+   3479  fffc				  -	      ORG	$10FFC
+   3480  fffc				  -	      RORG	$1FFFC
+   3481  fffc				  -	      endif
+   3482  fffc					      else
+   3483  fffc				  -	      ifconst	ROM2k
+   3484  fffc				  -	      ORG	$F7FC
+   3485  fffc					      else
+   3486  fffc					      ORG	$FFFC
+   3487  fffc					      endif
+   3488  fffc					      endif
+   3489  fffc		       00 f0		      .word.w	(start & $ffff)
+   3490  fffe		       00 f0		      .word.w	(start & $ffff)

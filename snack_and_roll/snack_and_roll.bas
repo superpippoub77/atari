@@ -4,7 +4,8 @@
    ; kernel_options :
    ; player0colors = colorazione del player 1
    ; pfcolors = colorazione del playfiled
-   set kernel_options pfcolors 
+   ; pfheights = altezza del righe del playfield
+   set kernel_options pfcolors
 
    ;*************************************************
    ; ALTRI SETTAGGI
@@ -26,10 +27,10 @@
    ;const noscore = 1
 
    ; limite dei bordi (suponendo un player di 8 pixel)
-   const _pf_edge_top = 9 
-   const _pf_edge_bottom = 88
-   const _pf_edge_left = 1
-   const _pf_edge_right = 153
+   const _P_Edge_Top = 5
+   const _P_Edge_Bottom = 88
+   const _P_Edge_Left = 1
+   const _P_Edge_Right = 153
 
    const _base_color = $16
    const _P0_color = $2C
@@ -168,6 +169,19 @@ end
    $24
    $24
 end
+   /* pfheights:
+   4
+   4
+   4
+   4
+   8
+   8
+   4
+   2
+   2
+   2
+   8
+end */
 
    ;*************************************************************************
    ; PLAYER AND SPRITE
@@ -178,7 +192,7 @@ end
    ; missile 1 -> Bonus (randomico sullo schermo a tempo, se attivo)
    ; ball ->  Bolle del bollitore (un solo colore azzurro)
    ;*************************************************************************
-   player0:
+   player1:
  %01100110
  %00100100
  %00011000
@@ -204,13 +218,9 @@ end
    ;,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,
    ;```````````````````````````````````````````````````````````````
 
-   player0x = 40
-   player0y = 56
+   player0x = 30 : player0y = 56
 
-   player0x = 20
-   player0y = 56
-
-
+   player1x = 20 : player1y = 56
 
    drawscreen
 
@@ -219,8 +229,6 @@ end
    _start_game=1
    
 __main_loop
-   _pos_p1_x = player0x
-   _pos_p1_y = player0y
 
    f=f+1
    scorecolor = f
@@ -323,25 +331,183 @@ end
 end
 
 
+
+   ;```````````````````````````````````````````````````````````````
+
+
    ;***************************************************************
    ;
    ;  Moves player0 sprite with the joystick while keeping the
    ;  sprite within the playfield area.
    ;
-   if joy0up && player0y > _pf_edge_top then player0y = player0y - 1
+   ;if !collision(player0,playfield) && joy0up && player0y > _pf_edge_top then player0y = player0y - 1 else player0y = _pos_p1_y+1
 
-   if joy0down && player0y < _pf_edge_bottom then player0y = player0y + 1
+   ;if !collision(player0,playfield) && joy0down && player0y < _pf_edge_bottom then _pos_p1_y = _pos_p1_y + 1
 
-   if joy0left && player0x > _pf_edge_left then player0x = player0x - 1
+   ;if !collision(player0,playfield) && joy0left && player0x > _pf_edge_left then player0x = player0x - 1 else player0x = _pos_p1_x+1
 
-   if joy0right && player0x < _pf_edge_right then player0x = player0x + 1
+   ;if !collision(player0,playfield) && joy0right && player0x < _pf_edge_right then player0x = player0x + 1 else player0x = _pos_p1_x-1
 
-   if collision(player0,playfield) then player0x = _pos_p1_x :player0y = _pos_p1_y
 
 
    COLUP0 = _P0_color 
    COLUP1 = _P1_color 
    COLUPF = $2C
+
+    ;***************************************************************
+   ;
+   ;  Joy0 up check.
+   ;
+   ;```````````````````````````````````````````````````````````````
+   ;  Skips this section if joystick isn't moved up.
+   ;
+   if !joy0up then goto __Skip_Joy0_Up
+
+   ;```````````````````````````````````````````````````````````````
+   ;  Skips this section if hitting the edge.
+   ;
+   if player0y <= _P_Edge_Top then goto __Skip_Joy0_Up
+
+   ;```````````````````````````````````````````````````````````````
+   ;  Stops movement if a playfield pixel is in the way.
+   ;
+   temp5 = (player0x-10)/4
+
+   temp6 = (player0y-5)/8
+
+   if temp5 < 34 then if pfread(temp5,temp6) then goto __Skip_Joy0_Up
+
+   temp4 = (player0x-17)/4
+
+   if temp4 < 34 then if pfread(temp4,temp6) then goto __Skip_Joy0_Up
+
+   temp3 = temp5 - 1
+
+   if temp3 < 34 then if pfread(temp3,temp6) then goto __Skip_Joy0_Up
+
+   ;```````````````````````````````````````````````````````````````
+   ;  Moves player0 up.
+   ;
+   player0y = player0y - 1
+
+__Skip_Joy0_Up
+
+
+
+   ;***************************************************************
+   ;
+   ;  Joy0 down check.
+   ;
+   ;```````````````````````````````````````````````````````````````
+   ;  Skips this section if joystick isn't moved down.
+   ;
+   if !joy0down then goto __Skip_Joy0_Down
+
+   ;```````````````````````````````````````````````````````````````
+   ;  Skips this section if hitting the edge.
+   ;
+   if player0y >= _P_Edge_Bottom then goto __Skip_Joy0_Down
+
+   ;```````````````````````````````````````````````````````````````
+   ;  Stops movement if a playfield pixel is in the way.
+   ;
+   temp5 = (player0x-10)/4
+
+   temp6 = (player0y)/8
+
+   if temp5 < 34 then if pfread(temp5,temp6) then goto __Skip_Joy0_Down
+
+   temp4 = (player0x-17)/4
+
+   if temp4 < 34 then if pfread(temp4,temp6) then goto __Skip_Joy0_Down
+
+   temp3 = temp5 - 1
+
+   if temp3 < 34 then if pfread(temp3,temp6) then goto __Skip_Joy0_Down
+
+   ;```````````````````````````````````````````````````````````````
+   ;  Moves player0 down.
+   ;
+   player0y = player0y + 1
+
+__Skip_Joy0_Down
+
+
+
+   ;***************************************************************
+   ;
+   ;  Joy0 left check.
+   ;
+   ;```````````````````````````````````````````````````````````````
+   ;  Skips this section if joystick isn't moved to the left.
+   ;
+   if !joy0left then goto __Skip_Joy0_Left
+
+   ;```````````````````````````````````````````````````````````````
+   ;  Skips this section if hitting the edge.
+   ;
+   if player0x <= _P_Edge_Left then goto __Skip_Joy0_Left
+
+   ;```````````````````````````````````````````````````````````````
+   ;  Stops movement if a playfield pixel is in the way.
+   ;
+   temp5 = (player0y-1)/8
+
+   temp6 = (player0x-18)/4
+
+   if temp6 < 34 then if pfread(temp6,temp5) then goto __Skip_Joy0_Left
+
+   temp3 = (player0y-4)/8
+
+   if temp6 < 34 then if pfread(temp6,temp3) then goto __Skip_Joy0_Left
+
+   ;```````````````````````````````````````````````````````````````
+   ;  Moves player0 left.
+   ;
+   player0x = player0x - 1
+
+__Skip_Joy0_Left
+
+
+
+   ;***************************************************************
+   ;
+   ;  Joy0 right check.
+   ;
+   ;```````````````````````````````````````````````````````````````
+   ;  Skips this section if joystick isn't moved to the right.
+   ;
+   if !joy0right then goto __Skip_Joy0_Right
+
+   ;```````````````````````````````````````````````````````````````
+   ;  Skips this section if hitting the edge.
+   ;
+   if player0x >= _P_Edge_Right then goto __Skip_Joy0_Right
+
+   ;```````````````````````````````````````````````````````````````
+   ;  Stops movement if a playfield pixel is in the way.
+   ;
+   temp5 = (player0y-1)/8
+
+   temp6 = (player0x-9)/4
+
+   if temp6 < 34 then if pfread(temp6,temp5) then goto __Skip_Joy0_Right
+
+   temp3 = (player0y-4)/8
+
+   if temp6 < 34 then if pfread(temp6,temp3) then goto __Skip_Joy0_Right
+
+   ;```````````````````````````````````````````````````````````````
+   ;  Moves player0 right.
+   ;
+   player0x = player0x + 1
+
+__Skip_Joy0_Right
+
+   if joy0fire then _light =  0
+
+   if joy0fire then pfpixel 1 7 off
+
 
    if f<10 then goto __BackGorund_Level_Begin
    if f>10 && f<20 then goto __BackGorund_Transitione_Start
@@ -357,6 +523,20 @@ __Decrease_Left_Time_Health_Bar
    ;pfpixel 6 1 flip
    goto __Skip_Done
 
+
+
+
+__Skip_Done
+   ;if f=10 then player0x = (rand&63) + (rand&31) + (rand&15) + (rand&1) + 21 : player0x = (rand/4) + (rand&31) + (rand&15) + (rand&1) + 21
+   
+   if f=20 then f=0 
+   if pfscore1=0 && f=0 then pfscore1=255
+
+   
+
+   if _start_game < 2 then goto __main_loop
+
+
 __BackGorund_Level_Begin
    playfield:
    ................................
@@ -365,11 +545,11 @@ __BackGorund_Level_Begin
    ................................
    ................................
    XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX.
-   XXX...XXXXX..X.X...........XX...
-   .X.....XXXX..X.X..........XXXX..
-   ........XXX..X.X.XXX..XXX.......
-   ...XXX...........XXXX.XXXX......
-   .X.X.X.X.........XXX..XXX.......
+   XXX...XXXXX................XX...
+   .X.....XXXX...............XXXX..
+   ........XXX......XXX............
+   ...XXX...........XXXX...........
+   .X.X.X.X.........XXX............
 end
    pfcolors:
    $24
@@ -384,22 +564,12 @@ end
    $24
    $26
 end
-   goto __Skip_Done
 
 __BackGorund_Transitione_Start
-   goto __Skip_Done
 
 __BackGorund_Transitione_End
-   goto __Skip_Done
-
-
-__Skip_Done
-   ;if f=10 then player0x = (rand&63) + (rand&31) + (rand&15) + (rand&1) + 21 : player0x = (rand/4) + (rand&31) + (rand&15) + (rand&1) + 21
-   
-   if f=20 then f=0 
-   if pfscore1=0 && f=0 then pfscore1=255
-
-   
+   _start_game = 2
 
    drawscreen
+
    goto __main_loop

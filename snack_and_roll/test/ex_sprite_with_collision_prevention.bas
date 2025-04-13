@@ -159,10 +159,6 @@ __Start_Restart
    ;  Defines shape of Player0 sprite.
    ;
    player0:
-   %00111100
-   %01111110
-   %11000011
-   %10111101
    %11111111
    %11011011
    %01111110
@@ -256,7 +252,7 @@ __Main_Loop
    ;
    temp5 = (player0x-10)/4
 
-   temp6 = (player0y-9)/8
+   temp6 = (player0y-5)/8
 
    if temp5 < 34 then if pfread(temp5,temp6) then goto __Skip_Joy0_Up
 
@@ -340,7 +336,7 @@ __Skip_Joy0_Down
 
    if temp6 < 34 then if pfread(temp6,temp5) then goto __Skip_Joy0_Left
 
-   temp3 = (player0y-8)/8
+   temp3 = (player0y-4)/8
 
    if temp6 < 34 then if pfread(temp6,temp3) then goto __Skip_Joy0_Left
 
@@ -376,7 +372,7 @@ __Skip_Joy0_Left
 
    if temp6 < 34 then if pfread(temp6,temp5) then goto __Skip_Joy0_Right
 
-   temp3 = (player0y-8)/8
+   temp3 = (player0y-4)/8
 
    if temp6 < 34 then if pfread(temp6,temp3) then goto __Skip_Joy0_Right
 
