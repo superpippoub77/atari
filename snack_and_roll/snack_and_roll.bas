@@ -515,7 +515,7 @@ end
    if f=10 then goto __Decrease_Left_Time_Health_Bar 
    goto __Skip_Done
 
-   if _animation=20 then player1x = (rand&63) + (rand&31) + (rand&15) + (rand&1) + 21 : player1x = (rand/4) + (rand&31) + (rand&15) + (rand&1) + 21 : player1y = (rand & 31) + (rand & 15) + (rand & 3) + 20
+   if _animation<20 then player1x = (rand&63) + (rand&31) + (rand&15) + (rand&1) + 21 : player1x = (rand/4) + (rand&31) + (rand&15) + (rand&1) + 21 : player1y = (rand & 31) + (rand & 15) + (rand & 3) + 20
 
    if collision(player0, player1) then __Decrease_Left_Time_Health_Bar
 

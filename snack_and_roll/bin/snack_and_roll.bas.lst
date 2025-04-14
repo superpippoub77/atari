@@ -4636,11 +4636,11 @@
    3477  f796				   .
    3478  f796							; 
    3479  f796
-   3480  f796				   .L094		;  if _animation = 20 then player1x  =   ( rand & 63 )   +   ( rand & 31 )   +   ( rand & 15 )   +   ( rand & 1 )   +	21  :  player1x  =   ( rand / 4 )   +	( rand & 31 )	+   ( rand & 15 )   +	( rand & 1 )   +  21  :  player1y  =   ( rand  &  31 )	 +   ( rand  &	15 )   +   ( rand  &  3 )   +  20
+   3480  f796				   .L094		;  if _animation < 20 then player1x  =   ( rand & 63 )   +   ( rand & 31 )   +   ( rand & 15 )   +   ( rand & 1 )   +	21  :  player1x  =   ( rand / 4 )   +	( rand & 31 )	+   ( rand & 15 )   +	( rand & 1 )   +  21  :  player1y  =   ( rand  &  31 )	 +   ( rand  &	15 )   +   ( rand  &  3 )   +  20
    3481  f796
    3482  f796		       a5 d9		      LDA	_animation
    3483  f798		       c9 14		      CMP	#20
-   3484  f79a		       d0 7e		      BNE	.skipL094
+   3484  f79a		       b0 7e		      BCS	.skipL094
    3485  f79c				   .condpart42
    3486  f79c							; complex statement detected
    3487  f79c		       20 bc f3 	      jsr	randomize
