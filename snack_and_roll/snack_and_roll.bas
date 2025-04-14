@@ -21,7 +21,7 @@
    ;*************************************************************************
    const pfscore = 1
    const scorefade = 1
-   ;const pfrowheight=8
+   ;const pfrowheight=6
    ;const noscore = 1
 
    ; limite dei bordi (suponendo un player di 8 pixel)
@@ -109,7 +109,7 @@ __inizialize
    ; lifecolor 
    ; lives = 128 => 4 lives
    ;*************************************************************************
-   COLUP0 = _P0_color : COLUP1 = _P1_color : NUSIZ0 = $07 : REFP0 = 0 
+   COLUP0 = _P0_color : COLUP1 = _P1_color : NUSIZ0 = $00 : REFP0 = 0 
    ;COLUBK = 0 
    COLUPF = $2C
    scorecolor = _base_color : pfscorecolor = _base_color
@@ -131,10 +131,10 @@ __inizialize
    ; ball ->  Bolle del bollitore (un solo colore azzurro)
    ;*************************************************************************
    player0:
-   %00100100
-   %00011000
    %00111100
-   %00011000
+   %01110110
+   %01111110
+   %00111100
 end
 
    player1:
@@ -147,7 +147,7 @@ end
    ;*************************************************************************
    ; POSIZIONI PLAYER AND SPRITE INIZIALI
    ;*************************************************************************
-   player0x = 30 : player0y = 56 : player1x = 20 : player1y = 56
+   player0x = 30 : player0y = 54 : player1x = 20 : player1y = 54
 
    ;Se il gioco è iniziato (bit0) = 1 non entra nella generazione del titolo
    ;if _opt_b0_StartGame{0} then __main_loop
@@ -168,12 +168,12 @@ __start
    playfield:
    ....XXXXXXXXX...XX.......X..X...
    ...X..............X......X.X....
-   ....XX.. X.XX...XXX..XXX.XX.....
+   ....XX...X.XX...XXX..XXX.XX.....
    ......X..XX..X.X..X.X....X.X....
    XXXXXX...X...X..XXX..XXX.X..X...
-   ............................X.X.
-   ..........................X.X...
-   .X.......X...............X.X....
+   ................................
+   ...........................X.X..
+   .X.......X................X.X...
    ...X.XX........X.XX..XX..X.X....
    ...XX..X.......XX...X..X.X.X....
    ...X...X.......X.....XX..X.X....
@@ -206,46 +206,11 @@ end
 end */
    goto __skip_playfield
 
-__select_level
-   if _lev_scheme = 1 then
-   playfield:
-   ................................
-   ................................
-   ................................
-   ................................
-   ................................
-   XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX.
-   XXX...XXXXX................XX...
-   .X.....XXXX...............XXXX..
-   ........XXX......XXX............
-   ...XXX...........XXXX...........
-   .X.X.X.X.........XXX............
-end
-   if _lev_scheme = 1 then
-   pfcolors:
-   $24
-   $26
-   $28
-   $D4
-   $26
-   $D4
-   $05
-   $9E
-   $0E
-   $24
-   $26
-end
-   if _lev_scheme = 99 then _lev_scheme = 0 : goto __start
-
-__skip_playfield
-   ; Scrive lo schermo
-   drawscreen
-
 
 __main_loop
 
    ;Se premoo select inizializzo il gioco _opt_b0_StartGame = 1 e cambio il playfield per esempio __level_1_1
-   if switchreset && !_opt_b0_StartGame{0} then _opt_b0_StartGame{0} = 1 : __select_level
+   if switchreset && !_opt_b0_StartGame{0} then _opt_b0_StartGame{0} = 1 : _lev_scheme = _lev_scheme + 1 : __select_level
 
    if switchselect && !_opt_b0_StartGame{0} then _lev_scheme = _lev_scheme + 1 : __select_level
 
@@ -335,31 +300,31 @@ end */
     ; shifta e disegna nel playfield
     PF0 = barriera << posizione */
 
-   if f<15 then player0:
-   %00111100
-   %01110110
-   %01111110
-   %00111100
+   if _animation<10 then player0:
+   %00011000
+   %11111111
+   %00000000
+   %11111111
 end
 
-   if f>15 && f <30 then player0:
+   /* if _animation>15 && _animation <30 then player0:
    %00111100
    %01111110
    %01110110
    %00111100
 end
-   if f>30 && f <45 then player0:
+   if _animation>30 && _animation <45 then player0:
    %00111100
    %01111110
    %01101110
    %00111100
-end
+end */
 
-   if f>45  then player0:
-   %00111100
-   %01101110
-   %01111110
-   %00111100
+   if _animation >10  then player0:
+   %00100100
+   %11111111
+   %00000000
+   %11111111
 end
 
 
@@ -367,7 +332,7 @@ end
    COLUP1 = _P1_color 
    COLUPF = $2C
 
-    ;***************************************************************
+   ;***************************************************************
    ;
    ;  Joy0 up check.
    ;
@@ -517,15 +482,40 @@ __Skip_Joy0_Left
 
 __Skip_Joy0_Right
 
-   /* if joy0fire then _opt_b1_Light{1} =  1
 
-   if joy0fire then pfpixel 1 7 off
-
+   if joy0fire && !_opt_b1_Light{1} then _opt_b1_Light{1} =  1 : pfpixel 1 7 on
+   if _animation = 20 then _opt_b1_Light{1} =  0 : pfpixel 1 7 off
+   if _opt_b1_Light{1} then pfcolors:
+   $24
+   $26
+   $28
+   $D4
+   $26
+   $D4
+   $05
+   $9E
+   $0E
+   $24
+   $26
+end
+   if !_opt_b1_Light{1} then pfcolors:
+   $0
+   $0
+   $0
+   $0
+   $0
+   $D4
+   $0
+   $0
+   $0
+   $0
+   $0
+end
 
    if f=10 then goto __Decrease_Left_Time_Health_Bar 
-   goto __Skip_Done */
+   goto __Skip_Done
 
-   if _animation=10 then player1x = (rand&63) + (rand&31) + (rand&15) + (rand&1) + 21 : player1x = (rand/4) + (rand&31) + (rand&15) + (rand&1) + 21 : player1y = (rand & 31) + (rand & 15) + (rand & 3) + 20
+   if _animation=20 then player1x = (rand&63) + (rand&31) + (rand&15) + (rand&1) + 21 : player1x = (rand/4) + (rand&31) + (rand&15) + (rand&1) + 21 : player1y = (rand & 31) + (rand & 15) + (rand & 3) + 20
 
    if collision(player0, player1) then __Decrease_Left_Time_Health_Bar
 
@@ -539,9 +529,43 @@ __Decrease_Left_Time_Health_Bar
 
 __Skip_Done
    
-   if _animation>60 then _animation = 0 
-   if _opt_b0_StartGame{0} then goto __main_loop
-
-
+   if _animation>20 then _animation = 0 
+   ;if _opt_b0_StartGame{0} then goto __main_loop
    ;se il gico è già partito non deve sovrascrivere lo schermo
+
+   ;goto __main_loop
+
+__select_level
+   if _lev_scheme = 1 then playfield:
+   ................................
+   ................................
+   ................................
+   ................................
+   ................................
+   XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX.
+   XXX...XXXXX................XX...
+   .......XXXX...............XXXX..
+   ........XXX......XXX............
+   ...XXX...........XXXX...........
+   .X.X.X.X.........XXX............
+end
+   if _lev_scheme = 1 then pfcolors:
+   $0
+   $0
+   $0
+   $0
+   $0
+   $D4
+   $0
+   $0
+   $0
+   $0
+   $0
+end
+   if _lev_scheme = 99 then _lev_scheme = 0 : goto __start
+
+__skip_playfield
+   drawscreen
+
    goto __main_loop
+

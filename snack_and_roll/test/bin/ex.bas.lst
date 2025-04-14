@@ -2920,12 +2920,12 @@
    1724  f49e				   .__Main_Loop
    1725  f49e							; __Main_Loop
    1726  f49e
-   1727  f49e				   .L03 		;  if joy0fire then pfpixel 2 7 on
+   1727  f49e				   .L03 		;  if joy0fire then pfpixel 2 7 flip
    1728  f49e
    1729  f49e		       24 0c		      bit	INPT4
    1730  f4a0		       30 09		      BMI	.skipL03
    1731  f4a2				   .condpart0
-   1732  f4a2		       a2 00		      LDX	#0
+   1732  f4a2		       a2 02		      LDX	#2
    1733  f4a4		       a0 07		      LDY	#7
    1734  f4a6		       a9 02		      LDA	#2
    1735  f4a8		       20 78 f2 	      jsr	pfpixel
