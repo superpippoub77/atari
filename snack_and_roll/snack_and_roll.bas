@@ -517,26 +517,29 @@ __Skip_Joy0_Left
 
 __Skip_Joy0_Right
 
-   if joy0fire then _opt_b1_Light{1} =  1
+   /* if joy0fire then _opt_b1_Light{1} =  1
 
    if joy0fire then pfpixel 1 7 off
 
 
    if f=10 then goto __Decrease_Left_Time_Health_Bar 
-   goto __Skip_Done
-   
+   goto __Skip_Done */
+
+   if _animation=10 then player1x = (rand&63) + (rand&31) + (rand&15) + (rand&1) + 21 : player1x = (rand/4) + (rand&31) + (rand&15) + (rand&1) + 21 : player1y = (rand & 31) + (rand & 15) + (rand & 3) + 20
+
+   if collision(player0, player1) then __Decrease_Left_Time_Health_Bar
+
+
 __Decrease_Left_Time_Health_Bar
    pfscore1 = pfscore1/2
    score=l+1
    ;pfpixel 6 1 flip
    goto __Skip_Done
 
+
 __Skip_Done
-   ;if f=10 then player0x = (rand&63) + (rand&31) + (rand&15) + (rand&1) + 21 : player0x = (rand/4) + (rand&31) + (rand&15) + (rand&1) + 21
    
    if _animation>60 then _animation = 0 
-   if pfscore1=0 && f=0 then pfscore1=255
-
    if _opt_b0_StartGame{0} then goto __main_loop
 
 
