@@ -1,59 +1,51 @@
    ;*************************************************
-   ; SETTAGGIO DEL KERNEL
+   ; SETTAGGIO DEL KERNEL E OPZIONI
    ; ------------------------------------------------
    ; kernel_options :
    ; player0colors = colorazione del player 1
    ; pfcolors = colorazione del playfiled
    ; pfheights = altezza del righe del playfield
-   set kernel_options pfcolors
-
-   ;*************************************************
-   ; ALTRI SETTAGGI
-   ; ------------------------------------------------
-   ; romsize = 4k, 8k (2 banhi di memoria)
+   ; romsize = 4k, 8k (2 banchi di memoria)
    ; pal  = Versione dei colori
-   ; tv = effetto crt
+   ; tv = effetto crt (non necessario)
+   set kernel_options pfcolors
    set romsize 4k
    set pal
 
 
-   ;*************************************************
-   ; COSTANTI KERNEL (vedi poi INIZIALIZZAZIONE)
-   ; ------------------------------------------------
-   
+   ;*************************************************************************
+   ; COSTANTI KERNEL
+   ; ------------------------------------------------------------------------
    ; pfscore = abilitazione dello score
+   ; scorefade = effetto fade nello score
+   ;*************************************************************************
    const pfscore = 1
+   const scorefade = 1
    ;const pfrowheight=8
    ;const noscore = 1
 
    ; limite dei bordi (suponendo un player di 8 pixel)
-   const _P_Edge_Top = 5
-   const _P_Edge_Bottom = 88
-   const _P_Edge_Left = 1
+   const _P_Edge_Top = 0
+   const _P_Edge_Bottom = 88 ; 11 X 8 ???
+   const _P_Edge_Left = 0
    const _P_Edge_Right = 153
 
    const _base_color = $16
    const _P0_color = $2C
    const _P1_color = $68
 
-   const scorefade = 1
 
    
    ;*************************************************************************
    ; VARIABILI
    ; ------------------------------------------------------------------------
-   ; light -> a (0 = off, 1 = on) => 0 non si vedono gli oggetti, 1 si vedono
-   ; ........................................................................
-   ; level -> b (1 = cucina, ...4 = ...) e 5 = Saccehtto finale
-   ; scheme -> c (da 1 a 10, disposizone degli oggetti)
+   ; level -> b (1 = cucina, ...4 = ...)
    ; ........................................................................
    ; diffcult -> d (1, 2, 3, 4) => levocità in cui si muovono gli oggetti
    ; ........................................................................
    ; score -> l
    ; ........................................................................
-   ; speed:
-   ; unit -> e
-   ; decimal -> f
+   ; anination: posizone del player in movimento
    ; ........................................................................
    ; timer_cp:
    ; cup -> e
@@ -62,16 +54,18 @@
    ; gocce cioccolato -> i
    ; timer healt:
    ; gocce cioccolato -> j
+   ; _opt_b0_StartGame -> k (b0 = Game start/stop)
+   ; _opt_b1_Light -> k (b1 = Light on/off)
    ;*************************************************************************
-   dim _light = a
-   dim _lev_scheme = b.c
+   dim _lev_scheme = b
    dim _difficult = d
-   dim _speed = e.f
+   dim _animation = f
 
    dim _timer_cp = g.h
    dim _timer_g = i
    ;dim _timer_h = j
-   dim _start_game = k
+   dim _opt_b0_StartGame = k
+   dim _opt_b1_Light = k
 
 
    ;***************************************************************
@@ -93,10 +87,11 @@
    dim posizione = 0
 
 
-   dim _pos_p1_x = 30
-   dim _pos_p1_y = 56
+   dim _pos_p1_x = player0.x
+   dim _pos_p1_y = player0.y
+   dim _animation = f
 
-
+__inizialize
    ;*************************************************************************
    ; INIZIALIZZAZIONE
    ; ------------------------------------------------------------------------
@@ -114,60 +109,87 @@
    ; lifecolor 
    ; lives = 128 => 4 lives
    ;*************************************************************************
-   COLUP0 = _P0_color
-   COLUP1 = _P1_color
-   NUSIZ0 = $07 : REFP0 = 0 
+   COLUP0 = _P0_color : COLUP1 = _P1_color : NUSIZ0 = $07 : REFP0 = 0 
    ;COLUBK = 0 
    COLUPF = $2C
    scorecolor = _base_color : pfscorecolor = _base_color
-   _start_game = 0
 
    a = 0 : b = 0 : c = 0 : d = 0 : e = 0 : f = 0 : g = 0 : h = 0 : i = 0
    j = 0 : k = 0 : l = 0 : m = 0 : n = 0 : o = 0 : p = 0 : q = 0 : r = 0
    s = 0 : t = 0 : u = 0 : v = 0 : w = 0 : x = 0 : y = 0 : z = 0
 
    score = 0
-   pfscore1 = 255
-   pfscore2 = 255
-   
+   pfscore1 = %11111111
+   pfscore2 = %11111111
+   ;*************************************************************************
+   ; PLAYER AND SPRITE
+   ; ------------------------------------------------------------------------
+   ; player 0 -> Biscotto (nessun colore) => 4 x 4 pixel
+   ; player 1 -> Bocca che mangia (colorata ?? dipende se voglio missile 1)
+   ; missile 0 -> Sacchetto di uscita dal livello 
+   ; missile 1 -> Bonus (randomico sullo schermo a tempo, se attivo)
+   ; ball ->  Bolle del bollitore (un solo colore azzurro)
+   ;*************************************************************************
+   player0:
+   %00100100
+   %00011000
+   %00111100
+   %00011000
+end
+
+   player1:
+   %01111110
+   %10000001
+   %10000001
+   %01111110
+end
+
+   ;*************************************************************************
+   ; POSIZIONI PLAYER AND SPRITE INIZIALI
+   ;*************************************************************************
+   player0x = 30 : player0y = 56 : player1x = 20 : player1y = 56
+
+   ;Se il gioco è iniziato (bit0) = 1 non entra nella generazione del titolo
+   ;if _opt_b0_StartGame{0} then __main_loop
 
    ;*************************************************
-   ; TITOLO
+   ; PLAYFIELD: TITOLO
    ; ------------------------------------------------
    ; Snack 'n' Roll
+   ; pfcolors => varaiazioni di marrone da $22 a $2B
    ;*************************************************
+__start
 
-__main_title
+   _opt_b0_StartGame{0} = 0
+   _opt_b1_Light{1} = 0
+   _lev_scheme = 0
+   _animation = 0
+
    playfield:
-   ................................
-   ....XX.........XX.......X..X....
-   ...X.............X......X.X.....
-   ....XX..X.XX...XXX..XXX.XX......
-   ......X.XX..X.X..X.X....X.X.....
-   ....XX..X...X..XXX..XXX.X..X....
-   ................................
+   ....XXXXXXXXX...XX.......X..X...
+   ...X..............X......X.X....
+   ....XX.. X.XX...XXX..XXX.XX.....
+   ......X..XX..X.X..X.X....X.X....
+   XXXXXX...X...X..XXX..XXX.X..X...
+   ............................X.X.
+   ..........................X.X...
    .X.......X...............X.X....
    ...X.XX........X.XX..XX..X.X....
    ...XX..X.......XX...X..X.X.X....
    ...X...X.......X.....XX..X.X....
 end
-
-   ;***************************************************************
-   ;
-   ;  Sets playfield colors.
-   ;
    pfcolors:
    $22
-   $22
-   $22
-   $22
-   $22
+   $24
+   $26
+   $28
+   $2A
    $22
    $24
-   $24
-   $24
-   $24
-   $24
+   $26
+   $28
+   $2A
+   $2B
 end
    /* pfheights:
    4
@@ -182,56 +204,53 @@ end
    2
    8
 end */
+   goto __skip_playfield
 
-   ;*************************************************************************
-   ; PLAYER AND SPRITE
-   ; ------------------------------------------------
-   ; player 0 -> Biscotto (nessun colore) => 4 x 4 pixel
-   ; player 1 -> Bocca che mangia (colorata ?? dipende se voglio missile 1)
-   ; missile 0 -> Sacchetto di uscita dal livello 
-   ; missile 1 -> Bonus (randomico sullo schermo a tempo, se attivo)
-   ; ball ->  Bolle del bollitore (un solo colore azzurro)
-   ;*************************************************************************
-   player1:
- %01100110
- %00100100
- %00011000
- %10100101
- %01001010
- %01010010
- %00100100
- %00011110
+__select_level
+   if _lev_scheme = 1 then
+   playfield:
+   ................................
+   ................................
+   ................................
+   ................................
+   ................................
+   XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX.
+   XXX...XXXXX................XX...
+   .X.....XXXX...............XXXX..
+   ........XXX......XXX............
+   ...XXX...........XXXX...........
+   .X.X.X.X.........XXX............
 end
-
-   player0:
-   %01111110
-   %10000001
-   %10000001
-   %01111110
+   if _lev_scheme = 1 then
+   pfcolors:
+   $24
+   $26
+   $28
+   $D4
+   $26
+   $D4
+   $05
+   $9E
+   $0E
+   $24
+   $26
 end
+   if _lev_scheme = 99 then _lev_scheme = 0 : goto __start
 
-   ;,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,
-   ;```````````````````````````````````````````````````````````````
-   ;
-   ;  Your code to test goes here.
-   ;
-   ;,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,
-   ;```````````````````````````````````````````````````````````````
-
-   player0x = 30 : player0y = 56
-
-   player1x = 20 : player1y = 56
-
+__skip_playfield
+   ; Scrive lo schermo
    drawscreen
 
-   if !joy0fire && _start_game = 0 then goto __main_title
 
-   _start_game=1
-   
 __main_loop
 
-   f=f+1
-   scorecolor = f
+   ;Se premoo select inizializzo il gioco _opt_b0_StartGame = 1 e cambio il playfield per esempio __level_1_1
+   if switchreset && !_opt_b0_StartGame{0} then _opt_b0_StartGame{0} = 1 : __select_level
+
+   if switchselect && !_opt_b0_StartGame{0} then _lev_scheme = _lev_scheme + 1 : __select_level
+
+   if joy0right || joy0left then _animation = _animation + 1
+   scorecolor = _animation
 
    ;,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,
    ;```````````````````````````````````````````````````````````````
@@ -316,38 +335,32 @@ end */
     ; shifta e disegna nel playfield
     PF0 = barriera << posizione */
 
-   if f<10 then player0:
+   if f<15 then player0:
+   %00111100
+   %01110110
    %01111110
-   %10000001
-   %10000001
-   %01111110
+   %00111100
 end
 
-   if f>10 then player0:
-   %00000000
+   if f>15 && f <30 then player0:
+   %00111100
    %01111110
+   %01110110
+   %00111100
+end
+   if f>30 && f <45 then player0:
+   %00111100
    %01111110
-   %00000000
+   %01101110
+   %00111100
 end
 
-
-
-   ;```````````````````````````````````````````````````````````````
-
-
-   ;***************************************************************
-   ;
-   ;  Moves player0 sprite with the joystick while keeping the
-   ;  sprite within the playfield area.
-   ;
-   ;if !collision(player0,playfield) && joy0up && player0y > _pf_edge_top then player0y = player0y - 1 else player0y = _pos_p1_y+1
-
-   ;if !collision(player0,playfield) && joy0down && player0y < _pf_edge_bottom then _pos_p1_y = _pos_p1_y + 1
-
-   ;if !collision(player0,playfield) && joy0left && player0x > _pf_edge_left then player0x = player0x - 1 else player0x = _pos_p1_x+1
-
-   ;if !collision(player0,playfield) && joy0right && player0x < _pf_edge_right then player0x = player0x + 1 else player0x = _pos_p1_x-1
-
+   if f>45  then player0:
+   %00111100
+   %01101110
+   %01111110
+   %00111100
+end
 
 
    COLUP0 = _P0_color 
@@ -504,14 +517,9 @@ __Skip_Joy0_Left
 
 __Skip_Joy0_Right
 
-   if joy0fire then _light =  0
+   if joy0fire then _opt_b1_Light{1} =  1
 
    if joy0fire then pfpixel 1 7 off
-
-
-   if f<10 then goto __BackGorund_Level_Begin
-   if f>10 && f<20 then goto __BackGorund_Transitione_Start
-   if f>20 then goto __BackGorund_Transitione_End
 
 
    if f=10 then goto __Decrease_Left_Time_Health_Bar 
@@ -523,53 +531,14 @@ __Decrease_Left_Time_Health_Bar
    ;pfpixel 6 1 flip
    goto __Skip_Done
 
-
-
-
 __Skip_Done
    ;if f=10 then player0x = (rand&63) + (rand&31) + (rand&15) + (rand&1) + 21 : player0x = (rand/4) + (rand&31) + (rand&15) + (rand&1) + 21
    
-   if f=20 then f=0 
+   if _animation>60 then _animation = 0 
    if pfscore1=0 && f=0 then pfscore1=255
 
-   
-
-   if _start_game < 2 then goto __main_loop
+   if _opt_b0_StartGame{0} then goto __main_loop
 
 
-__BackGorund_Level_Begin
-   playfield:
-   ................................
-   ................................
-   ................................
-   ................................
-   ................................
-   XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX.
-   XXX...XXXXX................XX...
-   .X.....XXXX...............XXXX..
-   ........XXX......XXX............
-   ...XXX...........XXXX...........
-   .X.X.X.X.........XXX............
-end
-   pfcolors:
-   $24
-   $26
-   $28
-   $D4
-   $26
-   $D4
-   $05
-   $9E
-   $0E
-   $24
-   $26
-end
-
-__BackGorund_Transitione_Start
-
-__BackGorund_Transitione_End
-   _start_game = 2
-
-   drawscreen
-
+   ;se il gico è già partito non deve sovrascrivere lo schermo
    goto __main_loop
