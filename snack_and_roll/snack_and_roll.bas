@@ -33,8 +33,6 @@
    const _base_color = $16
    const _P0_color = $2C
    const _P1_color = $68
-
-
    
    ;*************************************************************************
    ; VARIABILI
@@ -54,19 +52,24 @@
    ; gocce cioccolato -> i
    ; timer healt:
    ; gocce cioccolato -> j
-   ; _opt_b0_StartGame -> k (b0 = Game start/stop)
-   ; _opt_b1_Light -> k (b1 = Light on/off)
+   ; _opt_b0 -> k (b0 = Game start/stop)
+   ; _opt_b1 -> k (b1 = Light on/off)
    ;*************************************************************************
-   dim _lev_scheme = b
-   dim _difficult = d
+   dim _timer_light = a
+   dim _level = b
    dim _animation = f
+   dim _timer_pf = e
+
+   dim _transaction = d
 
    dim _timer_cp = g.h
    dim _timer_g = i
    ;dim _timer_h = j
-   dim _opt_b0_StartGame = k
-   dim _opt_b1_Light = k
+   dim _opt_b0 = k
+   dim _opt_b1 = k
 
+   dim _obj1 = s 
+   dim _obj2 = t
 
    ;***************************************************************
    ;
@@ -89,7 +92,6 @@
 
    dim _pos_p1_x = player0.x
    dim _pos_p1_y = player0.y
-   dim _animation = f
 
 __inizialize
    ;*************************************************************************
@@ -110,8 +112,8 @@ __inizialize
    ; lives = 128 => 4 lives
    ;*************************************************************************
    COLUP0 = _P0_color : COLUP1 = _P1_color : NUSIZ0 = $00 : REFP0 = 0 
-   ;COLUBK = 0 
-   COLUPF = $2C
+   COLUBK = 0 
+   ;COLUPF = $2C
    scorecolor = _base_color : pfscorecolor = _base_color
 
    a = 0 : b = 0 : c = 0 : d = 0 : e = 0 : f = 0 : g = 0 : h = 0 : i = 0
@@ -150,7 +152,7 @@ end
    player0x = 30 : player0y = 54 : player1x = 20 : player1y = 54
 
    ;Se il gioco è iniziato (bit0) = 1 non entra nella generazione del titolo
-   ;if _opt_b0_StartGame{0} then __main_loop
+   ;if _opt_b0{0} then __main_loop
 
    ;*************************************************
    ; PLAYFIELD: TITOLO
@@ -160,11 +162,14 @@ end
    ;*************************************************
 __start
 
-   _opt_b0_StartGame{0} = 0
-   _opt_b1_Light{1} = 0
-   _lev_scheme = 0
+   _opt_b0{0} = 0
+   _opt_b1{1} = 1
+   _level = 0
    _animation = 0
-
+   _timer_light = 0
+   _timer_pf = 0
+   _obj1 = 0
+   _obj2 = 0
    playfield:
    ....XXXXXXXXX...XX.......X..X...
    ...X..............X......X.X....
@@ -209,116 +214,94 @@ end */
 
 __main_loop
 
-   ;Se premoo select inizializzo il gioco _opt_b0_StartGame = 1 e cambio il playfield per esempio __level_1_1
-   if switchreset && !_opt_b0_StartGame{0} then _opt_b0_StartGame{0} = 1 : _lev_scheme = _lev_scheme + 1 : __select_level
+   ;Se premoo select inizializzo il gioco _opt_b0 = 1 e cambio il playfield per esempio __level_1_1
+   if switchreset && !_opt_b0{0} then _opt_b0{0} = 1 : _opt_b1{1} = 1 : _timer_pf = 0 : _level = 1 : goto __select_level
+   ;if switchselect && !_opt_b0{0} then _level = _level + 1 : __select_level
 
-   if switchselect && !_opt_b0_StartGame{0} then _lev_scheme = _lev_scheme + 1 : __select_level
+   if !_opt_b0{0} then goto __skip_playfield
 
+   ;*************************************************************************
+   ; ANIMAZIONE PLAYER 0
+   ; ------------------------------------------------------------------------
+   ; solo se sto muovendo il joystick
+   ;*************************************************************************
    if joy0right || joy0left then _animation = _animation + 1
+   if joy0up || joy0down then _animation = _animation + 1
+   if !joy0right && !joy0left && !joy0up && !joy0down then _animation = 0 
+
+   ;*************************************************************************
+   ; ANIMAZIONE PLAYER 1
+   ; ------------------------------------------------------------------------
+   ; 
+   ;*************************************************************************
+   if _timer_pf = 30 then player1x = (rand/4) + (rand&31) + (rand&15) + (rand&1) + 21 : player1y = (rand & 31) + (rand & 15) + (rand & 3) + 20
+   
+   ;*************************************************************************
+   ; ANIMAZIONE PLAYFIELD
+   ; ------------------------------------------------------------------------
+   ; 
+   ;*************************************************************************
+   _timer_pf = _timer_pf + 1
+   if _timer_pf > 120 then _timer_pf = 0
+
+   ;*************************************************************************
+   ; LIGHT
+   ; ------------------------------------------------------------------------
+   ; _timer_light => tempo di accensione della lampada (30s) se attiva
+   ; _data_light => array contenente l'elenco delle posizioni delle luci
+   ; suddivise per livello (a coppia)
+   ;*************************************************************************
+
+   ;Accensione della lampada
+   if joy0fire && !_opt_b1{1} then _opt_b1{1} =  1 : pfpixel 7 1 on
+
+   ;Attivazione del timer solo se la lampada è attiva
+   if _opt_b1{1} then _timer_light = _timer_light + 1
+   
+   ;Timer finito azzeramento del timer disattivazione del flag della lampada
+   ;if _timer_light = 255 then _opt_b1{1} =  0 : pfpixel 1 7 off : _timer_light = 0
+
+   ; background visibile se la lampada è accesa
+   if _opt_b1{1} then pfcolors:
+   $24
+   $26
+   $28
+   $D4
+   $26
+   $D4
+   $05
+   $9E
+   $0E
+   $24
+   $26
+end
+   ; background spento se la lampada no è accesa
+   if !_opt_b1{1} then pfcolors:
+   $0
+   $0
+   $0
+   $0
+   $0
+   $D4
+   $0
+   $0
+   $0
+   $0
+   $0
+end
+
+__skip_light
+
+
    scorecolor = _animation
 
-   ;,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,
-   ;```````````````````````````````````````````````````````````````
-   ;
-   ;  Your code to test goes here.
-   ;
-   ;,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,
-   ;```````````````````````````````````````````````````````````````
-
-
-
-   ;***************************************************************
-   ;
-   ;  Sets color of the score.
-   ;
-
-
-
-
-   ;***************************************************************
-   ;
-   ;  Puts temp4 in the three score digits on the left side.
-   ;
-   ;```````````````````````````````````````````````````````````````
-   ;  Replace "player0x" with whatever you need to check.
-   ;
-   ;temp4 = player0x
-
-   /* _sc1 = 0 : _sc2 = _sc2 & 15
-   if temp4 >= 100 then _sc1 = _sc1 + 16 : temp4 = temp4 - 100
-   if temp4 >= 100 then _sc1 = _sc1 + 16 : temp4 = temp4 - 100
-   if temp4 >= 50 then _sc1 = _sc1 + 5 : temp4 = temp4 - 50
-   if temp4 >= 30 then _sc1 = _sc1 + 3 : temp4 = temp4 - 30
-   if temp4 >= 20 then _sc1 = _sc1 + 2 : temp4 = temp4 - 20
-   if temp4 >= 10 then _sc1 = _sc1 + 1 : temp4 = temp4 - 10
-   _sc2 = (temp4 * 4 * 4) | _sc2 */
-
-
-
-   ;***************************************************************
-   ;
-   ;  Puts temp4 in the three score digits on the right side.
-   ;
-   ;```````````````````````````````````````````````````````````````
-   ;  Replace "player0y" with whatever you need to check.
-   ;
-   ;temp4 = player0y
-
-   /* _sc2 = _sc2 & 240 : _sc3 = 0
-   if temp4 >= 100 then _sc2 = _sc2 + 1 : temp4 = temp4 - 100
-   if temp4 >= 100 then _sc2 = _sc2 + 1 : temp4 = temp4 - 100
-   if temp4 >= 50 then _sc3 = _sc3 + 80 : temp4 = temp4 - 50
-   if temp4 >= 30 then _sc3 = _sc3 + 48 : temp4 = temp4 - 30
-   if temp4 >= 20 then _sc3 = _sc3 + 32 : temp4 = temp4 - 20
-   if temp4 >= 10 then _sc3 = _sc3 + 16 : temp4 = temp4 - 10
-   _sc3 = _sc3 | temp4 */
-
-   ;if f=20 then f=0
-
-   /* if joy0left || joy0right  then player0:
-   %00100100
-   %00010010
-   %00011100
-   %10100101
-   %01001010
-   %01010010
-   %00100100
-   %01111100
-end */
-
-
-   /* ; aumenta il contatore ogni frame
-  frame = frame + 1
-
-  ; ogni 10 frame sposta la barriera
-  if frame > 10 then frame = 0
-
-    ; aggiorna la posizione
-    posizione = posizione + 1
-    if posizione > 30 then posizione = 0
-
-    ; shifta e disegna nel playfield
-    PF0 = barriera << posizione */
-
+ 
    if _animation<10 then player0:
    %00011000
    %11111111
    %00000000
    %11111111
 end
-
-   /* if _animation>15 && _animation <30 then player0:
-   %00111100
-   %01111110
-   %01110110
-   %00111100
-end
-   if _animation>30 && _animation <45 then player0:
-   %00111100
-   %01111110
-   %01101110
-   %00111100
-end */
 
    if _animation >10  then player0:
    %00100100
@@ -328,9 +311,6 @@ end */
 end
 
 
-   COLUP0 = _P0_color 
-   COLUP1 = _P1_color 
-   COLUPF = $2C
 
    ;***************************************************************
    ;
@@ -482,42 +462,49 @@ __Skip_Joy0_Left
 
 __Skip_Joy0_Right
 
+__playfield_transaction ; y x l
 
-   if joy0fire && !_opt_b1_Light{1} then _opt_b1_Light{1} =  1 : pfpixel 1 7 on
-   if _animation = 20 then _opt_b1_Light{1} =  0 : pfpixel 1 7 off
-   if _opt_b1_Light{1} then pfcolors:
-   $24
-   $26
-   $28
-   $D4
-   $26
-   $D4
-   $05
-   $9E
-   $0E
-   $24
-   $26
+   if _timer_pf > 10 && _timer_pf < 60 then pfhline 0 0 5 on : pfhline 15 0 20 on
+   if _timer_pf > 12 && _timer_pf < 60 then pfhline 1 1 5 on : pfhline 16 1 20 on
+   if _timer_pf > 15 && _timer_pf < 60 then pfhline 2 2 5 on : pfhline 17 2 20 on
+
+   if _timer_pf > 60 && _timer_pf < 120 then pfhline 0 2 5 off : pfhline 15 2 20 off
+   if _timer_pf > 62 && _timer_pf < 120 then pfhline 0 1 5 off : pfhline 15 1 20 off
+   if _timer_pf > 65 && _timer_pf < 120 then pfhline 0 0 5 off : pfhline 15 0 20 off
+
+   /* callmacro setplayfield_col_on _timer_pf 0 0 8 _obj1 
+
+   ;callmacro setplayfield_col_on _timer_pf 10 0 8 1
+
+   ;!if _timer_pf > 60 && _timer_pf < 120 then callmacro setplayfield_col_off _timer_pf 0 0 : callmacro setplayfield_col_off _timer_pf 10 0
+
+   goto __skip_playfield
+
+   macro setplayfield_col_on
+   _obj2 = {4}
+   if _timer_pf > 10 && _timer_pf < 60 && _data_object[0] < 3 then _obj2 = _obj2 + 1 : pfhline {2} _data_object[0] {4} on
+   ;if _timer_pf > 60 && _timer_pf < 120 && _transaction < 2 then _transaction = _transaction - 1 : pfhline {2} temp6 {4} off 
+end */
+
+   macro setplayfield_col_off
+   temp2 = {2} ; x
+   temp5 = {2} + 4 ; x + length
+   temp6 = {3} ; y
+   if {1} = 62 then temp6 = temp6 - 1
+   if {1} = 64 then temp6 = temp6 - 1
+   if {1} > 60 then pfhline temp2 temp6 temp5 off
 end
-   if !_opt_b1_Light{1} then pfcolors:
-   $0
-   $0
-   $0
-   $0
-   $0
-   $D4
-   $0
-   $0
-   $0
-   $0
-   $0
-end
+
+
 
    if f=10 then goto __Decrease_Left_Time_Health_Bar 
    goto __Skip_Done
 
-   if _animation<20 then player1x = (rand&63) + (rand&31) + (rand&15) + (rand&1) + 21 : player1x = (rand/4) + (rand&31) + (rand&15) + (rand&1) + 21 : player1y = (rand & 31) + (rand & 15) + (rand & 3) + 20
+   ;if _animation = 20 then player0x = (rand/4) + (rand&31) + (rand&15) + (rand&1) + 21 : player0y = (rand & 31) + (rand & 15) + (rand & 3) + 20
 
    if collision(player0, player1) then __Decrease_Left_Time_Health_Bar
+
+
 
 
 __Decrease_Left_Time_Health_Bar
@@ -528,15 +515,14 @@ __Decrease_Left_Time_Health_Bar
 
 
 __Skip_Done
-   
-   if _animation>20 then _animation = 0 
-   ;if _opt_b0_StartGame{0} then goto __main_loop
+   ;if _opt_b0{0} then goto __main_loop
    ;se il gico è già partito non deve sovrascrivere lo schermo
 
-   ;goto __main_loop
+   goto __skip_playfield
+
 
 __select_level
-   if _lev_scheme = 1 then playfield:
+   if _level = 1 then playfield:
    ................................
    ................................
    ................................
@@ -549,23 +535,172 @@ __select_level
    ...XXX...........XXXX...........
    .X.X.X.X.........XXX............
 end
-   if _lev_scheme = 1 then pfcolors:
-   $0
-   $0
-   $0
-   $0
-   $0
-   $D4
-   $0
-   $0
-   $0
-   $0
-   $0
+   
+   if _level = 11 then playfield:
+   ................................
+   ................................
+   ................................
+   ................................
+   ................................
+   XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX.
+   XXX...XXXXX................XX...
+   .......XXXX...............XXXX..
+   ........XXX......XXX............
+   ...XXX...........XXXX...........
+   .X.X.X.X.........XXX............
 end
-   if _lev_scheme = 99 then _lev_scheme = 0 : goto __start
+   
+   if _level = 12 then playfield:
+   ................................
+   ................................
+   ................................
+   ................................
+   ................................
+   XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX.
+   XXX...XXXXX................XX...
+   .......XXXX...............XXXX..
+   ........XXX......XXX............
+   ...XXX...........XXXX...........
+   .X.X.X.X.........XXX............
+end
+   
+   if _level = 2 then playfield:
+   ................................
+   ................................
+   ................................
+   ................................
+   ................................
+   XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX.
+   XXX...XXXXX................XX...
+   .......XXXX...............XXXX..
+   ........XXX......XXX............
+   ...XXX...........XXXX...........
+   .X.X.X.X.........XXX............
+end
+   
+   if _level = 21 then playfield:
+   ................................
+   ................................
+   ................................
+   ................................
+   ................................
+   XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX.
+   XXX...XXXXX................XX...
+   .......XXXX...............XXXX..
+   ........XXX......XXX............
+   ...XXX...........XXXX...........
+   .X.X.X.X.........XXX............
+end
+   
+   if _level = 22 then playfield:
+   ................................
+   ................................
+   ................................
+   ................................
+   ................................
+   XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX.
+   XXX...XXXXX................XX...
+   .......XXXX...............XXXX..
+   ........XXX......XXX............
+   ...XXX...........XXXX...........
+   .X.X.X.X.........XXX............
+end
+   
+   if _level = 3 then playfield:
+   ................................
+   ................................
+   ................................
+   ................................
+   ................................
+   XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX.
+   XXX...XXXXX................XX...
+   .......XXXX...............XXXX..
+   ........XXX......XXX............
+   ...XXX...........XXXX...........
+   .X.X.X.X.........XXX............
+end
+   
+   if _level = 31 then playfield:
+   ................................
+   ................................
+   ................................
+   ................................
+   ................................
+   XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX.
+   XXX...XXXXX................XX...
+   .......XXXX...............XXXX..
+   ........XXX......XXX............
+   ...XXX...........XXXX...........
+   .X.X.X.X.........XXX............
+end
+   
+   if _level = 32 then playfield:
+   ................................
+   ................................
+   ................................
+   ................................
+   ................................
+   XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX.
+   XXX...XXXXX................XX...
+   .......XXXX...............XXXX..
+   ........XXX......XXX............
+   ...XXX...........XXXX...........
+   .X.X.X.X.........XXX............
+end
+   
+   if _level = 4 then playfield:
+   ................................
+   ................................
+   ................................
+   ................................
+   ................................
+   XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX.
+   XXX...XXXXX................XX...
+   .......XXXX...............XXXX..
+   ........XXX......XXX............
+   ...XXX...........XXXX...........
+   .X.X.X.X.........XXX............
+end
+   
+   if _level = 41 then playfield:
+   ................................
+   ................................
+   ................................
+   ................................
+   ................................
+   XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX.
+   XXX...XXXXX................XX...
+   .......XXXX...............XXXX..
+   ........XXX......XXX............
+   ...XXX...........XXXX...........
+   .X.X.X.X.........XXX............
+end
+   
+   if _level = 42 then playfield:
+   ................................
+   ................................
+   ................................
+   ................................
+   ................................
+   XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX.
+   XXX...XXXXX................XX...
+   .......XXXX...............XXXX..
+   ........XXX......XXX............
+   ...XXX...........XXXX...........
+   .X.X.X.X.........XXX............
+end
+
+   if _level > 42 then _level = 0 : goto __start
 
 __skip_playfield
+   COLUP0 = _P0_color : COLUP1 = _P1_color
+   COLUBK = 0 
+
    drawscreen
 
    goto __main_loop
+
+   data _data_light ; il primo non si conta
+   1,7,1,7,1,7,1,7
+end
 
