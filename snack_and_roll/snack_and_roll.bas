@@ -32,7 +32,7 @@
 
    const _base_color = $16
    const _P0_color = $2C
-   const _P1_color = $68
+   const _P1_color = $32
    
    ;*************************************************************************
    ; VARIABILI
@@ -52,24 +52,20 @@
    ; gocce cioccolato -> i
    ; timer healt:
    ; gocce cioccolato -> j
-   ; _opt_b0 -> k (b0 = Game start/stop)
-   ; _opt_b1 -> k (b1 = Light on/off)
+   ; _b0_gameStart -> k (b0 = Game start/stop)
+   ; _b4_gameLight -> k (b1 = Light on/off)
    ;*************************************************************************
    dim _timer_light = a
    dim _level = b
    dim _animation = f
    dim _timer_pf = e
 
-   dim _transaction = d
-
    dim _timer_cp = g.h
    dim _timer_g = i
    ;dim _timer_h = j
-   dim _opt_b0 = k
-   dim _opt_b1 = k
 
-   dim _obj1 = s 
-   dim _obj2 = t
+   dim _b0_gameStart = k
+   dim _b4_gameLight = k
 
    ;***************************************************************
    ;
@@ -86,12 +82,6 @@
    /* dim _sc1 = score
    dim _sc2 = score+1
    dim _sc3 = score+2 */
-   dim frame = 0
-   dim posizione = 0
-
-
-   dim _pos_p1_x = player0.x
-   dim _pos_p1_y = player0.y
 
 __inizialize
    ;*************************************************************************
@@ -121,30 +111,8 @@ __inizialize
    s = 0 : t = 0 : u = 0 : v = 0 : w = 0 : x = 0 : y = 0 : z = 0
 
    score = 0
-   pfscore1 = %11111111
-   pfscore2 = %11111111
-   ;*************************************************************************
-   ; PLAYER AND SPRITE
-   ; ------------------------------------------------------------------------
-   ; player 0 -> Biscotto (nessun colore) => 4 x 4 pixel
-   ; player 1 -> Bocca che mangia (colorata ?? dipende se voglio missile 1)
-   ; missile 0 -> Sacchetto di uscita dal livello 
-   ; missile 1 -> Bonus (randomico sullo schermo a tempo, se attivo)
-   ; ball ->  Bolle del bollitore (un solo colore azzurro)
-   ;*************************************************************************
-   player0:
-   %00111100
-   %01110110
-   %01111110
-   %00111100
-end
-
-   player1:
-   %01111110
-   %10000001
-   %10000001
-   %01111110
-end
+   pfscore1 = 255
+   pfscore2 = 255
 
    ;*************************************************************************
    ; POSIZIONI PLAYER AND SPRITE INIZIALI
@@ -152,7 +120,7 @@ end
    player0x = 30 : player0y = 54 : player1x = 20 : player1y = 54
 
    ;Se il gioco è iniziato (bit0) = 1 non entra nella generazione del titolo
-   ;if _opt_b0{0} then __main_loop
+   ;if _b0_gameStart{0} then __main_loop
 
    ;*************************************************
    ; PLAYFIELD: TITOLO
@@ -162,14 +130,12 @@ end
    ;*************************************************
 __start
 
-   _opt_b0{0} = 0
-   _opt_b1{1} = 1
+   _b0_gameStart{0} = 0
+   _b4_gameLight{4} = 1
    _level = 0
    _animation = 0
    _timer_light = 0
    _timer_pf = 0
-   _obj1 = 0
-   _obj2 = 0
    playfield:
    ....XXXXXXXXX...XX.......X..X...
    ...X..............X......X.X....
@@ -211,14 +177,13 @@ end
 end */
    goto __skip_playfield
 
-
 __main_loop
 
-   ;Se premoo select inizializzo il gioco _opt_b0 = 1 e cambio il playfield per esempio __level_1_1
-   if switchreset && !_opt_b0{0} then _opt_b0{0} = 1 : _opt_b1{1} = 1 : _timer_pf = 0 : _level = 1 : goto __select_level
-   ;if switchselect && !_opt_b0{0} then _level = _level + 1 : __select_level
+   ;Se premoo select inizializzo il gioco _b0_gameStart = 1 e cambio il playfield per esempio __level_1_1
+   if switchreset && !_b0_gameStart{0} then _b0_gameStart{0} = 1 : _b4_gameLight{4} = 1 : _timer_pf = 0 : _level = 1 : goto __select_level
+   ;if switchselect && !_b0_gameStart{0} then _level = _level + 1 : __select_level
 
-   if !_opt_b0{0} then goto __skip_playfield
+   if !_b0_gameStart{0} then goto __skip_playfield
 
    ;*************************************************************************
    ; ANIMAZIONE PLAYER 0
@@ -228,6 +193,7 @@ __main_loop
    if joy0right || joy0left then _animation = _animation + 1
    if joy0up || joy0down then _animation = _animation + 1
    if !joy0right && !joy0left && !joy0up && !joy0down then _animation = 0 
+   if _animation = 10 then _animation = 0 
 
    ;*************************************************************************
    ; ANIMAZIONE PLAYER 1
@@ -253,16 +219,16 @@ __main_loop
    ;*************************************************************************
 
    ;Accensione della lampada
-   if joy0fire && !_opt_b1{1} then _opt_b1{1} =  1 : pfpixel 7 1 on
+   if joy0fire && !_b4_gameLight{4} then _b4_gameLight{4} =  1 : pfpixel 1 7 on
 
    ;Attivazione del timer solo se la lampada è attiva
-   if _opt_b1{1} then _timer_light = _timer_light + 1
+   if _b4_gameLight{4} then _timer_light = _timer_light + 1
    
    ;Timer finito azzeramento del timer disattivazione del flag della lampada
-   ;if _timer_light = 255 then _opt_b1{1} =  0 : pfpixel 1 7 off : _timer_light = 0
+   ;if _timer_light = 255 then _b4_gameLight{4} =  0 : pfpixel 1 7 off : _timer_light = 0
 
    ; background visibile se la lampada è accesa
-   if _opt_b1{1} then pfcolors:
+   if _b4_gameLight{4} then pfcolors:
    $24
    $26
    $28
@@ -276,12 +242,12 @@ __main_loop
    $26
 end
    ; background spento se la lampada no è accesa
-   if !_opt_b1{1} then pfcolors:
-   $0
-   $0
-   $0
-   $0
-   $0
+   if !_b4_gameLight{4} then pfcolors:
+   $24
+   $26
+   $28
+   $D4
+   $26
    $D4
    $0
    $0
@@ -296,20 +262,44 @@ __skip_light
    scorecolor = _animation
 
  
-   if _animation<10 then player0:
-   %00011000
-   %11111111
-   %00000000
-   %11111111
-end
+   ;*************************************************************************
+   ; PLAYER AND SPRITE
+   ; ------------------------------------------------------------------------
+   ; player 0 -> Biscotto (nessun colore) => 4 x 4 pixel
+   ; player 1 -> Bocca che mangia (colorata ?? dipende se voglio missile 1)
+   ; missile 0 -> Sacchetto di uscita dal livello 
+   ; missile 1 -> Bonus (randomico sullo schermo a tempo, se attivo)
+   ; ball ->  Bolle del bollitore (un solo colore azzurro)
+   ;*************************************************************************
 
-   if _animation >10  then player0:
+
+   if _animation<5 then player0:
    %00100100
+   %00111100
    %11111111
-   %00000000
-   %11111111
+   %01111110
 end
 
+   if _animation >5  then player0:
+   %01100110
+   %00111100
+   %11111111
+   %01111110
+end
+
+   if _timer_pf > 0 && _timer_pf < 20 then player1:
+   %01111110
+   %10000001
+   %10011001
+   %01100110
+end
+
+   if _timer_pf > 20 && _timer_pf < 40  then player1:
+   %00000000
+   %11111111
+   %11111111
+   %00000000
+end
 
 
    ;***************************************************************
@@ -463,14 +453,13 @@ __Skip_Joy0_Left
 __Skip_Joy0_Right
 
 __playfield_transaction ; y x l
+   if _timer_pf > 10 && _timer_pf < 60 then pfhline 8 6 12 on : pfpixel 1 0 on : pfpixel 1 1 on 
+   if _timer_pf > 12 && _timer_pf < 60 then pfhline 9 7 12 on : pfpixel 1 0 off : pfpixel 1 1 off : pfhline 17 8 20 off
+   if _timer_pf > 15 && _timer_pf < 60 then pfhline 10 8 12 on : pfpixel 1 2 on : pfpixel 1 3 on : pfhline 17 8 20 on
 
-   if _timer_pf > 10 && _timer_pf < 60 then pfhline 0 0 5 on : pfhline 15 0 20 on
-   if _timer_pf > 12 && _timer_pf < 60 then pfhline 1 1 5 on : pfhline 16 1 20 on
-   if _timer_pf > 15 && _timer_pf < 60 then pfhline 2 2 5 on : pfhline 17 2 20 on
-
-   if _timer_pf > 60 && _timer_pf < 120 then pfhline 0 2 5 off : pfhline 15 2 20 off
-   if _timer_pf > 62 && _timer_pf < 120 then pfhline 0 1 5 off : pfhline 15 1 20 off
-   if _timer_pf > 65 && _timer_pf < 120 then pfhline 0 0 5 off : pfhline 15 0 20 off
+   if _timer_pf > 60 && _timer_pf < 120 then pfhline 8 8 12 off : pfpixel 1 2 off 
+   if _timer_pf > 62 && _timer_pf < 120 then pfhline 8 7 12 off : pfpixel 1 4 on: pfpixel 1 3 off
+   if _timer_pf > 65 && _timer_pf < 120 then pfhline 8 6 12 off : pfpixel 1 4 off
 
    /* callmacro setplayfield_col_on _timer_pf 0 0 8 _obj1 
 
@@ -495,28 +484,17 @@ end */
    if {1} > 60 then pfhline temp2 temp6 temp5 off
 end
 
-
-
-   if f=10 then goto __Decrease_Left_Time_Health_Bar 
-   goto __Skip_Done
-
    ;if _animation = 20 then player0x = (rand/4) + (rand&31) + (rand&15) + (rand&1) + 21 : player0y = (rand & 31) + (rand & 15) + (rand & 3) + 20
 
-   if collision(player0, player1) then __Decrease_Left_Time_Health_Bar
-
-
-
-
-__Decrease_Left_Time_Health_Bar
-   pfscore1 = pfscore1/2
-   score=l+1
-   ;pfpixel 6 1 flip
+   if _timer_pf > 60 && _timer_pf <120 && collision(player0, player1) then goto __Decrease_Health_Bar 
    goto __Skip_Done
 
+__Decrease_Health_Bar
+   pfscore2 = pfscore2/2
+   if score > 0 then score=l-1
+   ;pfpixel 6 1 flip
 
 __Skip_Done
-   ;if _opt_b0{0} then goto __main_loop
-   ;se il gico è già partito non deve sovrascrivere lo schermo
 
    goto __skip_playfield
 
@@ -528,11 +506,11 @@ __select_level
    ................................
    ................................
    ................................
-   XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX.
-   XXX...XXXXX................XX...
-   .......XXXX...............XXXX..
-   ........XXX......XXX............
-   ...XXX...........XXXX...........
+   XXXXXXXXXXXXXXXXXXXXXXXXXXXXXX.X
+   XXX........................XX...
+   .X........................XXXX..
+   ................................
+   ...XXX...........XXXXX..........
    .X.X.X.X.........XXX............
 end
    

@@ -3209,7 +3209,7 @@
    1998  f484
    1999  f484				   .L010		;  pfheights:
    2000  f484
-   2001  f484		       a9 01		      lda	# 1
+   2001  f484		       a9 08		      lda	# 8
    2002  f486		       85 ef		      sta	playfieldpos
    2003  f488				   .
    2004  f488							; 
