@@ -64,9 +64,8 @@
    dim frame_counter  = c
    dim seconds_counter  = d
 
-   dim _timer_cp = g.h
-   dim _timer_g = i
-   ;dim _timer_h = j
+   dim sugar = s
+   dim sugar_count = t
 
    dim _b0_gameStart = k
    dim _b4_gameLight = k
@@ -112,7 +111,7 @@ __inizialize
 
    a = 0 : b = 0 : c = 0 : d = 0 : e = 0 : f = 0 : g = 0 : h = 0 : i = 0
    j = 0 : k = 0 : l = 0 : m = 0 : n = 0 : o = 0 : p = 0 : q = 0 : r = 0
-   s = 0 : t = 0 : u = 0 : v = 0 : w = 0 : x = 0 : y = 0 : z = 0
+   s = 255 : t = 0 : u = 0 : v = 0 : w = 0 : x = 0 : y = 0 : z = 0
 
    score = 0
    pfscore1 = 255
@@ -186,7 +185,7 @@ end */
 __main_loop
 
    ;Se premo select inizializzo il gioco _b0_gameStart = 1 e cambio il playfield per esempio _level = 1
-   if switchreset && !_b0_gameStart{0} then _b0_gameStart{0} = 1 : _b4_gameLight{4} = 1 : _timer_pf = 0 : _level = 1 : goto __select_level
+   if switchreset && !_b0_gameStart{0} then _b0_gameStart{0} = 1 : _b4_gameLight{4} = 1 : _timer_pf = 0 : _level = 1 : sugar = 0 : sugar_count = 0 : goto __select_level
    ;if switchselect && !_b0_gameStart{0} then _level = _level + 1 : __select_level
 
    ;Se il gioco non è ancora iniziato skippa tutto e disegna solo il playfield
@@ -208,35 +207,21 @@ __main_loop
    if _animation = 10 then _animation = 0 
 
    ;*************************************************************************
-   ; ANIMAZIONE PLAYER 1
-   ; ------------------------------------------------------------------------
-   ; 
+   ; ANIMAZIONE PLAYER 1 => MOUNTH
    ;*************************************************************************
    if frame_counter = 30 then player1x = (rand/4) + (rand&31) + (rand&15) + (rand&1) + 21 : player1y = (rand & 31) + (rand & 15) + (rand & 3) + 20
    
    ;*************************************************************************
-   ; ANIMAZIONE PLAYFIELD
-   ; ------------------------------------------------------------------------
-   ; 
-   ;*************************************************************************
-   /* _timer_pf = _timer_pf + 1
-   if _timer_pf > 120 then _timer_pf = 0 */
-
-   ;*************************************************************************
    ; LIGHT
-   ; ------------------------------------------------------------------------
-   ; _timer_light => tempo di accensione della lampada (30s) se attiva
-   ; _data_light => array contenente l'elenco delle posizioni delle luci
-   ; suddivise per livello (a coppia)
    ;*************************************************************************
 
-   ;Accensione della luce
+   ;Accensione della luce bit = 1
    if joy0fire && !_b4_gameLight{4} then _b4_gameLight{4} =  1
   
-   ;Spegnimento la luce
+   ;Spegnimento la luce bit = 0
    if seconds_counter = 20 && _b4_gameLight{4} then _b4_gameLight{4} = 0
 
-   ; background visibile se la lampada è accesa
+   ;Background visibile se la lampada è accesa
    if _b4_gameLight{4} then pfcolors:
    $24
    $26
@@ -308,9 +293,28 @@ end
    %11111111
    %00000000
 end
+   ;*************************************************************************
+   ; SUGAR
+   ; ------------------------------------------------------------------------
+   ; missile 1 -> Zuccherino (8)
+   ; ball ->  Bolle del bollitore (un solo colore azzurro)
+   ;*************************************************************************
 
-  ; if frame_counter = 30 then missile0x = rand * 160) : missile0y = rand * 120) : missile0height = 4 :  missile0 = on
+   if frame_counter & 7 = 0 then missile0x = _data_sugar_x[sugar_count] : missile0y = _data_sugar_y[sugar_count] : missile0 on : sugar_count = sugar_count + 1
+   if frame_counter > 56 then sugar_count = 0
 
+   ;*************************************************************************
+   ; OGGETTI
+   ; ------------------------------------------------------------------------
+   ; missile 1 -> Zuccherino (8)
+   ; ball ->  Bolle del bollitore (un solo colore azzurro)
+   ;*************************************************************************
+   if frame_counter = 10 then pfhline 8 6 12 on : pfpixel 1 0 on : pfpixel _data_sugar_x[sugar_count] 1 on 
+   if frame_counter = 15 then pfhline 9 7 12 on : pfpixel 1 0 off : pfpixel _data_sugar_x[sugar_count] 1 off : pfhline 17 8 20 off
+   if frame_counter = 20 then pfhline 10 8 12 on : pfpixel 1 2 on : pfpixel _data_sugar_x[sugar_count] 3 on : pfhline 17 8 20 on
+   if frame_counter = 45 && _timer_pf < 120 then pfhline 8 8 12 off : pfpixel _data_sugar_x[sugar_count] 2 off 
+   if frame_counter = 50 && _timer_pf < 120 then pfhline 8 7 12 off : pfpixel _data_sugar_x[sugar_count] 4 on: pfpixel 1 3 off
+   if frame_counter = 55 && _timer_pf < 120 then pfhline 8 6 12 off : pfpixel _data_sugar_x[sugar_count] 4 off
 
    ;***************************************************************
    ;
@@ -462,23 +466,29 @@ __Skip_Joy0_Left
 
 __Skip_Joy0_Right
 
-__playfield_transaction_level1 ; y x l
-   if frame_counter = 10 then pfhline 8 6 12 on : pfpixel 1 0 on : pfpixel 1 1 on 
-   if frame_counter = 15 then pfhline 9 7 12 on : pfpixel 1 0 off : pfpixel 1 1 off : pfhline 17 8 20 off
-   if frame_counter = 20 then pfhline 10 8 12 on : pfpixel 1 2 on : pfpixel 1 3 on : pfhline 17 8 20 on
 
-   if frame_counter = 45 && _timer_pf < 120 then pfhline 8 8 12 off : pfpixel 1 2 off 
-   if frame_counter = 50 && _timer_pf < 120 then pfhline 8 7 12 off : pfpixel 1 4 on: pfpixel 1 3 off
-   if frame_counter = 55 && _timer_pf < 120 then pfhline 8 6 12 off : pfpixel 1 4 off
-
-   macro setplayfield_col_off
+   /* macro setplayfield_col_off
    temp2 = {2} ; x
    temp5 = {2} + 4 ; x + length
    temp6 = {3} ; y
    if {1} = 62 then temp6 = temp6 - 1
    if {1} = 64 then temp6 = temp6 - 1
    if {1} > 60 then pfhline temp2 temp6 temp5 off
-end
+end */
+
+   ; COLLISION TO DO
+
+   ; zuccherino 0
+   ;if sugar{0} = 1 then missile0x = sugar{0} : missile0y= sugar{0} : missile0 on
+   if collision(player0, missile0) && sugar{0} && player0x = _data_sugar_x[0] && player0y = _data_sugar_y[0] then sugar{0} = 0
+   if collision(player0, missile0) && sugar{0} && player0x = _data_sugar_x[1] && player0y = _data_sugar_y[1] then sugar{1} = 0
+   if collision(player0, missile0) && sugar{0} && player0x = _data_sugar_x[2] && player0y = _data_sugar_y[2] then sugar{2} = 0
+   if collision(player0, missile0) && sugar{0} && player0x = _data_sugar_x[3] && player0y = _data_sugar_y[3] then sugar{3} = 0
+   if collision(player0, missile0) && sugar{0} && player0x = _data_sugar_x[4] && player0y = _data_sugar_y[4] then sugar{4} = 0
+   if collision(player0, missile0) && sugar{0} && player0x = _data_sugar_x[5] && player0y = _data_sugar_y[5] then sugar{5} = 0
+   if collision(player0, missile0) && sugar{0} && player0x = _data_sugar_x[6] && player0y = _data_sugar_y[6] then sugar{6} = 0
+   if collision(player0, missile0) && sugar{0} && player0x = _data_sugar_x[7] && player0y = _data_sugar_y[7] then sugar{7} = 0
+
 
    ;if _animation = 20 then player0x = (rand/4) + (rand&31) + (rand&15) + (rand&1) + 21 : player0y = (rand & 31) + (rand & 15) + (rand & 3) + 20
    ;Per evitare che ci sia un continuo decremento della healt
@@ -674,7 +684,11 @@ __skip_playfield
 
    goto __main_loop
 
-   data _data_light ; il primo non si conta
-   1,7,1,7,1,7,1,7
+   ; Array con le posizioni degli zuccherini
+   data _data_sugar_x
+   20, 40, 60, 50, 90, 30, 120, 80  ; Coordinate x degli zuccherini
+end
+   data _data_sugar_y
+   10, 20, 30, 40, 50, 60, 70, 80  ; Coordinate y degli zuccherini
 end
 
