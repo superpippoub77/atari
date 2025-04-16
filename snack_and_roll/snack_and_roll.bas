@@ -6,12 +6,11 @@
    ; pfcolors = colorazione del playfiled
    ; pfheights = altezza del righe del playfield
    ; romsize = 4k, 8k (2 banchi di memoria)
-   ; pal  = Versione dei colori
+   ; pal  = Versione dei colori... NON FUNZIONA???
    ; tv = effetto crt (non necessario)
    set kernel_options pfcolors
    set romsize 4k
    set pal
-
 
    ;*************************************************************************
    ; COSTANTI KERNEL
@@ -30,6 +29,7 @@
    const _P_Edge_Left = 0
    const _P_Edge_Right = 153
 
+   ;colori di default
    const _base_color = $16
    const _P0_color = $2C
    const _P1_color = $32
@@ -45,6 +45,8 @@
    ; ........................................................................
    ; anination: posizone del player in movimento
    ; ........................................................................
+   ; _b0_gameStart -> k (b0 = Game start/stop)
+   ; _b4_gameLight -> k (b1 = Light on/off)
    ; timer_cp:
    ; cup -> e
    ; plate -> f
@@ -52,13 +54,15 @@
    ; gocce cioccolato -> i
    ; timer healt:
    ; gocce cioccolato -> j
-   ; _b0_gameStart -> k (b0 = Game start/stop)
-   ; _b4_gameLight -> k (b1 = Light on/off)
+
    ;*************************************************************************
    dim _timer_light = a
    dim _level = b
    dim _animation = f
    dim _timer_pf = e
+
+   dim frame_counter  = c
+   dim seconds_counter  = d
 
    dim _timer_cp = g.h
    dim _timer_g = i
@@ -122,20 +126,22 @@ __inizialize
    ;Se il gioco è iniziato (bit0) = 1 non entra nella generazione del titolo
    ;if _b0_gameStart{0} then __main_loop
 
+__startGame
+
+   _b0_gameStart{0} = 0 ; Gioco non attivo
+   _b4_gameLight{4} = 1 ; Luci accese di default
+   _level = 0
+
+   _animation = 0
+   _timer_light = 0
+   _timer_pf = 0
+
    ;*************************************************
    ; PLAYFIELD: TITOLO
    ; ------------------------------------------------
    ; Snack 'n' Roll
    ; pfcolors => varaiazioni di marrone da $22 a $2B
    ;*************************************************
-__start
-
-   _b0_gameStart{0} = 0
-   _b4_gameLight{4} = 1
-   _level = 0
-   _animation = 0
-   _timer_light = 0
-   _timer_pf = 0
    playfield:
    ....XXXXXXXXX...XX.......X..X...
    ...X..............X......X.X....
@@ -179,11 +185,17 @@ end */
 
 __main_loop
 
-   ;Se premoo select inizializzo il gioco _b0_gameStart = 1 e cambio il playfield per esempio __level_1_1
+   ;Se premo select inizializzo il gioco _b0_gameStart = 1 e cambio il playfield per esempio _level = 1
    if switchreset && !_b0_gameStart{0} then _b0_gameStart{0} = 1 : _b4_gameLight{4} = 1 : _timer_pf = 0 : _level = 1 : goto __select_level
    ;if switchselect && !_b0_gameStart{0} then _level = _level + 1 : __select_level
 
+   ;Se il gioco non è ancora iniziato skippa tutto e disegna solo il playfield
    if !_b0_gameStart{0} then goto __skip_playfield
+
+   ;IL GIOCO è iniziato
+   ;Per ottimizzare i timer ne uso uno per tutti gli eventi controllando solo i flag degli oggetti
+   frame_counter = frame_counter + 1
+   if frame_counter = 60 then frame_counter = 0 : seconds_counter = seconds_counter + 1
 
    ;*************************************************************************
    ; ANIMAZIONE PLAYER 0
@@ -200,15 +212,15 @@ __main_loop
    ; ------------------------------------------------------------------------
    ; 
    ;*************************************************************************
-   if _timer_pf = 30 then player1x = (rand/4) + (rand&31) + (rand&15) + (rand&1) + 21 : player1y = (rand & 31) + (rand & 15) + (rand & 3) + 20
+   if frame_counter = 30 then player1x = (rand/4) + (rand&31) + (rand&15) + (rand&1) + 21 : player1y = (rand & 31) + (rand & 15) + (rand & 3) + 20
    
    ;*************************************************************************
    ; ANIMAZIONE PLAYFIELD
    ; ------------------------------------------------------------------------
    ; 
    ;*************************************************************************
-   _timer_pf = _timer_pf + 1
-   if _timer_pf > 120 then _timer_pf = 0
+   /* _timer_pf = _timer_pf + 1
+   if _timer_pf > 120 then _timer_pf = 0 */
 
    ;*************************************************************************
    ; LIGHT
@@ -218,14 +230,11 @@ __main_loop
    ; suddivise per livello (a coppia)
    ;*************************************************************************
 
-   ;Accensione della lampada
-   if joy0fire && !_b4_gameLight{4} then _b4_gameLight{4} =  1 : pfpixel 1 7 on
-
-   ;Attivazione del timer solo se la lampada è attiva
-   if _b4_gameLight{4} then _timer_light = _timer_light + 1
-   
-   ;Timer finito azzeramento del timer disattivazione del flag della lampada
-   ;if _timer_light = 255 then _b4_gameLight{4} =  0 : pfpixel 1 7 off : _timer_light = 0
+   ;Accensione della luce
+   if joy0fire && !_b4_gameLight{4} then _b4_gameLight{4} =  1
+  
+   ;Spegnimento la luce
+   if seconds_counter = 20 && _b4_gameLight{4} then _b4_gameLight{4} = 0
 
    ; background visibile se la lampada è accesa
    if _b4_gameLight{4} then pfcolors:
@@ -257,7 +266,6 @@ end
 end
 
 __skip_light
-
 
    scorecolor = _animation
 
@@ -300,6 +308,8 @@ end
    %11111111
    %00000000
 end
+
+  ; if frame_counter = 30 then missile0x = rand * 160) : missile0y = rand * 120) : missile0height = 4 :  missile0 = on
 
 
    ;***************************************************************
@@ -452,28 +462,14 @@ __Skip_Joy0_Left
 
 __Skip_Joy0_Right
 
-__playfield_transaction ; y x l
-   if _timer_pf > 10 && _timer_pf < 60 then pfhline 8 6 12 on : pfpixel 1 0 on : pfpixel 1 1 on 
-   if _timer_pf > 12 && _timer_pf < 60 then pfhline 9 7 12 on : pfpixel 1 0 off : pfpixel 1 1 off : pfhline 17 8 20 off
-   if _timer_pf > 15 && _timer_pf < 60 then pfhline 10 8 12 on : pfpixel 1 2 on : pfpixel 1 3 on : pfhline 17 8 20 on
+__playfield_transaction_level1 ; y x l
+   if frame_counter = 10 then pfhline 8 6 12 on : pfpixel 1 0 on : pfpixel 1 1 on 
+   if frame_counter = 15 then pfhline 9 7 12 on : pfpixel 1 0 off : pfpixel 1 1 off : pfhline 17 8 20 off
+   if frame_counter = 20 then pfhline 10 8 12 on : pfpixel 1 2 on : pfpixel 1 3 on : pfhline 17 8 20 on
 
-   if _timer_pf > 60 && _timer_pf < 120 then pfhline 8 8 12 off : pfpixel 1 2 off 
-   if _timer_pf > 62 && _timer_pf < 120 then pfhline 8 7 12 off : pfpixel 1 4 on: pfpixel 1 3 off
-   if _timer_pf > 65 && _timer_pf < 120 then pfhline 8 6 12 off : pfpixel 1 4 off
-
-   /* callmacro setplayfield_col_on _timer_pf 0 0 8 _obj1 
-
-   ;callmacro setplayfield_col_on _timer_pf 10 0 8 1
-
-   ;!if _timer_pf > 60 && _timer_pf < 120 then callmacro setplayfield_col_off _timer_pf 0 0 : callmacro setplayfield_col_off _timer_pf 10 0
-
-   goto __skip_playfield
-
-   macro setplayfield_col_on
-   _obj2 = {4}
-   if _timer_pf > 10 && _timer_pf < 60 && _data_object[0] < 3 then _obj2 = _obj2 + 1 : pfhline {2} _data_object[0] {4} on
-   ;if _timer_pf > 60 && _timer_pf < 120 && _transaction < 2 then _transaction = _transaction - 1 : pfhline {2} temp6 {4} off 
-end */
+   if frame_counter = 45 && _timer_pf < 120 then pfhline 8 8 12 off : pfpixel 1 2 off 
+   if frame_counter = 50 && _timer_pf < 120 then pfhline 8 7 12 off : pfpixel 1 4 on: pfpixel 1 3 off
+   if frame_counter = 55 && _timer_pf < 120 then pfhline 8 6 12 off : pfpixel 1 4 off
 
    macro setplayfield_col_off
    temp2 = {2} ; x
@@ -485,8 +481,8 @@ end */
 end
 
    ;if _animation = 20 then player0x = (rand/4) + (rand&31) + (rand&15) + (rand&1) + 21 : player0y = (rand & 31) + (rand & 15) + (rand & 3) + 20
-
-   if _timer_pf > 60 && _timer_pf <120 && collision(player0, player1) then goto __Decrease_Health_Bar 
+   ;Per evitare che ci sia un continuo decremento della healt
+   if collision(player0, player1) && frame_counter = 0 then goto __Decrease_Health_Bar
    goto __Skip_Done
 
 __Decrease_Health_Bar
@@ -668,7 +664,7 @@ end
    .X.X.X.X.........XXX............
 end
 
-   if _level > 42 then _level = 0 : goto __start
+   if _level > 42 then _level = 0 : goto __startGame
 
 __skip_playfield
    COLUP0 = _P0_color : COLUP1 = _P1_color
