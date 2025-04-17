@@ -54,7 +54,6 @@
    dim _timer_pf = e
    dim _animation = f
 
-   dim sugar = s
    dim sugar_count = t
 
    dim _b0_gameStart = k
@@ -87,19 +86,16 @@ __inizialize
 
    a = 0 : b = 0 : c = 0 : d = 0 : e = 0 : f = 0 : g = 0 : h = 0 : i = 0
    j = 0 : k = 0 : l = 0 : m = 0 : n = 0 : o = 0 : p = 0 : q = 0 : r = 0
-   s = 255 : t = 0 : u = 0 : v = 0 : w = 0 : x = 0 : y = 0 : z = 0
+   s = 0 : t = 0 : u = 0 : v = 0 : w = 0 : x = 0 : y = 0 : z = 0
 
    score = 0
-   pfscore1 = 255
-   pfscore2 = 255
+   pfscore1 = 255 ;Tempo
+   pfscore2 = 255 ;Salute
 
    ;*************************************************************************
    ; POSIZIONI PLAYER AND SPRITE INIZIALI
    ;*************************************************************************
    player0x = 30 : player0y = 54 : player1x = 20 : player1y = 54
-
-   ;Se il gioco è iniziato (bit0) = 1 non entra nella generazione del titolo
-   ;if _b0_gameStart{0} then __main_loop
 
 __startGame
 
@@ -159,27 +155,34 @@ end */
 
 __main_loop
 
-   ;Se premo select inizializzo il gioco _b0_gameStart = 1 e cambio il playfield per esempio _level = 1
-   if switchreset && !_b0_gameStart{0} then _b0_gameStart{0} = 1 : _b4_gameLight{4} = 1 : _timer_pf = 0 : _level = 1 : sugar = 0 : sugar_count = 0 : goto __select_level
+   ;Se premo select inizializzo il gioco
+   if switchreset && !_b0_gameStart{0} then k = 255 : _timer_pf = 0 : _level = 1 : sugar_count = 0 : goto __select_level
    ;if switchselect && !_b0_gameStart{0} then _level = _level + 1 : __select_level
 
    ;Se il gioco non è ancora iniziato skippa tutto e disegna solo il playfield
    if !_b0_gameStart{0} then goto __skip_playfield
 
    ;IL GIOCO è iniziato
-   ;Per ottimizzare i timer ne uso uno per tutti gli eventi controllando solo i flag degli oggetti
+   ;*************************************************************************
+   ; TIMER
+   ;_________________________________________________________________________
+   ; Per ottimizzare i timer ne uso uno per tutti gli eventi controllando 
+   ; solo i flag degli oggetti
+   ;*************************************************************************
    frame_counter = frame_counter + 1
    if frame_counter = 60 then frame_counter = 0 : seconds_counter = seconds_counter + 1
 
    ;*************************************************************************
-   ; ANIMAZIONE PLAYER 0
-   ; ------------------------------------------------------------------------
-   ; solo se sto muovendo il joystick
+   ; CHECK
+   ;_________________________________________________________________________
+   ; 1) ogni 32 secondi elimina uno spazio tempo
+   ; 2) se lo spazio tempo è finito elimina una health
+   ; 3) se non ci sono più health allora il gioco è completato o terminato
    ;*************************************************************************
-   if joy0right || joy0left then _animation = _animation + 1
-   if joy0up || joy0down then _animation = _animation + 1
-   if !joy0right && !joy0left && !joy0up && !joy0down then _animation = 0 
-   if _animation = 10 then _animation = 0 
+
+   if seconds_counter & 31 = 0 then pfscore1 = pfscore1/2 
+   if pfscore1 = 0 then goto __decrease_health_bar
+   if pfscore2 = 0 || _level = 10 then goto __gameOver
 
    ;*************************************************************************
    ; ANIMAZIONE PLAYER 1 (MOUNTH)
@@ -191,18 +194,18 @@ __main_loop
    ;*************************************************************************
    ; ANIMAZIONE LIGHT
    ;_________________________________________________________________________
-   ; dopo 20 secondi la luce si spegne per accenderla devo premere il
+   ; dopo 16 secondi la luce si spegne per accenderla devo premere il
    ; pulsante !!ATTENZIONE i 20 secodi sono fittizzi perchè dipende dal 
    ; seconds_counter in quel determinato istante
    ; !!IMP Cambia il colore del background solo nella parte bassa dello 
    ; schermo (TO DO)
    ;*************************************************************************
 
-   ;Accensione della luce bit = 1
-   if joy0fire && !_b4_gameLight{4} then _b4_gameLight{4} =  1
-  
-   ;Spegnimento la luce bit = 0
-   if seconds_counter = 20 && _b4_gameLight{4} then _b4_gameLight{4} = 0
+   ;Spegnimento della luce bit = 0
+   if seconds_counter & 15 = 0 then _b4_gameLight{4} = 0
+
+   ;Accensione della luce bit = 1 e decremento della barra tempo
+   if joy0fire && !_b4_gameLight{4} then _b4_gameLight{4} =  1 : pfscore2 = pfscore2/2
 
    ;Background visibile se la lampada è accesa
    if _b4_gameLight{4} then pfcolors:
@@ -237,6 +240,13 @@ __skip_light
 
    ;scorecolor = _animation
  
+    ;*************************************************************************
+   ; ANIMAZIONE PLAYER 0
+   ; ------------------------------------------------------------------------
+   ; solo se sto muovendo il joystick
+   ;*************************************************************************
+   if !joy0right && !joy0left && !joy0up && !joy0down then goto __skip_animation_player0
+   
    ;*************************************************************************
    ; ANIMAZIONE PLAYER
    ;_________________________________________________________________________
@@ -244,33 +254,36 @@ __skip_light
    ; player 1 -> Bocca che mangia => 8 x 4 pixel
    ;*************************************************************************
 
-   if _animation<5 then player0:
+   if frame_counter & 15 = 0 then player0:
    %00100100
    %00111100
    %11111111
    %01111110
 end
 
-   if _animation >5  then player0:
+   if frame_counter & 31 = 0 then player0:
    %01100110
    %00111100
    %11111111
    %01111110
 end
 
-   if frame_counter & 15 then player1:
+__skip_animation_player0
+
+   if frame_counter & 15 = 0 then player1:
    %01111110
    %10000001
    %10011001
    %01100110
 end
 
-   if frame_counter & 31 then player1:
+   if frame_counter & 31 = 0 then player1:
    %00000000
    %11111111
    %11111111
    %00000000
 end
+
 
    ;*************************************************************************
    ; SUGAR
@@ -282,7 +295,7 @@ end
    ; ball ->  Bolle del bollitore (un solo colore azzurro)
    ;*************************************************************************
 
-   if frame_counter & 7 = 0 then missile0x = _data_sugar_x[sugar_count] : missile0y = _data_sugar_y[sugar_count] : missile0 on : sugar_count = sugar_count + 1
+   if frame_counter & 7 = 0 && _data_sugar_point[sugar_count] > 0 then missile0x = _data_sugar_x[sugar_count] : missile0y = _data_sugar_y[sugar_count] : missile0 on : sugar_count = sugar_count + 1
    if frame_counter > 56 then sugar_count = 0
 
    ;*************************************************************************
@@ -335,8 +348,6 @@ end
 
 __Skip_Joy0_Up
 
-
-
    ;***************************************************************
    ;
    ;  Joy0 down check.
@@ -375,8 +386,6 @@ __Skip_Joy0_Up
 
 __Skip_Joy0_Down
 
-
-
    ;***************************************************************
    ;
    ;  Joy0 left check.
@@ -410,8 +419,6 @@ __Skip_Joy0_Down
    player0x = player0x - 1
 
 __Skip_Joy0_Left
-
-
 
    ;***************************************************************
    ;
@@ -464,33 +471,61 @@ end */
    /* if collision(player0, missile0) && sugar{0} && player0x = _data_sugar_x[0] && player0y = _data_sugar_y[0] then sugar{0} = 0
    if collision(player0, missile0) && sugar{1} && player0x = _data_sugar_x[1] && player0y = _data_sugar_y[1] then sugar{1} = 0
    if collision(player0, missile0) && sugar{2} && player0x = _data_sugar_x[2] && player0y = _data_sugar_y[2] then sugar{2} = 0
-   if collision(player0, missile0) && sugar{3} && player0x = _data_sugar_x[3] && player0y = _data_sugar_y[3] then sugar{3} = 0
+   if collision(player0, missile0) && sugar{3} && player0x = _data_sugar_x[3] && player0y = _data_sugar_y[3] then sugar{3} = __done0
    if collision(player0, missile0) && sugar{4} && player0x = _data_sugar_x[4] && player0y = _data_sugar_y[4] then sugar{4} = 0
    if collision(player0, missile0) && sugar{5} && player0x = _data_sugar_x[5] && player0y = _data_sugar_y[5] then sugar{5} = 0
    if collision(player0, missile0) && sugar{6} && player0x = _data_sugar_x[6] && player0y = _data_sugar_y[6] then sugar{6} = 0
    if collision(player0, missile0) && sugar{7} && player0x = _data_sugar_x[7] && player0y = _data_sugar_y[7] then sugar{7} = 0 */
-   
+
+
+   ;*************************************************************************
+   ; COLLISION TRA PLAYER E ZUCCHERO
+   ;_________________________________________________________________________
+   ; incremento il valore del punteggio e decremento il valore energetico
+   ; dello zucchero
+   ;*************************************************************************   
    for x = 0 to 7
-      if collision(player0, missile0) && sugar{0} && player0x = _data_sugar_x[x] && player0y = _data_sugar_y[x] then sugar{0} = 0 : goto __increment_score
+      if collision(player0, missile0) && _data_sugar_point[x]>0 && player0x = _data_sugar_x[x] && player0y = _data_sugar_y[x] then  _data_sugar_y[x] = _data_sugar_y[x] - 1 : goto __increment_score
    next
 
-   ;if _animation = 20 then player0x = (rand/4) + (rand&31) + (rand&15) + (rand&1) + 21 : player0y = (rand & 31) + (rand & 15) + (rand & 3) + 20
-   ;Per evitare che ci sia un continuo decremento della healt
-   if collision(player0, player1) && frame_counter = 0 then goto __Decrease_Health_Bar
-   goto __Skip_Done
+   ;*************************************************************************
+   ; COLLISION TRA PLAYER E BOCCA 
+   ;_________________________________________________________________________
+   ; decremento la barra della salute
+   ;*************************************************************************   
+   if collision(player0, player1) && frame_counter = 0 then goto __decrease_health_bar
 
-__Decrease_Health_Bar
+   ; se non ci sono collisioni non controlla decrease health
+   goto __done
+
+__decrease_health_bar
    pfscore2 = pfscore2/2
    if score > 0 then score=l-1
-   ;pfpixel 6 1 flip
+   goto __done
 
 __increment_score
+   score=l+1
 
-
-__Skip_Done
+__done
 
    goto __skip_playfield
 
+__gameOver
+   playfield:
+      ................................
+      ................................
+      ................................
+      ................................
+      ................................
+      ................................
+      ................................
+      ................................
+      ................................
+      ................................
+      ................................
+end
+   _b0_gameStart{0} = 0
+   goto __skip_playfield
 
 __select_level
    if _level = 1 then playfield:
@@ -534,132 +569,6 @@ end
    ...XXX...........XXXX...........
    .X.X.X.X.........XXX............
 end
-   
-   if _level = 2 then playfield:
-   ................................
-   ................................
-   ................................
-   ................................
-   ................................
-   XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX.
-   XXX...XXXXX................XX...
-   .......XXXX...............XXXX..
-   ........XXX......XXX............
-   ...XXX...........XXXX...........
-   .X.X.X.X.........XXX............
-end
-   
-   if _level = 21 then playfield:
-   ................................
-   ................................
-   ................................
-   ................................
-   ................................
-   XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX.
-   XXX...XXXXX................XX...
-   .......XXXX...............XXXX..
-   ........XXX......XXX............
-   ...XXX...........XXXX...........
-   .X.X.X.X.........XXX............
-end
-   
-   if _level = 22 then playfield:
-   ................................
-   ................................
-   ................................
-   ................................
-   ................................
-   XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX.
-   XXX...XXXXX................XX...
-   .......XXXX...............XXXX..
-   ........XXX......XXX............
-   ...XXX...........XXXX...........
-   .X.X.X.X.........XXX............
-end
-   
-   if _level = 3 then playfield:
-   ................................
-   ................................
-   ................................
-   ................................
-   ................................
-   XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX.
-   XXX...XXXXX................XX...
-   .......XXXX...............XXXX..
-   ........XXX......XXX............
-   ...XXX...........XXXX...........
-   .X.X.X.X.........XXX............
-end
-   
-   if _level = 31 then playfield:
-   ................................
-   ................................
-   ................................
-   ................................
-   ................................
-   XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX.
-   XXX...XXXXX................XX...
-   .......XXXX...............XXXX..
-   ........XXX......XXX............
-   ...XXX...........XXXX...........
-   .X.X.X.X.........XXX............
-end
-   
-   if _level = 32 then playfield:
-   ................................
-   ................................
-   ................................
-   ................................
-   ................................
-   XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX.
-   XXX...XXXXX................XX...
-   .......XXXX...............XXXX..
-   ........XXX......XXX............
-   ...XXX...........XXXX...........
-   .X.X.X.X.........XXX............
-end
-   
-   if _level = 4 then playfield:
-   ................................
-   ................................
-   ................................
-   ................................
-   ................................
-   XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX.
-   XXX...XXXXX................XX...
-   .......XXXX...............XXXX..
-   ........XXX......XXX............
-   ...XXX...........XXXX...........
-   .X.X.X.X.........XXX............
-end
-   
-   if _level = 41 then playfield:
-   ................................
-   ................................
-   ................................
-   ................................
-   ................................
-   XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX.
-   XXX...XXXXX................XX...
-   .......XXXX...............XXXX..
-   ........XXX......XXX............
-   ...XXX...........XXXX...........
-   .X.X.X.X.........XXX............
-end
-   
-   if _level = 42 then playfield:
-   ................................
-   ................................
-   ................................
-   ................................
-   ................................
-   XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX.
-   XXX...XXXXX................XX...
-   .......XXXX...............XXXX..
-   ........XXX......XXX............
-   ...XXX...........XXXX...........
-   .X.X.X.X.........XXX............
-end
 
    if _level > 42 then _level = 0 : goto __startGame
 
@@ -671,11 +580,14 @@ __skip_playfield
 
    goto __main_loop
 
-   ; Array con le posizioni degli zuccherini
+   ; Array con le posizioni degli zuccherini e il relativo valore
    data _data_sugar_x
    20, 40, 60, 50, 90, 30, 120, 80  ; Coordinate x degli zuccherini
 end
    data _data_sugar_y
    10, 20, 30, 40, 50, 60, 70, 80  ; Coordinate y degli zuccherini
+end
+   data _data_sugar_point
+   1, 1, 1, 1, 1, 1, 1, 1  ; Point y degli zuccherini
 end
 
