@@ -38,53 +38,27 @@
    ; VARIABILI
    ; ------------------------------------------------------------------------
    ; level -> b (1 = cucina, ...4 = ...)
-   ; ........................................................................
-   ; diffcult -> d (1, 2, 3, 4) => levocità in cui si muovono gli oggetti
-   ; ........................................................................
+   ; frame_counter -> c => corrisponde a 60 frame in 1 secondo 
+   ; seconds_counter -> => contatore dei secondi
    ; score -> l
    ; ........................................................................
    ; anination: posizone del player in movimento
    ; ........................................................................
    ; _b0_gameStart -> k (b0 = Game start/stop)
    ; _b4_gameLight -> k (b1 = Light on/off)
-   ; timer_cp:
-   ; cup -> e
-   ; plate -> f
-   ; timer:
-   ; gocce cioccolato -> i
-   ; timer healt:
-   ; gocce cioccolato -> j
-
    ;*************************************************************************
-   dim _timer_light = a
    dim _level = b
-   dim _animation = f
-   dim _timer_pf = e
-
    dim frame_counter  = c
    dim seconds_counter  = d
+
+   dim _timer_pf = e
+   dim _animation = f
 
    dim sugar = s
    dim sugar_count = t
 
    dim _b0_gameStart = k
    dim _b4_gameLight = k
-
-   ;***************************************************************
-   ;
-   ;  Variable aliases go here (DIMs).
-   ;
-   ;```````````````````````````````````````````````````````````````
-   ;  Converts 6 digit score to 3 sets of two digits.
-   ;
-   ;  The 100 thousands and 10 thousands digits are held by _sc1.
-   ;  The thousands and hundreds digits are held by _sc2.
-   ;  The tens and ones digits are held by _sc3.
-   ;
-
-   /* dim _sc1 = score
-   dim _sc2 = score+1
-   dim _sc3 = score+2 */
 
 __inizialize
    ;*************************************************************************
@@ -107,7 +81,9 @@ __inizialize
    COLUP0 = _P0_color : COLUP1 = _P1_color : NUSIZ0 = $00 : REFP0 = 0 
    COLUBK = 0 
    ;COLUPF = $2C
-   scorecolor = _base_color : pfscorecolor = _base_color
+   scorecolor = _base_color 
+   
+   ;: pfscorecolor = _base_color
 
    a = 0 : b = 0 : c = 0 : d = 0 : e = 0 : f = 0 : g = 0 : h = 0 : i = 0
    j = 0 : k = 0 : l = 0 : m = 0 : n = 0 : o = 0 : p = 0 : q = 0 : r = 0
@@ -132,7 +108,6 @@ __startGame
    _level = 0
 
    _animation = 0
-   _timer_light = 0
    _timer_pf = 0
 
    ;*************************************************
@@ -207,12 +182,20 @@ __main_loop
    if _animation = 10 then _animation = 0 
 
    ;*************************************************************************
-   ; ANIMAZIONE PLAYER 1 => MOUNTH
+   ; ANIMAZIONE PLAYER 1 (MOUNTH)
+   ;_________________________________________________________________________
+   ; ogni mezzo secondo cambia randomicamente la posizone dell'oggetto
    ;*************************************************************************
    if frame_counter = 30 then player1x = (rand/4) + (rand&31) + (rand&15) + (rand&1) + 21 : player1y = (rand & 31) + (rand & 15) + (rand & 3) + 20
    
    ;*************************************************************************
-   ; LIGHT
+   ; ANIMAZIONE LIGHT
+   ;_________________________________________________________________________
+   ; dopo 20 secondi la luce si spegne per accenderla devo premere il
+   ; pulsante !!ATTENZIONE i 20 secodi sono fittizzi perchè dipende dal 
+   ; seconds_counter in quel determinato istante
+   ; !!IMP Cambia il colore del background solo nella parte bassa dello 
+   ; schermo (TO DO)
    ;*************************************************************************
 
    ;Accensione della luce bit = 1
@@ -252,19 +235,14 @@ end
 
 __skip_light
 
-   scorecolor = _animation
-
+   ;scorecolor = _animation
  
    ;*************************************************************************
-   ; PLAYER AND SPRITE
-   ; ------------------------------------------------------------------------
-   ; player 0 -> Biscotto (nessun colore) => 4 x 4 pixel
-   ; player 1 -> Bocca che mangia (colorata ?? dipende se voglio missile 1)
-   ; missile 0 -> Sacchetto di uscita dal livello 
-   ; missile 1 -> Bonus (randomico sullo schermo a tempo, se attivo)
-   ; ball ->  Bolle del bollitore (un solo colore azzurro)
+   ; ANIMAZIONE PLAYER
+   ;_________________________________________________________________________
+   ; player 0 -> Biscotto => 8 x 4 pixel
+   ; player 1 -> Bocca che mangia => 8 x 4 pixel
    ;*************************************************************************
-
 
    if _animation<5 then player0:
    %00100100
@@ -280,23 +258,27 @@ end
    %01111110
 end
 
-   if _timer_pf > 0 && _timer_pf < 20 then player1:
+   if frame_counter & 15 then player1:
    %01111110
    %10000001
    %10011001
    %01100110
 end
 
-   if _timer_pf > 20 && _timer_pf < 40  then player1:
+   if frame_counter & 31 then player1:
    %00000000
    %11111111
    %11111111
    %00000000
 end
+
    ;*************************************************************************
    ; SUGAR
-   ; ------------------------------------------------------------------------
+   ;_________________________________________________________________________
    ; missile 1 -> Zuccherino (8)
+   ; ball ->  Bolle del bollitore (un solo colore azzurro)
+   ; missile 0 -> Sacchetto di uscita dal livello 
+   ; missile 1 -> Bonus (randomico sullo schermo a tempo, se attivo)
    ; ball ->  Bolle del bollitore (un solo colore azzurro)
    ;*************************************************************************
 
@@ -304,17 +286,16 @@ end
    if frame_counter > 56 then sugar_count = 0
 
    ;*************************************************************************
-   ; OGGETTI
-   ; ------------------------------------------------------------------------
-   ; missile 1 -> Zuccherino (8)
-   ; ball ->  Bolle del bollitore (un solo colore azzurro)
+   ; ANIMAZIONE PLAYFIELD
+   ;_________________________________________________________________________
+   ; suddividere per livelli? lasciando solo 4 tipi di playfield
    ;*************************************************************************
    if frame_counter = 10 then pfhline 8 6 12 on : pfpixel 1 0 on : pfpixel _data_sugar_x[sugar_count] 1 on 
    if frame_counter = 15 then pfhline 9 7 12 on : pfpixel 1 0 off : pfpixel _data_sugar_x[sugar_count] 1 off : pfhline 17 8 20 off
    if frame_counter = 20 then pfhline 10 8 12 on : pfpixel 1 2 on : pfpixel _data_sugar_x[sugar_count] 3 on : pfhline 17 8 20 on
-   if frame_counter = 45 && _timer_pf < 120 then pfhline 8 8 12 off : pfpixel _data_sugar_x[sugar_count] 2 off 
-   if frame_counter = 50 && _timer_pf < 120 then pfhline 8 7 12 off : pfpixel _data_sugar_x[sugar_count] 4 on: pfpixel 1 3 off
-   if frame_counter = 55 && _timer_pf < 120 then pfhline 8 6 12 off : pfpixel _data_sugar_x[sugar_count] 4 off
+   if frame_counter = 45 then pfhline 8 8 12 off : pfpixel _data_sugar_x[sugar_count] 2 off 
+   if frame_counter = 50 then pfhline 8 7 12 off : pfpixel _data_sugar_x[sugar_count] 4 on: pfpixel 1 3 off
+   if frame_counter = 55 then pfhline 8 6 12 off : pfpixel _data_sugar_x[sugar_count] 4 off
 
    ;***************************************************************
    ;
@@ -480,15 +461,18 @@ end */
 
    ; zuccherino 0
    ;if sugar{0} = 1 then missile0x = sugar{0} : missile0y= sugar{0} : missile0 on
-   if collision(player0, missile0) && sugar{0} && player0x = _data_sugar_x[0] && player0y = _data_sugar_y[0] then sugar{0} = 0
-   if collision(player0, missile0) && sugar{0} && player0x = _data_sugar_x[1] && player0y = _data_sugar_y[1] then sugar{1} = 0
-   if collision(player0, missile0) && sugar{0} && player0x = _data_sugar_x[2] && player0y = _data_sugar_y[2] then sugar{2} = 0
-   if collision(player0, missile0) && sugar{0} && player0x = _data_sugar_x[3] && player0y = _data_sugar_y[3] then sugar{3} = 0
-   if collision(player0, missile0) && sugar{0} && player0x = _data_sugar_x[4] && player0y = _data_sugar_y[4] then sugar{4} = 0
-   if collision(player0, missile0) && sugar{0} && player0x = _data_sugar_x[5] && player0y = _data_sugar_y[5] then sugar{5} = 0
-   if collision(player0, missile0) && sugar{0} && player0x = _data_sugar_x[6] && player0y = _data_sugar_y[6] then sugar{6} = 0
-   if collision(player0, missile0) && sugar{0} && player0x = _data_sugar_x[7] && player0y = _data_sugar_y[7] then sugar{7} = 0
-
+   /* if collision(player0, missile0) && sugar{0} && player0x = _data_sugar_x[0] && player0y = _data_sugar_y[0] then sugar{0} = 0
+   if collision(player0, missile0) && sugar{1} && player0x = _data_sugar_x[1] && player0y = _data_sugar_y[1] then sugar{1} = 0
+   if collision(player0, missile0) && sugar{2} && player0x = _data_sugar_x[2] && player0y = _data_sugar_y[2] then sugar{2} = 0
+   if collision(player0, missile0) && sugar{3} && player0x = _data_sugar_x[3] && player0y = _data_sugar_y[3] then sugar{3} = 0
+   if collision(player0, missile0) && sugar{4} && player0x = _data_sugar_x[4] && player0y = _data_sugar_y[4] then sugar{4} = 0
+   if collision(player0, missile0) && sugar{5} && player0x = _data_sugar_x[5] && player0y = _data_sugar_y[5] then sugar{5} = 0
+   if collision(player0, missile0) && sugar{6} && player0x = _data_sugar_x[6] && player0y = _data_sugar_y[6] then sugar{6} = 0
+   if collision(player0, missile0) && sugar{7} && player0x = _data_sugar_x[7] && player0y = _data_sugar_y[7] then sugar{7} = 0 */
+   
+   for x = 0 to 7
+      if collision(player0, missile0) && sugar{0} && player0x = _data_sugar_x[x] && player0y = _data_sugar_y[x] then sugar{0} = 0 : goto __increment_score
+   next
 
    ;if _animation = 20 then player0x = (rand/4) + (rand&31) + (rand&15) + (rand&1) + 21 : player0y = (rand & 31) + (rand & 15) + (rand & 3) + 20
    ;Per evitare che ci sia un continuo decremento della healt
@@ -499,6 +483,9 @@ __Decrease_Health_Bar
    pfscore2 = pfscore2/2
    if score > 0 then score=l-1
    ;pfpixel 6 1 flip
+
+__increment_score
+
 
 __Skip_Done
 
