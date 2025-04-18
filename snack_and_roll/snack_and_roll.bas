@@ -34,6 +34,7 @@
    const _P0_color = $2C
    const _P1_color = $32
    
+   const frame_limit = 54
    ;*************************************************************************
    ; VARIABILI
    ; ------------------------------------------------------------------------
@@ -51,10 +52,10 @@
    dim frame_counter  = c
    dim seconds_counter  = d
 
-   dim _timer_pf = e
    dim _animation = f
 
    dim sugar_count = t
+   dim sugar_point = s
 
    dim _b0_gameStart = k
    dim _b4_gameLight = k
@@ -77,20 +78,17 @@ __inizialize
    ; lifecolor 
    ; lives = 128 => 4 lives
    ;*************************************************************************
-   COLUP0 = _P0_color : COLUP1 = _P1_color : NUSIZ0 = $00 : REFP0 = 0 
+   COLUP0 = _P0_color : COLUP1 = _P1_color : NUSIZ0 = %00110000 : REFP0 = 0 
    COLUBK = 0 
    ;COLUPF = $2C
-   scorecolor = _base_color 
-   
-   ;: pfscorecolor = _base_color
 
    a = 0 : b = 0 : c = 0 : d = 0 : e = 0 : f = 0 : g = 0 : h = 0 : i = 0
    j = 0 : k = 0 : l = 0 : m = 0 : n = 0 : o = 0 : p = 0 : q = 0 : r = 0
    s = 0 : t = 0 : u = 0 : v = 0 : w = 0 : x = 0 : y = 0 : z = 0
 
-   score = 0
+   score = 10
    pfscore1 = 255 ;Tempo
-   pfscore2 = 255 ;Salute
+   pfscore2 = %10101010 ;Salute
 
    ;*************************************************************************
    ; POSIZIONI PLAYER AND SPRITE INIZIALI
@@ -102,26 +100,30 @@ __startGame
    _b0_gameStart{0} = 0 ; Gioco non attivo
    _b4_gameLight{4} = 1 ; Luci accese di default
    _level = 0
-
    _animation = 0
-   _timer_pf = 0
+   sugar_point=255
+   missile0height=1
+   ;Per evitare che si veda nella schermata di presentazione
+   scorecolor = 255
+   pfscorecolor = $0
 
    ;*************************************************
    ; PLAYFIELD: TITOLO
    ; ------------------------------------------------
+   ; E' visibile solo dalla riga 1 alla riga 11
    ; Snack 'n' Roll
    ; pfcolors => varaiazioni di marrone da $22 a $2B
    ;*************************************************
    playfield:
+   ................................
    ....XXXXXXXXX...XX.......X..X...
    ...X..............X......X.X....
    ....XX...X.XX...XXX..XXX.XX.....
    ......X..XX..X.X..X.X....X.X....
    XXXXXX...X...X..XXX..XXX.X..X...
    ................................
-   ...........................X.X..
-   .X.......X................X.X...
-   ...X.XX........X.XX..XX..X.X....
+   .X.......X.................X.X.
+   ...X.XX........X.XX..XX...X.X...
    ...XX..X.......XX...X..X.X.X....
    ...X...X.......X.....XX..X.X....
 end
@@ -151,26 +153,26 @@ end
    2
    8
 end */
-   goto __skip_playfield
-
+      goto __skip_playfield
+   
 __main_loop
-
    ;Se premo select inizializzo il gioco
-   if switchreset && !_b0_gameStart{0} then k = 255 : _timer_pf = 0 : _level = 1 : sugar_count = 0 : goto __select_level
+   if switchreset && !_b0_gameStart{0} then k = 255 : _level = 1 : sugar_count = 0 : scorecolor = _base_color : pfscorecolor = _base_color: goto __select_level
    ;if switchselect && !_b0_gameStart{0} then _level = _level + 1 : __select_level
 
    ;Se il gioco non è ancora iniziato skippa tutto e disegna solo il playfield
    if !_b0_gameStart{0} then goto __skip_playfield
 
-   ;IL GIOCO è iniziato
+   ;!!!!!!!!!!!!!!!!!!! START
+
    ;*************************************************************************
    ; TIMER
    ;_________________________________________________________________________
-   ; Per ottimizzare i timer ne uso uno per tutti gli eventi controllando 
-   ; solo i flag degli oggetti
+   ; Per ottimizzare uso un solo timer per tutti gli eventi controllando 
+   ; i flag degli oggetti
    ;*************************************************************************
    frame_counter = frame_counter + 1
-   if frame_counter = 60 then frame_counter = 0 : seconds_counter = seconds_counter + 1
+   if frame_counter > frame_limit then frame_counter = 0 : seconds_counter = seconds_counter + 1
 
    ;*************************************************************************
    ; CHECK
@@ -180,7 +182,7 @@ __main_loop
    ; 3) se non ci sono più health allora il gioco è completato o terminato
    ;*************************************************************************
 
-   if seconds_counter & 31 = 0 then pfscore1 = pfscore1/2 
+   if frame_counter = 0 && seconds_counter & 7 = 0 then pfscore1 = pfscore - 10
    if pfscore1 = 0 then goto __decrease_health_bar
    if pfscore2 = 0 || _level = 10 then goto __gameOver
 
@@ -189,7 +191,8 @@ __main_loop
    ;_________________________________________________________________________
    ; ogni mezzo secondo cambia randomicamente la posizone dell'oggetto
    ;*************************************************************************
-   if frame_counter = 30 then player1x = (rand/4) + (rand&31) + (rand&15) + (rand&1) + 21 : player1y = (rand & 31) + (rand & 15) + (rand & 3) + 20
+   temp2 = (frame_limit/2)
+   if temp2 = frame_counter then player1x = (rand/4) + (rand&31) + (rand&15) + (rand&1) + 21 : player1y = (rand & 31) + (rand & 15) + (rand & 3) + 20
    
    ;*************************************************************************
    ; ANIMAZIONE LIGHT
@@ -202,7 +205,7 @@ __main_loop
    ;*************************************************************************
 
    ;Spegnimento della luce bit = 0
-   if seconds_counter & 15 = 0 then _b4_gameLight{4} = 0
+   if seconds_counter && seconds_counter & 15 = 0 then _b4_gameLight{4} = 0
 
    ;Accensione della luce bit = 1 e decremento della barra tempo
    if joy0fire && !_b4_gameLight{4} then _b4_gameLight{4} =  1 : pfscore2 = pfscore2/2
@@ -238,14 +241,34 @@ end
 
 __skip_light
 
-   ;scorecolor = _animation
+
+  ;*************************************************************************
+   ; SUGAR
+   ;_________________________________________________________________________
+   ; missile 1 -> Zuccherino (8)
+   ; ball ->  Bolle del bollitore (un solo colore azzurro)
+   ; missile 0 -> Sacchetto di uscita dal livello 
+   ; missile 1 -> Bonus (randomico sullo schermo a tempo, se attivo)
+   ; ball ->  Bolle del bollitore (un solo colore azzurro)
+   ;*************************************************************************
+
+   if frame_counter <> frame_limit then goto __skip_animation_sugar
+   if _level = 1 then sugar_count = _level else sugar_count = (rand&7) + 1 
+   temp2 = 255 - (2 ^ x) 
+   
+   missile0x = _data_sugar_x[sugar_count] : missile0y = _data_sugar_y[sugar_count]
+   ;a = (rand&7) + 1
+   ;if frame_counter & 6 = 0 then sugar_count = 0
+   ;if seconds_counter then score = seconds_counter
+
+__skip_animation_sugar
  
     ;*************************************************************************
    ; ANIMAZIONE PLAYER 0
    ; ------------------------------------------------------------------------
    ; solo se sto muovendo il joystick
    ;*************************************************************************
-   if !joy0right && !joy0left && !joy0up && !joy0down then goto __skip_animation_player0
+   if !joy0right && !joy0left && !joy0up && !joy0down && seconds_counter then goto __skip_animation_player0
    
    ;*************************************************************************
    ; ANIMAZIONE PLAYER
@@ -254,14 +277,14 @@ __skip_light
    ; player 1 -> Bocca che mangia => 8 x 4 pixel
    ;*************************************************************************
 
-   if frame_counter & 15 = 0 then player0:
+   if frame_counter && frame_counter & 7 = 0 then player0:
    %00100100
    %00111100
    %11111111
    %01111110
 end
 
-   if frame_counter & 31 = 0 then player0:
+   if frame_counter && frame_counter & 31 = 0 then player0:
    %01100110
    %00111100
    %11111111
@@ -283,32 +306,22 @@ end
    %11111111
    %00000000
 end
-
-
-   ;*************************************************************************
-   ; SUGAR
-   ;_________________________________________________________________________
-   ; missile 1 -> Zuccherino (8)
-   ; ball ->  Bolle del bollitore (un solo colore azzurro)
-   ; missile 0 -> Sacchetto di uscita dal livello 
-   ; missile 1 -> Bonus (randomico sullo schermo a tempo, se attivo)
-   ; ball ->  Bolle del bollitore (un solo colore azzurro)
-   ;*************************************************************************
-
-   if frame_counter & 7 = 0 && _data_sugar_point[sugar_count] > 0 then missile0x = _data_sugar_x[sugar_count] : missile0y = _data_sugar_y[sugar_count] : missile0 on : sugar_count = sugar_count + 1
-   if frame_counter > 56 then sugar_count = 0
+   if !_b0_gameStart{0} then goto __skip_playfield
 
    ;*************************************************************************
    ; ANIMAZIONE PLAYFIELD
    ;_________________________________________________________________________
    ; suddividere per livelli? lasciando solo 4 tipi di playfield
    ;*************************************************************************
-   if frame_counter = 10 then pfhline 8 6 12 on : pfpixel 1 0 on : pfpixel _data_sugar_x[sugar_count] 1 on 
-   if frame_counter = 15 then pfhline 9 7 12 on : pfpixel 1 0 off : pfpixel _data_sugar_x[sugar_count] 1 off : pfhline 17 8 20 off
-   if frame_counter = 20 then pfhline 10 8 12 on : pfpixel 1 2 on : pfpixel _data_sugar_x[sugar_count] 3 on : pfhline 17 8 20 on
-   if frame_counter = 45 then pfhline 8 8 12 off : pfpixel _data_sugar_x[sugar_count] 2 off 
-   if frame_counter = 50 then pfhline 8 7 12 off : pfpixel _data_sugar_x[sugar_count] 4 on: pfpixel 1 3 off
-   if frame_counter = 55 then pfhline 8 6 12 off : pfpixel _data_sugar_x[sugar_count] 4 off
+   callmacro transaction sugar_count
+   macro transaction
+   if frame_counter = 10 then pfhline 8 6 12 on : pfpixel {1} 0 on ;: pfpixel _data_sugar_x[sugar_count] 1 on 
+   if frame_counter = 15 then pfhline 9 7 12 on : pfpixel {1} 0 off ;: pfpixel _data_sugar_x[sugar_count] 1 off : pfhline 17 8 20 off
+   if frame_counter = 20 then pfhline 10 8 12 on : pfpixel {1} 2 on ;: pfpixel _data_sugar_x[sugar_count] 3 on : pfhline 17 8 20 on
+   if frame_counter = 45 then pfhline 8 8 12 off : pfpixel {1} 2 off  ;: pfpixel _data_sugar_x[sugar_count] 2 off 
+   if frame_counter = 50 then pfhline 8 7 12 off : pfpixel {1} 4 on ;: pfpixel _data_sugar_x[sugar_count] 4 on: pfpixel 1 3 off
+   if frame_counter = 53 then pfhline 8 6 12 off : pfpixel {1} 4 off ;: pfpixel _data_sugar_x[sugar_count] 4 off
+end 
 
    ;***************************************************************
    ;
@@ -485,7 +498,8 @@ end */
    ; dello zucchero
    ;*************************************************************************   
    for x = 0 to 7
-      if collision(player0, missile0) && _data_sugar_point[x]>0 && player0x = _data_sugar_x[x] && player0y = _data_sugar_y[x] then  _data_sugar_y[x] = _data_sugar_y[x] - 1 : goto __increment_score
+      temp2 = 255 - (2 ^ x)    ; crea maschera con 0 nella posizione x
+      if collision(player0, missile0) && sugar_point & temp2 = 0 then  sugar_point = sugar_point & temp2 : goto __increment_score
    next
 
    ;*************************************************************************
@@ -500,11 +514,12 @@ end */
 
 __decrease_health_bar
    pfscore2 = pfscore2/2
-   if score > 0 then score=l-1
+   if score then score=score-10
    goto __done
 
 __increment_score
-   score=l+1
+   score=score+10
+   sugar_point = sugar_point +1
 
 __done
 
@@ -528,13 +543,19 @@ end
    goto __skip_playfield
 
 __select_level
+
+   ;*************************************************************************
+   ; LIVELLO 1
+   ;_________________________________________________________________________
+   ; TO DO
+   ;************************************************************************* 
    if _level = 1 then playfield:
    ................................
    ................................
    ................................
    ................................
    ................................
-   XXXXXXXXXXXXXXXXXXXXXXXXXXXXXX.X
+   XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
    XXX........................XX...
    .X........................XXXX..
    ................................
@@ -573,8 +594,9 @@ end
    if _level > 42 then _level = 0 : goto __startGame
 
 __skip_playfield
-   COLUP0 = _P0_color : COLUP1 = _P1_color
-   COLUBK = 0 
+   /* COLUP0 = _P0_color : COLUP1 = _P1_color
+   COLUBK = 0  */
+   NUSIZ0 = $20
 
    drawscreen
 
@@ -582,12 +604,9 @@ __skip_playfield
 
    ; Array con le posizioni degli zuccherini e il relativo valore
    data _data_sugar_x
-   20, 40, 60, 50, 90, 30, 120, 80  ; Coordinate x degli zuccherini
+   20,30, 50, 70, 90, 110, 130, 150  ; Coordinate x degli zuccherini
 end
    data _data_sugar_y
-   10, 20, 30, 40, 50, 60, 70, 80  ; Coordinate y degli zuccherini
-end
-   data _data_sugar_point
-   1, 1, 1, 1, 1, 1, 1, 1  ; Point y degli zuccherini
+   10, 60, 10, 60, 10, 60, 10, 60  ; Coordinate y degli zuccherini
 end
 
