@@ -313,7 +313,7 @@ end
    ;_________________________________________________________________________
    ; suddividere per livelli? lasciando solo 4 tipi di playfield
    ;*************************************************************************
-   callmacro transaction sugar_count
+   /* callmacro transaction sugar_count
    macro transaction
    if frame_counter = 10 then pfhline 8 6 12 on : pfpixel {1} 0 on ;: pfpixel _data_sugar_x[sugar_count] 1 on 
    if frame_counter = 15 then pfhline 9 7 12 on : pfpixel {1} 0 off ;: pfpixel _data_sugar_x[sugar_count] 1 off : pfhline 17 8 20 off
@@ -321,7 +321,80 @@ end
    if frame_counter = 45 then pfhline 8 8 12 off : pfpixel {1} 2 off  ;: pfpixel _data_sugar_x[sugar_count] 2 off 
    if frame_counter = 50 then pfhline 8 7 12 off : pfpixel {1} 4 on ;: pfpixel _data_sugar_x[sugar_count] 4 on: pfpixel 1 3 off
    if frame_counter = 53 then pfhline 8 6 12 off : pfpixel {1} 4 off ;: pfpixel _data_sugar_x[sugar_count] 4 off
+end  */
+
+; !!!!!!!!!!!!!!!!!!!!!!! TAZZE
+      if v = 1 then goto __skiiiip
+      v = 0
+      x = 0
+
+__timer_10
+      if objects[1] & x = 1 then callmacro row x 2 3 4 
+      if objects[1] & x = 1 then callmacro row x 8 9 10
+      x = x +7
+      if x < 22 then goto __timer_10
+
+      v = 1
+
+      macro row
+      temp3 = {1} + 3
+      pfhline {1} {2}  temp3 on 
+      temp3 = {1} + 4
+      pfhline {1} {3}  temp3 on
+      temp3 = {1} + 2
+      pfhline {1} {4}  temp3 on
 end 
+
+__skiiiip
+
+      /* if objects[0] & 7 = 0 then pfhline 6 8 9 on : pfhline 6 9 10 on : pfhline 6 10 8 on ; Tazza
+      if objects[0] & 7 = 0 then pfhline 6 8 9 on : pfhline 6 9 10 on : pfhline 6 10 8 on ; Tazza
+      if objects[0] & 7 = 0 then pfhline 6 8 9 on : pfhline 6 9 10 on : pfhline 6 10 8 on ; Tazza
+      if objects[0] & 7 = 0 then pfhline 6 8 9 on : pfhline 6 9 10 on : pfhline 6 10 8 on ; Tazza
+      if objects[0] & 7 = 0 then pfhline 6 8 9 on : pfhline 6 9 10 on : pfhline 6 10 8 on ; Tazza */
+
+         ;if objects[1] & temp2 = 0 then pfhline v 6 2 on ; Luce
+         ;if objects[3] & temp2 = 0 then pfhline v 6 3 on : pfpixel 2 7 on; Pressa
+
+      /* if objects[4] & v = 0 then pfhline 2 9 4 on : pfpixel 0 10 on : pfpixel 2 10 on : pfpixel 4 10 on; Tavolo
+      if objects[5] & v = 0 then pfhline 0 6 2 on : pfpixel 1 7 on; Luce
+      if objects[6] & v = 0 then pfhline 0 6 2 on ; Luce
+      if objects[7] & v = 0 then pfhline 0 6 2 on ; Luce
+      if objects[8] & v = 0 then pfhline 0 6 2 on ; Luce
+      if objects[9] & v = 0 then pfhline 0 6 2 on ; Luce
+      if objects[10] & v = 0 then pfhline 0 6 2 on ; Luce
+      if objects[11] & v = 0 then pfhline 0 6 2 on ; Luce */
+      /* v = v * 2
+      if v < 128 then goto __timer_10
+      v = 1 */
+__skip_timer_10
+   goto __done
+
+   /* temp2 = 1
+   for x = 0 to 7
+      callmacro timer_10 0 temp2 0
+      temp2 = temp2 * 2
+   next
+
+   macro timer_10
+      temp3 = {2}
+      temp4 = objects[{1}]
+      if temp4 & temp3 > 0 then pfhline {3} 6 4 on ; Coltello
+      if temp4 & temp3 > 0 then pfhline {3} 6 2 on ; Luce
+      if temp4 & temp3 > 0 then pfhline {3} 6 2 on ; Luce
+      if temp4 & temp3 > 0 then pfhline {3} 6 2 on ; Luce
+      if temp4 & temp3 > 0 then pfhline {3} 6 2 on ; Luce
+end */
+
+__timer_20
+
+__timer_30
+
+__timer_40
+
+__timer_50
+
+
 
    ;***************************************************************
    ;
@@ -526,19 +599,6 @@ __done
    goto __skip_playfield
 
 __gameOver
-   playfield:
-      ................................
-      ................................
-      ................................
-      ................................
-      ................................
-      ................................
-      ................................
-      ................................
-      ................................
-      ................................
-      ................................
-end
    _b0_gameStart{0} = 0
    goto __skip_playfield
 
@@ -556,40 +616,13 @@ __select_level
    ................................
    ................................
    XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
-   XXX........................XX...
-   .X........................XXXX..
    ................................
-   ...XXX...........XXXXX..........
-   .X.X.X.X.........XXX............
+   ................................
+   ................................
+   ................................
+   ................................
 end
-   
-   if _level = 11 then playfield:
-   ................................
-   ................................
-   ................................
-   ................................
-   ................................
-   XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX.
-   XXX...XXXXX................XX...
-   .......XXXX...............XXXX..
-   ........XXX......XXX............
-   ...XXX...........XXXX...........
-   .X.X.X.X.........XXX............
-end
-   
-   if _level = 12 then playfield:
-   ................................
-   ................................
-   ................................
-   ................................
-   ................................
-   XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX.
-   XXX...XXXXX................XX...
-   .......XXXX...............XXXX..
-   ........XXX......XXX............
-   ...XXX...........XXXX...........
-   .X.X.X.X.........XXX............
-end
+
 
    if _level > 42 then _level = 0 : goto __startGame
 
@@ -609,4 +642,16 @@ end
    data _data_sugar_y
    10, 60, 10, 60, 10, 60, 10, 60  ; Coordinate y degli zuccherini
 end
-
+   data objects
+      %10000000, ; 0 = Coltelli
+      %11101111, ; 1 = Tazze
+      %00000000, ; 2 = Cucchi
+      %00000000, ; 3 = Pressa
+      %00000000, ; 4 = Tavoli
+      %00000000, ; 5 = Luci
+      %00000000, ; 6 = Gocce
+      %00000000, ; 7 = Fornello
+      %00000000, ; 8 = Forchetta
+      %00000000, ; 9 = Pentola
+      %00000000, ; 10 = Torta
+end
