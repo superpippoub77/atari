@@ -93,7 +93,8 @@ __inizialize
    ;*************************************************************************
    ; POSIZIONI PLAYER AND SPRITE INIZIALI
    ;*************************************************************************
-   player0x = 30 : player0y = 54 : player1x = 20 : player1y = 54
+   player0x = 30 : player0y = 54 : player1x = 0 : player1y = 20
+   missile1x  = 0 : missile1y = 20
 
 __startGame
 
@@ -191,9 +192,9 @@ __main_loop
    ;_________________________________________________________________________
    ; ogni mezzo secondo cambia randomicamente la posizone dell'oggetto
    ;*************************************************************************
+
    temp2 = (frame_limit/2)
    if temp2 = frame_counter then player1x = (rand/4) + (rand&31) + (rand&15) + (rand&1) + 21 : player1y = (rand & 31) + (rand & 15) + (rand & 3) + 20
-   
    ;*************************************************************************
    ; ANIMAZIONE LIGHT
    ;_________________________________________________________________________
@@ -313,8 +314,19 @@ end
    ;_________________________________________________________________________
    ; suddividere per livelli? lasciando solo 4 tipi di playfield
    ;*************************************************************************
-   /* callmacro transaction sugar_count
-   macro transaction
+   ;callmacro transaction sugar_count
+   if _level >= 1 then temp3 = (rand&31) else temp3 = (rand&15) 
+
+   if frame_counter = 10 && _level >=1 then a = temp3 : pfpixel a 0 on
+   if frame_counter = 15 && _level >=2 then t = temp3 + 15 : pfpixel t 0 on
+   if frame_counter = 20 && _level >=1 then pfpixel a 2 on : pfpixel a 0 off 
+   if frame_counter = 25 && _level >=2 then pfpixel t 2 on : pfpixel t 0 off
+   if frame_counter = 30 && _level >=1 then pfpixel a 4 on : pfpixel a 2 off 
+   if frame_counter = 35 && _level >=2 then pfpixel t 4 on : pfpixel t 2 off
+   if frame_counter = 40 && _level >=1 then pfpixel a 4 off 
+   if frame_counter = 45 && _level >=2 then pfpixel t 4 off
+
+   /* macro transaction
    if frame_counter = 10 then pfhline 8 6 12 on : pfpixel {1} 0 on ;: pfpixel _data_sugar_x[sugar_count] 1 on 
    if frame_counter = 15 then pfhline 9 7 12 on : pfpixel {1} 0 off ;: pfpixel _data_sugar_x[sugar_count] 1 off : pfhline 17 8 20 off
    if frame_counter = 20 then pfhline 10 8 12 on : pfpixel {1} 2 on ;: pfpixel _data_sugar_x[sugar_count] 3 on : pfhline 17 8 20 on
@@ -324,29 +336,6 @@ end
 end  */
 
 ; !!!!!!!!!!!!!!!!!!!!!!! TAZZE
-      if v = 1 then goto __skiiiip
-      v = 0
-      x = 1
-      l = 1 
-__timer_10
-      if objects[2] & l > 0 then callmacro row x 2 3 4 
-      if objects[2] & l > 0 then callmacro row x 8 9 10
-      x = x + 7
-      l = l * 2
-      if x < 22 then goto __timer_10
-
-      v = 1
-      ; {1} = x -> posizione di partenza, {2} = y1, {3} = y2, {4} = y3
-      macro row
-         temp3 = {1} + 3
-         pfhline {1} {2}  temp3 on 
-         temp3 = {1} + 4
-         pfhline {1} {3}  temp3 on
-         temp3 = {1} + 2
-         pfhline {1} {4}  temp3 on
-end 
-
-__skiiiip
 
       /* if objects[0] & 7 = 0 then pfhline 6 8 9 on : pfhline 6 9 10 on : pfhline 6 10 8 on ; Tazza
       if objects[0] & 7 = 0 then pfhline 6 8 9 on : pfhline 6 9 10 on : pfhline 6 10 8 on ; Tazza
@@ -369,7 +358,7 @@ __skiiiip
       if v < 128 then goto __timer_10
       v = 1 */
 __skip_timer_10
-   goto __done
+   ;goto __done
 
    /* temp2 = 1
    for x = 0 to 7
@@ -564,7 +553,6 @@ end */
    if collision(player0, missile0) && sugar{6} && player0x = _data_sugar_x[6] && player0y = _data_sugar_y[6] then sugar{6} = 0
    if collision(player0, missile0) && sugar{7} && player0x = _data_sugar_x[7] && player0y = _data_sugar_y[7] then sugar{7} = 0 */
 
-
    ;*************************************************************************
    ; COLLISION TRA PLAYER E ZUCCHERO
    ;_________________________________________________________________________
@@ -611,17 +599,17 @@ __select_level
    ; TO DO
    ;************************************************************************* 
    if _level = 1 then playfield:
-   ................................
-   ................................
-   ................................
-   ................................
-   ................................
+   XXXX............................
+   X..X............................
+   XXXX............................
+   XXXX............................
+   XXXX............................
    XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
+   XXX..........................X..
+   .X..........................XXX.
    ................................
-   ................................
-   ................................
-   ................................
-   ................................
+   XXX.............................
+   X.X.X...........................
 end
 
 
@@ -632,9 +620,51 @@ __skip_playfield
    COLUBK = 0  */
    NUSIZ0 = $20
 
-   drawscreen
+   ;if seconds_counter & 7 > then goto __skip_animation
+   x = 0
+   temp4 = 1 
+   temp5 = 16
+__oggetti
+   ; TAZZE
+   ;if frame_counter & 30 > 0 && %00000000 & temp4 > 0 then callmacro row x 2 3 4 3 4 2 on
+   if frame_counter & 35 > 0 && %11100000 & temp5 > 0 then callmacro row x 8 9 10 3 4 2 on
+   
+   ; COLTELLI
+   ;if frame_counter & 20 > 0 && %00000000 & temp4 > 0 then callmacro row x 0 1 2 5 3 2 on
+   ;if frame_counter & 25 > 0 && %01000000 & temp5 > 0 then callmacro row x 6 7 0 5 3 0 on
 
+   ; LUCI
+   /* temp6 = x+1
+   if %00000000 & temp4 > 0 then callmacro row x 0 0 0 2 0 0 : pfpixel temp6 1 on
+   if %00010000 & temp5 > 0 then callmacro row x 6 0 0 2 0 0 : pfpixel temp6 7 on
+
+   ; TAVOLO
+   temp6 = x+2
+   if frame_counter & 40 > 0 && %01000000 & temp5 > 0 then callmacro row x 9 0 0 2 0 0 on: pfpixel x 10 on : pfpixel temp6 10 on
+   temp6 = x+4
+   if frame_counter & 45 > 0 && %01000000 & temp5 > 0 then pfpixel temp6 10 on */
+
+   /* temp6 = x+7
+   ; CUCCHIAIO
+   if frame_counter & 50 > 0 && %10101000 & temp4 > 0 then pfpixel temp6 0 on : pfpixel temp6 1 on : pfpixel temp6 2 on
+   if frame_counter & 55 > 0 && %10000000 & temp5 > 0 then pfpixel temp6 6 on : pfpixel temp6 7 on : pfpixel temp6 8 on */
+   x = x + 7
+   temp4 = temp4 * 2
+   temp5 = temp5 * 2
+   if x < 28 then goto __oggetti
+
+   ; {1} = x -> posizione di partenza, {2} = y1, {3} = y2, {4} = y3
+__skip_animation
+   
+   macro row
+      if {5} > 0 then temp3 = {1} + {5} : pfhline {1} {2}  temp3 {8} ; prima riga lunga {5}
+      if {6} > 0 then temp3 = {1} + {6} : pfhline {1} {3}  temp3 {8} ; seconda riga lunga {6}
+      if {7} > 0 then temp3 = {1} + {7} : pfhline {1} {4}  temp3 {8} ; terza riga linga {7}
+end 
+   drawscreen
    goto __main_loop
+
+
 
    ; Array con le posizioni degli zuccherini e il relativo valore
    data _data_sugar_x
@@ -644,15 +674,15 @@ end
    10, 60, 10, 60, 10, 60, 10, 60  ; Coordinate y degli zuccherini
 end
    data objects
-      %10000000, ; 0 = Coltelli
-      %00000111, ; 1 = Tazze
-      %00000000, ; 2 = Cucchi
-      %00000000, ; 3 = Pressa
-      %00000000, ; 4 = Tavoli
-      %00000000, ; 5 = Luci
-      %00000000, ; 6 = Gocce
-      %00000000, ; 7 = Fornello
-      %00000000, ; 8 = Forchetta
-      %00000000, ; 9 = Pentola
-      %00000000, ; 10 = Torta
+      %11111111, ; 0 = Luci
+      %11111111, ; 1 = Tazze -- FATTO
+      %11111111, ; 2 = Cucchi
+      %11111111, ; 3 = Pressa
+      %11111111, ; 4 = Tavoli
+      %11111111, ; 5 = Luci
+      %11111111, ; 6 = Gocce
+      %11111111, ; 7 = Fornello
+      %11111111, ; 8 = Forchetta
+      %11111111, ; 9 = Pentola
+      %11111111, ; 10 = Torta
 end
