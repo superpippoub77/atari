@@ -326,23 +326,24 @@ end  */
 ; !!!!!!!!!!!!!!!!!!!!!!! TAZZE
       if v = 1 then goto __skiiiip
       v = 0
-      x = 0
-
+      x = 1
+      l = 1 
 __timer_10
-      if objects[1] & x = 1 then callmacro row x 2 3 4 
-      if objects[1] & x = 1 then callmacro row x 8 9 10
-      x = x +7
+      if objects[2] & l > 0 then callmacro row x 2 3 4 
+      if objects[2] & l > 0 then callmacro row x 8 9 10
+      x = x + 7
+      l = l * 2
       if x < 22 then goto __timer_10
 
       v = 1
-
+      ; {1} = x -> posizione di partenza, {2} = y1, {3} = y2, {4} = y3
       macro row
-      temp3 = {1} + 3
-      pfhline {1} {2}  temp3 on 
-      temp3 = {1} + 4
-      pfhline {1} {3}  temp3 on
-      temp3 = {1} + 2
-      pfhline {1} {4}  temp3 on
+         temp3 = {1} + 3
+         pfhline {1} {2}  temp3 on 
+         temp3 = {1} + 4
+         pfhline {1} {3}  temp3 on
+         temp3 = {1} + 2
+         pfhline {1} {4}  temp3 on
 end 
 
 __skiiiip
@@ -644,7 +645,7 @@ end
 end
    data objects
       %10000000, ; 0 = Coltelli
-      %11101111, ; 1 = Tazze
+      %00000111, ; 1 = Tazze
       %00000000, ; 2 = Cucchi
       %00000000, ; 3 = Pressa
       %00000000, ; 4 = Tavoli
