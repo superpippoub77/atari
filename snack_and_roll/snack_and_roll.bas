@@ -312,19 +312,41 @@ end
    ;*************************************************************************
    ; ANIMAZIONE PLAYFIELD
    ;_________________________________________________________________________
-   ; suddividere per livelli? lasciando solo 4 tipi di playfield
+   ; RIGA: 0 -> 4 (partono sempre dalla colonna 3)
+   ; Gocce di cioccolato:traslazione verticale
+   ; Barrette di ciccolato: traslazione orizzontale
+   ; RIGA: 7 -> 8
+   ; Lama del coltello
    ;*************************************************************************
    ;callmacro transaction sugar_count
-   if _level >= 1 then temp3 = (rand&31) else temp3 = (rand&15) 
 
+   ;============
+   ;=  GOCCE   =
+   ;============
+   /* if _level >= 1 then temp3 = (rand&28) + 3 else temp3 = (rand & 9) + 3
    if frame_counter = 10 && _level >=1 then a = temp3 : pfpixel a 0 on
-   if frame_counter = 15 && _level >=2 then t = temp3 + 15 : pfpixel t 0 on
+   if frame_counter = 15 && _level >=2 then t = temp3 + 13 : pfpixel t 0 on
    if frame_counter = 20 && _level >=1 then pfpixel a 2 on : pfpixel a 0 off 
    if frame_counter = 25 && _level >=2 then pfpixel t 2 on : pfpixel t 0 off
    if frame_counter = 30 && _level >=1 then pfpixel a 4 on : pfpixel a 2 off 
    if frame_counter = 35 && _level >=2 then pfpixel t 4 on : pfpixel t 2 off
    if frame_counter = 40 && _level >=1 then pfpixel a 4 off 
-   if frame_counter = 45 && _level >=2 then pfpixel t 4 off
+   if frame_counter = 45 && _level >=2 then pfpixel t 4 off */
+   ;============
+   ;=  CIOCO   =
+   ;============
+   if frame_counter = 0 then a = 32 : t = 32
+   for x = 0 to 28
+      if frame_counter = x then t = a : a = a - 1  :callmacro choco a on : callmacro choco t off
+   next
+   ;if frame_counter = 30 && _level >=1 then a = temp3 - 1 : callmacro choco a on
+   ;if frame_counter = 430 && _level >=1 then a = temp3 - 1 : callmacro choco a on
+   ;if frame_counter = 30 && _level >=1 then if temp3 > 3 then a = temp3 - 1 else a = 3 : callmacro choco a on
+
+   
+   macro choco
+   pfpixel {1} 2 {2} : pfpixel {1} 3 {2} : pfpixel {1} 4 {2}
+end
 
    /* macro transaction
    if frame_counter = 10 then pfhline 8 6 12 on : pfpixel {1} 0 on ;: pfpixel _data_sugar_x[sugar_count] 1 on 
@@ -599,11 +621,11 @@ __select_level
    ; TO DO
    ;************************************************************************* 
    if _level = 1 then playfield:
-   XXXX............................
-   X..X............................
-   XXXX............................
-   XXXX............................
-   XXXX............................
+   ................................
+   ................................
+   ................................
+   ................................
+   ................................
    XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
    XXX..........................X..
    .X..........................XXX.
