@@ -279,16 +279,16 @@ __skip_animation_sugar
    ;*************************************************************************
 
    if frame_counter && frame_counter & 7 = 0 then player0:
-   %00100100
-   %00111100
-   %11111111
+   %00011000
+   %10111101
+   %01111110
    %01111110
 end
 
-   if frame_counter && frame_counter & 31 = 0 then player0:
-   %01100110
-   %00111100
-   %11111111
+   if frame_counter && frame_counter & 8 = 0 then player0:
+   %00100100
+   %10111101
+   %01111110
    %01111110
 end
 
@@ -332,21 +332,26 @@ end
    if frame_counter = 35 && _level >=2 then pfpixel t 4 on : pfpixel t 2 off
    if frame_counter = 40 && _level >=1 then pfpixel a 4 off 
    if frame_counter = 45 && _level >=2 then pfpixel t 4 off */
+
    ;============
-   ;=  CIOCO   =
+   ;=CIOCCOLATO=
    ;============
-   if frame_counter = 0 then a = 32 : t = 32
-   for x = 0 to 28
-      if frame_counter = x then t = a : a = a - 1  :callmacro choco a on : callmacro choco t off
-   next
+   ;for x = 0 to 28
+   ;a = a - 1 : callmacro choco a on
+
+
+   if seconds_counter = 0 || a = 3 then pfpixel a 2 off: pfpixel a 3 off: pfpixel a 4 off : a = 31 
+   if frame_counter & 31 = 0 && a > 2 then pfpixel a 2 off: pfpixel a 3 off: pfpixel a 4 off
+   if frame_counter & 31 = 1 && a > 3 then a = a - 1: pfpixel a 2 on: pfpixel a 3 on: pfpixel a 4 on
+
+   ;if second_counter * 30 + frame_counter < 54 then a = 32 - ((second_counter * 30 + frame_counter) * 29 / 54) : pfpixel a 2 on : pfpixel a 3 on : pfpixel a 4 on
+
+   ;next
    ;if frame_counter = 30 && _level >=1 then a = temp3 - 1 : callmacro choco a on
    ;if frame_counter = 430 && _level >=1 then a = temp3 - 1 : callmacro choco a on
    ;if frame_counter = 30 && _level >=1 then if temp3 > 3 then a = temp3 - 1 else a = 3 : callmacro choco a on
 
-   
-   macro choco
-   pfpixel {1} 2 {2} : pfpixel {1} 3 {2} : pfpixel {1} 4 {2}
-end
+
 
    /* macro transaction
    if frame_counter = 10 then pfhline 8 6 12 on : pfpixel {1} 0 on ;: pfpixel _data_sugar_x[sugar_count] 1 on 
