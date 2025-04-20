@@ -281,14 +281,14 @@ __skip_animation_sugar
    if frame_counter && frame_counter & 7 = 0 then player0:
    %00011000
    %10111101
-   %01111110
+   %01011010
    %01111110
 end
 
    if frame_counter && frame_counter & 8 = 0 then player0:
    %00100100
    %10111101
-   %01111110
+   %01011010
    %01111110
 end
 
@@ -339,11 +339,15 @@ end
    ;for x = 0 to 28
    ;a = a - 1 : callmacro choco a on
 
+   if a = 3 then callmacro chocolat_wall a 0
+   if seconds_counter = 0 || a = 3 then a = 31 
+   if frame_counter & 31 = 0 && a > 2 then callmacro chocolat_wall a 0
+   if frame_counter & 31 = 1 && a > 3 then a = a - 1: callmacro chocolat_wall a 1
 
-   if seconds_counter = 0 || a = 3 then pfpixel a 2 off: pfpixel a 3 off: pfpixel a 4 off : a = 31 
-   if frame_counter & 31 = 0 && a > 2 then pfpixel a 2 off: pfpixel a 3 off: pfpixel a 4 off
-   if frame_counter & 31 = 1 && a > 3 then a = a - 1: pfpixel a 2 on: pfpixel a 3 on: pfpixel a 4 on
-
+   macro chocolat_wall
+   if {2} = 1 then pfpixel {1} 2 on : pfpixel {1} 3 on : pfpixel {1} 4 on
+   if {2} = 0 then pfpixel {1} 2 off : pfpixel {1} 3 off : pfpixel {1} 4 off
+end
    ;if second_counter * 30 + frame_counter < 54 then a = 32 - ((second_counter * 30 + frame_counter) * 29 / 54) : pfpixel a 2 on : pfpixel a 3 on : pfpixel a 4 on
 
    ;next
