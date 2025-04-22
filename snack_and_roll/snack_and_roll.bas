@@ -48,6 +48,7 @@
    ; _b0_gameStart -> k (b0 = Game start/stop)
    ; _b4_gameLight -> k (b1 = Light on/off)
    ;*************************************************************************
+   dim pf_animation = a
    dim _level = b
    dim frame_counter  = c
    dim seconds_counter  = d
@@ -82,7 +83,7 @@ __inizialize
    COLUBK = 0 
    ;COLUPF = $2C
 
-   a = 0 : b = 0 : c = 0 : d = 0 : e = 0 : f = 0 : g = 0 : h = 0 : i = 0
+   a = 3 : b = 0 : c = 0 : d = 0 : e = 0 : f = 0 : g = 0 : h = 0 : i = 0
    j = 0 : k = 0 : l = 0 : m = 0 : n = 0 : o = 0 : p = 0 : q = 0 : r = 0
    s = 0 : t = 0 : u = 0 : v = 0 : w = 0 : x = 0 : y = 0 : z = 0
 
@@ -336,15 +337,15 @@ end
    ;============
    ;=CIOCCOLATO=
    ;============
-   ;for x = 0 to 28
-   ;a = a - 1 : callmacro choco a on
+   ;pf_animation = consentei di avviare o meno il playfiled dello schermo superiore
+   ;pf_animation = pf_animation - 1 : sposta la barretta orizzontalmente fino alla colonna 3
+   ;dalla colonna 3 alla colonna 0 deve essere abbattuta
 
-   if a = 3 then callmacro chocolat_wall a 0
-   if seconds_counter = 0 || a = 3 then a = 31 
-   if frame_counter & 31 = 0 && a > 2 then callmacro chocolat_wall a 0
-   if frame_counter & 31 = 1 && a > 3 then a = a - 1: callmacro chocolat_wall a 1
+   if pf_animation = 3 then  callmacro chocoWall pf_animation 0 : pf_animation = 31
+   if frame_counter & 31 = 0 && pf_animation > 2 then callmacro chocoWall pf_animation 0
+   if frame_counter & 31 = 1 && pf_animation > 3 then pf_animation = pf_animation - 1: callmacro chocoWall pf_animation 1
 
-   macro chocolat_wall
+   macro chocoWall
    if {2} = 1 then pfpixel {1} 2 on : pfpixel {1} 3 on : pfpixel {1} 4 on
    if {2} = 0 then pfpixel {1} 2 off : pfpixel {1} 3 off : pfpixel {1} 4 off
 end
