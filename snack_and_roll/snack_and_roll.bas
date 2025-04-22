@@ -12,6 +12,13 @@
    set romsize 4k
    set pal
 
+   ;****************************************************************
+   ;
+   ;  Some multiplication operations require you to include
+   ;  a module.
+   ;
+   ;include div_mul.asm
+
    ;*************************************************************************
    ; COSTANTI KERNEL
    ; ------------------------------------------------------------------------
@@ -28,6 +35,11 @@
    const _P_Edge_Bottom = 88 ; 11 X 8 ???
    const _P_Edge_Left = 0
    const _P_Edge_Right = 153
+
+   const _M_Edge_Top = 2
+   const _M_Edge_Bottom = 88
+   const _M_Edge_Left = 2
+   const _M_Edge_Right = 159
 
    ;colori di default
    const _base_color = $16
@@ -47,8 +59,8 @@
    ; ........................................................................
    ; _b0_gameStart -> k (b0 = Game start/stop)
    ; _b4_gameLight -> k (b1 = Light on/off)
+   ; _b5_gameWallOrRain -> k (b5 = 0 Wall / 1 Rain)
    ;*************************************************************************
-   dim pf_animation = a
    dim _level = b
    dim frame_counter  = c
    dim seconds_counter  = d
@@ -58,8 +70,36 @@
    dim sugar_count = t
    dim sugar_point = s
 
+   dim wall1 = g
+   dim wall2 = h
+
+   dim shoot = l
+
+   ;```````````````````````````````````````````````````````````````
+   ;  Converted ball coordinates for playfield.
+   ;
+   dim _pf_x = n
+   dim _pf_y = o
+
+
    dim _b0_gameStart = k
    dim _b4_gameLight = k
+   dim _b5_gameWallOrRain = k
+   dim _b6_gameAnimation = k
+   dim _b7_gameMissile0Moving = k
+
+
+   dim _BitOp_P0_M0_Dir = p
+   dim _Bit0_P0_Dir_Up = p
+   dim _Bit1_P0_Dir_Down = p
+   dim _Bit2_P0_Dir_Left = p
+   dim _Bit3_P0_Dir_Right = p
+   dim _Bit4_M0_Dir_Up = p
+   dim _Bit5_M0_Dir_Down = p
+   dim _Bit6_M0_Dir_Left = p
+   dim _Bit7_M0_Dir_Right = p
+
+
 
 __inizialize
    ;*************************************************************************
@@ -73,41 +113,39 @@ __inizialize
    ;*************************************************************************
    ; SCORE AND LIVES
    ; ------------------------------------------------------------------------
-   ; pfscore1 => timer (decrementale)
-   ; pfscore2 => energy (incrementale)
-   ; ........................................................................
-   ; lifecolor 
-   ; lives = 128 => 4 lives
+   ; pfscore1 => timer
+   ; pfscore2 => energy
    ;*************************************************************************
-   COLUP0 = _P0_color : COLUP1 = _P1_color : NUSIZ0 = %00110000 : REFP0 = 0 
-   COLUBK = 0 
-   ;COLUPF = $2C
+   COLUP0 = _P0_color : COLUP1 = _P1_color : REFP0 = 0 : COLUBK = 0 : NUSIZ0 = $10 : missile0height = 1 : missile1height = 1
 
-   a = 3 : b = 0 : c = 0 : d = 0 : e = 0 : f = 0 : g = 0 : h = 0 : i = 0
+   a = 0 : b = 0 : c = 0 : d = 0 : e = 0 : f = 0 : g = 3 : h = 3 : i = 0
    j = 0 : k = 0 : l = 0 : m = 0 : n = 0 : o = 0 : p = 0 : q = 0 : r = 0
    s = 0 : t = 0 : u = 0 : v = 0 : w = 0 : x = 0 : y = 0 : z = 0
 
-   score = 10
-   pfscore1 = 255 ;Tempo
-   pfscore2 = %10101010 ;Salute
+   pfscore1 = %11111111 : pfscore2 = %10101010
 
    ;*************************************************************************
    ; POSIZIONI PLAYER AND SPRITE INIZIALI
    ;*************************************************************************
-   player0x = 30 : player0y = 54 : player1x = 0 : player1y = 20
-   missile1x  = 0 : missile1y = 20
+   player0x = 30 : player0y = 54 
+   player1x = 0 : player1y = 20
 
 __startGame
 
    _b0_gameStart{0} = 0 ; Gioco non attivo
    _b4_gameLight{4} = 1 ; Luci accese di default
+   _b5_gameWallOrRain{5} = 0 ; Wall attivo
    _level = 0
    _animation = 0
    sugar_point=255
-   missile0height=1
+
    ;Per evitare che si veda nella schermata di presentazione
    scorecolor = 255
    pfscorecolor = $0
+
+   ; non si vedono
+   ;missile0y = 222
+   _Bit3_P0_Dir_Right{3} = 1
 
    ;*************************************************
    ; PLAYFIELD: TITOLO
@@ -158,8 +196,9 @@ end */
       goto __skip_playfield
    
 __main_loop
+
    ;Se premo select inizializzo il gioco
-   if switchreset && !_b0_gameStart{0} then k = 255 : _level = 1 : sugar_count = 0 : scorecolor = _base_color : pfscorecolor = _base_color: goto __select_level
+   if switchreset && !_b0_gameStart{0} then _b0_gameStart{0} = 1 : _level = 1 : sugar_count = 0 : scorecolor = _base_color : pfscorecolor = _base_color: goto __select_level
    ;if switchselect && !_b0_gameStart{0} then _level = _level + 1 : __select_level
 
    ;Se il gioco non è ancora iniziato skippa tutto e disegna solo il playfield
@@ -179,23 +218,188 @@ __main_loop
    ;*************************************************************************
    ; CHECK
    ;_________________________________________________________________________
-   ; 1) ogni 32 secondi elimina uno spazio tempo
+   ; 1) ogni 16 secondi elimina uno spazio tempo
    ; 2) se lo spazio tempo è finito elimina una health
    ; 3) se non ci sono più health allora il gioco è completato o terminato
+   ; 4) fire check
    ;*************************************************************************
 
-   if frame_counter = 0 && seconds_counter & 7 = 0 then pfscore1 = pfscore - 10
+   if frame_counter = 0 && seconds_counter & 15 = 0 then goto __decrease_timer_bar
    if pfscore1 = 0 then goto __decrease_health_bar
    if pfscore2 = 0 || _level = 10 then goto __gameOver
+
+   if !joy0up && !joy0down && !joy0left && !joy0right then goto __Skip_Joystick_Precheck
+   
+   _BitOp_P0_M0_Dir = _BitOp_P0_M0_Dir & %11110000
+
+__Skip_Joystick_Precheck
+
+
+   ;***************************************************************
+   ;
+   ;  Fire button check.
+   ;  
+   ;  Turns on missile1 movement if fire button is pressed and
+   ;  missile1 is not moving.
+   ;
+   ;```````````````````````````````````````````````````````````````
+   ;  Skips this section if the fire button is not pressed.
+   ;
+   if !joy0fire then goto __Skip_Fire
+
+   ;```````````````````````````````````````````````````````````````
+   ;  If missile0 is moving, skip this subsection.
+   ;
+   if _b7_gameMissile0Moving{7} then goto __Skip_Fire
+
+   ;```````````````````````````````````````````````````````````````
+   ;  Turns on missile0 movement.
+   ;
+   _b7_gameMissile0Moving{7} = 1
+
+   ;```````````````````````````````````````````````````````````````
+   ;  Takes a 'snapshot' of player0 direction so missile0 will
+   ;  stay on track until it hits something.
+   ;
+   _Bit4_M0_Dir_Up{4} = _Bit0_P0_Dir_Up{0}
+   _Bit5_M0_Dir_Down{5} = _Bit1_P0_Dir_Down{1}
+   _Bit6_M0_Dir_Left{6} = _Bit2_P0_Dir_Left{2}
+   _Bit7_M0_Dir_Right{7} = _Bit3_P0_Dir_Right{3}
+
+   ;```````````````````````````````````````````````````````````````
+   ;  Sets up starting position of missile0.
+   ;
+   if _Bit4_M0_Dir_Up{4} then missile0x = player0x + 4 : missile0y = player0y - 5
+   if _Bit5_M0_Dir_Down{5} then missile0x = player0x + 4 : missile0y = player0y - 1
+   if _Bit6_M0_Dir_Left{6} then missile0x = player0x + 2 : missile0y = player0y - 3
+   if _Bit7_M0_Dir_Right{7} then missile0x = player0x + 6 : missile0y = player0y - 3
+
+__Skip_Fire
+
+   ;***************************************************************
+   ;
+   ;  Missile0 movement check.
+   ;
+   ;```````````````````````````````````````````````````````````````
+   ;  Skips this section if missile0 isn't moving.
+   ;
+   if !_b7_gameMissile0Moving{7} then goto __Skip_Missile
+
+   ;```````````````````````````````````````````````````````````````
+   ;  Moves missile0 in the appropriate direction and gets
+   ;  coordinates for pfpixel check.
+   ;
+   if _Bit4_M0_Dir_Up{4} then missile0y = missile0y - 2 : temp5 = (missile0x-18)/4 : temp6 = (missile0y-1)/8
+   if _Bit5_M0_Dir_Down{5} then missile0y = missile0y + 2 : temp5 = (missile0x-18)/4 : temp6 = (missile0y)/8
+   if _Bit6_M0_Dir_Left{6} then missile0x = missile0x - 2 : temp5 = (missile0x-18)/4 : temp6 = (missile0y-1)/8
+   if _Bit7_M0_Dir_Right{7} then missile0x = missile0x + 2 : temp5 = (missile0x-18)/4 : temp6 = (missile0y-1)/8
+
+   ;```````````````````````````````````````````````````````````````
+   ;  Clears missile0 if it hits the edge of the screen.
+   ;
+   if missile0y < _M_Edge_Top then goto __Delete_Missile
+   if missile0y > _M_Edge_Bottom then goto __Delete_Missile
+   if missile0x < _M_Edge_Left then goto __Delete_Missile
+   if missile0x > _M_Edge_Right then goto __Delete_Missile
+
+   ;```````````````````````````````````````````````````````````````
+   ;  Skips rest of section if no pfpixel shot.
+   ;
+   if !pfread(temp5,temp6) then goto __Skip_Missile
+
+   ;```````````````````````````````````````````````````````````````
+   ;  Deletes pfpixel.
+   ;
+   pfpixel temp5 temp6 off
+
+__Delete_Missile
+
+   ;```````````````````````````````````````````````````````````````
+   ;  Clears missile0 moving bit and moves missile0 off the screen.
+   ;
+   _b7_gameMissile0Moving{7} = 0 : missile0x = 200 : missile0y = 200
+
+__Skip_Missile
+
+
+   /* ; LANCIO DEL MISSILE
+   ; Se joy0fire è premuto o shoot è già attivo, salta l'inizializzazione
+   if !joy0fire then goto __skip_missile
+   if (shoot & %10000000) <> 0 then goto __skip_missile
+
+   ; SPARO: inizializza il missile
+   shoot = %10000000               ; Missile attivo
+   missile0x = player0x            ; Allinea il missile con il giocatore
+   missile0y = player0y            ; Allinea il missile con il giocatore
+
+   ; Imposta la direzione in base al joystick
+   if joy0left then shoot = shoot | %00001000
+   if joy0right then shoot = shoot | %00010000
+   if joy0up then shoot = shoot | %00100000
+   if joy0down then shoot = shoot | %01000000
+
+__skip_missile
+
+   ; MOVIMENTO DEL MISSILE (ogni 4 frame per rallentare un po’)
+   ;if frame_counter & 7 <> 0 then goto __skip_movement
+   ;if (shoot & %10000000) = 0 then goto __skip_movement   ; Se il missile non è sparato, salta il movimento
+
+   ; MOVIMENTO DEL MISSILE
+   temp1 = shoot & %00000111       ; Estrai la distanza dal missile
+   temp1 = temp1 + 1               ; Aumenta la distanza
+   shoot = (shoot & %11111000) | temp1  ; Aggiorna la distanza nel missile
+
+   ; Muovi orizzontalmente
+   if (shoot & %00011000) = %00001000 then missile0x = missile0x - 1  ; Sinistra
+   if joy0left then missile0x = missile0x + 1  ; Destra
+
+   ; Muovi verticalmente
+   if (shoot & %01100000) = %00100000 then missile0y = missile0y - 1  ; Su
+   if (shoot & %01100000) = %01000000 then missile0y = missile0y + 1  ; Giù
+
+   ; Se il missile ha raggiunto la distanza massima, spegnilo
+   ;if temp1 >= 128 then shoot = 0
+
+__skip_movement */
+
+   ;if collision(playfield,missile0) then temp5 = (missile0x-17)/4 : temp6 = (missile0y-missile0height)/8: pfpixel temp5 temp6 off : shoot = 0 : missile0y = 222 
+   
+   /* ;```````````````````````````````````````````````````````````````
+   ;  Missile0 y coordinate conversion.
+   ;
+   
+   temp5 = missile0height + 3 : _pf_y = (missile0y-temp5)/3
+
+   ;```````````````````````````````````````````````````````````````
+   ;  Missile0 x coordinate conversion.
+   ;
+   _pf_x = (missile0x-17)/4
+
+   ;```````````````````````````````````````````````````````````````
+   ;  If a block is there, skip this subsection.
+   ;
+   if !pfread(_pf_x,_pf_y) then goto __Skip_miss0_to_pf_Coll
+
+   ;```````````````````````````````````````````````````````````````
+   ;  Deletes pfpixel.
+   ;
+   pfpixel _pf_x _pf_y off
+
+   ;```````````````````````````````````````````````````````````````
+   ;  Moves missile0 off the screen.
+   ;
+   missile0y = 222  */
+
+;__Skip_miss0_to_pf_Coll
 
    ;*************************************************************************
    ; ANIMAZIONE PLAYER 1 (MOUNTH)
    ;_________________________________________________________________________
    ; ogni mezzo secondo cambia randomicamente la posizone dell'oggetto
    ;*************************************************************************
-
    temp2 = (frame_limit/2)
    if temp2 = frame_counter then player1x = (rand/4) + (rand&31) + (rand&15) + (rand&1) + 21 : player1y = (rand & 31) + (rand & 15) + (rand & 3) + 20
+   
    ;*************************************************************************
    ; ANIMAZIONE LIGHT
    ;_________________________________________________________________________
@@ -209,8 +413,10 @@ __main_loop
    ;Spegnimento della luce bit = 0
    if seconds_counter && seconds_counter & 15 = 0 then _b4_gameLight{4} = 0
 
-   ;Accensione della luce bit = 1 e decremento della barra tempo
-   if joy0fire && !_b4_gameLight{4} then _b4_gameLight{4} =  1 : pfscore2 = pfscore2/2
+   ;Accensione della luce bit = 1 e decremento della barra tempo se vado a colpire la lampadinda dall'alto verso il basso
+   temp5 = (player0x-10)/4
+   temp6 = (player0y-5)/8
+   if !_b4_gameLight{4} && pfread(temp5,temp6) then _b4_gameLight{4} =  1
 
    ;Background visibile se la lampada è accesa
    if _b4_gameLight{4} then pfcolors:
@@ -243,7 +449,6 @@ end
 
 __skip_light
 
-
   ;*************************************************************************
    ; SUGAR
    ;_________________________________________________________________________
@@ -258,7 +463,7 @@ __skip_light
    if _level = 1 then sugar_count = _level else sugar_count = (rand&7) + 1 
    temp2 = 255 - (2 ^ x) 
    
-   missile0x = _data_sugar_x[sugar_count] : missile0y = _data_sugar_y[sugar_count]
+   missile1x = _data_sugar_x[sugar_count] : missile1y = _data_sugar_y[sugar_count]
    ;a = (rand&7) + 1
    ;if frame_counter & 6 = 0 then sugar_count = 0
    ;if seconds_counter then score = seconds_counter
@@ -324,7 +529,8 @@ end
    ;============
    ;=  GOCCE   =
    ;============
-   /* if _level >= 1 then temp3 = (rand&28) + 3 else temp3 = (rand & 9) + 3
+   if !_b5_gameWallOrRain{5} then goto __skip_rain
+   if _level >= 1 then temp3 = (rand&28) + 3 else temp3 = (rand & 9) + 3
    if frame_counter = 10 && _level >=1 then a = temp3 : pfpixel a 0 on
    if frame_counter = 15 && _level >=2 then t = temp3 + 13 : pfpixel t 0 on
    if frame_counter = 20 && _level >=1 then pfpixel a 2 on : pfpixel a 0 off 
@@ -332,31 +538,85 @@ end
    if frame_counter = 30 && _level >=1 then pfpixel a 4 on : pfpixel a 2 off 
    if frame_counter = 35 && _level >=2 then pfpixel t 4 on : pfpixel t 2 off
    if frame_counter = 40 && _level >=1 then pfpixel a 4 off 
-   if frame_counter = 45 && _level >=2 then pfpixel t 4 off */
+   if frame_counter = 45 && _level >=2 then pfpixel t 4 off
+
+__skip_rain
 
    ;============
    ;=CIOCCOLATO=
    ;============
-   ;pf_animation = consentei di avviare o meno il playfiled dello schermo superiore
-   ;pf_animation = pf_animation - 1 : sposta la barretta orizzontalmente fino alla colonna 3
-   ;dalla colonna 3 alla colonna 0 deve essere abbattuta
+   if _b5_gameWallOrRain{5} then goto __skip_wall
+   if wall1 = 3 then callmacro chocoWall wall1 0 : wall1 = 31
+   if frame_counter & 31 = 0 && wall1 > 2 then callmacro chocoWall wall1 0
+   if frame_counter & 31 = 1 && wall1 > 3 then wall1 = wall1 - 1: callmacro chocoWall wall1 1
 
-   if pf_animation = 3 then  callmacro chocoWall pf_animation 0 : pf_animation = 31
-   if frame_counter & 31 = 0 && pf_animation > 2 then callmacro chocoWall pf_animation 0
-   if frame_counter & 31 = 1 && pf_animation > 3 then pf_animation = pf_animation - 1: callmacro chocoWall pf_animation 1
+   ;=== Muro 2 === (parte quando wall1 arriva a 20)
+   if wall2 = 3 then callmacro chocoWall wall2 0 : wall2 = 0
+   if wall1 = 20 && wall2 = 0 then wall2 = 31
+   if frame_counter & 31 = 0 && wall2 > 2 && _level > 1 then callmacro chocoWall wall2 0
+   if frame_counter & 31 = 1 && wall2 > 3 && _level > 1 then wall2 = wall2 - 1 : callmacro chocoWall wall2 1
 
    macro chocoWall
    if {2} = 1 then pfpixel {1} 2 on : pfpixel {1} 3 on : pfpixel {1} 4 on
    if {2} = 0 then pfpixel {1} 2 off : pfpixel {1} 3 off : pfpixel {1} 4 off
 end
+
+__skip_wall
+
+
+__oggetti
+   ;if frame_counter <> 0 then goto __skip_oggetti
+   ; TAZZE
+   temp4 = objects[0]
+   temp5 = 16
+   for x = 0 to 28 step 7
+      if frame_counter = x && temp4 & temp5 > 0 then callmacro tazze x 8 9 10 3 4 2
+      temp5 = temp5 * 2
+   next
+
+
+   ;goto __increment_score
+   ;temp4 = temp4 * 2
+
+   ; COLTELLI
+   ;if frame_counter & 20 > 0 && %00000000 & temp4 > 0 then callmacro row x 0 1 2 5 3 2 on
+   ;if frame_counter & 25 > 0 && %01000000 & temp5 > 0 then callmacro row x 6 7 0 5 3 0 on
+
+   ; LUCI
+   /* temp6 = x+1
+   if %00000000 & temp4 > 0 then callmacro row x 0 0 0 2 0 0 : pfpixel temp6 1 on
+   if %00010000 & temp5 > 0 then callmacro row x 6 0 0 2 0 0 : pfpixel temp6 7 on
+
+   ; TAVOLO
+   temp6 = x+2
+   if frame_counter & 40 > 0 && %01000000 & temp5 > 0 then callmacro row x 9 0 0 2 0 0 on: pfpixel x 10 on : pfpixel temp6 10 on
+   temp6 = x+4
+   if frame_counter & 45 > 0 && %01000000 & temp5 > 0 then pfpixel temp6 10 on */
+
+   /* temp6 = x+7
+   ; CUCCHIAIO
+   if frame_counter & 50 > 0 && %10101000 & temp4 > 0 then pfpixel temp6 0 on : pfpixel temp6 1 on : pfpixel temp6 2 on
+   if frame_counter & 55 > 0 && %10000000 & temp5 > 0 then pfpixel temp6 6 on : pfpixel temp6 7 on : pfpixel temp6 8 on */
+   ;x = x + 7
+
+   ;if x < 28 then goto __oggetti
+
+   ; {1} = x -> posizione di partenza, {2} = y1, {3} = y2, {4} = y3
+
+   macro tazze
+      if {5} > 0 then temp3 = {1} + {5} : pfhline {1} {2} temp3 flip ; prima riga lunga {5}
+      if {6} > 0 then temp3 = {1} + {6} : pfhline {1} {3} temp3 flip ; seconda riga lunga {6}
+      if {7} > 0 then temp3 = {1} + {7} : pfhline {1} {4} temp3 flip; terza riga linga {7}
+end
+__skip_oggetti
+
+
    ;if second_counter * 30 + frame_counter < 54 then a = 32 - ((second_counter * 30 + frame_counter) * 29 / 54) : pfpixel a 2 on : pfpixel a 3 on : pfpixel a 4 on
 
    ;next
    ;if frame_counter = 30 && _level >=1 then a = temp3 - 1 : callmacro choco a on
    ;if frame_counter = 430 && _level >=1 then a = temp3 - 1 : callmacro choco a on
    ;if frame_counter = 30 && _level >=1 then if temp3 > 3 then a = temp3 - 1 else a = 3 : callmacro choco a on
-
-
 
    /* macro transaction
    if frame_counter = 10 then pfhline 8 6 12 on : pfpixel {1} 0 on ;: pfpixel _data_sugar_x[sugar_count] 1 on 
@@ -408,16 +668,6 @@ __skip_timer_10
       if temp4 & temp3 > 0 then pfhline {3} 6 2 on ; Luce
 end */
 
-__timer_20
-
-__timer_30
-
-__timer_40
-
-__timer_50
-
-
-
    ;***************************************************************
    ;
    ;  Joy0 up check.
@@ -453,6 +703,7 @@ __timer_50
    ;  Moves player0 up.
    ;
    player0y = player0y - 1
+   _Bit0_P0_Dir_Up{0} = 1
 
 __Skip_Joy0_Up
 
@@ -491,6 +742,8 @@ __Skip_Joy0_Up
    ;  Moves player0 down.
    ;
    player0y = player0y + 1
+   _Bit1_P0_Dir_Down{1} = 1
+
 
 __Skip_Joy0_Down
 
@@ -525,6 +778,7 @@ __Skip_Joy0_Down
    ;  Moves player0 left.
    ;
    player0x = player0x - 1
+   _Bit2_P0_Dir_Left{2} = 1
 
 __Skip_Joy0_Left
 
@@ -559,7 +813,7 @@ __Skip_Joy0_Left
    ;  Moves player0 right.
    ;
    player0x = player0x + 1
-
+   _Bit3_P0_Dir_Right{3} = 1
 __Skip_Joy0_Right
 
 
@@ -575,15 +829,15 @@ end */
    ; COLLISION TO DO
 
    ; zuccherino 0
-   ;if sugar{0} = 1 then missile0x = sugar{0} : missile0y= sugar{0} : missile0 on
-   /* if collision(player0, missile0) && sugar{0} && player0x = _data_sugar_x[0] && player0y = _data_sugar_y[0] then sugar{0} = 0
-   if collision(player0, missile0) && sugar{1} && player0x = _data_sugar_x[1] && player0y = _data_sugar_y[1] then sugar{1} = 0
-   if collision(player0, missile0) && sugar{2} && player0x = _data_sugar_x[2] && player0y = _data_sugar_y[2] then sugar{2} = 0
-   if collision(player0, missile0) && sugar{3} && player0x = _data_sugar_x[3] && player0y = _data_sugar_y[3] then sugar{3} = __done0
-   if collision(player0, missile0) && sugar{4} && player0x = _data_sugar_x[4] && player0y = _data_sugar_y[4] then sugar{4} = 0
-   if collision(player0, missile0) && sugar{5} && player0x = _data_sugar_x[5] && player0y = _data_sugar_y[5] then sugar{5} = 0
-   if collision(player0, missile0) && sugar{6} && player0x = _data_sugar_x[6] && player0y = _data_sugar_y[6] then sugar{6} = 0
-   if collision(player0, missile0) && sugar{7} && player0x = _data_sugar_x[7] && player0y = _data_sugar_y[7] then sugar{7} = 0 */
+   ;if sugar{0} = 1 then missile1x = sugar{0} : missile1y= sugar{0} : missile1 on
+   /* if collision(player0, missile1) && sugar{0} && player0x = _data_sugar_x[0] && player0y = _data_sugar_y[0] then sugar{0} = 0
+   if collision(player0, missile1) && sugar{1} && player0x = _data_sugar_x[1] && player0y = _data_sugar_y[1] then sugar{1} = 0
+   if collision(player0, missile1) && sugar{2} && player0x = _data_sugar_x[2] && player0y = _data_sugar_y[2] then sugar{2} = 0
+   if collision(player0, missile1) && sugar{3} && player0x = _data_sugar_x[3] && player0y = _data_sugar_y[3] then sugar{3} = __done0
+   if collision(player0, missile1) && sugar{4} && player0x = _data_sugar_x[4] && player0y = _data_sugar_y[4] then sugar{4} = 0
+   if collision(player0, missile1) && sugar{5} && player0x = _data_sugar_x[5] && player0y = _data_sugar_y[5] then sugar{5} = 0
+   if collision(player0, missile1) && sugar{6} && player0x = _data_sugar_x[6] && player0y = _data_sugar_y[6] then sugar{6} = 0
+   if collision(player0, missile1) && sugar{7} && player0x = _data_sugar_x[7] && player0y = _data_sugar_y[7] then sugar{7} = 0 */
 
    ;*************************************************************************
    ; COLLISION TRA PLAYER E ZUCCHERO
@@ -593,7 +847,7 @@ end */
    ;*************************************************************************   
    for x = 0 to 7
       temp2 = 255 - (2 ^ x)    ; crea maschera con 0 nella posizione x
-      if collision(player0, missile0) && sugar_point & temp2 = 0 then  sugar_point = sugar_point & temp2 : goto __increment_score
+      if collision(player0, missile1) && sugar_point & temp2 = 0 then  sugar_point = sugar_point & temp2 : goto __increment_score
    next
 
    ;*************************************************************************
@@ -606,9 +860,12 @@ end */
    ; se non ci sono collisioni non controlla decrease health
    goto __done
 
+__decrease_timer_bar
+   pfscore1 = pfscore1 * 2
+   goto __done
+
 __decrease_health_bar
-   pfscore2 = pfscore2/2
-   if score then score=score-10
+   pfscore2 = pfscore2 / 4
    goto __done
 
 __increment_score
@@ -616,7 +873,6 @@ __increment_score
    sugar_point = sugar_point +1
 
 __done
-
    goto __skip_playfield
 
 __gameOver
@@ -648,51 +904,7 @@ end
    if _level > 42 then _level = 0 : goto __startGame
 
 __skip_playfield
-   /* COLUP0 = _P0_color : COLUP1 = _P1_color
-   COLUBK = 0  */
-   NUSIZ0 = $20
 
-   ;if seconds_counter & 7 > then goto __skip_animation
-   x = 0
-   temp4 = 1 
-   temp5 = 16
-__oggetti
-   ; TAZZE
-   ;if frame_counter & 30 > 0 && %00000000 & temp4 > 0 then callmacro row x 2 3 4 3 4 2 on
-   if frame_counter & 35 > 0 && %11100000 & temp5 > 0 then callmacro row x 8 9 10 3 4 2 on
-   
-   ; COLTELLI
-   ;if frame_counter & 20 > 0 && %00000000 & temp4 > 0 then callmacro row x 0 1 2 5 3 2 on
-   ;if frame_counter & 25 > 0 && %01000000 & temp5 > 0 then callmacro row x 6 7 0 5 3 0 on
-
-   ; LUCI
-   /* temp6 = x+1
-   if %00000000 & temp4 > 0 then callmacro row x 0 0 0 2 0 0 : pfpixel temp6 1 on
-   if %00010000 & temp5 > 0 then callmacro row x 6 0 0 2 0 0 : pfpixel temp6 7 on
-
-   ; TAVOLO
-   temp6 = x+2
-   if frame_counter & 40 > 0 && %01000000 & temp5 > 0 then callmacro row x 9 0 0 2 0 0 on: pfpixel x 10 on : pfpixel temp6 10 on
-   temp6 = x+4
-   if frame_counter & 45 > 0 && %01000000 & temp5 > 0 then pfpixel temp6 10 on */
-
-   /* temp6 = x+7
-   ; CUCCHIAIO
-   if frame_counter & 50 > 0 && %10101000 & temp4 > 0 then pfpixel temp6 0 on : pfpixel temp6 1 on : pfpixel temp6 2 on
-   if frame_counter & 55 > 0 && %10000000 & temp5 > 0 then pfpixel temp6 6 on : pfpixel temp6 7 on : pfpixel temp6 8 on */
-   x = x + 7
-   temp4 = temp4 * 2
-   temp5 = temp5 * 2
-   if x < 28 then goto __oggetti
-
-   ; {1} = x -> posizione di partenza, {2} = y1, {3} = y2, {4} = y3
-__skip_animation
-   
-   macro row
-      if {5} > 0 then temp3 = {1} + {5} : pfhline {1} {2}  temp3 {8} ; prima riga lunga {5}
-      if {6} > 0 then temp3 = {1} + {6} : pfhline {1} {3}  temp3 {8} ; seconda riga lunga {6}
-      if {7} > 0 then temp3 = {1} + {7} : pfhline {1} {4}  temp3 {8} ; terza riga linga {7}
-end 
    drawscreen
    goto __main_loop
 
@@ -706,15 +918,5 @@ end
    10, 60, 10, 60, 10, 60, 10, 60  ; Coordinate y degli zuccherini
 end
    data objects
-      %11111111, ; 0 = Luci
-      %11111111, ; 1 = Tazze -- FATTO
-      %11111111, ; 2 = Cucchi
-      %11111111, ; 3 = Pressa
-      %11111111, ; 4 = Tavoli
-      %11111111, ; 5 = Luci
-      %11111111, ; 6 = Gocce
-      %11111111, ; 7 = Fornello
-      %11111111, ; 8 = Forchetta
-      %11111111, ; 9 = Pentola
-      %11111111, ; 10 = Torta
+      %11000000 ; 0 = Tazze
 end
