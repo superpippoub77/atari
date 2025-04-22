@@ -33,18 +33,18 @@
    ; limite dei bordi (suponendo un player di 8 pixel)
    const _P_Edge_Top = 0
    const _P_Edge_Bottom = 88 ; 11 X 8 ???
-   const _P_Edge_Left = 0
-   const _P_Edge_Right = 153
+   const _P_Edge_Left = 10
+   const _P_Edge_Right = 145
 
    const _M_Edge_Top = 2
    const _M_Edge_Bottom = 88
    const _M_Edge_Left = 2
-   const _M_Edge_Right = 159
+   const _M_Edge_Right = 145
 
    ;colori di default
    const _base_color = $16
    const _P0_color = $2C
-   const _P1_color = $32
+   const _P1_color = $36
    
    const frame_limit = 54
    ;*************************************************************************
@@ -116,11 +116,11 @@ __inizialize
    ; pfscore1 => timer
    ; pfscore2 => energy
    ;*************************************************************************
-   COLUP0 = _P0_color : COLUP1 = _P1_color : REFP0 = 0 : COLUBK = 0 : NUSIZ0 = $10 : missile0height = 1 : missile1height = 1
+   REFP0 = 0 : COLUBK = 0 : NUSIZ0 = $10 : missile0height = 1 : missile1height = 1
 
    a = 0 : b = 0 : c = 0 : d = 0 : e = 0 : f = 0 : g = 3 : h = 3 : i = 0
    j = 0 : k = 0 : l = 0 : m = 0 : n = 0 : o = 0 : p = 0 : q = 0 : r = 0
-   s = 0 : t = 0 : u = 0 : v = 0 : w = 0 : x = 0 : y = 0 : z = 0
+   s = 0 : t = 1 : u = 0 : v = 0 : w = 0 : x = 0 : y = 0 : z = 0
 
    pfscore1 = %11111111 : pfscore2 = %10101010
 
@@ -196,9 +196,10 @@ end */
       goto __skip_playfield
    
 __main_loop
-
+   COLUP1 = _P1_color 
+   COLUP0 = _P0_color 
    ;Se premo select inizializzo il gioco
-   if switchreset && !_b0_gameStart{0} then _b0_gameStart{0} = 1 : _level = 1 : sugar_count = 0 : scorecolor = _base_color : pfscorecolor = _base_color: goto __select_level
+   if switchreset && !_b0_gameStart{0} then _b0_gameStart{0} = 1 : _level = 1 : sugar_count = 1 : scorecolor = _base_color : pfscorecolor = _base_color: goto __select_level
    ;if switchselect && !_b0_gameStart{0} then _level = _level + 1 : __select_level
 
    ;Se il gioco non è ancora iniziato skippa tutto e disegna solo il playfield
@@ -397,8 +398,7 @@ __skip_movement */
    ;_________________________________________________________________________
    ; ogni mezzo secondo cambia randomicamente la posizone dell'oggetto
    ;*************************************************************************
-   temp2 = (frame_limit/2)
-   if temp2 = frame_counter then player1x = (rand/4) + (rand&31) + (rand&15) + (rand&1) + 21 : player1y = (rand & 31) + (rand & 15) + (rand & 3) + 20
+   if frame_counter = 0 && seconds_counter & 2 = 0 then player1x = (rand/4) : player1y = (rand/8)
    
    ;*************************************************************************
    ; ANIMAZIONE LIGHT
@@ -459,11 +459,10 @@ __skip_light
    ; ball ->  Bolle del bollitore (un solo colore azzurro)
    ;*************************************************************************
 
-   if frame_counter <> frame_limit then goto __skip_animation_sugar
-   if _level = 1 then sugar_count = _level else sugar_count = (rand&7) + 1 
-   temp2 = 255 - (2 ^ x) 
+   ;if frame_counter <> frame_limit then goto __skip_animation_sugar
    
-   missile1x = _data_sugar_x[sugar_count] : missile1y = _data_sugar_y[sugar_count]
+   missile1x = 222 : missile1y = 222
+   if frame_counter & 2 then missile1x = _data_sugar_x[sugar_count] : missile1y = _data_sugar_y[sugar_count] 
    ;a = (rand&7) + 1
    ;if frame_counter & 6 = 0 then sugar_count = 0
    ;if seconds_counter then score = seconds_counter
@@ -508,10 +507,10 @@ __skip_animation_player0
 end
 
    if frame_counter & 31 = 0 then player1:
-   %00000000
+   %01111110
    %11111111
    %11111111
-   %00000000
+   %01100110
 end
    if !_b0_gameStart{0} then goto __skip_playfield
 
@@ -574,35 +573,20 @@ __oggetti
       temp5 = temp5 * 2
    next
 
+   temp4 = objects[1]
+   temp5 = 16
+   for x = 0 to 28 step 7
+      if frame_counter = x && temp4 & temp5 > 0 then callmacro tazze x 6 7 8 5 3 0
+      temp5 = temp5 * 2
+   next
 
    ;goto __increment_score
-   ;temp4 = temp4 * 2
-
+   temp4 = objects[0]
+   temp5 = 16
    ; COLTELLI
-   ;if frame_counter & 20 > 0 && %00000000 & temp4 > 0 then callmacro row x 0 1 2 5 3 2 on
-   ;if frame_counter & 25 > 0 && %01000000 & temp5 > 0 then callmacro row x 6 7 0 5 3 0 on
 
-   ; LUCI
-   /* temp6 = x+1
-   if %00000000 & temp4 > 0 then callmacro row x 0 0 0 2 0 0 : pfpixel temp6 1 on
-   if %00010000 & temp5 > 0 then callmacro row x 6 0 0 2 0 0 : pfpixel temp6 7 on
-
-   ; TAVOLO
-   temp6 = x+2
-   if frame_counter & 40 > 0 && %01000000 & temp5 > 0 then callmacro row x 9 0 0 2 0 0 on: pfpixel x 10 on : pfpixel temp6 10 on
-   temp6 = x+4
-   if frame_counter & 45 > 0 && %01000000 & temp5 > 0 then pfpixel temp6 10 on */
-
-   /* temp6 = x+7
-   ; CUCCHIAIO
-   if frame_counter & 50 > 0 && %10101000 & temp4 > 0 then pfpixel temp6 0 on : pfpixel temp6 1 on : pfpixel temp6 2 on
-   if frame_counter & 55 > 0 && %10000000 & temp5 > 0 then pfpixel temp6 6 on : pfpixel temp6 7 on : pfpixel temp6 8 on */
-   ;x = x + 7
-
-   ;if x < 28 then goto __oggetti
 
    ; {1} = x -> posizione di partenza, {2} = y1, {3} = y2, {4} = y3
-
    macro tazze
       if {5} > 0 then temp3 = {1} + {5} : pfhline {1} {2} temp3 flip ; prima riga lunga {5}
       if {6} > 0 then temp3 = {1} + {6} : pfhline {1} {3} temp3 flip ; seconda riga lunga {6}
@@ -816,48 +800,26 @@ __Skip_Joy0_Left
    _Bit3_P0_Dir_Right{3} = 1
 __Skip_Joy0_Right
 
-
-   /* macro setplayfield_col_off
-   temp2 = {2} ; x
-   temp5 = {2} + 4 ; x + length
-   temp6 = {3} ; y
-   if {1} = 62 then temp6 = temp6 - 1
-   if {1} = 64 then temp6 = temp6 - 1
-   if {1} > 60 then pfhline temp2 temp6 temp5 off
-end */
-
-   ; COLLISION TO DO
-
-   ; zuccherino 0
-   ;if sugar{0} = 1 then missile1x = sugar{0} : missile1y= sugar{0} : missile1 on
-   /* if collision(player0, missile1) && sugar{0} && player0x = _data_sugar_x[0] && player0y = _data_sugar_y[0] then sugar{0} = 0
-   if collision(player0, missile1) && sugar{1} && player0x = _data_sugar_x[1] && player0y = _data_sugar_y[1] then sugar{1} = 0
-   if collision(player0, missile1) && sugar{2} && player0x = _data_sugar_x[2] && player0y = _data_sugar_y[2] then sugar{2} = 0
-   if collision(player0, missile1) && sugar{3} && player0x = _data_sugar_x[3] && player0y = _data_sugar_y[3] then sugar{3} = __done0
-   if collision(player0, missile1) && sugar{4} && player0x = _data_sugar_x[4] && player0y = _data_sugar_y[4] then sugar{4} = 0
-   if collision(player0, missile1) && sugar{5} && player0x = _data_sugar_x[5] && player0y = _data_sugar_y[5] then sugar{5} = 0
-   if collision(player0, missile1) && sugar{6} && player0x = _data_sugar_x[6] && player0y = _data_sugar_y[6] then sugar{6} = 0
-   if collision(player0, missile1) && sugar{7} && player0x = _data_sugar_x[7] && player0y = _data_sugar_y[7] then sugar{7} = 0 */
-
    ;*************************************************************************
    ; COLLISION TRA PLAYER E ZUCCHERO
    ;_________________________________________________________________________
    ; incremento il valore del punteggio e decremento il valore energetico
    ; dello zucchero
    ;*************************************************************************   
-   for x = 0 to 7
+   /* for x = 0 to 7
       temp2 = 255 - (2 ^ x)    ; crea maschera con 0 nella posizione x
       if collision(player0, missile1) && sugar_point & temp2 = 0 then  sugar_point = sugar_point & temp2 : goto __increment_score
-   next
+   next */
 
    ;*************************************************************************
-   ; COLLISION TRA PLAYER E BOCCA 
+   ; COLLISIONI 
    ;_________________________________________________________________________
-   ; decremento la barra della salute
+   ; tra Biscotto e Bocca: decremento la barra della salute
+   ; tra Missile e Bocca: incremento dei punti di 10 unità
    ;*************************************************************************   
    if collision(player0, player1) && frame_counter = 0 then goto __decrease_health_bar
-
-   ; se non ci sono collisioni non controlla decrease health
+   if collision(missile0, player1) then player1x = 222 : player1y = 222 : goto __increment_score
+   if collision(player0, missile1) then sugar_count = sugar_count + 1 :goto __increment_score
    goto __done
 
 __decrease_timer_bar
@@ -866,10 +828,11 @@ __decrease_timer_bar
 
 __decrease_health_bar
    pfscore2 = pfscore2 / 4
+   if score > 0 then score = score - 1
    goto __done
 
 __increment_score
-   score=score+10
+   score=score+1
    sugar_point = sugar_point +1
 
 __done
@@ -904,19 +867,17 @@ end
    if _level > 42 then _level = 0 : goto __startGame
 
 __skip_playfield
-
+   
    drawscreen
    goto __main_loop
 
-
-
    ; Array con le posizioni degli zuccherini e il relativo valore
    data _data_sugar_x
-   20,30, 50, 70, 90, 110, 130, 150  ; Coordinate x degli zuccherini
+   64, 54, 50, 70, 90, 110, 130, 150  ; Coordinate x degli zuccherini
 end
    data _data_sugar_y
-   10, 60, 10, 60, 10, 60, 10, 60  ; Coordinate y degli zuccherini
+   80, 80, 80, 80, 80, 80, 80, 80  ; Coordinate y degli zuccherini
 end
    data objects
-      %11000000 ; 0 = Tazze
+      %01100000, %10000000
 end
