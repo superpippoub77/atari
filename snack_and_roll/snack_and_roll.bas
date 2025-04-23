@@ -61,7 +61,7 @@
    ; _b4_gameLight -> k (b1 = Light on/off)
    ; _b5_gameWallOrRain -> k (b5 = 0 Wall / 1 Rain)
    ;*************************************************************************
-   dim _SC_Back = w
+   ;dim _SC_Back = w
    
    dim _level = b
    dim frame_counter  = c
@@ -282,8 +282,8 @@ __oggetti
    x = 0
 __for_1
    ;Tazze
-   if (seconds_counter & temp4) = 0 && frame_counter = x && objects[0] & temp6 > 0 then callmacro tazze x 8 3 
-   if (seconds_counter & temp4) = 0 && frame_counter = x + 10 && objects[1] & temp6 > 0 then callmacro tazze x 6 2
+   if (seconds_counter & temp4) = 0 && frame_counter = x && objects[5] & temp6 > 0 then callmacro tazze x 8 3 
+   if (seconds_counter & temp4) = 0 && frame_counter = x + 10 && objects[6] & temp6 > 0 then callmacro tazze x 6 2
 
    ;if (seconds_counter & temp4) = 0 && frame_counter = x && objects[0] & temp6 > 0 then callmacro tazze x 8 3
    ;Coltello
@@ -440,6 +440,7 @@ __Skip_Fire
    ;```````````````````````````````````````````````````````````````
    ;  Deletes pfpixel.
    ;
+   ;if objects[5] & 4 = 0 then goto __Delete_Missile
    if temp6 > 7 then goto __Delete_Missile
    pfpixel temp5 temp6 off
 
@@ -871,10 +872,10 @@ end
    data _data_sugar_y
    68, 72, 72, 72, 72, 72, 72, 72  ; Coordinate y degli zuccherini
 end
-      ; TAZZE, ; COLTELLI ; GOCCE, MURI
+      ; TAZZE, ; COLTELLI ; GOCCE, MURI ; VIE DI ACCESSO
    data objects
-      %11100011, %10000011, %01100011, %10000000, ;LIVELLO 1
-      %01100011, %10000000, %01100011, %10000000  ;LIVELLO 2
+      %11100011, %10000011, %01100011, %10000000, %11111111 ;LIVELLO 1
+      %01000000, %10000000, %01100011, %10000000, %11111111 ;LIVELLO 2
 end
 
    ;=======================================================================
