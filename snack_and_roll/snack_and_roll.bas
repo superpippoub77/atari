@@ -67,8 +67,9 @@
 
    dim _animation = f
 
+   ; questa variabile è usata per capire quanti "zuccheri" sono stati colpiti
+   ; riparte da 0 ad ogni cambio schema/livello
    dim sugar_count = t
-   dim sugar_point = s
 
    dim wall1 = g
    dim wall2 = h
@@ -135,9 +136,8 @@ __startGame
    _b0_gameStart{0} = 0 ; Gioco non attivo
    _b4_gameLight{4} = 1 ; Luci accese di default
    _b5_gameWallOrRain{5} = 0 ; Wall attivo
-   _level = 0
+   _level = 1
    _animation = 0
-   sugar_point=255
 
    ;Per evitare che si veda nella schermata di presentazione
    scorecolor = 255
@@ -193,28 +193,142 @@ end
    2
    8
 end */
-      goto __skip_playfield
+      goto __skip_to_draw_playfield
    
 __main_loop
    COLUP1 = _P1_color 
    COLUP0 = _P0_color 
+   
    ;Se premo select inizializzo il gioco
-   if switchreset && !_b0_gameStart{0} then _b0_gameStart{0} = 1 : _level = 1 : sugar_count = 1 : scorecolor = _base_color : pfscorecolor = _base_color: goto __select_level
-   ;if switchselect && !_b0_gameStart{0} then _level = _level + 1 : __select_level
+   if switchreset && !_b0_gameStart{0} then _b0_gameStart{0} = 1 : goto __select_level
+   ;if switchselect && !_b0_gameStart{0} then _level = _level + 1 : goto __select_level
 
    ;Se il gioco non è ancora iniziato skippa tutto e disegna solo il playfield
-   if !_b0_gameStart{0} then goto __skip_playfield
+   if !_b0_gameStart{0} then goto __skip_to_draw_playfield
 
    ;!!!!!!!!!!!!!!!!!!! START
 
    ;*************************************************************************
    ; TIMER
    ;_________________________________________________________________________
-   ; Per ottimizzare uso un solo timer per tutti gli eventi controllando 
-   ; i flag degli oggetti
+   ; E' stato definito un solo timer per il controllo degli oggetti e
+   ; playfield:
+   ; frame_counter = 0 a frame_limit(54) (circa 54 frame al secondo)
+   ; seconds_counter = 1 a ...
    ;*************************************************************************
    frame_counter = frame_counter + 1
    if frame_counter > frame_limit then frame_counter = 0 : seconds_counter = seconds_counter + 1
+
+   ;*************************************************************************
+   ; PLAYER 1 (BOCCA)
+   ;_________________________________________________________________________
+   ; ogni mezzo secondo cambia randomicamente la posizone dell'oggetto
+   ;*************************************************************************
+   if frame_counter = 0 && seconds_counter & 2 = 0 then temp5 = rand : player1x = temp5 & 31 : player1y = temp5 & 7
+   
+   ;*************************************************************************
+   ; LUCE
+   ;_________________________________________________________________________
+   ; dopo 16 secondi la luce si spegne per accenderla ci si deve posizonare
+   ; sotto la lampada (dal basso verso l'alto)
+   ; !!IMP Cambia il colore del playfield tranne la fascia centrale
+   ;*************************************************************************
+   ;>>>> SPEGNIMENTO <<<<
+   if seconds_counter && seconds_counter & 15 = 0 then _b4_gameLight{4} = 0
+
+   ;>>>> ACCENSIONE <<<<
+   temp5 = (player0x-10)/4
+   temp6 = (player0y-5)/8
+   if !_b4_gameLight{4} && pfread(temp5,temp6) then _b4_gameLight{4} =  1
+
+   ;*************************************************************************
+   ; ZUCCHERO
+   ;_________________________________________________________________________
+   ; il missile 1 è cosiderato lo zucchero con effetto flickering ogni
+   ; 2 millisecondi e deve essere entro gli 8 zuccherini preconfigurati
+   ;*************************************************************************
+   if frame_counter & 2 && sugar_count < 8 then missile1x = _data_sugar_x[sugar_count] : missile1y = _data_sugar_y[sugar_count] else missile1y =255
+
+   ;*************************************************************************
+   ; PLAYFIELD
+   ;_________________________________________________________________________
+   ; RIGA: 0 -> 4 (partono sempre dalla colonna 3)
+   ; Gocce di cioccolato:traslazione verticale
+   ; Barrette di ciccolato: traslazione orizzontale
+   ; RIGA: 7 -> 8
+   ; Lama del coltello
+   ;*************************************************************************
+
+__oggetti
+
+   ; TAZZE Livello basso
+   temp5 = 16
+   temp4 = 4 - _level
+   for x = 0 to 28 step 7
+      if (seconds_counter & temp4) = 0 && frame_counter = x && objects[0] & temp5 > 0 then callmacro tazze x 8 9 10 3 4 2
+      temp5 = temp5 * 2
+   next
+
+   ;Livello alto
+   temp5 = 1
+   for x = 0 to 21 step 7 ; massimo 4 iterazioni
+      if (temp4 & temp5) = 0 && frame_counter = x && objects[0] & temp5 > 0 then  callmacro tazze x 2 3 4 3 4 2
+      endif
+      temp5 = temp5 * 2
+   next
+
+   temp4 = objects[1]
+   temp5 = 16
+   for x = 0 to 28 step 7
+      if frame_counter = x && temp4 & temp5 > 0 then callmacro tazze x 6 7 8 5 3 0
+      temp5 = temp5 * 2
+   next
+
+   /* ;goto __increment_score
+   temp4 = objects[0]
+   temp5 = 16
+   ; COLTELLI */
+
+__skip_oggetti
+
+
+   ;============
+   ;=  GOCCE   =
+   ;============
+   if !_b5_gameWallOrRain{5} then goto __skip_rain
+   if _level >= 1 then temp3 = (rand&28) + 3 else temp3 = (rand & 9) + 3
+   if frame_counter = 10 && _level >=1 then a = temp3 : pfpixel a 0 on
+   if frame_counter = 15 && _level >=2 then t = temp3 + 13 : pfpixel t 0 on
+   if frame_counter = 20 && _level >=1 then pfpixel a 2 on : pfpixel a 0 off 
+   if frame_counter = 25 && _level >=2 then pfpixel t 2 on : pfpixel t 0 off
+   if frame_counter = 30 && _level >=1 then pfpixel a 4 on : pfpixel a 2 off 
+   if frame_counter = 35 && _level >=2 then pfpixel t 4 on : pfpixel t 2 off
+   if frame_counter = 40 && _level >=1 then pfpixel a 4 off 
+   if frame_counter = 45 && _level >=2 then pfpixel t 4 off
+
+__skip_rain
+
+   ;============
+   ;=CIOCCOLATO=
+   ;============
+   if _b5_gameWallOrRain{5} then goto __skip_wall
+   if wall1 = 3 then callmacro chocoWall wall1 0 : wall1 = 31
+   if frame_counter & 31 = 0 && wall1 > 2 then callmacro chocoWall wall1 0
+   if frame_counter & 31 = 1 && wall1 > 3 then wall1 = wall1 - 1: callmacro chocoWall wall1 1
+
+   ;=== Muro 2 === (parte quando wall1 arriva a 20)
+   if wall2 = 3 then callmacro chocoWall wall2 0 : wall2 = 0
+   if wall1 = 20 && wall2 = 0 then wall2 = 31
+   if frame_counter & 31 = 0 && wall2 > 2 && _level > 1 then callmacro chocoWall wall2 0
+   if frame_counter & 31 = 1 && wall2 > 3 && _level > 1 then wall2 = wall2 - 1 : callmacro chocoWall wall2 1
+
+   macro chocoWall
+   if {2} = 1 then pfpixel {1} 2 on : pfpixel {1} 3 on : pfpixel {1} 4 on
+   if {2} = 0 then pfpixel {1} 2 off : pfpixel {1} 3 off : pfpixel {1} 4 off
+end
+
+__skip_wall
+
 
    ;*************************************************************************
    ; CHECK
@@ -393,30 +507,7 @@ __skip_movement */
 
 ;__Skip_miss0_to_pf_Coll
 
-   ;*************************************************************************
-   ; ANIMAZIONE PLAYER 1 (MOUNTH)
-   ;_________________________________________________________________________
-   ; ogni mezzo secondo cambia randomicamente la posizone dell'oggetto
-   ;*************************************************************************
-   if frame_counter = 0 && seconds_counter & 2 = 0 then player1x = (rand/4) : player1y = (rand/8)
    
-   ;*************************************************************************
-   ; ANIMAZIONE LIGHT
-   ;_________________________________________________________________________
-   ; dopo 16 secondi la luce si spegne per accenderla devo premere il
-   ; pulsante !!ATTENZIONE i 20 secodi sono fittizzi perchè dipende dal 
-   ; seconds_counter in quel determinato istante
-   ; !!IMP Cambia il colore del background solo nella parte bassa dello 
-   ; schermo (TO DO)
-   ;*************************************************************************
-
-   ;Spegnimento della luce bit = 0
-   if seconds_counter && seconds_counter & 15 = 0 then _b4_gameLight{4} = 0
-
-   ;Accensione della luce bit = 1 e decremento della barra tempo se vado a colpire la lampadinda dall'alto verso il basso
-   temp5 = (player0x-10)/4
-   temp6 = (player0y-5)/8
-   if !_b4_gameLight{4} && pfread(temp5,temp6) then _b4_gameLight{4} =  1
 
    ;Background visibile se la lampada è accesa
    if _b4_gameLight{4} then pfcolors:
@@ -449,25 +540,7 @@ end
 
 __skip_light
 
-  ;*************************************************************************
-   ; SUGAR
-   ;_________________________________________________________________________
-   ; missile 1 -> Zuccherino (8)
-   ; ball ->  Bolle del bollitore (un solo colore azzurro)
-   ; missile 0 -> Sacchetto di uscita dal livello 
-   ; missile 1 -> Bonus (randomico sullo schermo a tempo, se attivo)
-   ; ball ->  Bolle del bollitore (un solo colore azzurro)
-   ;*************************************************************************
 
-   ;if frame_counter <> frame_limit then goto __skip_animation_sugar
-   
-   missile1x = 222 : missile1y = 222
-   if frame_counter & 2 then missile1x = _data_sugar_x[sugar_count] : missile1y = _data_sugar_y[sugar_count] 
-   ;a = (rand&7) + 1
-   ;if frame_counter & 6 = 0 then sugar_count = 0
-   ;if seconds_counter then score = seconds_counter
-
-__skip_animation_sugar
  
     ;*************************************************************************
    ; ANIMAZIONE PLAYER 0
@@ -512,87 +585,8 @@ end
    %11111111
    %01100110
 end
-   if !_b0_gameStart{0} then goto __skip_playfield
+   if !_b0_gameStart{0} then goto __skip_to_draw_playfield
 
-   ;*************************************************************************
-   ; ANIMAZIONE PLAYFIELD
-   ;_________________________________________________________________________
-   ; RIGA: 0 -> 4 (partono sempre dalla colonna 3)
-   ; Gocce di cioccolato:traslazione verticale
-   ; Barrette di ciccolato: traslazione orizzontale
-   ; RIGA: 7 -> 8
-   ; Lama del coltello
-   ;*************************************************************************
-   ;callmacro transaction sugar_count
-
-   ;============
-   ;=  GOCCE   =
-   ;============
-   if !_b5_gameWallOrRain{5} then goto __skip_rain
-   if _level >= 1 then temp3 = (rand&28) + 3 else temp3 = (rand & 9) + 3
-   if frame_counter = 10 && _level >=1 then a = temp3 : pfpixel a 0 on
-   if frame_counter = 15 && _level >=2 then t = temp3 + 13 : pfpixel t 0 on
-   if frame_counter = 20 && _level >=1 then pfpixel a 2 on : pfpixel a 0 off 
-   if frame_counter = 25 && _level >=2 then pfpixel t 2 on : pfpixel t 0 off
-   if frame_counter = 30 && _level >=1 then pfpixel a 4 on : pfpixel a 2 off 
-   if frame_counter = 35 && _level >=2 then pfpixel t 4 on : pfpixel t 2 off
-   if frame_counter = 40 && _level >=1 then pfpixel a 4 off 
-   if frame_counter = 45 && _level >=2 then pfpixel t 4 off
-
-__skip_rain
-
-   ;============
-   ;=CIOCCOLATO=
-   ;============
-   if _b5_gameWallOrRain{5} then goto __skip_wall
-   if wall1 = 3 then callmacro chocoWall wall1 0 : wall1 = 31
-   if frame_counter & 31 = 0 && wall1 > 2 then callmacro chocoWall wall1 0
-   if frame_counter & 31 = 1 && wall1 > 3 then wall1 = wall1 - 1: callmacro chocoWall wall1 1
-
-   ;=== Muro 2 === (parte quando wall1 arriva a 20)
-   if wall2 = 3 then callmacro chocoWall wall2 0 : wall2 = 0
-   if wall1 = 20 && wall2 = 0 then wall2 = 31
-   if frame_counter & 31 = 0 && wall2 > 2 && _level > 1 then callmacro chocoWall wall2 0
-   if frame_counter & 31 = 1 && wall2 > 3 && _level > 1 then wall2 = wall2 - 1 : callmacro chocoWall wall2 1
-
-   macro chocoWall
-   if {2} = 1 then pfpixel {1} 2 on : pfpixel {1} 3 on : pfpixel {1} 4 on
-   if {2} = 0 then pfpixel {1} 2 off : pfpixel {1} 3 off : pfpixel {1} 4 off
-end
-
-__skip_wall
-
-
-__oggetti
-   ;if frame_counter <> 0 then goto __skip_oggetti
-   ; TAZZE
-   temp4 = objects[0]
-   temp5 = 16
-   for x = 0 to 28 step 7
-      if frame_counter = x && temp4 & temp5 > 0 then callmacro tazze x 8 9 10 3 4 2
-      temp5 = temp5 * 2
-   next
-
-   temp4 = objects[1]
-   temp5 = 16
-   for x = 0 to 28 step 7
-      if frame_counter = x && temp4 & temp5 > 0 then callmacro tazze x 6 7 8 5 3 0
-      temp5 = temp5 * 2
-   next
-
-   ;goto __increment_score
-   temp4 = objects[0]
-   temp5 = 16
-   ; COLTELLI
-
-
-   ; {1} = x -> posizione di partenza, {2} = y1, {3} = y2, {4} = y3
-   macro tazze
-      if {5} > 0 then temp3 = {1} + {5} : pfhline {1} {2} temp3 flip ; prima riga lunga {5}
-      if {6} > 0 then temp3 = {1} + {6} : pfhline {1} {3} temp3 flip ; seconda riga lunga {6}
-      if {7} > 0 then temp3 = {1} + {7} : pfhline {1} {4} temp3 flip; terza riga linga {7}
-end
-__skip_oggetti
 
 
    ;if second_counter * 30 + frame_counter < 54 then a = 32 - ((second_counter * 30 + frame_counter) * 29 / 54) : pfpixel a 2 on : pfpixel a 3 on : pfpixel a 4 on
@@ -601,15 +595,6 @@ __skip_oggetti
    ;if frame_counter = 30 && _level >=1 then a = temp3 - 1 : callmacro choco a on
    ;if frame_counter = 430 && _level >=1 then a = temp3 - 1 : callmacro choco a on
    ;if frame_counter = 30 && _level >=1 then if temp3 > 3 then a = temp3 - 1 else a = 3 : callmacro choco a on
-
-   /* macro transaction
-   if frame_counter = 10 then pfhline 8 6 12 on : pfpixel {1} 0 on ;: pfpixel _data_sugar_x[sugar_count] 1 on 
-   if frame_counter = 15 then pfhline 9 7 12 on : pfpixel {1} 0 off ;: pfpixel _data_sugar_x[sugar_count] 1 off : pfhline 17 8 20 off
-   if frame_counter = 20 then pfhline 10 8 12 on : pfpixel {1} 2 on ;: pfpixel _data_sugar_x[sugar_count] 3 on : pfhline 17 8 20 on
-   if frame_counter = 45 then pfhline 8 8 12 off : pfpixel {1} 2 off  ;: pfpixel _data_sugar_x[sugar_count] 2 off 
-   if frame_counter = 50 then pfhline 8 7 12 off : pfpixel {1} 4 on ;: pfpixel _data_sugar_x[sugar_count] 4 on: pfpixel 1 3 off
-   if frame_counter = 53 then pfhline 8 6 12 off : pfpixel {1} 4 off ;: pfpixel _data_sugar_x[sugar_count] 4 off
-end  */
 
 ; !!!!!!!!!!!!!!!!!!!!!!! TAZZE
 
@@ -816,10 +801,12 @@ __Skip_Joy0_Right
    ;_________________________________________________________________________
    ; tra Biscotto e Bocca: decremento la barra della salute
    ; tra Missile e Bocca: incremento dei punti di 10 unità
+   ; tra Biscotto e Zucchero : incremento dei punti e individuazione del
+   ; prossiomo zuccehro da prendere
    ;*************************************************************************   
    if collision(player0, player1) && frame_counter = 0 then goto __decrease_health_bar
    if collision(missile0, player1) then player1x = 222 : player1y = 222 : goto __increment_score
-   if collision(player0, missile1) then sugar_count = sugar_count + 1 :goto __increment_score
+   if collision(player0, missile1) && sugar_count < 8 then sugar_count = sugar_count + 1 : goto __increment_score
    goto __done
 
 __decrease_timer_bar
@@ -833,14 +820,13 @@ __decrease_health_bar
 
 __increment_score
    score=score+1
-   sugar_point = sugar_point +1
 
 __done
-   goto __skip_playfield
+   goto __skip_to_draw_playfield
 
 __gameOver
    _b0_gameStart{0} = 0
-   goto __skip_playfield
+   goto __skip_to_draw_playfield
 
 __select_level
 
@@ -866,7 +852,7 @@ end
 
    if _level > 42 then _level = 0 : goto __startGame
 
-__skip_playfield
+__skip_to_draw_playfield
    
    drawscreen
    goto __main_loop
@@ -879,5 +865,12 @@ end
    80, 80, 80, 80, 80, 80, 80, 80  ; Coordinate y degli zuccherini
 end
    data objects
-      %01100000, %10000000
+      %01100011, %10000000
+end
+
+   ; {1} = x -> posizione di partenza, {2} = y1, {3} = y2, {4} = y3
+   macro tazze
+      if {5} > 0 then temp3 = {1} + {5} : pfhline {1} {2} temp3 flip ; prima riga lunga {5}
+      if {6} > 0 then temp3 = {1} + {6} : pfhline {1} {3} temp3 flip ; seconda riga lunga {6}
+      if {7} > 0 then temp3 = {1} + {7} : pfhline {1} {4} temp3 flip ; terza riga linga {7}
 end
