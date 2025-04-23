@@ -200,8 +200,8 @@ __main_loop
    COLUP0 = _P0_color 
    
    ;Se premo select inizializzo il gioco
-   if switchreset && !_b0_gameStart{0} then _b0_gameStart{0} = 1 : goto __select_level
-   ;if switchselect && !_b0_gameStart{0} then _level = _level + 1 : goto __select_level
+   if switchreset && !_b0_gameStart{0} then _b0_gameStart{0} = 1 : goto __playfield
+   ;if switchselect && !_b0_gameStart{0} then _level = _level + 1 : goto __playfield
 
    ;Se il gioco non è ancora iniziato skippa tutto e disegna solo il playfield
    if !_b0_gameStart{0} then goto __skip_to_draw_playfield
@@ -260,29 +260,40 @@ __main_loop
    ;*************************************************************************
 
 __oggetti
+   ; velocità
+   temp4 = 4 - _level
+
+   ; TAZZE Livello alto
+   /* temp5 = 1
+   for x = 0 to 21 step 7 ; massimo 4 iterazioni
+      temp5 = temp5 * 2
+   next
 
    ; TAZZE Livello basso
-   temp5 = 16
-   temp4 = 4 - _level
    for x = 0 to 28 step 7
-      if (seconds_counter & temp4) = 0 && frame_counter = x && objects[0] & temp5 > 0 then callmacro tazze x 8 9 10 3 4 2
+      ;if (seconds_counter & temp4) = 0 && frame_counter = x && objects[0] & temp5 > 0 then callmacro tazze x 8 9 10 3 4 2
       temp5 = temp5 * 2
-   next
+   next */
 
-   ;Livello alto
    temp5 = 1
-   for x = 0 to 21 step 7 ; massimo 4 iterazioni
-      if (temp4 & temp5) = 0 && frame_counter = x && objects[0] & temp5 > 0 then  callmacro tazze x 2 3 4 3 4 2
-      endif
-      temp5 = temp5 * 2
-   next
+   temp6 = 16
+   x = 0
+__for_1
+   ;Tazze
+   if (seconds_counter & temp4) = 0 && frame_counter = x && objects[0] & temp6 > 0 then callmacro tazze x 8 3 
+   ;if (seconds_counter & temp4) = 0 && frame_counter = x && objects[0] & temp6 > 0 then callmacro tazze x 8 3
+   ;Coltello
+   /* if (seconds_counter & temp4) = 0 && frame_counter = x && objects[1] & temp5 > 0 then callmacro tazze x 0 2 
+   if (seconds_counter & temp4) = 0 && frame_counter = x && objects[1] & temp6 > 0 then callmacro tazze x 8 2 */
+   if x < 28 then x = x + 7 : temp5 = temp5 * 2 : temp6 = temp6 * 2 : goto __for_1
 
-   temp4 = objects[1]
+
+   /* temp4 = objects[1]
    temp5 = 16
    for x = 0 to 28 step 7
       if frame_counter = x && temp4 & temp5 > 0 then callmacro tazze x 6 7 8 5 3 0
       temp5 = temp5 * 2
-   next
+   next */
 
    /* ;goto __increment_score
    temp4 = objects[0]
@@ -828,7 +839,7 @@ __gameOver
    _b0_gameStart{0} = 0
    goto __skip_to_draw_playfield
 
-__select_level
+__playfield
 
    ;*************************************************************************
    ; LIVELLO 1
@@ -836,11 +847,11 @@ __select_level
    ; TO DO
    ;************************************************************************* 
    if _level = 1 then playfield:
-   ................................
-   ................................
-   ................................
-   ................................
-   ................................
+   XX.............................
+   .XX.............................
+   XXX.............................
+   .XX.............................
+   XX..............................
    XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
    XXX..........................X..
    .X..........................XXX.
@@ -864,13 +875,45 @@ end
    data _data_sugar_y
    80, 80, 80, 80, 80, 80, 80, 80  ; Coordinate y degli zuccherini
 end
+      ; TAZZE, ; COLTELLI ; GOCCE, MURI
    data objects
-      %01100011, %10000000
+      %01100011, %10000000, %01100011, %10000000, ;LIVELLO 1
+      %01100011, %10000000, %01100011, %10000000  ;LIVELLO 2
 end
 
-   ; {1} = x -> posizione di partenza, {2} = y1, {3} = y2, {4} = y3
+   ;=======================================================================
+   ; XXXX
+   ; XXXXX
+   ; XXXX
+   ;-----------------------------------------------------------------------
+   ; {1} = posizione iniziale colonna
+   ; {2} = posizione iniziale riga
+   ; {3} = numero di righe
+   ; esegue un ciclo in base la numero di righe che deve disegnare
+   ; assegna un pixel per il manico
+   ;=======================================================================
    macro tazze
-      if {5} > 0 then temp3 = {1} + {5} : pfhline {1} {2} temp3 flip ; prima riga lunga {5}
+      temp2 = {2} 
+      temp1 = {1} + 4
+      for y = 8 to 11
+         pfhline {1} y temp1 flip
+      next
+      temp2 = temp2 - 1 : pfpixel temp1 temp2 flip ; manico
+
+      /*temp4 = {2}
+      pfhline {1} temp4 {2} flip : temp4 = temp4 + 1
+      temp3 = {1} + {2} + 1
+      pfhline {1} temp4 temp3 flip : temp4 = temp4 + 1 ; prima riga lunga {5}
+      pfhline {1} temp4 {2} flip ; seconda riga lunga {6}
+     if {5} > 0 then temp3 = {1} + {5} : pfhline {1} {2} temp3 flip ; prima riga lunga {5}
       if {6} > 0 then temp3 = {1} + {6} : pfhline {1} {3} temp3 flip ; seconda riga lunga {6}
       if {7} > 0 then temp3 = {1} + {7} : pfhline {1} {4} temp3 flip ; terza riga linga {7}
+      */
 end
+   ; {1} = inizio, {2} = altezza, {3} = larghezza
+   /* macro tazze
+      temp3 = {1} + {3} 
+      pfvline {1} {2} temp3 flip 
+      temp3 = temp3 + 1
+      pfpixel temp3 {4} flip
+end */
