@@ -61,6 +61,8 @@
    ; _b4_gameLight -> k (b1 = Light on/off)
    ; _b5_gameWallOrRain -> k (b5 = 0 Wall / 1 Rain)
    ;*************************************************************************
+   dim _SC_Back = w
+   
    dim _level = b
    dim frame_counter  = c
    dim seconds_counter  = d
@@ -117,11 +119,11 @@ __inizialize
    ; pfscore1 => timer
    ; pfscore2 => energy
    ;*************************************************************************
-   REFP0 = 0 : COLUBK = 0 : NUSIZ0 = $10 : missile0height = 1 : missile1height = 1
+   REFP0 = 0
 
    a = 0 : b = 0 : c = 0 : d = 0 : e = 0 : f = 0 : g = 3 : h = 3 : i = 0
    j = 0 : k = 0 : l = 0 : m = 0 : n = 0 : o = 0 : p = 0 : q = 0 : r = 0
-   s = 0 : t = 1 : u = 0 : v = 0 : w = 0 : x = 0 : y = 0 : z = 0
+   s = 0 : t = 0 : u = 0 : v = 0 : w = 0 : x = 0 : y = 0 : z = 0
 
    pfscore1 = %11111111 : pfscore2 = %10101010
 
@@ -132,7 +134,6 @@ __inizialize
    player1x = 0 : player1y = 20
 
 __startGame
-
    _b0_gameStart{0} = 0 ; Gioco non attivo
    _b4_gameLight{4} = 1 ; Luci accese di default
    _b5_gameWallOrRain{5} = 0 ; Wall attivo
@@ -156,14 +157,14 @@ __startGame
    ;*************************************************
    playfield:
    ................................
-   ....XXXXXXXXX...XX.......X..X...
-   ...X..............X......X.X....
-   ....XX...X.XX...XXX..XXX.XX.....
-   ......X..XX..X.X..X.X....X.X....
+   ....XXXXXXXXX....XX.......X..X..
+   ...X...............X......X.X...
+   ....XX....X.XX...XXX..XXX.XX....
+   ......X...XX..X.X..X.X....X.X...
    XXXXXX...X...X..XXX..XXX.X..X...
    ................................
-   .X.......X.................X.X.
-   ...X.XX........X.XX..XX...X.X...
+   .X.......X.....X..XX.......X.X..
+   ...X.XX........X.X...XX...X.X...
    ...XX..X.......XX...X..X.X.X....
    ...X...X.......X.....XX..X.X....
 end
@@ -198,9 +199,10 @@ end */
 __main_loop
    COLUP1 = _P1_color 
    COLUP0 = _P0_color 
-   
+   NUSIZ1 = $20
+   COLUBK = 0 
    ;Se premo select inizializzo il gioco
-   if switchreset && !_b0_gameStart{0} then _b0_gameStart{0} = 1 : goto __playfield
+   if switchreset && !_b0_gameStart{0} then _b0_gameStart{0} = 1 : pfscorecolor = _base_color :goto __playfield
    ;if switchselect && !_b0_gameStart{0} then _level = _level + 1 : goto __playfield
 
    ;Se il gioco non è ancora iniziato skippa tutto e disegna solo il playfield
@@ -261,7 +263,7 @@ __main_loop
 
 __oggetti
    ; velocità
-   temp4 = 4 - _level
+   temp4 = 3 - _level
 
    ; TAZZE Livello alto
    /* temp5 = 1
@@ -281,6 +283,8 @@ __oggetti
 __for_1
    ;Tazze
    if (seconds_counter & temp4) = 0 && frame_counter = x && objects[0] & temp6 > 0 then callmacro tazze x 8 3 
+   if (seconds_counter & temp4) = 0 && frame_counter = x + 10 && objects[1] & temp6 > 0 then callmacro tazze x 6 2
+
    ;if (seconds_counter & temp4) = 0 && frame_counter = x && objects[0] & temp6 > 0 then callmacro tazze x 8 3
    ;Coltello
    /* if (seconds_counter & temp4) = 0 && frame_counter = x && objects[1] & temp5 > 0 then callmacro tazze x 0 2 
@@ -436,6 +440,7 @@ __Skip_Fire
    ;```````````````````````````````````````````````````````````````
    ;  Deletes pfpixel.
    ;
+   if temp6 > 7 then goto __Delete_Missile
    pfpixel temp5 temp6 off
 
 __Delete_Missile
@@ -521,7 +526,7 @@ __skip_movement */
    
 
    ;Background visibile se la lampada è accesa
-   if _b4_gameLight{4} then pfcolors:
+   if _b4_gameLight{4} || frame_counter & 7 = 0 then pfcolors:
    $24
    $26
    $28
@@ -534,18 +539,9 @@ __skip_movement */
    $24
    $26
 end
+
    ; background spento se la lampada no è accesa
    if !_b4_gameLight{4} then pfcolors:
-   $24
-   $26
-   $28
-   $D4
-   $26
-   $D4
-   $0
-   $0
-   $0
-   $0
    $0
 end
 
@@ -553,7 +549,7 @@ __skip_light
 
 
  
-    ;*************************************************************************
+   ;*************************************************************************
    ; ANIMAZIONE PLAYER 0
    ; ------------------------------------------------------------------------
    ; solo se sto muovendo il joystick
@@ -870,14 +866,14 @@ __skip_to_draw_playfield
 
    ; Array con le posizioni degli zuccherini e il relativo valore
    data _data_sugar_x
-   64, 54, 50, 70, 90, 110, 130, 150  ; Coordinate x degli zuccherini
+   54, 66, 78, 90, 90, 110, 130, 150  ; Coordinate x degli zuccherini
 end
    data _data_sugar_y
-   80, 80, 80, 80, 80, 80, 80, 80  ; Coordinate y degli zuccherini
+   68, 72, 72, 72, 72, 72, 72, 72  ; Coordinate y degli zuccherini
 end
       ; TAZZE, ; COLTELLI ; GOCCE, MURI
    data objects
-      %01100011, %10000000, %01100011, %10000000, ;LIVELLO 1
+      %11100011, %10000011, %01100011, %10000000, ;LIVELLO 1
       %01100011, %10000000, %01100011, %10000000  ;LIVELLO 2
 end
 
@@ -893,12 +889,12 @@ end
    ; assegna un pixel per il manico
    ;=======================================================================
    macro tazze
-      temp2 = {2} 
-      temp1 = {1} + 4
-      for y = 8 to 11
-         pfhline {1} y temp1 flip
+      temp5 = {2} + {3} -1
+      temp6 = {1} + 4
+      for y = {2} to temp5
+         pfhline {1} y temp6 flip
       next
-      temp2 = temp2 - 1 : pfpixel temp1 temp2 flip ; manico
+      pfpixel temp6 temp5 flip ; manico
 
       /*temp4 = {2}
       pfhline {1} temp4 {2} flip : temp4 = temp4 + 1
