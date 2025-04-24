@@ -226,8 +226,9 @@ __main_loop
    ;_________________________________________________________________________
    ; ogni mezzo secondo cambia randomicamente la posizone dell'oggetto
    ;*************************************************************************
-   if frame_counter = 0 && seconds_counter & 2 = 0 then temp5 = rand : player1x = temp5 & 31 : player1y = temp5 & 7
-   
+   ;if frame_counter = 0 && seconds_counter & 2 = 0 then temp5 = rand : player1x = temp5 & 31 : player1y = temp5 & 7
+   if frame_counter = 0 && (seconds_counter & 2) = 0 then temp5 = rand : player1x = temp5 & 31 : player1y = (temp5 / 32) & 15 : if player1y > 10 then player1y = player1y - 4
+
    ;*************************************************************************
    ; LUCE
    ;_________________________________________________________________________
@@ -249,7 +250,8 @@ __main_loop
    ; il missile 1 è cosiderato lo zucchero con effetto flickering ogni
    ; 2 millisecondi e deve essere entro gli 8 zuccherini preconfigurati
    ;*************************************************************************
-   if frame_counter & 2 && sugar_count < 8 then missile1x = _data_sugar_x[sugar_count] : missile1y = _data_sugar_y[sugar_count] else missile1y =255
+   temp1 = frame_counter & 7 : missile1x = _data_sugar_x[temp1] : missile1y = _data_sugar_y[temp1] ; TO DO Da testare bene
+   ;if frame_counter & 2 && sugar_count < 8 then missile1x = _data_sugar_x[sugar_count] : missile1y = _data_sugar_y[sugar_count] else missile1y =255
 
    ;*************************************************************************
    ; PLAYFIELD
@@ -261,9 +263,7 @@ __main_loop
    ; Lama del coltello
    ;*************************************************************************
 
-__oggetti
    ; velocità
-   temp4 = 3 - _level
 
    ; TAZZE Livello alto
    /* temp5 = 1
@@ -276,22 +276,38 @@ __oggetti
       ;if (seconds_counter & temp4) = 0 && frame_counter = x && objects[0] & temp5 > 0 then callmacro tazze x 8 9 10 3 4 2
       temp5 = temp5 * 2
    next */
-
-   temp5 = 1
-   temp6 = 16
+   temp4 = 0;3 - _level   ; VELOCITA'
+   temp5 = 1            ; INDICE PER PIANO SUPERIORE %00001111 : 2^0 = 1  -> 2^1 = 2  -> 2^2 = 4  -> 2^3 = 8
+   temp6 = 16           ; INDICE PER PIANO INFERIORE %11110000 : 2^4 = 16 -> 2^5 = 32 -> 2^6 = 64 -> 2^7 = 128
    x = 0
-__for_1
+   w = 0
+__loop_objects
+   temp1 = _level -1
+   ; Da testare Posizonamento degli ogggetti = temp2 con indice temp1 (parte da 0)
+
+   if (seconds_counter & temp4) = 0 && frame_counter = x && objects[temp1] & temp5 > 0 then temp5 = temp5 * 2 : callmacro tazze x w 3
+
+  ; if (seconds_counter & temp4) = 0 && frame_counter = x && 
+   
+   ;if objects[temp1] & temp5 > 0 then callmacro tazze x 8 3
+   ;if (seconds_counter & temp4) = 0 then if frame_counter+1 = x && temp2 & temp5 > 0 then callmacro tazze x 8 3
+
+   ;temp2 = objects[_level] ; -> Coltelli
+   ;if (seconds_counter & temp4) = 0 then if frame_counter = x && temp3 & temp6 > 0 then callmacro tazze x 6 3 if frame_counter = x + 10  && temp3 & temp5 > 0 then callmacro tazze x 0 2
+
+   ;temp1 = _level +1 ; -> Coltelli
+
    ;Tazze
-   if (seconds_counter & temp4) = 0 && frame_counter = x && objects[5] & temp6 > 0 then callmacro tazze x 8 3 
-   if (seconds_counter & temp4) = 0 && frame_counter = x + 10 && objects[6] & temp6 > 0 then callmacro tazze x 6 2
+   /* if (seconds_counter & temp4) = 0 && frame_counter = x && objects[5] & temp6 > 0 then callmacro tazze x 8 3 
+   if (seconds_counter & temp4) = 0 && frame_counter = x + 10 && objects[6] & temp6 > 0 then callmacro tazze x 6 2 */
 
    ;if (seconds_counter & temp4) = 0 && frame_counter = x && objects[0] & temp6 > 0 then callmacro tazze x 8 3
    ;Coltello
    /* if (seconds_counter & temp4) = 0 && frame_counter = x && objects[1] & temp5 > 0 then callmacro tazze x 0 2 
    if (seconds_counter & temp4) = 0 && frame_counter = x && objects[1] & temp6 > 0 then callmacro tazze x 8 2 */
-   if x < 28 then x = x + 7 : temp5 = temp5 * 2 : temp6 = temp6 * 2 : goto __for_1
-
-
+   
+   if temp5 = %00000100 then x = 0 : w = 2
+   if x < 21 then x = x + 7 : goto __loop_objects
    /* temp4 = objects[1]
    temp5 = 16
    for x = 0 to 28 step 7
@@ -874,7 +890,7 @@ end
 end
       ; TAZZE, ; COLTELLI ; GOCCE, MURI ; VIE DI ACCESSO
    data objects
-      %11100011, %10000011, %01100011, %10000000, %11111111 ;LIVELLO 1
+      %11101111, %10000011, %01100011, %10000000, %11111111 ;LIVELLO 1
       %01000000, %10000000, %01100011, %10000000, %11111111 ;LIVELLO 2
 end
 
