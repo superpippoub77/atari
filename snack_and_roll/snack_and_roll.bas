@@ -280,7 +280,7 @@ __main_loop
    temp5 = 1            ; INDICE PER PIANO SUPERIORE %00001111 : 2^0 = 1  -> 2^1 = 2  -> 2^2 = 4  -> 2^3 = 8
    temp6 = 16           ; INDICE PER PIANO INFERIORE %11110000 : 2^4 = 16 -> 2^5 = 32 -> 2^6 = 64 -> 2^7 = 128
    x = 0
-   w = 0
+   w = 2
 __loop_objects
    temp1 = _level -1
    ; Da testare Posizonamento degli ogggetti = temp2 con indice temp1 (parte da 0)
@@ -306,8 +306,8 @@ __loop_objects
    /* if (seconds_counter & temp4) = 0 && frame_counter = x && objects[1] & temp5 > 0 then callmacro tazze x 0 2 
    if (seconds_counter & temp4) = 0 && frame_counter = x && objects[1] & temp6 > 0 then callmacro tazze x 8 2 */
    
-   if temp5 = %00000100 then x = 0 : w = 2
-   if x < 21 then x = x + 7 : goto __loop_objects
+   if temp5 = %00010000 then x = 0 : w = 8
+   if x < 21 then x = x + 7 :score = 2:goto __loop_objects
    /* temp4 = objects[1]
    temp5 = 16
    for x = 0 to 28 step 7
