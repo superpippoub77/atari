@@ -123,7 +123,7 @@ __inizialize
 
    a = 0 : b = 0 : c = 0 : d = 0 : e = 0 : f = 0 : g = 3 : h = 3 : i = 0
    j = 0 : k = 0 : l = 0 : m = 0 : n = 0 : o = 0 : p = 0 : q = 0 : r = 0
-   s = 0 : t = 0 : u = 0 : v = 0 : w = 0 : x = 0 : y = 0 : z = 0
+   s = 0 : t = 255 : u = 0 : v = 0 : w = 0 : x = 0 : y = 0 : z = 0
 
    pfscore1 = %11111111 : pfscore2 = %10101010
 
@@ -249,8 +249,12 @@ __main_loop
    ;_________________________________________________________________________
    ; il missile 1 è cosiderato lo zucchero con effetto flickering ogni
    ; 2 millisecondi e deve essere entro gli 8 zuccherini preconfigurati
+   ; sugar_count bitmask inizialmente = 255 => %11111111
    ;*************************************************************************
-   temp1 = frame_counter & 7 : missile1x = _data_sugar_x[temp1] : missile1y = _data_sugar_y[temp1] ; TO DO Da testare bene
+   temp1 = frame_counter & 7
+   if sugar_count & bitmasks[temp1] then missile1x = _data_sugar_x[temp1] : missile1y = _data_sugar_y[temp1] 
+   if collision(player0, missile1) then temp2 = 255 ^ bitmasks[temp1] : sugar_count = sugar_count & temp2 : goto __increment_score
+
    ;if frame_counter & 2 && sugar_count < 8 then missile1x = _data_sugar_x[sugar_count] : missile1y = _data_sugar_y[sugar_count] else missile1y =255
 
    ;*************************************************************************
@@ -283,9 +287,12 @@ __main_loop
    w = 2
 __loop_objects
    temp1 = _level -1
-   ; Da testare Posizonamento degli ogggetti = temp2 con indice temp1 (parte da 0)
 
-   if (seconds_counter & temp4) = 0 && frame_counter = x && objects[temp1] & temp5 > 0 then temp5 = temp5 * 2 : callmacro tazze x w 3
+   if (seconds_counter & temp4) = 0 && frame_counter = x && (objects[0]  & temp5) > 0 then callmacro tazze x w 3
+   temp5 = temp5 * 2
+   x = x + 7
+   if temp5 = 16 && w = 2 then x = 0 : w = 8
+   if temp5 > 0 then goto __loop_objects
 
   ; if (seconds_counter & temp4) = 0 && frame_counter = x && 
    
@@ -305,9 +312,7 @@ __loop_objects
    ;Coltello
    /* if (seconds_counter & temp4) = 0 && frame_counter = x && objects[1] & temp5 > 0 then callmacro tazze x 0 2 
    if (seconds_counter & temp4) = 0 && frame_counter = x && objects[1] & temp6 > 0 then callmacro tazze x 8 2 */
-   
-   if temp5 = %00010000 then x = 0 : w = 8
-   if x < 21 then x = x + 7 :score = 2:goto __loop_objects
+
    /* temp4 = objects[1]
    temp5 = 16
    for x = 0 to 28 step 7
@@ -830,7 +835,7 @@ __Skip_Joy0_Right
    ;*************************************************************************   
    if collision(player0, player1) && frame_counter = 0 then goto __decrease_health_bar
    if collision(missile0, player1) then player1x = 222 : player1y = 222 : goto __increment_score
-   if collision(player0, missile1) && sugar_count < 8 then sugar_count = sugar_count + 1 : goto __increment_score
+   ;if collision(player0, missile1) && sugar_count <= 8 then sugar_count = sugar_count + 1 : goto __increment_score
    goto __done
 
 __decrease_timer_bar
@@ -881,19 +886,22 @@ __skip_to_draw_playfield
    drawscreen
    goto __main_loop
 
-   ; Array con le posizioni degli zuccherini e il relativo valore
+   ; Array con le posizioni degli zuccherini e il relativo valore %11111111
    data _data_sugar_x
-   54, 66, 78, 90, 90, 110, 130, 150  ; Coordinate x degli zuccherini
+   112,90,68,46,112,90,68,46  ; Coordinate x degli zuccherini
 end
    data _data_sugar_y
-   68, 72, 72, 72, 72, 72, 72, 72  ; Coordinate y degli zuccherini
+   26, 26, 26, 26, 72, 72, 72, 72  ; Coordinate y degli zuccherini
 end
       ; TAZZE, ; COLTELLI ; GOCCE, MURI ; VIE DI ACCESSO
    data objects
-      %11101111, %10000011, %01100011, %10000000, %11111111 ;LIVELLO 1
+      %11100000, %10000011, %01100011, %10000000, %11111111 ;LIVELLO 1
       %01000000, %10000000, %01100011, %10000000, %11111111 ;LIVELLO 2
 end
-
+   data bitmasks
+   1,2,4,8,128,64,32,16
+   ;128,64,32,16,8,4,2,1
+end
    ;=======================================================================
    ; XXXX
    ; XXXXX
