@@ -123,15 +123,14 @@ __inizialize
 
    a = 0 : b = 0 : c = 0 : d = 0 : e = 0 : f = 0 : g = 3 : h = 3 : i = 0
    j = 0 : k = 0 : l = 0 : m = 0 : n = 0 : o = 0 : p = 0 : q = 0 : r = 0
-   s = 0 : t = 255 : u = 0 : v = 0 : w = 0 : x = 0 : y = 0 : z = 0
+   s = 0 : t = 0 : u = 0 : v = 0 : w = 0 : x = 0 : y = 0 : z = 0
 
    pfscore1 = %11111111 : pfscore2 = %10101010
 
    ;*************************************************************************
    ; POSIZIONI PLAYER AND SPRITE INIZIALI
    ;*************************************************************************
-   player0x = 30 : player0y = 54 
-   player1x = 0 : player1y = 20
+   player0x = 30 : player0y = 54 : player1y = 0 : player1x = 20
 
 __startGame
    _b0_gameStart{0} = 0 ; Gioco non attivo
@@ -227,7 +226,9 @@ __main_loop
    ; ogni mezzo secondo cambia randomicamente la posizone dell'oggetto
    ;*************************************************************************
    ;if frame_counter = 0 && seconds_counter & 2 = 0 then temp5 = rand : player1x = temp5 & 31 : player1y = temp5 & 7
-   if frame_counter = 0 && (seconds_counter & 2) = 0 then temp5 = rand : player1x = temp5 & 31 : player1y = (temp5 / 32) & 15 : if player1y > 10 then player1y = player1y - 4
+   if frame_counter &2 && player1y < 30 then player1y = player1y + 1
+   if frame_counter &2 && player1y >= 30 then player1y = 0
+   ;if frame_counter&2 then player1x = 20: player1y = player1y + 1
 
    ;*************************************************************************
    ; LUCE
@@ -251,9 +252,11 @@ __main_loop
    ; 2 millisecondi e deve essere entro gli 8 zuccherini preconfigurati
    ; sugar_count bitmask inizialmente = 255 => %11111111
    ;*************************************************************************
-   temp1 = frame_counter & 7
-   if sugar_count & bitmasks[temp1] then missile1x = _data_sugar_x[temp1] : missile1y = _data_sugar_y[temp1] 
-   if collision(player0, missile1) then temp2 = 255 ^ bitmasks[temp1] : sugar_count = sugar_count & temp2 : goto __increment_score
+   
+   if seconds_counter&2=0 && frame_counter = 0 && sugar_count < 7 then temp1 = (rand&7) : missile1x = _data_sugar_x[temp1] : missile1y = _data_sugar_y[temp1] 
+   if collision(player0, missile1) then sugar_count = sugar_count + 1  : goto __increment_score
+skip_sugar
+
 
    ;if frame_counter & 2 && sugar_count < 8 then missile1x = _data_sugar_x[sugar_count] : missile1y = _data_sugar_y[sugar_count] else missile1y =255
 
@@ -282,16 +285,38 @@ __main_loop
    next */
    temp4 = 0;3 - _level   ; VELOCITA'
    temp5 = 1            ; INDICE PER PIANO SUPERIORE %00001111 : 2^0 = 1  -> 2^1 = 2  -> 2^2 = 4  -> 2^3 = 8
-   temp6 = 16           ; INDICE PER PIANO INFERIORE %11110000 : 2^4 = 16 -> 2^5 = 32 -> 2^6 = 64 -> 2^7 = 128
    x = 0
-   w = 2
+   w = 0 ; parte alta
+   j = 2 ; parte bassa
 __loop_objects
    temp1 = _level -1
 
-   if (seconds_counter & temp4) = 0 && frame_counter = x && (objects[0]  & temp5) > 0 then callmacro tazze x w 3
+   if (seconds_counter&temp4) = 0 && frame_counter = x && (objects[0]&temp5)> 0 then callmacro tazze x j 3 ; TAZZE
+   if (seconds_counter&temp4) = 0 && frame_counter = x && (objects[1]&temp5)> 0 then callmacro tazze x w 2 ; COLTELLI
+   if (seconds_counter&temp4) = 0 && frame_counter = m && (objects[2]&temp5)> 0 then callmacro chocoWall x j
+
+
+/*   ;============
+   ;=  GOCCE   =
+   ;============
+   if !_b5_gameWallOrRain{5} then goto __skip_rain
+   if _level >= 1 then temp3 = (rand&28) + 3 else temp3 = (rand & 9) + 3
+   if frame_counter = 10 && _level >=1 then a = temp3 : pfpixel a 0 on
+   if frame_counter = 15 && _level >=2 then t = temp3 + 13 : pfpixel t 0 on
+   if frame_counter = 20 && _level >=1 then pfpixel a 2 on : pfpixel a 0 off 
+   if frame_counter = 25 && _level >=2 then pfpixel t 2 on : pfpixel t 0 off
+   if frame_counter = 30 && _level >=1 then pfpixel a 4 on : pfpixel a 2 off 
+   if frame_counter = 35 && _level >=2 then pfpixel t 4 on : pfpixel t 2 off
+   if frame_counter = 40 && _level >=1 then pfpixel a 4 off 
+   if frame_counter = 45 && _level >=2 then pfpixel t 4 off
+   */
+
+
+
    temp5 = temp5 * 2
    x = x + 7
-   if temp5 = 16 && w = 2 then x = 0 : w = 8
+   
+   if temp5 = 16 && w = 0 then x = 0 : w = 6 : j = 8
    if temp5 > 0 then goto __loop_objects
 
   ; if (seconds_counter & temp4) = 0 && frame_counter = x && 
@@ -327,7 +352,7 @@ __loop_objects
 
 __skip_oggetti
 
-
+/*
    ;============
    ;=  GOCCE   =
    ;============
@@ -341,9 +366,9 @@ __skip_oggetti
    if frame_counter = 35 && _level >=2 then pfpixel t 4 on : pfpixel t 2 off
    if frame_counter = 40 && _level >=1 then pfpixel a 4 off 
    if frame_counter = 45 && _level >=2 then pfpixel t 4 off
-
+*/
 __skip_rain
-
+/*
    ;============
    ;=CIOCCOLATO=
    ;============
@@ -362,7 +387,7 @@ __skip_rain
    if {2} = 1 then pfpixel {1} 2 on : pfpixel {1} 3 on : pfpixel {1} 4 on
    if {2} = 0 then pfpixel {1} 2 off : pfpixel {1} 3 off : pfpixel {1} 4 off
 end
-
+*/
 __skip_wall
 
 
@@ -462,7 +487,9 @@ __Skip_Fire
    ;  Deletes pfpixel.
    ;
    ;if objects[5] & 4 = 0 then goto __Delete_Missile
-   if temp6 > 7 then goto __Delete_Missile
+   temp2 = frame_counter & 7
+   if temp6 = 5 && temp5 >temp2 then goto __Delete_Missile
+   if temp6 > 5 then goto __Delete_Missile
    pfpixel temp5 temp6 off
 
 __Delete_Missile
@@ -865,11 +892,11 @@ __playfield
    ; TO DO
    ;************************************************************************* 
    if _level = 1 then playfield:
-   XX.............................
-   .XX.............................
    XXX.............................
    .XX.............................
-   XX..............................
+   .XX.............................
+   .XX.............................
+   XXX.............................
    XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
    XXX..........................X..
    .X..........................XXX.
@@ -888,14 +915,14 @@ __skip_to_draw_playfield
 
    ; Array con le posizioni degli zuccherini e il relativo valore %11111111
    data _data_sugar_x
-   112,90,68,46,112,90,68,46  ; Coordinate x degli zuccherini
+   46,68,90,112,46,68,90,112  ; Coordinate x degli zuccherini
 end
    data _data_sugar_y
    26, 26, 26, 26, 72, 72, 72, 72  ; Coordinate y degli zuccherini
 end
       ; TAZZE, ; COLTELLI ; GOCCE, MURI ; VIE DI ACCESSO
    data objects
-      %11100000, %10000011, %01100011, %10000000, %11111111 ;LIVELLO 1
+      %01100000, %10000000, %00001110, %10000000, %11111111 ;LIVELLO 1
       %01000000, %10000000, %01100011, %10000000, %11111111 ;LIVELLO 2
 end
    data bitmasks
@@ -930,6 +957,15 @@ end
       if {6} > 0 then temp3 = {1} + {6} : pfhline {1} {3} temp3 flip ; seconda riga lunga {6}
       if {7} > 0 then temp3 = {1} + {7} : pfhline {1} {4} temp3 flip ; terza riga linga {7}
       */
+end
+
+   macro chocoWall
+   u = {1}
+   o = {2} + 2
+   pfvline u {2} o on
+   u = {1} + 4
+   o = {2} -2
+   pfpixel u o on
 end
    ; {1} = inizio, {2} = altezza, {3} = larghezza
    /* macro tazze
