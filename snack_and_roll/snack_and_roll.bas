@@ -887,7 +887,7 @@ __Skip_Joy0_Right
    ; prossiomo zuccehro da prendere
    ;*************************************************************************   
    if collision(player0, player1) && frame_counter = 0 then goto __decrease_health_bar
-   if collision(missile0, player1) then player1x = 222 : player1y = 222 : goto __increment_score
+   if collision(missile0, player1) then goto __increment_score
    ;if collision(player0, missile1) && sugar_count <= 8 then sugar_count = sugar_count + 1 : goto __increment_score
    goto __done
 
