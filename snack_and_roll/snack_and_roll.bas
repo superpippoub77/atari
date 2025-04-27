@@ -882,7 +882,7 @@ __Skip_Joy0_Right
    ; COLLISIONI 
    ;_________________________________________________________________________
    ; tra Biscotto e Bocca: decremento la barra della salute
-   ; tra Missile e Bocca: incremento dei punti di 10 unità
+   ; tra Missile e Bocca: incremento dei punti di una unità
    ; tra Biscotto e Zucchero : incremento dei punti e individuazione del
    ; prossiomo zuccehro da prendere
    ;*************************************************************************   
