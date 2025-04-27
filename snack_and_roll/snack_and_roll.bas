@@ -62,7 +62,8 @@
    ; _b5_gameWallOrRain -> k (b5 = 0 Wall / 1 Rain)
    ;*************************************************************************
    ;dim _SC_Back = w
-   
+   dim speedx = i
+   dim speedy = q
    dim _level = b
    dim frame_counter  = c
    dim seconds_counter  = d
@@ -130,7 +131,7 @@ __inizialize
    ;*************************************************************************
    ; POSIZIONI PLAYER AND SPRITE INIZIALI
    ;*************************************************************************
-   player0x = 30 : player0y = 54 : player1y = 0 : player1x = 20
+   player0x = 30 : player0y = 54 : player1y = 0 : player1x = 17 : ballx = 18 :bally = 18
 
 __startGame
    _b0_gameStart{0} = 0 ; Gioco non attivo
@@ -138,6 +139,7 @@ __startGame
    _b5_gameWallOrRain{5} = 0 ; Wall attivo
    _level = 1
    _animation = 0
+   speedx = 1: speedy = 1
 
    ;Per evitare che si veda nella schermata di presentazione
    scorecolor = 255
@@ -223,12 +225,36 @@ __main_loop
    ;*************************************************************************
    ; PLAYER 1 (BOCCA)
    ;_________________________________________________________________________
-   ; ogni mezzo secondo cambia randomicamente la posizone dell'oggetto
+   ; La bocca si muove su e giù dentro le musa di cioccolato in protezione 
+   ; della "pillola" magica, il giocatore è costrattto ad abbattere tutto
+   ; il muro di ciccolato per poter accedere alla pillola ma una volta che
+   ; sblocca la bocca può uscire ed inseguire il giocatore
    ;*************************************************************************
    ;if frame_counter = 0 && seconds_counter & 2 = 0 then temp5 = rand : player1x = temp5 & 31 : player1y = temp5 & 7
-   if frame_counter &2 && player1y < 30 then player1y = player1y + 1
-   if frame_counter &2 && player1y >= 30 then player1y = 0
+   /* if frame_counter &2 && player1y < 30 then player1y = player1y + 1
+   if frame_counter &2 && player1y >= 30 then player1y = 0 */
    ;if frame_counter&2 then player1x = 20: player1y = player1y + 1
+
+
+
+
+   ;--- Rimbalzo contro il playfield
+   if frame_counter &2 then goto __skip_animation_player1
+   temp2 = 0
+   for o = 0 to 4
+      if pfread(2,o) then temp2 = temp2 + 1
+   next
+   if temp2 = 4 then player1x = player1x + speedx
+   player1y = player1y + speedy
+   temp1=rand&2 + 1
+   if player1x <= 18 then speedx = temp1 ;rem Rimbalza a destra con velocità random 1..2
+   if player1x >= 140 then speedx = 0 - temp1  ; Rimbalza a sinistra
+   if player1y <= 5 then speedy = temp1   ; Rimbalza in basso
+   if player1y >= 40 then speedy = 0 - temp1  ; Rimbalza in alto
+
+__skip_animation_player1
+
+
 
    ;*************************************************************************
    ; LUCE
@@ -893,9 +919,9 @@ __playfield
    ;************************************************************************* 
    if _level = 1 then playfield:
    XXX.............................
-   .XX.............................
-   .XX.............................
-   .XX.............................
+   ..X.............................
+   ..X.............................
+   ..X.............................
    XXX.............................
    XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
    XXX..........................X..
