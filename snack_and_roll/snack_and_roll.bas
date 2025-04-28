@@ -60,6 +60,7 @@
    ; _b0_gameStart -> k (b0 = Game start/stop)
    ; _b4_gameLight -> k (b1 = Light on/off)
    ; _b5_gameWallOrRain -> k (b5 = 0 Wall / 1 Rain)
+   ; _b6_palyerslowMotion -> k (b6 = 0 Non attivo / 1 Attivo)
    ;*************************************************************************
    ;dim _SC_Back = w
    dim speedx = i
@@ -73,6 +74,7 @@
    ; questa variabile è usata per capire quanti "zuccheri" sono stati colpiti
    ; riparte da 0 ad ogni cambio schema/livello
    dim sugar_count = t
+   dim current_sugar = v
 
    dim _velocita = g
 
@@ -88,8 +90,9 @@
    dim _b0_gameStart = k
    dim _b4_gameLight = k
    dim _b5_gameWallOrRain = k
-   dim _b6_gameAnimation = k
+   dim _b6_palyerslowMotion = k
    dim _b7_gameMissile0Moving = k
+
 
 
    dim _BitOp_P0_M0_Dir = p
@@ -128,7 +131,7 @@ __inizialize
    ;*************************************************************************
    ; POSIZIONI PLAYER AND SPRITE INIZIALI
    ;*************************************************************************
-   player0x = 30 : player0y = 54 : player1y = 0 : player1x = 17 : ballx = 18 :bally = 18
+   player0x = 30 : player0y = 54 : player1y = 0 : player1x = 1 : ballx = 18 :bally = 18
 
 __startGame
    _b0_gameStart{0} = 0 ; Gioco non attivo
@@ -235,25 +238,33 @@ __main_loop
    ; speedy = può essere da 1 a 2 in modo randomico
    ;*************************************************************************
 
-   if frame_counter &2 then goto __skip_animation_player1
-   temp2 = 0
-   for o = 0 to 4
-      if pfread(2,o) then temp2 = temp2 + 1
-   next
-   if temp2 < 4 then goto __skip_animation_x_player1
+   ; >>> ASSE X PRIMA DI MUOVERE <<<
+   temp5 = (player1x-10)/4
+   if temp5 < 0 then temp5 = 0
+   temp6 = (player1y-5)/8
+   if temp6 < 0 then temp6 = 0
 
-   temp1=rand&2 + 1
-   ;>>>> RIMBALZO ASSE X <<<<
-   player1x = player1x + speedx
-   if player1x <= 18 then speedx = temp1
-   if player1x >= 140 then speedx = 0 - temp1
-__skip_animation_x_player1
+   if pfread(temp5,temp6) then speedx = 0 - speedx  ; Cambia direzione
 
-   ;>>>> RIMBALZO ASSE Y <<<<
-   player1y = player1y + speedy
-   if player1y <= 5 then speedy = temp1
-   if player1y >= 40 then speedy = 0 - temp1
-__skip_animation_player1
+   player1x = player1x + speedx  ; SOLO DOPO aggiorna
+
+   ; Check confini schermo
+   if player1x <= 18 then speedx = (rand & 1) + 1
+   if player1x >= 140 then speedx = 0-((rand & 1) + 1)
+
+   ; >>> ASSE Y PRIMA DI MUOVERE <<<
+   temp5 = (player1x-10)/4
+   temp6 = (player1y-5)/8
+   if temp5 < 0 then temp5 = 0
+   if temp6 < 0 then temp6 = 0
+
+   if pfread(temp5,temp6) then speedy = 0 - speedy  ; Cambia direzione
+
+   player1y = player1y + speedy  ; SOLO DOPO aggiorna
+
+   ; Check confini schermo
+   if player1y <= 5 then speedy = (rand & 1) + 1
+   if player1y >= 40 then speedy = 0-((rand & 1) + 1)
 
    ;*************************************************************************
    ; ZUCCHERO (MISSILE1)
@@ -264,8 +275,8 @@ __skip_animation_player1
    ; !!!!IMPORTANTE distruggere il missile dopo il contatto che si ottiene
    ; facendolo sparire dallo schermo missile1x = 255 e missile1y = 255
    ;*************************************************************************
-   if sugar_count <= 7 then missile1x = _data_sugar_x[sugar_count] : missile1y = _data_sugar_y[sugar_count] 
-   if collision(player0, missile1) then missile1x = 255 : missile1y = 255 : sugar_count = sugar_count + 1 : score = score + 80000 : goto __done
+   if sugar_count <= 7 && current_sugar = 0 then current_sugar = (rand & 127) +10: missile1x =  current_sugar : missile1y = (rand & 62) + 10
+   if collision(player0, missile1) then missile1x = 255 : missile1y = 255 : current_sugar = 0 : sugar_count = sugar_count + 1 : score = score + 160000 : goto __done
 
    ;*************************************************************************
    ; LUCE (PLAYFIELD)
@@ -275,13 +286,18 @@ __skip_animation_player1
    ; !!IMP Cambia il colore del playfield tranne la fascia centrale
    ;*************************************************************************
    ;>>>> SPEGNIMENTO <<<<
-   if seconds_counter && seconds_counter & 15 = 0 then _b4_gameLight{4} = 0
+   if seconds_counter && seconds_counter & 30 = 0 then _b4_gameLight{4} = 0
 
    ;>>>> ACCENSIONE <<<<
    temp5 = (player0x-10)/4
    temp6 = (player0y-5)/8
    if !_b4_gameLight{4} && pfread(temp5,temp6) then _b4_gameLight{4} =  1
 
+   ;*************************************************************************
+   ; SLOW MOTION 
+   ;_________________________________________________________________________
+   ; dopo 8 secondi si disattiva lo slow motion
+   if seconds_counter & 7 = 0 then _b6_palyerslowMotion{6} = 0
 
    ;*************************************************************************
    ; PLAYFIELD
@@ -313,10 +329,11 @@ __skip_animation_player1
    j = 2 ; parte bassa
 __loop_objects
    temp1 = _velocita - 1
-   if (seconds_counter&temp1) = 0 && frame_counter = x && (objects[_level]&temp5)> 0 then callmacro tazze x j 3 ; TAZZE
-   temp2 = _level+ 1
+   temp2 = _level -1
+   if (seconds_counter&temp1) = 0 && frame_counter = x && (objects[temp2]&temp5)> 0 then callmacro tazze x j 3 ; TAZZE
+   temp2 = temp2 + 1
    if (seconds_counter&temp1) = 0 && frame_counter = (x+1) && (objects[temp2]&temp5)> 0 then callmacro tazze x w 2 ; COLTELLI
-   temp2 = _level+ 2
+   temp2 = temp2+ 1
    if (seconds_counter&temp1) = 0 && frame_counter = (x+2) && (objects[temp2]&temp5)> 0 then callmacro chocoWall x j ; MURI
    ; TODO GOCCE
 
@@ -457,7 +474,7 @@ __Skip_Joystick_Precheck
    ;```````````````````````````````````````````````````````````````
    ;  Turns on missile0 movement.
    ;
-   _b7_gameMissile0Moving{7} = 1 : score = score - 80000 
+   _b7_gameMissile0Moving{7} = 1 : score = score - 10000 
 
    ;```````````````````````````````````````````````````````````````
    ;  Takes a 'snapshot' of player0 direction so missile0 will
@@ -739,20 +756,21 @@ end */
 
    temp6 = (player0y-5)/8
 
-   if temp5 < 34 then if pfread(temp5,temp6) then goto __Skip_Joy0_Up
+   if temp5 < 34 then if pfread(temp5,temp6) then _b6_palyerslowMotion{6} =1 :goto __Skip_Joy0_Up
 
    temp4 = (player0x-17)/4
 
-   if temp4 < 34 then if pfread(temp4,temp6) then goto __Skip_Joy0_Up
+   if temp4 < 34 then if pfread(temp4,temp6) then _b6_palyerslowMotion{6} =1 :goto __Skip_Joy0_Up
 
    temp3 = temp5 - 1
 
-   if temp3 < 34 then if pfread(temp3,temp6) then goto __Skip_Joy0_Up
+   if temp3 < 34 then if pfread(temp3,temp6) then _b6_palyerslowMotion{6} =1 :goto __Skip_Joy0_Up
 
    ;```````````````````````````````````````````````````````````````
    ;  Moves player0 up.
    ;
-   player0y = player0y - 1
+   if _b6_palyerslowMotion{6} then if (frame_counter & 3) = 0 then player0y = player0y - 1
+   if !_b6_palyerslowMotion{6} then player0y = player0y - 1 
    _Bit0_P0_Dir_Up{0} = 1
 
 __Skip_Joy0_Up
@@ -778,20 +796,23 @@ __Skip_Joy0_Up
 
    temp6 = (player0y)/8
 
-   if temp5 < 34 then if pfread(temp5,temp6) then goto __Skip_Joy0_Down
+   if temp5 < 34 then if pfread(temp5,temp6) then _b6_palyerslowMotion{6} = 1 :goto __Skip_Joy0_Down
 
    temp4 = (player0x-17)/4
 
-   if temp4 < 34 then if pfread(temp4,temp6) then goto __Skip_Joy0_Down
+   if temp4 < 34 then if pfread(temp4,temp6) then _b6_palyerslowMotion{6} = 1 :goto __Skip_Joy0_Down
 
    temp3 = temp5 - 1
 
-   if temp3 < 34 then if pfread(temp3,temp6) then goto __Skip_Joy0_Down
+   if temp3 < 34 then if pfread(temp3,temp6) then _b6_palyerslowMotion{6} = 1 :goto __Skip_Joy0_Down
+
+   if _b6_palyerslowMotion{6} then if (frame_counter & 3) = 0 then player0y = player0y + 1
+   if !_b6_palyerslowMotion{6} then player0y = player0y + 1 
+
 
    ;```````````````````````````````````````````````````````````````
    ;  Moves player0 down.
    ;
-   player0y = player0y + 1
    _Bit1_P0_Dir_Down{1} = 1
 
 
@@ -818,16 +839,18 @@ __Skip_Joy0_Down
 
    temp6 = (player0x-18)/4
 
-   if temp6 < 34 then if pfread(temp6,temp5) then goto __Skip_Joy0_Left
+   if temp6 < 34 then if pfread(temp6,temp5) then _b6_palyerslowMotion{6} = 1 : goto __Skip_Joy0_Left
 
    temp3 = (player0y-4)/8
 
-   if temp6 < 34 then if pfread(temp6,temp3) then goto __Skip_Joy0_Left
+   if temp6 < 34 then if pfread(temp6,temp3) then _b6_palyerslowMotion{6} = 1 : goto __Skip_Joy0_Left
 
    ;```````````````````````````````````````````````````````````````
    ;  Moves player0 left.
    ;
-   player0x = player0x - 1
+   if _b6_palyerslowMotion{6} then if (frame_counter & 3) = 0 then player0x = player0x - 1
+   if !_b6_palyerslowMotion{6} then player0x = player0x - 1 
+
    _Bit2_P0_Dir_Left{2} = 1
 
 __Skip_Joy0_Left
@@ -853,16 +876,18 @@ __Skip_Joy0_Left
 
    temp6 = (player0x-9)/4
 
-   if temp6 < 34 then if pfread(temp6,temp5) then goto __Skip_Joy0_Right
+   if temp6 < 34 then if pfread(temp6,temp5) then _b6_palyerslowMotion{6} = 1 : goto __Skip_Joy0_Right
 
    temp3 = (player0y-4)/8
 
-   if temp6 < 34 then if pfread(temp6,temp3) then goto __Skip_Joy0_Right
+   if temp6 < 34 then if pfread(temp6,temp3) then _b6_palyerslowMotion{6} = 1 : goto __Skip_Joy0_Right
 
    ;```````````````````````````````````````````````````````````````
    ;  Moves player0 right.
    ;
-   player0x = player0x + 1
+   if _b6_palyerslowMotion{6} then if (frame_counter & 3) = 0 then player0x = player0x + 1
+   if !_b6_palyerslowMotion{6} then player0x = player0x + 1 
+
    _Bit3_P0_Dir_Right{3} = 1
 __Skip_Joy0_Right
 
@@ -883,7 +908,7 @@ __Skip_Joy0_Right
    ; tra Biscotto e Bocca: decremento la barra della salute
    ; tra Missile e Bocca: incremento dei punti di una unità
    ; tra Biscotto e Zucchero : incremento dei punti e individuazione del
-   ; prossiomo zuccehro da prendere
+   ; prossimo zucchero da prendere
    ;*************************************************************************   
    if collision(player0, player1) && frame_counter = 0 then goto __decrease_health_bar
    if collision(missile0, player1) && frame_counter = 0 then score = score + 10 
@@ -931,7 +956,7 @@ __playfield
    ..X.............................
    ..X.............................
    ..X.............................
-   XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
+   XXXXXXXXXXXXXXXXXXXXXXXXXXXXX...
    XXX..........................X..
    .X..........................XXX.
    ................................
@@ -939,8 +964,12 @@ __playfield
    X.X.X...........................
 end
 
+
+
 __skip_to_draw_playfield
-   
+
+
+
    drawscreen
    goto __main_loop
 
@@ -949,11 +978,11 @@ __skip_to_draw_playfield
    46,68,90,112,46,68,90,112  ; Coordinate x degli zuccherini
 end
    data _data_sugar_y
-   72, 72, 72, 72, 26, 26, 26, 26  ; Coordinate y degli zuccherini
+   82, 62, 82, 62, 26, 26, 26, 26  ; Coordinate y degli zuccherini
 end
       ; TAZZE, ; COLTELLI ; GOCCE, MURI ; VIE DI ACCESSO
    data objects
-         %01100000, %10000000, %00001110, %10000000, %11111111;,
+         %00100000, %10000000, %00000100, %10000000, %11111111;,
          /* %01000000, %10000000, %00001110, %10000000, %11111111,
          %01000000, %10000000, %01100011, %10000000, %11111111,
          %01000000, %10000000, %01100011, %10000000, %11111111,
