@@ -74,8 +74,7 @@
    ; riparte da 0 ad ogni cambio schema/livello
    dim sugar_count = t
 
-   dim wall1 = g
-   dim wall2 = h
+   dim _velocita = g
 
    dim shoot = l
 
@@ -102,8 +101,6 @@
    dim _Bit5_M0_Dir_Down = p
    dim _Bit6_M0_Dir_Left = p
    dim _Bit7_M0_Dir_Right = p
-
-
 
 __inizialize
    ;*************************************************************************
@@ -140,6 +137,9 @@ __startGame
    _level = 1
    _animation = 0
    speedx = 1: speedy = 1
+
+   _velocita = 8
+
 
    ;Per evitare che si veda nella schermata di presentazione
    scorecolor = 255
@@ -201,7 +201,7 @@ __main_loop
    COLUP1 = _P1_color 
    COLUP0 = _P0_color 
    NUSIZ1 = $20
-   COLUBK = 0 
+   ;COLUBK = 0 
    ;Se premo select inizializzo il gioco
    if switchreset && !_b0_gameStart{0} then _b0_gameStart{0} = 1 : pfscorecolor = _base_color :goto __playfield
    ;if switchselect && !_b0_gameStart{0} then _level = _level + 1 : goto __playfield
@@ -223,44 +223,55 @@ __main_loop
    if frame_counter > frame_limit then frame_counter = 0 : seconds_counter = seconds_counter + 1
 
    ;*************************************************************************
-   ; PLAYER 1 (BOCCA)
+   ; BOCCA (PLAYER1)
    ;_________________________________________________________________________
-   ; La bocca si muove su e giù dentro le musa di cioccolato in protezione 
+   ; La bocca si muove su e giù dentro le mura di cioccolato in protezione 
    ; della "pillola" magica, il giocatore è costrattto ad abbattere tutto
    ; il muro di ciccolato per poter accedere alla pillola ma una volta che
-   ; sblocca la bocca può uscire ed inseguire il giocatore
+   ; sblocca il muro la bocca può uscire ed inseguire il giocatore
+   ; Il movimento avviene ogni 2 millisecondi 
+   ;-------------------------------------------------------------------------
+   ; speedx = può essere da 1 a 2 in modo randomico
+   ; speedy = può essere da 1 a 2 in modo randomico
    ;*************************************************************************
-   ;if frame_counter = 0 && seconds_counter & 2 = 0 then temp5 = rand : player1x = temp5 & 31 : player1y = temp5 & 7
-   /* if frame_counter &2 && player1y < 30 then player1y = player1y + 1
-   if frame_counter &2 && player1y >= 30 then player1y = 0 */
-   ;if frame_counter&2 then player1x = 20: player1y = player1y + 1
 
-
-
-
-   ;--- Rimbalzo contro il playfield
    if frame_counter &2 then goto __skip_animation_player1
    temp2 = 0
    for o = 0 to 4
       if pfread(2,o) then temp2 = temp2 + 1
    next
-   if temp2 = 4 then player1x = player1x + speedx
-   player1y = player1y + speedy
-   temp1=rand&2 + 1
-   if player1x <= 18 then speedx = temp1 ;rem Rimbalza a destra con velocità random 1..2
-   if player1x >= 140 then speedx = 0 - temp1  ; Rimbalza a sinistra
-   if player1y <= 5 then speedy = temp1   ; Rimbalza in basso
-   if player1y >= 40 then speedy = 0 - temp1  ; Rimbalza in alto
+   if temp2 < 4 then goto __skip_animation_x_player1
 
+   temp1=rand&2 + 1
+   ;>>>> RIMBALZO ASSE X <<<<
+   player1x = player1x + speedx
+   if player1x <= 18 then speedx = temp1
+   if player1x >= 140 then speedx = 0 - temp1
+__skip_animation_x_player1
+
+   ;>>>> RIMBALZO ASSE Y <<<<
+   player1y = player1y + speedy
+   if player1y <= 5 then speedy = temp1
+   if player1y >= 40 then speedy = 0 - temp1
 __skip_animation_player1
 
-
+   ;*************************************************************************
+   ; ZUCCHERO (MISSILE1)
+   ;_________________________________________________________________________
+   ; Gli zuccheri nel playfield sono 8 e verranno visualizzati uno alla volta
+   ; Il player una volta che viene a contatto con lo zucchero aumenta di una
+   ; unità e si passa al prossimo zucchero da catturare
+   ; !!!!IMPORTANTE distruggere il missile dopo il contatto che si ottiene
+   ; facendolo sparire dallo schermo missile1x = 255 e missile1y = 255
+   ;*************************************************************************
+   if sugar_count <= 7 then missile1x = _data_sugar_x[sugar_count] : missile1y = _data_sugar_y[sugar_count] 
+   if collision(player0, missile1) then missile1x = 255 : missile1y = 255 : sugar_count = sugar_count + 1 : score = score + 80000 : goto __done
 
    ;*************************************************************************
-   ; LUCE
+   ; LUCE (PLAYFIELD)
    ;_________________________________________________________________________
-   ; dopo 16 secondi la luce si spegne per accenderla ci si deve posizonare
-   ; sotto la lampada (dal basso verso l'alto)
+   ; dopo 16 secondi la luce si spegne automaticamente per accenderla ci si 
+   ; deve posizonare sotto la lampada (dal basso verso l'alto)
    ; !!IMP Cambia il colore del playfield tranne la fascia centrale
    ;*************************************************************************
    ;>>>> SPEGNIMENTO <<<<
@@ -271,20 +282,6 @@ __skip_animation_player1
    temp6 = (player0y-5)/8
    if !_b4_gameLight{4} && pfread(temp5,temp6) then _b4_gameLight{4} =  1
 
-   ;*************************************************************************
-   ; ZUCCHERO
-   ;_________________________________________________________________________
-   ; il missile 1 è cosiderato lo zucchero con effetto flickering ogni
-   ; 2 millisecondi e deve essere entro gli 8 zuccherini preconfigurati
-   ; sugar_count bitmask inizialmente = 255 => %11111111
-   ;*************************************************************************
-   
-   if seconds_counter&2=0 && frame_counter = 0 && sugar_count < 7 then temp1 = (rand&7) : missile1x = _data_sugar_x[temp1] : missile1y = _data_sugar_y[temp1] 
-   if collision(player0, missile1) then sugar_count = sugar_count + 1  : goto __increment_score
-skip_sugar
-
-
-   ;if frame_counter & 2 && sugar_count < 8 then missile1x = _data_sugar_x[sugar_count] : missile1y = _data_sugar_y[sugar_count] else missile1y =255
 
    ;*************************************************************************
    ; PLAYFIELD
@@ -309,18 +306,19 @@ skip_sugar
       ;if (seconds_counter & temp4) = 0 && frame_counter = x && objects[0] & temp5 > 0 then callmacro tazze x 8 9 10 3 4 2
       temp5 = temp5 * 2
    next */
-   temp4 = 0;3 - _level   ; VELOCITA'
+   ;temp4 = 0;3 - _level   ; VELOCITA'
    temp5 = 1            ; INDICE PER PIANO SUPERIORE %00001111 : 2^0 = 1  -> 2^1 = 2  -> 2^2 = 4  -> 2^3 = 8
    x = 0
    w = 0 ; parte alta
    j = 2 ; parte bassa
 __loop_objects
-   temp1 = _level -1
-
-   if (seconds_counter&temp4) = 0 && frame_counter = x && (objects[0]&temp5)> 0 then callmacro tazze x j 3 ; TAZZE
-   if (seconds_counter&temp4) = 0 && frame_counter = x && (objects[1]&temp5)> 0 then callmacro tazze x w 2 ; COLTELLI
-   if (seconds_counter&temp4) = 0 && frame_counter = m && (objects[2]&temp5)> 0 then callmacro chocoWall x j
-
+   temp1 = _velocita - 1
+   if (seconds_counter&temp1) = 0 && frame_counter = x && (objects[_level]&temp5)> 0 then callmacro tazze x j 3 ; TAZZE
+   temp2 = _level+ 1
+   if (seconds_counter&temp1) = 0 && frame_counter = (x+1) && (objects[temp2]&temp5)> 0 then callmacro tazze x w 2 ; COLTELLI
+   temp2 = _level+ 2
+   if (seconds_counter&temp1) = 0 && frame_counter = (x+2) && (objects[temp2]&temp5)> 0 then callmacro chocoWall x j ; MURI
+   ; TODO GOCCE
 
 /*   ;============
    ;=  GOCCE   =
@@ -336,8 +334,6 @@ __loop_objects
    if frame_counter = 40 && _level >=1 then pfpixel a 4 off 
    if frame_counter = 45 && _level >=2 then pfpixel t 4 off
    */
-
-
 
    temp5 = temp5 * 2
    x = x + 7
@@ -429,6 +425,10 @@ __skip_wall
    if frame_counter = 0 && seconds_counter & 15 = 0 then goto __decrease_timer_bar
    if pfscore1 = 0 then goto __decrease_health_bar
    if pfscore2 = 0 || _level = 10 then goto __gameOver
+   if frame_counter&32 && pfscore1<8 then COLUBK = 10 : goto __skip_bck
+   COLUBK = 0
+
+__skip_bck
 
    if !joy0up && !joy0down && !joy0left && !joy0right then goto __Skip_Joystick_Precheck
    
@@ -446,8 +446,8 @@ __Skip_Joystick_Precheck
    ;
    ;```````````````````````````````````````````````````````````````
    ;  Skips this section if the fire button is not pressed.
-   ;
-   if !joy0fire then goto __Skip_Fire
+   ;Se non 
+   if !joy0fire || score <= 0 then goto __Skip_Fire
 
    ;```````````````````````````````````````````````````````````````
    ;  If missile0 is moving, skip this subsection.
@@ -457,7 +457,7 @@ __Skip_Joystick_Precheck
    ;```````````````````````````````````````````````````````````````
    ;  Turns on missile0 movement.
    ;
-   _b7_gameMissile0Moving{7} = 1
+   _b7_gameMissile0Moving{7} = 1 : score = score - 80000 
 
    ;```````````````````````````````````````````````````````````````
    ;  Takes a 'snapshot' of player0 direction so missile0 will
@@ -513,8 +513,7 @@ __Skip_Fire
    ;  Deletes pfpixel.
    ;
    ;if objects[5] & 4 = 0 then goto __Delete_Missile
-   temp2 = frame_counter & 7
-   if temp6 = 5 && temp5 >temp2 then goto __Delete_Missile
+   if temp6 = 5 then goto __Delete_Missile
    if temp6 > 5 then goto __Delete_Missile
    pfpixel temp5 temp6 off
 
@@ -887,7 +886,8 @@ __Skip_Joy0_Right
    ; prossiomo zuccehro da prendere
    ;*************************************************************************   
    if collision(player0, player1) && frame_counter = 0 then goto __decrease_health_bar
-   if collision(missile0, player1) then goto __increment_score
+   if collision(missile0, player1) && frame_counter = 0 then score = score + 10 
+   if collision(player0, ball) && frame_counter = 0 then goto __change_level
    ;if collision(player0, missile1) && sugar_count <= 8 then sugar_count = sugar_count + 1 : goto __increment_score
    goto __done
 
@@ -899,9 +899,17 @@ __decrease_health_bar
    pfscore2 = pfscore2 / 4
    if score > 0 then score = score - 1
    goto __done
-
+/* 
 __increment_score
-   score=score+1
+   score=score+1 */
+
+__change_level
+   score = score + 100 
+   _level = _level + 1
+   if _level > 10 then goto __startGame
+   sugar_count = 0
+   if _velocita < 2 then _velocita = 2
+   _velocita = _velocita - 2
 
 __done
    goto __skip_to_draw_playfield
@@ -913,16 +921,16 @@ __gameOver
 __playfield
 
    ;*************************************************************************
-   ; LIVELLO 1
+   ; PLAYFIELD LIVELLI
    ;_________________________________________________________________________
-   ; TO DO
+   ; Uno generico per semplificare
    ;************************************************************************* 
    if _level = 1 then playfield:
-   XXX.............................
    ..X.............................
    ..X.............................
    ..X.............................
-   XXX.............................
+   ..X.............................
+   ..X.............................
    XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
    XXX..........................X..
    .X..........................XXX.
@@ -930,9 +938,6 @@ __playfield
    XXX.............................
    X.X.X...........................
 end
-
-
-   if _level > 42 then _level = 0 : goto __startGame
 
 __skip_to_draw_playfield
    
@@ -944,15 +949,24 @@ __skip_to_draw_playfield
    46,68,90,112,46,68,90,112  ; Coordinate x degli zuccherini
 end
    data _data_sugar_y
-   26, 26, 26, 26, 72, 72, 72, 72  ; Coordinate y degli zuccherini
+   72, 72, 72, 72, 26, 26, 26, 26  ; Coordinate y degli zuccherini
 end
       ; TAZZE, ; COLTELLI ; GOCCE, MURI ; VIE DI ACCESSO
    data objects
-      %01100000, %10000000, %00001110, %10000000, %11111111 ;LIVELLO 1
-      %01000000, %10000000, %01100011, %10000000, %11111111 ;LIVELLO 2
+         %01100000, %10000000, %00001110, %10000000, %11111111;,
+         /* %01000000, %10000000, %00001110, %10000000, %11111111,
+         %01000000, %10000000, %01100011, %10000000, %11111111,
+         %01000000, %10000000, %01100011, %10000000, %11111111,
+         %01000000, %10000000, %01100011, %10000000, %11111111,
+         %01000000, %10000000, %01100011, %10000000, %11111111,
+         %01000000, %10000000, %01100011, %10000000, %11111111,
+         %01000000, %10000000, %01100011, %10000000, %11111111,
+         %01000000, %10000000, %01100011, %10000000, %11111111,
+         %01000000, %10000000, %01100011, %10000000, %11111111 ;LIVELLO 2 */
 end
-   data bitmasks
-   1,2,4,8,128,64,32,16
+
+   data divisor
+   28,64,32,16,8,4,2,1
    ;128,64,32,16,8,4,2,1
 end
    ;=======================================================================
@@ -993,10 +1007,6 @@ end
    o = {2} -2
    pfpixel u o on
 end
-   ; {1} = inizio, {2} = altezza, {3} = larghezza
-   /* macro tazze
-      temp3 = {1} + {3} 
-      pfvline {1} {2} temp3 flip 
-      temp3 = temp3 + 1
-      pfpixel temp3 {4} flip
-end */
+   ; {1} = Sezione dello score
+   ; {2} = Tipologia che corrisponde al punteggio da aggiungere
+
