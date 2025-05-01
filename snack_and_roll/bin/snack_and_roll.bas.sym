@@ -1,12 +1,12 @@
 --- Symbol List (sorted by symbol)
 0.21stcentury            0001                  
-0.__cambio_livello       fe88              (R )
-0.__clean_playfield      fed4              (R )
-0.__decrease_health_bar  fe60              (R )
-0.__decrease_timer_bar   fe52              (R )
+0.__cambio_livello       fe82              (R )
+0.__clean_playfield      fece              (R )
+0.__decrease_health_bar  fe5a              (R )
+0.__decrease_timer_bar   fe4c              (R )
 0.__Delete_Missile       fb7c              (R )
-0.__done                 fec8              (R )
-0.__gameOver             fecb              (R )
+0.__done                 fec2              (R )
+0.__gameOver             fec5              (R )
 0.__inizialize           f466                  
 0.__loop_objects         f689              (R )
 0.__main_loop            f53e              (R )
@@ -19,7 +19,7 @@
 0.__Skip_Joystick_Precheck f9e7              (R )
 0.__Skip_Missile         fb88              (R )
 0.__skip_oggetti         f99a                  
-0.__skip_to_draw_playfield fed9              (R )
+0.__skip_to_draw_playfield fed3              (R )
 0.__startGame            f4d2              (R )
 0.condpart0              f555                  
 0.condpart1              f55a                  
@@ -52,10 +52,9 @@
 0.condpart123            fe20                  
 0.condpart124            fe26                  
 0.condpart125            fe2d                  
-0.condpart126            fe33                  
-0.condpart127            fe4c                  
-0.condpart128            fe9f                  
-0.condpart129            feac                  
+0.condpart126            fe46                  
+0.condpart127            fe99                  
+0.condpart128            fea6                  
 0.condpart13             f62f                  
 0.condpart14             f63b                  
 0.condpart15             f64d                  
@@ -253,48 +252,46 @@
 0.L0181                  fe16                  
 0.L0182                  fe1c                  
 0.L0183                  fe29                  
-0.L0184                  fe48                  
-0.L0185                  fe4f                  
-0.L0186                  fe52                  
-0.L0187                  fe58                  
-0.L0188                  fe5d                  
-0.L0189                  fe60                  
+0.L0184                  fe42                  
+0.L0185                  fe49                  
+0.L0186                  fe4c                  
+0.L0187                  fe52                  
+0.L0188                  fe57                  
+0.L0189                  fe5a                  
 0.L019                   f466                  
-0.L0190                  fe66                  
-0.L0191                  fe7b                  
-0.L0192                  fe81                  
-0.L0193                  fe85                  
-0.L0194                  fe88                  
-0.L0195                  fe97                  
-0.L0196                  fe99                  
-0.L0197                  fea2                  
-0.L0198                  fea6                  
-0.L0199                  feb0                  
+0.L0190                  fe60                  
+0.L0191                  fe75                  
+0.L0192                  fe7b                  
+0.L0193                  fe7f                  
+0.L0194                  fe82                  
+0.L0195                  fe91                  
+0.L0196                  fe93                  
+0.L0197                  fe9c                  
+0.L0198                  fea0                  
+0.L0199                  feaa                  
 0.L02                    f466                  
 0.L020                   f466                  
-0.L0200                  feb7                  
-0.L0201                  febd                  
-0.L0202                  fec5                  
-0.L0203                  fec8                  
-0.L0204                  fecb                  
-0.L0205                  fed1                  
-0.L0206                  fed4                  
-0.L0207                  fed9                  
-0.L0208                  fedc                  
-0.L0209                  fedf                  
+0.L0200                  feb1                  
+0.L0201                  feb7                  
+0.L0202                  febf                  
+0.L0203                  fec2                  
+0.L0204                  fec5                  
+0.L0205                  fecb                  
+0.L0206                  fece                  
+0.L0207                  fed3                  
+0.L0208                  fed6                  
+0.L0209                  fed9                  
 0.L021                   f466                  
-0.L0210                  feea                  
-0.L0211                  fef5                  
-0.L0212                  ff49                  
-0.L0219                  ff49                  
+0.L0210                  ff2d                  
+0.L0217                  ff2d                  
 0.L022                   f466                  
-0.L0223                  ff49                  
+0.L0221                  ff2d                  
+0.L0228                  ff2d                  
 0.L023                   f466                  
-0.L0230                  ff49                  
-0.L0234                  ff49                  
+0.L0232                  ff2d                  
+0.L0238                  ff2d                  
 0.L024                   f466                  
-0.L0240                  ff49                  
-0.L0248                  ff49                  
+0.L0246                  ff2d                  
 0.L025                   f466                  
 0.L026                   f466                  
 0.L027                   f466                  
@@ -387,7 +384,6 @@
 0.skip118then            fe02              (R )
 0.skip120then            fe10              (R )
 0.skip123then            fe29              (R )
-0.skip125then            fe48              (R )
 0.skip12then             f635              (R )
 0.skip17then             f679              (R )
 0.skip19then             f6eb              (R )
@@ -486,13 +482,11 @@
 0.skipL0179              fe10              (R )
 0.skipL0180              fe16              (R )
 0.skipL0182              fe29              (R )
-0.skipL0183              fe48              (R )
-0.skipL0184              fe4f              (R )
-0.skipL0196              fea2              (R )
-0.skipL0198              feb0              (R )
-0.skipL0209              feea              (R )
-0.skipL0210              fef5              (R )
-0.skipL0211              ff49              (R )
+0.skipL0183              fe42              (R )
+0.skipL0184              fe49              (R )
+0.skipL0196              fe9c              (R )
+0.skipL0198              feaa              (R )
+0.skipL0209              ff2d              (R )
 0.skipL061               f569              (R )
 0.skipL062               f587              (R )
 0.skipL063               f58f              (R )
@@ -517,57 +511,57 @@
 0.startkernel            f0a8              (R )
 1.CYCLES                 0000              (R )
 14.CYCLES                0000              (R )
-15.L0213                 f6b8                  
-15.L0214                 f6c2                  
-15.L0215                 f6c9                  
-15.L0215fory             f6cd              (R )
-15.L0216                 f6cd                  
-15.L0217                 f6da                  
-15.L0218                 f6e2                  
-16.L0213                 f718                  
-16.L0214                 f722                  
-16.L0215                 f729                  
-16.L0215fory             f72d              (R )
-16.L0216                 f72d                  
-16.L0217                 f73a                  
-16.L0218                 f742                  
-17.L0224                 f778                  
-17.L0225                 f77c                  
-17.L0226                 f783                  
-17.L0227                 f790                  
-17.L0228                 f797                  
-17.L0229                 f79e                  
-18.L0220                 f7d4                  
-18.L0221                 f7db                  
-18.L0222                 f7e2                  
-19.L0235                 f818                  
-19.L0236                 f81f                  
-19.L0237                 f826                  
-19.L0238                 f833                  
-19.L0239                 f835                  
+15.L0211                 f6b8                  
+15.L0212                 f6c2                  
+15.L0213                 f6c9                  
+15.L0213fory             f6cd              (R )
+15.L0214                 f6cd                  
+15.L0215                 f6da                  
+15.L0216                 f6e2                  
+16.L0211                 f718                  
+16.L0212                 f722                  
+16.L0213                 f729                  
+16.L0213fory             f72d              (R )
+16.L0214                 f72d                  
+16.L0215                 f73a                  
+16.L0216                 f742                  
+17.L0222                 f778                  
+17.L0223                 f77c                  
+17.L0224                 f783                  
+17.L0225                 f790                  
+17.L0226                 f797                  
+17.L0227                 f79e                  
+18.L0218                 f7d4                  
+18.L0219                 f7db                  
+18.L0220                 f7e2                  
+19.L0233                 f818                  
+19.L0234                 f81f                  
+19.L0235                 f826                  
+19.L0236                 f833                  
+19.L0237                 f835                  
 2.CYCLES                 0002              (R )
-20.L0241                 f872                  
-20.L0242                 f879                  
-20.L0243                 f880                  
-20.L0244                 f88d                  
-20.L0245                 f88f                  
-20.L0246                 f8a1                  
-20.L0247                 f8a8                  
-21.L0231                 f8de                  
-21.L0232                 f8e5                  
-21.L0233                 f8ec                  
-22.condpart130           f945                  
-22.L0249                 f92d                  
-22.L0250                 f931                  
-22.L0251                 f935                  
-22.L0252                 f939                  
-22.L0252foru             f93d              (R )
-22.L0253                 f93d                  
-22.L0254                 f952                  
-22.L0255                 f957                  
-22.L0256                 f95e                  
-22.L0257                 f965                  
-22.skipL0253             f952              (R )
+20.L0239                 f872                  
+20.L0240                 f879                  
+20.L0241                 f880                  
+20.L0242                 f88d                  
+20.L0243                 f88f                  
+20.L0244                 f8a1                  
+20.L0245                 f8a8                  
+21.L0229                 f8de                  
+21.L0230                 f8e5                  
+21.L0231                 f8ec                  
+22.condpart129           f945                  
+22.L0247                 f92d                  
+22.L0248                 f931                  
+22.L0249                 f935                  
+22.L0250                 f939                  
+22.L0250foru             f93d              (R )
+22.L0251                 f93d                  
+22.L0252                 f952                  
+22.L0253                 f957                  
+22.L0254                 f95e                  
+22.L0255                 f965                  
+22.skipL0251             f952              (R )
 3.CYCLES                 0002              (R )
 _b0_gameStart            00de              (R )
 _b4_gameLight            00de              (R )
@@ -587,10 +581,6 @@ _current_lamp            00ea              (R )
 _current_object_level    00e1              (R )
 _current_sugar_x         00e9              (R )
 _current_sugar_y         00ed              (R )
-_data_sugar_x            fee2              (R )
-_data_sugar_x_length     0008                  
-_data_sugar_y            feed              (R )
-_data_sugar_y_length     0008                  
 _Edge_Bottom             0058              (R )
 _Edge_Right              0091              (R )
 _level                   00d5              (R )
@@ -617,8 +607,8 @@ aux3                     00f2
 aux4                     00f3                  
 aux5                     00f4                  
 aux6                     00f5                  
-b                        00d5              (R )
 B                        00d5                  
+b                        00d5              (R )
 backgroundchange         0000 ????         (R )
 ballheight               0092              (R )
 ballx                    0084              (R )
@@ -655,16 +645,16 @@ doneoverscan             f3cb
 down2                    f396              (R )
 DPC_kernel_options       0000 ????         (R )
 drawscreen               f3c6              (R )
-e                        00d8              (R )
 E                        00d8                  
+e                        00d8              (R )
 ECHOFIRST                0001                  
 ENABL                    001f              (R )
 ENAM0                    001d              (R )
 ENAM1                    001e              (R )
 endkernel                f179              (R )
 enterlastkernel          f128              (R )
-F                        00d9                  
 f                        00d9              (R )
+F                        00d9                  
 font                     0000 ????         (R )
 frame_counter            00d6              (R )
 frame_limit              0036              (R )
@@ -686,8 +676,8 @@ HMOVE                    002a              (R )
 HMP0                     0020              (R )
 HMP1                     0021              (R )
 HorPosLoop               f3e7              (R )
-i                        00dc              (R )
 I                        00dc                  
+i                        00dc              (R )
 initscore                f021              (R )
 INPT0                    0008                  
 INPT1                    0009                  
@@ -698,10 +688,10 @@ INPT5                    000d
 interlaced               0000 ????         (R )
 interrupted              0004                  
 INTIM                    0284              (R )
-J                        00dd                  
 j                        00dd              (R )
-k                        00de              (R )
+J                        00dd                  
 K                        00de                  
+k                        00de              (R )
 keepgoing                f28d              (R )
 keepgoingy               f2a9              (R )
 kernel                   f034              (R )
@@ -727,8 +717,8 @@ missile1height           0087              (R )
 missile1x                0083              (R )
 missile1y                0088              (R )
 multisprite              0000 ????         (R )
-N                        00e1                  
 n                        00e1              (R )
+N                        00e1                  
 no_blank_lines           0000 ????         (R )
 NO_ILLEGAL_OPCODES       0000 ????         (R )
 noeor                    f3c3              (R )
@@ -741,9 +731,9 @@ notright                 f327              (R )
 notup                    f373              (R )
 NUSIZ0                   0004              (R )
 NUSIZ1                   0005              (R )
-o                        00e2              (R )
 O                        00e2                  
-objects                  fef8              (R )
+o                        00e2              (R )
+objects                  fedc              (R )
 objects_length           0051                  
 objecty                  0085                  
 onedecup                 f32f              (R )
@@ -751,8 +741,8 @@ oneincup                 f378              (R )
 overscan                 f3c6                  
 overscan_time            0000 ????         (R )
 overscanloop             f3c6              (R )
-P                        00e3                  
 p                        00e3              (R )
+P                        00e3                  
 paddle                   0091                  
 PF0                      000d              (R )
 PF1                      000e              (R )
@@ -837,8 +827,8 @@ retroputer               0005
 rightloop                f316              (R )
 ROM2k                    0000 ????         (R )
 RSYNC                    0003                  
-S                        00e6                  
 s                        00e6              (R )
+S                        00e6                  
 score                    0093              (R )
 scorecolor               00a3              (R )
 scorefade                0001              (R )
@@ -884,8 +874,8 @@ tiny                     0007
 u                        00e8              (R )
 U                        00e8                  
 up2                      f34b              (R )
-v                        00e9              (R )
 V                        00e9                  
+v                        00e9              (R )
 var0                     00a4                  
 var1                     00a5                  
 var10                    00ae                  
@@ -946,14 +936,14 @@ VERSION_MACRO            0069
 VERSION_VCS              0069                  
 vertical_reflect         0000 ????         (R )
 VSYNC                    0000              (R )
-W                        00ea                  
 w                        00ea              (R )
+W                        00ea                  
 whimsey                  0006                  
 WSYNC                    0002              (R )
-x                        00eb              (R )
 X                        00eb                  
-y                        00ec              (R )
+x                        00eb              (R )
 Y                        00ec                  
-Z                        00ed                  
+y                        00ec              (R )
 z                        00ed              (R )
+Z                        00ed                  
 --- End of Symbol List.
