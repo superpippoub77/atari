@@ -60,8 +60,6 @@
    ; _b6_palyerslowMotion -> k (b6 = 0 Non attivo / 1 Attivo)
    ;*************************************************************************
    ;dim _SC_Back = w
-   dim speedx = i
-   dim speedy = q
    dim _level = b
    dim _current_object_level = n
    dim frame_counter  = c
@@ -120,7 +118,7 @@ __inizialize
    j = 0 : k = 0 : l = 0 : m = 0 : n = 0 : o = 0 : p = 0 : q = 0 : r = 0
    s = 0 : t = 0 : u = 0 : v = 0 : w = 0 : x = 0 : y = 0 : z = 0
 
-   pfscore1 = %11111111 : pfscore2 = %10101010 : score = 990000
+   pfscore1 = %11111111 : pfscore2 = %10101010
 
    ;*************************************************************************
    ; POSIZIONI PLAYER AND SPRITE INIZIALI
@@ -134,7 +132,6 @@ __startGame
    _b0_gameStart{0} = 0 ; Gioco non attivo
    _b4_gameLight{4} = 1 ; Luci accese di default
    _level = 1
-   speedx = 1: speedy = 1
    _velocita = 8
    _current_sugar_x = 146 : _current_sugar_y  = 146
 
@@ -208,35 +205,25 @@ __main_loop
    ;*************************************************************************
    ; BOCCA (PLAYER1)
    ;_________________________________________________________________________
-   ; La bocca si muove su e giù dentro le mura di cioccolato in protezione 
-   ; della "pillola" magica, il giocatore è costrattto ad abbattere tutto
-   ; il muro di ciccolato per poter accedere alla pillola ma una volta che
-   ; sblocca il muro la bocca può uscire ed inseguire il giocatore
-   ; Il movimento avviene ogni 2 millisecondi 
-   ;-------------------------------------------------------------------------
-   ; speedx = può essere da 1 a 2 in modo randomico
-   ; speedy = può essere da 1 a 2 in modo randomico
+   ; La bocca si muove all'interno del playfield in modo randomico, 
+   ; l'aggiornamento viene in base alla velocità dello schema di gioco
+   ; (inizialmente 8 secondi)
    ;*************************************************************************
-
-   ; >>> ASSE X PRIMA DI MUOVERE <<<
-   if seconds_counter<>frame_limit then goto __skip_movimento_bocca
-   player1x = (rand & 125) + 20
-   player1y = (rand & 80) + 8
-
-__skip_movimento_bocca
+   temp1 = _velocita - 1 
+   if frame_counter = 0 && seconds_counter & temp1 = 0 then player1x = (rand & 125) + 20 : player1y = (rand & 80) + 8
 
    ;*************************************************************************
    ; ZUCCHERO (MISSILE1)
    ;_________________________________________________________________________
    ; Gli zuccheri nel playfield sono 8 e verranno visualizzati uno alla volta
-   ; Il player una volta che viene a contatto con lo zucchero aumenta di 8
+   ; Il player una volta che viene a contatto con lo zucchero aumenta di 10
    ; unità degli spari
    ; !!!!IMPORTANTE distruggere il missile dopo il contatto che si ottiene
    ; facendolo sparire dallo schermo missile1x = 255 e missile1y = 255
    ;*************************************************************************
    if _current_sugar_x = 146 then _current_sugar_x = (rand & 125) + 20 : _current_sugar_y = (rand & 80) + 8
    if sugar_count < 8 && _current_sugar_x < 146 then missile1x = _current_sugar_x: missile1y = _current_sugar_y
-   if collision(player0, missile1) then missile1x = 255 : missile1y = 255 : sugar_count = sugar_count + 1 : score = score + 80000 : _current_sugar_x = 146
+   if collision(player0, missile1) then missile1x = 255 : missile1y = 255 : sugar_count = sugar_count + 1 : score = score + 100000 : _current_sugar_x = 146
 
    ;*************************************************************************
    ; LUCE (PLAYFIELD)
@@ -282,22 +269,19 @@ end
    if seconds_counter & 7 = 0 then _b6_palyerslowMotion{6} = 0
 
    ;*************************************************************************
-   ; CONTENITORE FINALE
+   ; CONTENITORE FINALE (BALL)
    ;_________________________________________________________________________
+   ; il sacchetto finale individuato come ball viene visualizzato solo dopo
+   ; aver trovato gli 8 zuccherini nel playfield
    ;*************************************************************************
    if frame_counter = frame_limit && sugar_count = 8 then ballx = 18  : bally = 18
 
    ;*************************************************************************
-   ; PLAYFIELD
+   ; PLAYFIELD DIAMICO
    ;_________________________________________________________________________
-   ; RIGA: 0 -> 4 (partono sempre dalla colonna 3)
-   ; Gocce di cioccolato:traslazione verticale
-   ; Barrette di ciccolato: traslazione orizzontale
-   ; RIGA: 7 -> 8
-   ; Lama del coltello
    ;*************************************************************************
 
-   temp5 = 1            ; INDICE PER PIANO SUPERIORE %00001111 : 2^0 = 1  -> 2^1 = 2  -> 2^2 = 4  -> 2^3 = 8
+   temp5 = 1 
    x = 0
    w = 0 ; parte alta
    j = 2 ; parte bassa
@@ -335,15 +319,19 @@ __skip_oggetti
    ; 1) ogni 16 secondi elimina uno spazio tempo
    ; 2) se lo spazio tempo è finito elimina una health
    ; 3) se non ci sono più health allora il gioco è completato o terminato
-   ; 4) fire check
+   ; 4) lampeggio in scadenza del tempo ogni frame_limit
    ;*************************************************************************
 
-   ; Effetto flash del background
-   if frame_counter=frame_limit && pfscore1 <=8  then COLUBK = frame_counter & 32 : COLUBK = rand&16
+   ; ---- 4 ---- (TO DO)
+   ;if frame_counter=frame_limit && pfscore1 <=8  then COLUBK = frame_counter & 32 : COLUBK = rand&16
 
+   ; ---- 1 ----
    if frame_counter = 0 && seconds_counter & 15 = 0 then goto __decrease_timer_bar
+   ; ---- 2 ----
    if pfscore1 = 0 then goto __decrease_health_bar
+   ; ---- 3 ----
    if pfscore2 = 0 || _level = 10 then goto __gameOver
+
 
    if !joy0up && !joy0down && !joy0left && !joy0right then goto __Skip_Joystick_Precheck
    
@@ -453,12 +441,12 @@ __skip_animation_player0
    %01100110
 end
 
-   /* if frame_counter & 8 <> 0 then player1:
+   if frame_counter & 8 <> 0 then player1:
    %01111110
    %11111111
    %11111111
    %01100110
-end */
+end
    if !_b0_gameStart{0} then goto __skip_to_draw_playfield
 
 
@@ -622,17 +610,18 @@ __Skip_Joy0_Right
    ; COLLISIONI 
    ;_________________________________________________________________________
    ; tra Biscotto e Bocca: decremento la barra della salute
-   ; tra Missile e Bocca: incremento dei punti di una unità
+   ; tra Missile e Bocca: incremento dei punti di 10 unità
    ; tra Biscotto e Zucchero : incremento dei punti e individuazione del
    ; prossimo zucchero da prendere
    ;*************************************************************************   
-   if collision(player0, player1) && frame_counter = 0 then player1x = 200 : player1y :200 :goto __decrease_health_bar
-   if collision(missile0, player1) && frame_counter = 0 then score = score + 10 
+   if collision(player0, player1) && frame_counter = 0 then goto __decrease_health_bar
+   if collision(missile0, player1) then score = score + 10 
    if collision(player0, ball) then goto __cambio_livello
    ;if collision(player0, missile1) && sugar_count <= 8 then sugar_count = sugar_count + 1 : goto __increment_score
    goto __done
 
 __decrease_timer_bar
+   player1x = 200 : player1y = 200
    pfscore1 = pfscore1 * 2
    goto __done
 
@@ -652,6 +641,7 @@ __cambio_livello
    _velocita = _velocita - 2
    ballx = 200 : bally = 200
    player0x = 30 : player0y = 54 
+   goto __clean_playfield
 
 __done
    goto __skip_to_draw_playfield
@@ -683,17 +673,18 @@ end
    ;=======================================================================
 
    ;0.TAZZE   1.COLTELLI 2.CIOCCOLATO 3.GOCCE    4.LAMPADE  5.TAVOLI   6.TRAGUARDO 7.PIANO
+   ; LIVELLI (10)
    data objects
-   %01000010, %00000000, %00000000,   %00000000, %00010000, %10100000, %00000000,  %00000111,  ; LIVELLO 1
-   %01000010, %00000000, %00000000,   %00000000, %00010000, %10100000, %00000000,  %00000111,  ; LIVELLO 2
-   %10101010, %00000000, %00000000,   %00000000, %00010000, %00010000, %00000001,  %11111111,  ; LIVELLO 3
-   %10101010, %00000000, %00000000,   %00000000, %00010000, %00010000, %00000001,  %11111111,  ; LIVELLO 4
-   %10101010, %00000000, %00000000,   %00000000, %00010000, %00010000, %00000001,  %11111111,  ; LIVELLO 5
-   %10101010, %00000000, %00000000,   %00000000, %00010000, %00010000, %00000001,  %11111111,  ; LIVELLO 6
-   %10101010, %00000000, %00000000,   %00000000, %00010000, %00010000, %00000001,  %11111111,  ; LIVELLO 7
-   %10101010, %00000000, %00000000,   %00000000, %00010000, %00010000, %00000001,  %11111111,  ; LIVELLO 8
-   %10101010, %00000000, %00000000,   %00000000, %00010000, %00010000, %00000001,  %11111111,  ; LIVELLO 9
-   %10101010, %00000000, %00000000,   %00000000, %00010000, %00010000, %00000001,  %11111111,  ; LIVELLO 10
+   %01000010, %00000000, %00000000,   %00000000, %00010000, %10100000, %00000000,  %00000111, 
+   %01000010, %00000000, %00000010,   %00000001, %00010000, %10100000, %00000000,  %00100111,   
+   %01000010, %00000000, %00000000,   %00000000, %00010000, %10100000, %00000000,  %00000111,
+   %01000010, %00000000, %00000000,   %00000000, %00010000, %10100000, %00000000,  %00000111,
+   %01000010, %00000000, %00000000,   %00000000, %00010000, %10100000, %00000000,  %00000111,
+   %01000010, %00000000, %00000000,   %00000000, %00010000, %10100000, %00000000,  %00000111,
+   %01000010, %00000000, %00000000,   %00000000, %00010000, %10100000, %00000000,  %00000111,
+   %01000010, %00000000, %00000000,   %00000000, %00010000, %10100000, %00000000,  %00000111,
+   %01000010, %00000000, %00000000,   %00000000, %00010000, %10100000, %00000000,  %00000111,
+   %01000010, %00000000, %00000000,   %00000000, %00010000, %10100000, %00000000,  %00000111,
    ;%01100000, %10000000, %00000110,   %00001000, %00010000, %00010000, %00000001,  %11111111   ; LIVELLO
 end
    macro tazze_coltelli
