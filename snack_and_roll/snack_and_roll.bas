@@ -685,7 +685,7 @@ end
       temp6 = {1} + 4
       ;TAZZA
       for y = {2} to temp5
-         pfhline {1} y temp6 on
+         pfhline {1} y temp6 flip
       next
       ;MANICO
       pfpixel temp6 temp5 flip ; manico
