@@ -12,44 +12,33 @@
    set romsize 4k
    set pal
 
-   ;****************************************************************
-   ;
-   ;  Some multiplication operations require you to include
-   ;  a module.
-   ;
-   ;include div_mul.asm
-
    ;*************************************************************************
    ; COSTANTI KERNEL
    ; ------------------------------------------------------------------------
    ; pfscore = abilitazione dello score
-   ; scorefade = effetto fade nello score
    ;*************************************************************************
    const pfscore = 1
-   const scorefade = 1
-   ;const pfrowheight=6
 
    ; limite dei bordi (suponendo un player di 8 pixel)
    const _P_Edge_Top = 8
-   const _Edge_Bottom = 88 ; 11 X 8 ???
+   const _Edge_Bottom = 88
    const _P_Edge_Left = 10
    const _Edge_Right = 145
 
    const _M_Edge_Top = 2
    const _M_Edge_Left = 2
 
-   ;colori di default
    const _base_color = $16
    const _P0_color = $2C
    const _P1_color = $30
-   
    const frame_limit = 54
+
    ;*************************************************************************
    ; VARIABILI
    ; ------------------------------------------------------------------------
    ; level -> b (1 = cucina, ...4 = ...)
-   ; frame_counter -> c => corrisponde a 60 frame in 1 secondo 
-   ; seconds_counter -> => contatore dei secondi
+   ; _frame_counter -> c => corrisponde a 60 frame in 1 secondo 
+   ; _seconds_counter -> => contatore dei secondi
    ; score -> l
    ; ........................................................................
    ; anination: posizone del player in movimento
@@ -59,21 +48,24 @@
    ; _b5_gameWallOrRain -> k (b5 = 0 Wall / 1 Rain)
    ; _b6_palyerslowMotion -> k (b6 = 0 Non attivo / 1 Attivo)
    ;*************************************************************************
-   ;dim _SC_Back = w
+
+   ; level
    dim _level = b
+
+   ; timer
+   dim _frame_counter  = c
+   dim _seconds_counter  = d
+
+
    dim _current_object_level = n
-   dim frame_counter  = c
-   dim seconds_counter  = d
 
    ; questa variabile è usata per capire quanti "zuccheri" sono stati colpiti
    ; riparte da 0 ad ogni cambio schema/livello
-   dim sugar_count = t
+   dim _sugar_count = t
    dim _current_sugar_x = v
    dim _current_sugar_y = z
 
-   dim _velocita = g
-
-   dim shoot = l
+   dim _speed = g
    dim _current_lamp = w
 
    ; FLAG DI CONFIGURAZIONE
@@ -98,10 +90,6 @@
    dim _Bit6_M0_Dir_Left = p
    dim _Bit7_M0_Dir_Right = p
 
-   ;Sound
-   dim lancio_timer = s
-   dim lancio_trigger = r
-
 __inizialize
    ;*************************************************************************
    ; INIZIALIZZAZIONE
@@ -112,35 +100,40 @@ __inizialize
    ; COLUP(0/1) = Colore del Player (0/1)
    ; COLUBK = Colore background
    ;*************************************************************************
-   ; SCORE AND LIVES
+   ; SCORE e LIVES
    ; ------------------------------------------------------------------------
    ; pfscore1 => timer
-   ; pfscore2 => energy
+   ; pfscore2 => lives
    ;*************************************************************************
    REFP0 = 0
+   AUDV1 = 12
+
+   ; Altezze oggeti base
+   missile0height = 4 
+   missile1height = 2
+   ballheight = 2
 
    a = 0 : b = 0 : c = 0 : d = 0 : e = 0 : f = 0 : g = 3 : h = 3 : i = 0
    j = 0 : k = 0 : l = 0 : m = 0 : n = 0 : o = 0 : p = 0 : q = 0 : r = 0
    s = 0 : t = 0 : u = 0 : v = 0 : w = 0 : x = 0 : y = 0 : z = 0
 
+   ; Impostazione del timer iniziale e delle vite
    pfscore1 = %11111111 : pfscore2 = %10101010
 
    ;*************************************************************************
    ; POSIZIONI PLAYER AND SPRITE INIZIALI
    ;*************************************************************************
    player0x = 30 : player0y = 54 
-   player1y = 0  : player1x = 1 
-   ballheight = 2 :ballx = 200 : bally = 200
-   missile0height = 4 : missile1height = 2
+   ballx = 200   : bally = 200
 
-__startGame
+__game_start
    _b0_gameStart{0} = 0 ; Gioco non attivo
    _b4_gameLight{4} = 1 ; Luci accese di default
    _b5_palyer1Enable{5} = 1
    _level = 1
-   _velocita = 8
+   _speed = 8
    _current_sugar_x = 146 : _current_sugar_y  = 146
-
+   score = 1000000
 
    ;Per evitare che si veda nella schermata di presentazione
    scorecolor = 0
@@ -196,18 +189,19 @@ __main_loop
    if !_b0_gameStart{0} then goto __skip_to_draw_playfield
 
    ;!!!!!!!!!!!!!!!!!!! START
-   if frame_counter&7 then AUDV0 = 0 : AUDV1 = 0
+   if _frame_counter&7 then AUDV0 = 0 : AUDV1 = 0
+   if _frame_counter>32 && _b6_palyerslowMotion{6} then AUDF0 = 30 : AUDC0 = 6: AUDV0 = 4
 
    ;*************************************************************************
    ; TIMER
    ;_________________________________________________________________________
-   ; E' stato definito un solo timer per il controllo degli oggetti e
-   ; playfield:
-   ; frame_counter = 0 a frame_limit(54) (circa 54 frame al secondo)
-   ; seconds_counter = 1 a ...
+   ; E' stato definita una variabile come timer per il controllo degli 
+   ; oggetti e le dinamiche del playfield:
+   ; _frame_counter = conteggio dei frame => frame_limit(54 al secondo)
+   ; _seconds_counter = conteggio dei secondi
    ;*************************************************************************
-   frame_counter = frame_counter + 1
-   if frame_counter > frame_limit then frame_counter = 0 : seconds_counter = seconds_counter + 1
+   _frame_counter = _frame_counter + 1
+   if _frame_counter > frame_limit then _frame_counter = 0 : _seconds_counter = _seconds_counter + 1
 
    ;*************************************************************************
    ; BOCCA (PLAYER1)
@@ -216,8 +210,8 @@ __main_loop
    ; l'aggiornamento viene in base alla velocità dello schema di gioco
    ; (inizialmente 8 secondi)
    ;*************************************************************************
-   temp1 = _velocita - 1 
-   if frame_counter = 0 && seconds_counter && _b5_palyer1Enable{5} then player1x = (rand & 125) + 20 : player1y = (rand & 80) + 8
+   temp1=_speed-1
+   if _frame_counter = 0 && _seconds_counter&temp1= 1&& _b5_palyer1Enable{5} then player1x = (rand & 125) + 20 : player1y = (rand & 80) + 8
 
    ;*************************************************************************
    ; ZUCCHERO (MISSILE1)
@@ -228,25 +222,25 @@ __main_loop
    ; !!!!IMPORTANTE distruggere il missile dopo il contatto che si ottiene
    ; facendolo sparire dallo schermo missile1x = 255 e missile1y = 255
    ;*************************************************************************
-   if _current_sugar_x = 146 then _current_sugar_x = (rand & 125) + 20 : _current_sugar_y = (rand & 80) + 8
-   if sugar_count < 8 && _current_sugar_x < 146 then missile1x = _current_sugar_x: missile1y = _current_sugar_y
-   if collision(player0, missile1) then AUDC0 = 4 : AUDF0 = 2 :missile1x = 255 : missile1y = 255 : sugar_count = sugar_count + 1 : score = score + 100000 : _current_sugar_x = 146
+   if _current_sugar_x = 146 || _seconds_counter&7= 1 then _current_sugar_x = (rand & 125) + 20 : _current_sugar_y = (rand & 80) + 8
+   if _sugar_count < 8 && _current_sugar_x < 146 then missile1x = _current_sugar_x: missile1y = _current_sugar_y
+   if collision(player0, missile1) then AUDV1=12 : AUDC1 = 4 : AUDF1 = 2 :missile1x = 255 : missile1y = 255 : _sugar_count = _sugar_count + 1 : score = score + 100000 : _current_sugar_x = 146
 
    ;*************************************************************************
    ; LUCE (PLAYFIELD)
    ;_________________________________________________________________________
-   ; dopo 16 secondi la luce si spegne automaticamente per accenderla ci si 
+   ; dopo 32 secondi la luce si spegne automaticamente per accenderla ci si 
    ; deve posizonare sotto la lampada (dal basso verso l'alto)
    ; !!IMP Cambia il colore del playfield tranne la fascia centrale
    ;*************************************************************************
    ;>>>> SPEGNIMENTO <<<<
-   ;if seconds_counter && seconds_counter & 15 = 0 then _b4_gameLight{4} = 0
+   if _seconds_counter > 0 && _seconds_counter&31 = 0 then _b4_gameLight{4} = 0
 
    ;>>>> ACCENSIONE <<<<
    ; TO DO VEDO AGGIUNGERE LA POSIONE DI __current_lamp ad X (es.: %10010000, due lampade alla posizone 128 e 16)
    temp5 = (player0x-10)/4
    temp6 = (player0y-5)/8
-   if !_b4_gameLight{4} && pfread(temp5,temp6) then _b4_gameLight{4} = 1
+   if !_b4_gameLight{4} && temp5 = _current_lamp then _b4_gameLight{4} = 1
 
    ;Background visibile
    if _b4_gameLight{4} then pfcolors:
@@ -273,7 +267,7 @@ end
    ;_________________________________________________________________________
    ; dopo 8 secondi si disattiva lo slow motion
    ;*************************************************************************
-   if seconds_counter & 7 = 0 then _b6_palyerslowMotion{6} = 0
+   if _seconds_counter&7 = 0 then _b6_palyerslowMotion{6} = 0
 
    ;*************************************************************************
    ; CONTENITORE FINALE (BALL)
@@ -281,7 +275,7 @@ end
    ; il sacchetto finale individuato come ball viene visualizzato solo dopo
    ; aver trovato gli 8 zuccherini nel playfield
    ;*************************************************************************
-   if frame_counter = frame_limit && sugar_count = 8 && _b5_palyer1Enable{5} then ballx = 18  : bally = 18
+   if _frame_counter = frame_limit && _sugar_count = 8 && !_b5_palyer1Enable{5} then ballx = 18  : bally = 18
 
    ;*************************************************************************
    ; PLAYFIELD DIAMICO
@@ -292,30 +286,32 @@ end
    x = 0
    w = 0 ; parte alta
    j = 2 ; parte bassa
+   temp3 = w
 __loop_objects
-   temp1 = _velocita - 1
+   temp1 = _speed - 1
    _current_object_level = (_level - 1) * 8
-   if (seconds_counter&temp1) = 0 && frame_counter = x && (objects[_current_object_level]&temp5)> 0 then callmacro tazze_coltelli x j 3 ; TAZZE
+   if (_seconds_counter&temp1) = 0 && _frame_counter = x && (objects[_current_object_level]&temp5)> 0 then callmacro tazze_coltelli x j 3 ; TAZZE
    temp2 = _current_object_level +1
-   if (seconds_counter&temp1) = 0 && frame_counter = (x+1) && (objects[temp2]&temp5)> 0 then callmacro tazze_coltelli x w 2 ; COLTELLI
+   if (_seconds_counter&temp1) = 0 && _frame_counter = (x+1) && (objects[temp2]&temp5)> 0 then callmacro tazze_coltelli x w 2 ; COLTELLI
    temp2 = _current_object_level+2
-   if (seconds_counter&temp1) = 0 && frame_counter = (x+2) && (objects[temp2]&temp5)> 0 then callmacro cioccolato x j if; MURI
+   if (_seconds_counter&temp1) = 0 && _frame_counter = (x+2) && (objects[temp2]&temp5)> 0 then callmacro cioccolato x j; MURI
    temp2 = _current_object_level+3
-   if (seconds_counter&temp1) = 0 && frame_counter = (x+3) && (objects[temp2]&temp5)> 0 then callmacro gocce x w; GOCCE
+   if (_seconds_counter&temp1) = 0 && _frame_counter = (x+3) && (objects[temp2]&temp5)> 0 then callmacro gocce x w; GOCCE
    
    ; !!! SALVA LA POSIZONE DELLE LAMPADE PER IL DISCORSO DI ATTIVAZIONE E DISATTIVAZIONE
    temp2 = _current_object_level+ 4
-   if (seconds_counter&temp1) = 0 && frame_counter = (x+4) && (objects[temp2]&temp5)> 0 then callmacro lampada x w : _current_lamp = objects[temp2]; LAMPADE
+   if (_seconds_counter&temp1) = 0 && _frame_counter = (x+4) && (objects[temp2]&temp5)> 0 then callmacro lampada x w : _current_lamp = x; LAMPADE
    temp2 = _current_object_level+ 5
-   if (seconds_counter&temp1) = 0 && frame_counter = (x+5) && (objects[temp2]&temp5)> 0 then callmacro tavolo x j ; TAVOLI
-   temp2 = _current_object_level+ 6
-   if (seconds_counter&temp1) = 0 && frame_counter = (x+6) && (objects[temp2]&temp5)> 0 then callmacro arrivo x w ; TRAGUARDO
+   if (_seconds_counter&temp1) = 0 && _frame_counter = (x+5) && (objects[temp2]&temp5)> 0 then callmacro tavolo x j ; TAVOLI
+   /*temp2 = _current_object_level+ 6
+    if (_seconds_counter&temp1) = 0 && _frame_counter = (x+6) && (objects[temp2]&temp5)> 0 then callmacro arrivo x w ; TRAGUARDO
+   */
    temp2 = _current_object_level+ 7
-   if (seconds_counter&temp1) = 0 && frame_counter = (x+7) && (objects[temp2]&temp5)> 0 then temp4 = objects[temp2]: callmacro piano temp4; PIANO
+   if (_seconds_counter&temp1) = 0 && _frame_counter = (x+7) && (objects[temp2]&temp5)> 0 then temp4 = objects[temp2]: callmacro piano temp4; PIANO
    temp5 = temp5 * 2
    x = x + 7
    
-   if temp5 = 16 && w = 0 then x = 0 : w = 6 : j = 8
+   if temp5 = 16 && w = 0 then x = 0 : w = 6 : j = 8 : temp3 = w
    if temp5 > 0 then goto __loop_objects
 
 __skip_oggetti
@@ -330,14 +326,14 @@ __skip_oggetti
    ;*************************************************************************
 
    ; ---- 4 ---- (TO DO)
-   ;if frame_counter=frame_limit && pfscore1 <=8  then COLUBK = frame_counter & 32 : COLUBK = rand&16
+   ;if _frame_counter=frame_limit && pfscore1 <=8  then COLUBK = _frame_counter & 32 : COLUBK = rand&16
 
    ; ---- 1 ----
-   if frame_counter = 0 && seconds_counter & 15 = 0 then goto __decrease_timer_bar
+   if _frame_counter = 0 && _seconds_counter & 15 = 0 then goto __decrease_timer_bar
    ; ---- 2 ----
    if pfscore1 = 0 then goto __decrease_health_bar
    ; ---- 3 ----
-   if pfscore2 = 0 || _level = 10 then goto __gameOver
+   if pfscore2 = 0 || _level = 10 then goto __game_over
 
 
    if !joy0up && !joy0down && !joy0left && !joy0right then goto __Skip_Joystick_Precheck
@@ -416,7 +412,7 @@ __Skip_Missile
    ; ------------------------------------------------------------------------
    ; solo se sto muovendo il joystick
    ;*************************************************************************
-   if !joy0right && !joy0left && !joy0up && !joy0down && seconds_counter then goto __skip_animation_player0
+   if !joy0right && !joy0left && !joy0up && !joy0down && _seconds_counter then goto __skip_animation_player0
 
    ;*************************************************************************
    ; ANIMAZIONE PLAYER
@@ -424,15 +420,14 @@ __Skip_Missile
    ; player 0 -> Biscotto => 8 x 4 pixel
    ; player 1 -> Bocca che mangia => 8 x 4 pixel
    ;*************************************************************************
-
-   if frame_counter && frame_counter & 7 = 0 then AUDV0 = 10 : AUDC0 = 12 : AUDF0 = 5 : player0:
+   if _frame_counter && _frame_counter & 7 = 0 then player0:
    %00011000
    %10111101
    %01011010
    %01111110
 end
 
-   if frame_counter  && frame_counter & 7 <> 0 then player0:
+   if _frame_counter  && _frame_counter & 7 <> 0 then player0:
    %00100100
    %10111101
    %01011010
@@ -441,14 +436,14 @@ end
 
 __skip_animation_player0
 
-   if frame_counter & 8 = 0 then player1:
+   if _frame_counter & 8 = 0 then player1:
    %01111110
    %10000001
    %10011001
    %01100110
 end
 
-   if frame_counter & 8 <> 0 then player1:
+   if _frame_counter & 8 <> 0 then player1:
    %01111110
    %11111111
    %11111111
@@ -491,7 +486,7 @@ end
    ;```````````````````````````````````````````````````````````````
    ;  Moves player0 up.
    ;
-   if _b6_palyerslowMotion{6} then if (frame_counter & 3) = 0 then player0y = player0y - 1
+   if _b6_palyerslowMotion{6} then if (_frame_counter & 3) = 0 then player0y = player0y - 1
    if !_b6_palyerslowMotion{6} then player0y = player0y - 1 
    _Bit0_P0_Dir_Up{0} = 1
 
@@ -528,7 +523,7 @@ __Skip_Joy0_Up
 
    if temp3 < 34 then if pfread(temp3,temp6) then _b6_palyerslowMotion{6} = 1 :goto __Skip_Joy0_Down
 
-   if _b6_palyerslowMotion{6} then if (frame_counter & 3) = 0 then player0y = player0y + 1
+   if _b6_palyerslowMotion{6} then if (_frame_counter & 3) = 0 then player0y = player0y + 1
    if !_b6_palyerslowMotion{6} then player0y = player0y + 1 
 
 
@@ -570,7 +565,7 @@ __Skip_Joy0_Down
    ;```````````````````````````````````````````````````````````````
    ;  Moves player0 left.
    ;
-   if _b6_palyerslowMotion{6} then if (frame_counter & 3) = 0 then player0x = player0x - 1
+   if _b6_palyerslowMotion{6} then if (_frame_counter & 3) = 0 then player0x = player0x - 1
    if !_b6_palyerslowMotion{6} then player0x = player0x - 1 
 
    _Bit2_P0_Dir_Left{2} = 1
@@ -607,7 +602,7 @@ __Skip_Joy0_Left
    ;```````````````````````````````````````````````````````````````
    ;  Moves player0 right.
    ;
-   if _b6_palyerslowMotion{6} then if (frame_counter & 3) = 0 then player0x = player0x + 1
+   if _b6_palyerslowMotion{6} then if (_frame_counter & 3) = 0 then player0x = player0x + 1
    if !_b6_palyerslowMotion{6} then player0x = player0x + 1 
 
    _Bit3_P0_Dir_Right{3} = 1
@@ -621,10 +616,10 @@ __Skip_Joy0_Right
    ; tra Biscotto e Zucchero : incremento dei punti e individuazione del
    ; prossimo zucchero da prendere
    ;*************************************************************************   
-   if collision(player0, player1) && frame_counter = 0 then goto __decrease_health_bar
+   if collision(player0, player1) && _frame_counter = 0 then goto __decrease_health_bar
    if collision(missile0, player1) then score = score + 10 : _b5_palyer1Enable{5} = 0 : player1x = 255 : player1y : 255
-   if collision(player0, ball) then goto __cambio_livello
-   ;if collision(player0, missile1) && sugar_count <= 8 then sugar_count = sugar_count + 1 : goto __increment_score
+   if collision(player0, ball) then goto __change_level
+   ;if collision(player0, missile1) && _sugar_count <= 8 then _sugar_count = _sugar_count + 1 : goto __increment_score
    goto __done
 
 __decrease_timer_bar
@@ -635,26 +630,29 @@ __decrease_timer_bar
 __decrease_health_bar
    pfscore2 = pfscore2 / 4
    score = score - 1
-   if pfscore2 = 0 then __gameOver
-   pfscore1 = 255
+   if pfscore2 = 0 then __game_over
+   pfscore1 = 255 : _sugar_count = 0
    goto __done
 
-__cambio_livello
+__change_level
    score = score + 100 
    _level = _level + 1
-   if _level > 10 then goto __startGame
-   sugar_count = 0
-   if _velocita < 2 then _velocita = 2
-   _velocita = _velocita - 2
+   if _level > 10 then goto __game_start
+   _sugar_count = 0
+   if _speed < 2 then _speed = 2
+   _speed = _speed - 2
    ballx = 200 : bally = 200
    player0x = 30 : player0y = 54 
+   AUDV1 = 12
+   AUDC1 = 6
+   AUDF1 = 2 
    _b5_palyer1Enable{5} = 1
    goto __clean_playfield
 
 __done
    goto __skip_to_draw_playfield
 
-__gameOver
+__game_over
    _b0_gameStart{0} = 0
    goto __skip_to_draw_playfield
 
@@ -676,11 +674,11 @@ __skip_to_draw_playfield
    ;0.TAZZE   1.COLTELLI 2.CIOCCOLATO 3.GOCCE    4.LAMPADE  5.TAVOLI   6.TRAGUARDO 7.PIANO
    ; LIVELLI (10)
    data objects
+   %01000010, %00000000, %00000000,   %00000001, %00010000, %10100000, %00000000,  %00000111, 
+   %01000010, %00000000, %00000000,   %00000000, %00010000, %10100000, %00000000,  %00000111,    
    %01000010, %00000000, %00000000,   %00000000, %00010000, %10100000, %00000000,  %00000111, 
-   %01000000, %00000000, %00000010,   %00000001, %00010000, %10100000, %00000000,  %00100111,   
-   %01000010, %00000000, %00000000,   %00000000, %00010000, %10100000, %00000000,  %00000111,
-   %01000010, %00000000, %00000000,   %00000000, %00010000, %10100000, %00000000,  %00000111,
-   %01000010, %00000000, %00000000,   %00000000, %00010000, %10100000, %00000000,  %00000111,
+   %01000010, %00000000, %00000000,   %00000000, %00010000, %10100000, %00000000,  %00000111, 
+   %01000010, %00000000, %00000000,   %00000000, %00010000, %10100000, %00000000,  %00000111, 
    %01000010, %00000000, %00000000,   %00000000, %00010000, %10100000, %00000000,  %00000111
    ;%01000010, %00000000, %00000000,   %00000000, %00010000, %10100000, %00000000,  %00000111
    ;%01000010, %00000000, %00000000,   %00000000, %00010000, %10100000, %00000000,  %00000111;,
@@ -693,15 +691,16 @@ end
       temp6 = {1} + 4
       ;TAZZA
       for y = {2} to temp5
-         pfhline {1} y temp6 flip
+         pfhline {1} y temp6 on
       next
       ;MANICO
-      pfpixel temp6 temp5 flip ; manico
+      pfpixel temp6 temp5 off ; manico
 end
 
    macro gocce
-      u = rand&{1}
-      o = rand&{2}
+      ;u = rand&2
+      o = rand&3
+      y = {2} + o
       /* pfpixel {1} {2} off
       o = {2} + 1 */
       pfpixel {1} o flip
@@ -715,14 +714,14 @@ end
       u = {1} + 4
       o = {2} -2
       ;PEZZETTINO
-      pfpixel u o flip
+      pfpixel u o on
 end
 
-   macro arrivo
+   /* macro arrivo
       u = {1} + 3
       o = {2} + 4
       pfvline u {2} o on
-end
+end */
 
    macro lampada
       o = {1} + 2
@@ -741,7 +740,7 @@ end
       pfpixel {1} u on : pfpixel o u on
       ; SEDIA
       o = o + 2
-      pfpixel o u flip 
+      pfpixel o u on 
 end
 
    macro piano
