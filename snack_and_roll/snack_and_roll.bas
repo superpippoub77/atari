@@ -79,6 +79,7 @@
    ; FLAG DI CONFIGURAZIONE
    dim _b0_gameStart = k
    dim _b4_gameLight = k
+   dim _b5_palyer1Enable = k
    dim _b6_palyerslowMotion = k
    dim _b7_gameMissile0Moving = k
 
@@ -96,6 +97,10 @@
    dim _Bit5_M0_Dir_Down = p
    dim _Bit6_M0_Dir_Left = p
    dim _Bit7_M0_Dir_Right = p
+
+   ;Sound
+   dim lancio_timer = s
+   dim lancio_trigger = r
 
 __inizialize
    ;*************************************************************************
@@ -131,6 +136,7 @@ __inizialize
 __startGame
    _b0_gameStart{0} = 0 ; Gioco non attivo
    _b4_gameLight{4} = 1 ; Luci accese di default
+   _b5_palyer1Enable{5} = 1
    _level = 1
    _velocita = 8
    _current_sugar_x = 146 : _current_sugar_y  = 146
@@ -181,7 +187,7 @@ __main_loop
    COLUP0 = _P0_color 
    NUSIZ1 = $20
    CTRLPF = $21
-   
+  
    ;Se premo select inizializzo il gioco
    if switchreset && !_b0_gameStart{0} then _b0_gameStart{0} = 1 : scorecolor = _base_color : pfscorecolor = _base_color :goto __clean_playfield
    if switchselect && !_b0_gameStart{0} then _level = _level + 1 : pfhline 0 6 _level on : goto __skip_to_draw_playfield
@@ -190,6 +196,7 @@ __main_loop
    if !_b0_gameStart{0} then goto __skip_to_draw_playfield
 
    ;!!!!!!!!!!!!!!!!!!! START
+   if frame_counter&7 then AUDV0 = 0 : AUDV1 = 0
 
    ;*************************************************************************
    ; TIMER
@@ -210,7 +217,7 @@ __main_loop
    ; (inizialmente 8 secondi)
    ;*************************************************************************
    temp1 = _velocita - 1 
-   if frame_counter = 0 && seconds_counter & temp1 = 0 then player1x = (rand & 125) + 20 : player1y = (rand & 80) + 8
+   if frame_counter = 0 && seconds_counter && _b5_palyer1Enable{5} then player1x = (rand & 125) + 20 : player1y = (rand & 80) + 8
 
    ;*************************************************************************
    ; ZUCCHERO (MISSILE1)
@@ -223,7 +230,7 @@ __main_loop
    ;*************************************************************************
    if _current_sugar_x = 146 then _current_sugar_x = (rand & 125) + 20 : _current_sugar_y = (rand & 80) + 8
    if sugar_count < 8 && _current_sugar_x < 146 then missile1x = _current_sugar_x: missile1y = _current_sugar_y
-   if collision(player0, missile1) then missile1x = 255 : missile1y = 255 : sugar_count = sugar_count + 1 : score = score + 100000 : _current_sugar_x = 146
+   if collision(player0, missile1) then AUDC0 = 4 : AUDF0 = 2 :missile1x = 255 : missile1y = 255 : sugar_count = sugar_count + 1 : score = score + 100000 : _current_sugar_x = 146
 
    ;*************************************************************************
    ; LUCE (PLAYFIELD)
@@ -274,7 +281,7 @@ end
    ; il sacchetto finale individuato come ball viene visualizzato solo dopo
    ; aver trovato gli 8 zuccherini nel playfield
    ;*************************************************************************
-   if frame_counter = frame_limit && sugar_count = 8 then ballx = 18  : bally = 18
+   if frame_counter = frame_limit && sugar_count = 8 && _b5_palyer1Enable{5} then ballx = 18  : bally = 18
 
    ;*************************************************************************
    ; PLAYFIELD DIAMICO
@@ -343,8 +350,8 @@ __Skip_Joystick_Precheck
    if !joy0fire || score <= 0 then goto __Skip_Fire
    if _b7_gameMissile0Moving{7} then goto __Skip_Fire
 
-   _b7_gameMissile0Moving{7} = 1 : score = score - 10000 
-
+   _b7_gameMissile0Moving{7} = 1 : score = score - 10000
+   AUDV1 = 12 :  AUDC1 = 4 : AUDF1 = 10 
    ; Direzione iniziale del missile esattamente uguale a a quella del giocatore
    _Bit4_M0_Dir_Up{4} = _Bit0_P0_Dir_Up{0}
    _Bit5_M0_Dir_Down{5} = _Bit1_P0_Dir_Down{1}
@@ -410,7 +417,7 @@ __Skip_Missile
    ; solo se sto muovendo il joystick
    ;*************************************************************************
    if !joy0right && !joy0left && !joy0up && !joy0down && seconds_counter then goto __skip_animation_player0
-   
+
    ;*************************************************************************
    ; ANIMAZIONE PLAYER
    ;_________________________________________________________________________
@@ -418,14 +425,14 @@ __Skip_Missile
    ; player 1 -> Bocca che mangia => 8 x 4 pixel
    ;*************************************************************************
 
-   if frame_counter & 2 = 0 then player0:
+   if frame_counter && frame_counter & 7 = 0 then AUDV0 = 10 : AUDC0 = 12 : AUDF0 = 5 : player0:
    %00011000
    %10111101
    %01011010
    %01111110
 end
 
-   if frame_counter & 2 <> 0 then player0:
+   if frame_counter  && frame_counter & 7 <> 0 then player0:
    %00100100
    %10111101
    %01011010
@@ -615,7 +622,7 @@ __Skip_Joy0_Right
    ; prossimo zucchero da prendere
    ;*************************************************************************   
    if collision(player0, player1) && frame_counter = 0 then goto __decrease_health_bar
-   if collision(missile0, player1) then score = score + 10 
+   if collision(missile0, player1) then score = score + 10 : _b5_palyer1Enable{5} = 0 : player1x = 255 : player1y : 255
    if collision(player0, ball) then goto __cambio_livello
    ;if collision(player0, missile1) && sugar_count <= 8 then sugar_count = sugar_count + 1 : goto __increment_score
    goto __done
@@ -641,6 +648,7 @@ __cambio_livello
    _velocita = _velocita - 2
    ballx = 200 : bally = 200
    player0x = 30 : player0y = 54 
+   _b5_palyer1Enable{5} = 1
    goto __clean_playfield
 
 __done
@@ -673,11 +681,11 @@ __skip_to_draw_playfield
    %01000010, %00000000, %00000000,   %00000000, %00010000, %10100000, %00000000,  %00000111,
    %01000010, %00000000, %00000000,   %00000000, %00010000, %10100000, %00000000,  %00000111,
    %01000010, %00000000, %00000000,   %00000000, %00010000, %10100000, %00000000,  %00000111,
-   %01000010, %00000000, %00000000,   %00000000, %00010000, %10100000, %00000000,  %00000111,
-   %01000010, %00000000, %00000000,   %00000000, %00010000, %10100000, %00000000,  %00000111,
-   %01000010, %00000000, %00000000,   %00000000, %00010000, %10100000, %00000000,  %00000111,
-   %01000010, %00000000, %00000000,   %00000000, %00010000, %10100000, %00000000,  %00000111,
    %01000010, %00000000, %00000000,   %00000000, %00010000, %10100000, %00000000,  %00000111
+   ;%01000010, %00000000, %00000000,   %00000000, %00010000, %10100000, %00000000,  %00000111
+   ;%01000010, %00000000, %00000000,   %00000000, %00010000, %10100000, %00000000,  %00000111;,
+   ;%01000010, %00000000, %00000000,   %00000000, %00010000, %10100000, %00000000,  %00000111,
+   ;%01000010, %00000000, %00000000,   %00000000, %00010000, %10100000, %00000000,  %00000111
    
 end
    macro tazze_coltelli
