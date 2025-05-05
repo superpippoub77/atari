@@ -106,7 +106,6 @@ __inizialize
    ; pfscore2 => lives
    ;*************************************************************************
    REFP0 = 0
-   AUDV1 = 12
 
    ; Altezze oggeti base
    missile0height = 4 
@@ -189,7 +188,7 @@ __main_loop
    if !_b0_gameStart{0} then goto __skip_to_draw_playfield
 
    ;!!!!!!!!!!!!!!!!!!! START
-   if _frame_counter&7 then AUDV0 = 0 : AUDV1 = 0
+   if _frame_counter&7 then AUDV0 = 0 : callmacro sound 0 0 0
    if _frame_counter>32 && _b6_palyerslowMotion{6} then AUDF0 = 30 : AUDC0 = 6: AUDV0 = 4
 
    ;*************************************************************************
@@ -224,7 +223,7 @@ __main_loop
    ;*************************************************************************
    if _current_sugar_x = 146 || _seconds_counter&7= 1 then _current_sugar_x = (rand & 125) + 20 : _current_sugar_y = (rand & 80) + 8
    if _sugar_count < 8 && _current_sugar_x < 146 then missile1x = _current_sugar_x: missile1y = _current_sugar_y
-   if collision(player0, missile1) then AUDV1=12 : AUDC1 = 4 : AUDF1 = 2 :missile1x = 255 : missile1y = 255 : _sugar_count = _sugar_count + 1 : score = score + 100000 : _current_sugar_x = 146
+   if collision(player0, missile1) then callmacro sound 12 4 2 :missile1x = 255 : missile1y = 255 : _sugar_count = _sugar_count + 1 : score = score + 100000 : _current_sugar_x = 146
 
    ;*************************************************************************
    ; LUCE (PLAYFIELD)
@@ -303,9 +302,6 @@ __loop_objects
    if (_seconds_counter&temp1) = 0 && _frame_counter = (x+4) && (objects[temp2]&temp5)> 0 then callmacro lampada x w : _current_lamp = x; LAMPADE
    temp2 = _current_object_level+ 5
    if (_seconds_counter&temp1) = 0 && _frame_counter = (x+5) && (objects[temp2]&temp5)> 0 then callmacro tavolo x j ; TAVOLI
-   /*temp2 = _current_object_level+ 6
-    if (_seconds_counter&temp1) = 0 && _frame_counter = (x+6) && (objects[temp2]&temp5)> 0 then callmacro arrivo x w ; TRAGUARDO
-   */
    temp2 = _current_object_level+ 7
    if (_seconds_counter&temp1) = 0 && _frame_counter = (x+7) && (objects[temp2]&temp5)> 0 then temp4 = objects[temp2]: callmacro piano temp4; PIANO
    temp5 = temp5 * 2
@@ -347,7 +343,7 @@ __Skip_Joystick_Precheck
    if _b7_gameMissile0Moving{7} then goto __Skip_Fire
 
    _b7_gameMissile0Moving{7} = 1 : score = score - 10000
-   AUDV1 = 12 :  AUDC1 = 4 : AUDF1 = 10 
+   callmacro sound 12 4 10
    ; Direzione iniziale del missile esattamente uguale a a quella del giocatore
    _Bit4_M0_Dir_Up{4} = _Bit0_P0_Dir_Up{0}
    _Bit5_M0_Dir_Down{5} = _Bit1_P0_Dir_Down{1}
@@ -616,23 +612,21 @@ __Skip_Joy0_Right
    ; tra Biscotto e Zucchero : incremento dei punti e individuazione del
    ; prossimo zucchero da prendere
    ;*************************************************************************   
-   if collision(player0, player1) && _frame_counter = 0 then goto __decrease_health_bar
+   if collision(player0, player1) then goto __decrease_health_bar
    if collision(missile0, player1) then score = score + 10 : _b5_palyer1Enable{5} = 0 : player1x = 255 : player1y : 255
    if collision(player0, ball) then goto __change_level
    ;if collision(player0, missile1) && _sugar_count <= 8 then _sugar_count = _sugar_count + 1 : goto __increment_score
    goto __done
 
 __decrease_timer_bar
-   player1x = 200 : player1y = 200
    pfscore1 = pfscore1 * 2
    goto __done
 
 __decrease_health_bar
-   pfscore2 = pfscore2 / 4
-   score = score - 1
-   if pfscore2 = 0 then __game_over
-   pfscore1 = 255 : _sugar_count = 0
-   goto __done
+  player1x=200:player1y=200
+  pfscore2=pfscore2/4:score=score-1
+  if pfscore2 then pfscore1=255:_sugar_count=0:goto __done
+  goto __game_over
 
 __change_level
    score = score + 100 
@@ -643,9 +637,7 @@ __change_level
    _speed = _speed - 2
    ballx = 200 : bally = 200
    player0x = 30 : player0y = 54 
-   AUDV1 = 12
-   AUDC1 = 6
-   AUDF1 = 2 
+   callmacro sound 12 6 2
    _b5_palyer1Enable{5} = 1
    goto __clean_playfield
 
@@ -671,19 +663,19 @@ __skip_to_draw_playfield
    ; b4 : b5 : b6 : b7
    ;=======================================================================
 
-   ;0.TAZZE   1.COLTELLI 2.CIOCCOLATO 3.GOCCE    4.LAMPADE  5.TAVOLI   6.TRAGUARDO 7.PIANO
+   ;0.TAZZE   1.COLTELLI 2.CIOCCOLATO 3.GOCCE    4.LAMPADE  5.TAVOLI   7.PIANO
    ; LIVELLI (10)
    data objects
-   %01000010, %00000000, %00000000,   %00000001, %00010000, %10100000, %00000000,  %00000111, 
-   %01000010, %00000000, %00000000,   %00000000, %00010000, %10100000, %00000000,  %00000111,    
-   %01000010, %00000000, %00000000,   %00000000, %00010000, %10100000, %00000000,  %00000111, 
-   %01000010, %00000000, %00000000,   %00000000, %00010000, %10100000, %00000000,  %00000111, 
-   %01000010, %00000000, %00000000,   %00000000, %00010000, %10100000, %00000000,  %00000111, 
-   %01000010, %00000000, %00000000,   %00000000, %00010000, %10100000, %00000000,  %00000111
-   ;%01000010, %00000000, %00000000,   %00000000, %00010000, %10100000, %00000000,  %00000111
-   ;%01000010, %00000000, %00000000,   %00000000, %00010000, %10100000, %00000000,  %00000111;,
-   ;%01000010, %00000000, %00000000,   %00000000, %00010000, %10100000, %00000000,  %00000111,
-   ;%01000010, %00000000, %00000000,   %00000000, %00010000, %10100000, %00000000,  %00000111
+   %01000010, %00000000, %00000000,   %00000001, %00010000, %10100000, %00000111, 
+   %01000010, %00000000, %00000000,   %00000000, %00010000, %10100000, %00000111,    
+   %01000010, %00000000, %00000000,   %00000000, %00010000, %10100000, %00000111, 
+   %01000010, %00000000, %00000000,   %00000000, %00010000, %10100000, %00000111, 
+   %01000010, %00000000, %00000000,   %00000000, %00010000, %10100000, %00000111, 
+   %01000010, %00000000, %00000000,   %00000000, %00010000, %10100000, %00000111
+   ;%01000010, %00000000, %00000000,   %00000000, %00010000, %10100000,%00000111
+   ;%01000010, %00000000, %00000000,   %00000000, %00010000, %10100000,%00000111,
+   ;%01000010, %00000000, %00000000,   %00000000, %00010000, %10100000,%00000111,
+   ;%01000010, %00000000, %00000000,   %00000000, %00010000, %10100000,%00000111
    
 end
    macro tazze_coltelli
@@ -717,12 +709,6 @@ end
       pfpixel u o on
 end
 
-   /* macro arrivo
-      u = {1} + 3
-      o = {2} + 4
-      pfvline u {2} o on
-end */
-
    macro lampada
       o = {1} + 2
       u = {2} + 1
@@ -754,3 +740,8 @@ end
       q = f + 4
    next
 end
+   macro sound
+   AUDV1 = {1}
+   AUDC1 = {2}
+   AUDF1 = {3}
+end 
