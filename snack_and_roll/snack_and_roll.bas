@@ -482,7 +482,7 @@ end
    ;```````````````````````````````````````````````````````````````
    ;  Moves player0 up.
    ;
-   if _b6_palyerslowMotion{6} then if (_frame_counter & 3) = 0 then player0y = player0y - 1
+   if _b6_palyerslowMotion{6} then if (_frame_counter & 3) <> 0 then goto __Skip_Joy0_Up
    if !_b6_palyerslowMotion{6} then player0y = player0y - 1 
    _Bit0_P0_Dir_Up{0} = 1
 
@@ -519,7 +519,7 @@ __Skip_Joy0_Up
 
    if temp3 < 34 then if pfread(temp3,temp6) then _b6_palyerslowMotion{6} = 1 :goto __Skip_Joy0_Down
 
-   if _b6_palyerslowMotion{6} then if (_frame_counter & 3) = 0 then player0y = player0y + 1
+   if _b6_palyerslowMotion{6} then if (_frame_counter & 3) <> 0 then goto __Skip_Joy0_Down
    if !_b6_palyerslowMotion{6} then player0y = player0y + 1 
 
 
@@ -561,8 +561,7 @@ __Skip_Joy0_Down
    ;```````````````````````````````````````````````````````````````
    ;  Moves player0 left.
    ;
-   if _b6_palyerslowMotion{6} then if (_frame_counter & 3) = 0 then player0x = player0x - 1
-   if !_b6_palyerslowMotion{6} then player0x = player0x - 1 
+   if _b6_palyerslowMotion{6} then if (_frame_counter & 3) <> 0 then goto __Skip_Joy0_Left
 
    _Bit2_P0_Dir_Left{2} = 1
 
@@ -598,8 +597,8 @@ __Skip_Joy0_Left
    ;```````````````````````````````````````````````````````````````
    ;  Moves player0 right.
    ;
-   if _b6_palyerslowMotion{6} then if (_frame_counter & 3) = 0 then player0x = player0x + 1
-   if !_b6_palyerslowMotion{6} then player0x = player0x + 1 
+   if _b6_palyerslowMotion{6} then if (_frame_counter & 3) <> 0 then goto __Skip_Joy0_Right
+   player0x = player0x + 1 
 
    _Bit3_P0_Dir_Right{3} = 1
 __Skip_Joy0_Right
@@ -607,15 +606,13 @@ __Skip_Joy0_Right
    ;*************************************************************************
    ; COLLISIONI 
    ;_________________________________________________________________________
-   ; tra Biscotto e Bocca: decremento la barra della salute
-   ; tra Missile e Bocca: incremento dei punti di 10 unità
-   ; tra Biscotto e Zucchero : incremento dei punti e individuazione del
-   ; prossimo zucchero da prendere
+   ; Biscotto e Bocca: decremento la barra della salute
+   ; Missile e Bocca: incremento dei punti di 10 unità e Bocca disabilitata
+   ; Biscotto e Arrivo : cambio di livello
    ;*************************************************************************   
    if collision(player0, player1) then goto __decrease_health_bar
    if collision(missile0, player1) then score = score + 10 : _b5_palyer1Enable{5} = 0 : player1x = 255 : player1y : 255
    if collision(player0, ball) then goto __change_level
-   ;if collision(player0, missile1) && _sugar_count <= 8 then _sugar_count = _sugar_count + 1 : goto __increment_score
    goto __done
 
 __decrease_timer_bar
@@ -629,20 +626,20 @@ __decrease_health_bar
   goto __game_over
 
 __change_level
-   score = score + 100 
-   _level = _level + 1
-   if _level > 10 then goto __game_start
-   _sugar_count = 0
-   if _speed < 2 then _speed = 2
-   _speed = _speed - 2
-   ballx = 200 : bally = 200
-   player0x = 30 : player0y = 54 
-   callmacro sound 12 6 2
-   _b5_palyer1Enable{5} = 1
-   goto __clean_playfield
+  _level=_level+1
+  if _level>10 then goto __game_start
+  _sugar_count=0
+  if _speed<2 then goto __skip_speed
+  _speed=_speed-2
+__skip_speed
+  ballx=200:bally=200
+  player0x=30:player0y=54
+  callmacro sound 12 6 2
+  _b5_palyer1Enable{5}=1
+  goto __clean_playfield
 
 __done
-   goto __skip_to_draw_playfield
+  goto __skip_to_draw_playfield
 
 __game_over
    _b0_gameStart{0} = 0
@@ -671,9 +668,9 @@ __skip_to_draw_playfield
    %01000010, %00000000, %00000000,   %00000000, %00010000, %10100000, %00000111, 
    %01000010, %00000000, %00000000,   %00000000, %00010000, %10100000, %00000111, 
    %01000010, %00000000, %00000000,   %00000000, %00010000, %10100000, %00000111, 
-   %01000010, %00000000, %00000000,   %00000000, %00010000, %10100000, %00000111
-   ;%01000010, %00000000, %00000000,   %00000000, %00010000, %10100000,%00000111
-   ;%01000010, %00000000, %00000000,   %00000000, %00010000, %10100000,%00000111,
+   %01000010, %00000000, %00000000,   %00000000, %00010000, %10100000, %00000111,
+   %01000010, %00000000, %00000000,   %00000000, %00010000, %10100000,%00000111,
+   %01000010, %00000000, %00000000,   %00000000, %00010000, %10100000,%00000111
    ;%01000010, %00000000, %00000000,   %00000000, %00010000, %10100000,%00000111,
    ;%01000010, %00000000, %00000000,   %00000000, %00010000, %10100000,%00000111
    
@@ -690,11 +687,8 @@ end
 end
 
    macro gocce
-      ;u = rand&2
       o = rand&3
       y = {2} + o
-      /* pfpixel {1} {2} off
-      o = {2} + 1 */
       pfpixel {1} o flip
 end
 
