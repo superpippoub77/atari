@@ -810,6 +810,8 @@ __skip_speed
   callmacro sound 12 6 2
   _b3_enableLevel{3}=0
   _b5_enablePalyer1{5}=1
+  _sugar_count=0
+
   pfclear
 
 __done
