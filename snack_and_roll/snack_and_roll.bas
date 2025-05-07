@@ -6,13 +6,11 @@
    ; pfcolors = colorazione del playfiled
    ; pfheights = altezza del righe del playfield
    ; romsize = 4k, 8k (2 banchi di memoria)
-   ; pal  = Versione dei colori... NON FUNZIONA???
    ; tv = effetto crt (non necessario)
    ; debug cycles = lampeggi lo sfondo in caso di cicli eccessivi
    ;*************************************************************************************************************************
    set kernel_options pfcolors
    set romsize 4k
-   set pal
    ;set debug cycles
 
    ;*************************************************************************************************************************
