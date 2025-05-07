@@ -343,6 +343,7 @@ __main_loop
    ;F2 inizio il gioco mentre F1 seleziono il livello
    if switchreset && !_b0_enableStart{0} then _b0_enableStart{0} = 1 : scorecolor = (scorecolor + $10) & $F0 : pfscorecolor = 255 : pfclear
    if switchselect && !_b0_enableStart{0} then _level = _level + 1 : pfhline 0 6 _level on : goto __done
+   if switchselect && !_b0_enableStart{0} && _level > 10 then _level = 1
 
    ;Se il gioco non è ancora iniziato skippa tutto
    if !_b0_enableStart{0} then goto __done
@@ -829,7 +830,7 @@ __done
    ; LIVELLI (10)
    data objects
    %10100100,%01000000,%00000000,%00000000,%00010000,%01010000,%00001111,
-   %01000010, %00000000, %00000000,   %00000000, %00010000, %10100000, %00000111,    
+   %00011100,%01100000,%00000000,%00000001,%10010000,%10000000,%01111000,   
    %01000010, %00000000, %00000000,   %00000000, %00010000, %10100000, %00000111, 
    %01000010, %00000000, %00000000,   %00000000, %00010000, %10100000, %00000111, 
    %01000010, %00000000, %00000000,   %00000000, %00010000, %10100000, %00000111, 
