@@ -12,7 +12,7 @@
    ;*************************************************************************************************************************
    set kernel_options pfcolors
    set romsize 4k
-   ;set pal
+   set pal
    ;set debug cycles
 
    ;*************************************************************************************************************************
@@ -35,6 +35,147 @@
    const _P0_color = $2C
    const _P1_color = $30
    const frame_limit = 54
+
+
+   ;****************************************************************
+   ;
+   ;  PAL colors.
+   ;
+   ;  Use this when you want to instantly convert your NTSC colors
+   ;  to PAL-60 (if you were already using the NTSC constants). Or
+   ;  if you're making a PAL-60 game, use these constants so you
+   ;  can quickly and easily swap them out for NTSC colors.
+   ;
+   const _00 = $00 ; Black
+   const _02 = $02 ; Very dark gray
+   const _04 = $04 ; Dark gray
+   const _06 = $06 ; Gray
+   const _08 = $08 ; Light gray
+   const _0A = $0A ; Very light gray
+   const _0C = $0C ; Near white
+   const _0E = $0E ; White
+   const _10 = $20 ; Dark blue-gray
+   const _12 = $22 ; Slate blue
+   const _14 = $24 ; Medium blue
+   const _16 = $26 ; Blue
+   const _18 = $28 ; Sky blue
+   const _1A = $2A ; Light sky blue
+   const _1C = $2C ; Powder blue
+   const _1E = $2E ; Very light blue
+   const _20 = $40 ; Dark green
+   const _22 = $42 ; Green
+   const _24 = $44 ; Medium green
+   const _26 = $46 ; Lime green
+   const _28 = $48 ; Light green
+   const _2A = $4A ; Pale green
+   const _2C = $4C ; Pastel green
+   const _2E = $4E ; Mint green
+   const _30 = $40 ; Dark green
+   const _32 = $42 ; Green
+   const _34 = $44 ; Medium green
+   const _36 = $46 ; Lime green
+   const _38 = $48 ; Light green
+   const _3A = $4A ; Pale green
+   const _3C = $4C ; Pastel green
+   const _3E = $4E ; Mint green
+   const _40 = $60 ; Dark yellow-green
+   const _42 = $62 ; Olive green
+   const _44 = $64 ; Yellow-green
+   const _46 = $66 ; Chartreuse
+   const _48 = $68 ; Bright yellow-green
+   const _4A = $6A ; Pale yellow-green
+   const _4C = $6C ; Pastel yellow-green
+   const _4E = $6E ; Light lime
+   const _50 = $80 ; Dark orange
+   const _52 = $82 ; Orange
+   const _54 = $84 ; Medium orange
+   const _56 = $86 ; Orange-gold
+   const _58 = $88 ; Goldenrod
+   const _5A = $8A ; Light orange
+   const _5C = $8C ; Pale orange
+   const _5E = $8E ; Peach
+   const _60 = $A0 ; Brown
+   const _62 = $A2 ; Medium brown
+   const _64 = $A4 ; Copper
+   const _66 = $A6 ; Tan
+   const _68 = $A8 ; Light brown
+   const _6A = $AA ; Pale tan
+   const _6C = $AC ; Sand
+   const _6E = $AE ; Beige
+   const _70 = $C0 ; Dark red
+   const _72 = $C2 ; Red
+   const _74 = $C4 ; Tomato red
+   const _76 = $C6 ; Coral
+   const _78 = $C8 ; Salmon
+   const _7A = $CA ; Light red
+   const _7C = $CC ; Pink
+   const _7E = $CE ; Light pink
+   const _80 = $D0 ; Dark magenta
+   const _82 = $D2 ; Magenta
+   const _84 = $D4 ; Orchid
+   const _86 = $D6 ; Violet
+   const _88 = $D8 ; Light violet
+   const _8A = $DA ; Pale magenta
+   const _8C = $DC ; Pink-mauve
+   const _8E = $DE ; Light mauve
+   const _90 = $B0 ; Dark purple
+   const _92 = $B2 ; Purple
+   const _94 = $B4 ; Medium purple
+   const _96 = $B6 ; Lavender
+   const _98 = $B8 ; Light lavender
+   const _9A = $BA ; Very light purple
+   const _9C = $BC ; Pale lavender
+   const _9E = $BE ; Lilac
+   const _A0 = $90 ; Navy blue
+   const _A2 = $92 ; Deep blue
+   const _A4 = $94 ; Blue
+   const _A6 = $96 ; Azure
+   const _A8 = $98 ; Light blue
+   const _AA = $9A ; Pale blue
+   const _AC = $9C ; Pastel blue
+   const _AE = $9E ; Baby blue
+   const _B0 = $70 ; Teal
+   const _B2 = $72 ; Cyan
+   const _B4 = $74 ; Aqua
+   const _B6 = $76 ; Light aqua
+   const _B8 = $78 ; Pale aqua
+   const _BA = $7A ; Ice blue
+   const _BC = $7C ; Powder blue
+   const _BE = $7E ; Sky blue
+   const _C0 = $50 ; Dark turquoise
+   const _C2 = $52 ; Turquoise
+   const _C4 = $54 ; Medium turquoise
+   const _C6 = $56 ; Light turquoise
+   const _C8 = $58 ; Pale turquoise
+   const _CA = $5A ; Icy turquoise
+   const _CC = $5C ; Frost blue
+   const _CE = $5E ; Icy blue
+   const _D0 = $30 ; Dark sea green
+   const _D2 = $32 ; Sea green
+   const _D4 = $34 ; Light sea green
+   const _D6 = $36 ; Pale sea green
+   const _D8 = $38 ; Mint
+   const _DA = $3A ; Pale mint
+   const _DC = $3C ; Frost green
+   const _DE = $3E ; Icy mint
+   const _E0 = $20 ; Dark blue-gray
+   const _E2 = $22 ; Slate blue
+   const _E4 = $24 ; Medium blue
+   const _E6 = $26 ; Blue
+   const _E8 = $28 ; Sky blue
+   const _EA = $2A ; Light sky blue
+   const _EC = $2C ; Powder blue
+   const _EE = $2E ; Very light blue
+   const _F0 = $40 ; Dark green
+   const _F2 = $42 ; Green
+   const _F4 = $44 ; Medium green
+   const _F6 = $46 ; Lime green
+   const _F8 = $48 ; Light green
+   const _FA = $4A ; Pale green
+   const _FC = $4C ; Pastel green
+   const _FE = $4E ; Mint green
+
+
 
    ;*************************************************************************************************************************
    ; VARIABILI
