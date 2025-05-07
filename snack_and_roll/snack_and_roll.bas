@@ -1,12 +1,8 @@
    ;*************************************************************************************************************************
    ; SETTAGGIO DEL KERNEL E OPZIONI
    ;_________________________________________________________________________________________________________________________
-   ; kernel_options :
-   ; player0colors = colorazione del player 1
-   ; pfcolors = colorazione del playfiled
-   ; pfheights = altezza del righe del playfield
-   ; romsize = 4k, 8k (2 banchi di memoria)
-   ; tv = effetto crt (non necessario)
+   ; pfcolors = colorazione del playfield
+   ; romsize = 4k
    ; debug cycles = lampeggi lo sfondo in caso di cicli eccessivi
    ;*************************************************************************************************************************
    set kernel_options pfcolors
@@ -177,15 +173,27 @@
    ;*************************************************************************************************************************
    ; VARIABILI
    ;_________________________________________________________________________________________________________________________
-   ; _level => livello corrente del gicoc
+   ; _level => livello corrente del gioco
    ; _frame_counter => corrisponde a 60 frame in 1 secondo 
-   ; _seconds_counter => contatore dei secondi
-   ; ........................................................................................................................
-   ; _b0_enableStart => Game start/stop
+   ; _seconds_counter => secondi
+   ;.........................................................................................................................
+   ; _playfield_up => parte alta della section
+   ; _playfield_down => parte bassa della section 
+   ; _playfield_section => sezione del playfield (le sezioni sono 8, vedi schema livelli)
+   ;.........................................................................................................................
+   ; _sugar_count => numero di zuccherini reuperati dal biscotto (ad ogni livello parte da 0)
+   ; _current_sugar_x => coordinate temporanee dello zuccherino da catturare (colonna)
+   ; _current_sugar_y => coordinate temporanee dello zuccherino da catturare (riga)
+   ;.........................................................................................................................
+   ; _speed => velocià di attivazione del playfield dinamico e della bocca (parte da 8 e scende di 2 unità al cambio livello)
+   ; _current_lamp => rappresenta in quale zona è stata impostata la lampada utile per l'accensione
+   ;.........................................................................................................................
+   ; i flag (bit) si caratterizzano nel seguente modo: on = 1/off = 0
+   ; _b0_enableStart => Game start
    ; _b3_enableLevel => Attivazione del nuovo livello
-   ; _b4_enableLight => Luce on/off
-   ; _b5_enablePalyer1 => Attivazione del Player 1
-   ; _b5_enableSlowMotion => Opzione lentezza del Player 1
+   ; _b4_enableLight => flag per apire se lo stato della luce
+   ; _b5_enablePalyer1 => Attivazione della bocca
+   ; _b5_enableSlowMotion => Opzione lentezza del biscotto
    ;*************************************************************************************************************************
 
    ; level
@@ -239,17 +247,18 @@
 __inizialize
    ;*************************************************************************************************************************
    ; INIZIALIZZAZIONE
-   ; ------------------------------------------------------------------------
+   ;_________________________________________________________________________________________________________________________
    ; CTRLPF = P dimensione della palla e F posizione del palyfield rispett
    ; NUSIZ(0/1) = dimesione missile + dimensione player (0/1)
    ; REFP0  = Reflection Player 0
    ; COLUP(0/1) = Colore del Player (0/1)
    ; COLUBK = Colore background
-   ;*************************************************************************************************************************
+   ;.........................................................................................................................
    ; SCORE e LIVES
-   ; ------------------------------------------------------------------------
+   ;_________________________________________________________________________________________________________________________
    ; pfscore1 => timer
    ; pfscore2 => lives
+   ; score => suddiviso in due parti 00|0000, la prima parte 00 sono i lanci a disposizione gli utili 0000 punti 
    ;*************************************************************************************************************************
    REFP0 = 0
 
@@ -271,13 +280,12 @@ __inizialize
    player0x = 30 : player0y = 54 
    bally = 200
 
-   ;*************************************************
+   ;*************************************************************************************************************************
    ; PLAYFIELD: TITOLO
-   ; ------------------------------------------------
-   ; E' visibile solo dalla riga 1 alla riga 11
-   ; Snack 'n' Roll
+   ;_________________________________________________________________________________________________________________________
+   ; E' visibile solo dalla riga 1 alla riga 11 Snack 'n' Roll
    ; pfcolors => varaiazioni di marrone da $22 a $2B
-   ;*************************************************
+   ;*************************************************************************************************************************
    playfield:
    ................................
    ....XXXXXXXXX....XX.......X..X..
@@ -306,15 +314,20 @@ end
 end
 
 __game_start
+   ;flag
    _b0_enableStart{0} = 0
    _b3_enableLevel{3} = 0 
    _b4_enableLight{4} = 1
    _b5_enablePalyer1{5} = 1
+
+   ;velocià e livello
    _level = 1
    _speed = 8
+
+   ; 10 lancia a dispozione per il biscotto
    score = 100000
 
-   ;Per evitare che si veda nella schermata di presentazione
+   ;Per evitare che si veda nella schermata del titolo
    scorecolor = 0
 
    _Bit3_P0_Dir_Right{3} = 1
@@ -327,14 +340,14 @@ __main_loop
    NUSIZ1 = $20
    CTRLPF = $21
   
-   ;Se premo reset F2 inizializzo il gioco mentre con select F1 seleziono il livello
+   ;F2 inizio il gioco mentre F1 seleziono il livello
    if switchreset && !_b0_enableStart{0} then _b0_enableStart{0} = 1 : scorecolor = (scorecolor + $10) & $F0 : pfscorecolor = 255 : pfclear
    if switchselect && !_b0_enableStart{0} then _level = _level + 1 : pfhline 0 6 _level on : goto __done
 
    ;Se il gioco non è ancora iniziato skippa tutto
    if !_b0_enableStart{0} then goto __done
 
-   ;!!!!!!!!!!!!!!!!!!! START
+   ;!!!!!!!!!!!!!!!!!!! START !!!!!!!!!!!!!!!!!!!
    if _frame_counter&7 then AUDV0 = 0 : callmacro sound 0 0 0
    if _frame_counter>32 && _b5_enableSlowMotion{6} then AUDF0 = 30 : AUDC0 = 6: AUDV0 = 4
 
