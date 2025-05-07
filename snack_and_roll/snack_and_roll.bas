@@ -43,11 +43,11 @@
    ; _frame_counter => corrisponde a 60 frame in 1 secondo 
    ; _seconds_counter => contatore dei secondi
    ; ........................................................................................................................
-   ; _b0_gameStart => Game start/stop
-   ; _b3_showLevel => Attivazione del nuovo livello
-   ; _b4_gameLight => Luce on/off
-   ; _b5_palyer1Enable => Attivazione del Player 1
-   ; _b6_palyerslowMotion => Opzione lentezza del Player 1
+   ; _b0_enableStart => Game start/stop
+   ; _b3_enableLevel => Attivazione del nuovo livello
+   ; _b4_enableLight => Luce on/off
+   ; _b5_enablePalyer1 => Attivazione del Player 1
+   ; _b5_enableSlowMotion => Opzione lentezza del Player 1
    ;*************************************************************************************************************************
 
    ; level
@@ -67,7 +67,6 @@
    dim _playfield_section = x
 
    ; questa variabile è usata per capire quanti "zuccheri" sono stati colpiti
-   ; riparte da 0 ad ogni cambio schema/livello
    dim _sugar_count = t
    dim _current_sugar_x = v
    dim _current_sugar_y = z
@@ -77,11 +76,11 @@
    dim _current_lamp = w
 
    ; FLAG DI CONFIGURAZIONE
-   dim _b0_gameStart = k
-   dim _b3_showLevel = k
-   dim _b4_gameLight = k
-   dim _b5_palyer1Enable = k
-   dim _b6_palyerslowMotion = k
+   dim _b0_enableStart = k
+   dim _b3_enableLevel = k
+   dim _b4_enableLight = k
+   dim _b5_enablePalyer1 = k
+   dim _b5_enableSlowMotion = k
    dim _b7_gameMissile0Moving = k
 
    ;DIREZIONE PLAYER 0 E MISSILE 0
@@ -169,13 +168,12 @@ end
 end
 
 __game_start
-   _b0_gameStart{0} = 0 ; Gioco non attivo
-   _b3_showLevel{3} = 0
-   _b4_gameLight{4} = 1 ; Luci accese di default
-   _b5_palyer1Enable{5} = 1
+   _b0_enableStart{0} = 0
+   _b3_enableLevel{3} = 0 
+   _b4_enableLight{4} = 1
+   _b5_enablePalyer1{5} = 1
    _level = 1
    _speed = 8
-   ;_current_sugar_x = 146 : _current_sugar_y  = 146
    score = 100000
 
    ;Per evitare che si veda nella schermata di presentazione
@@ -192,15 +190,15 @@ __main_loop
    CTRLPF = $21
   
    ;Se premo reset F2 inizializzo il gioco mentre con select F1 seleziono il livello
-   if switchreset && !_b0_gameStart{0} then _b0_gameStart{0} = 1 : scorecolor = (scorecolor + $10) & $F0 : pfscorecolor = 255 : pfclear
-   if switchselect && !_b0_gameStart{0} then _level = _level + 1 : pfhline 0 6 _level on : goto __done
+   if switchreset && !_b0_enableStart{0} then _b0_enableStart{0} = 1 : scorecolor = (scorecolor + $10) & $F0 : pfscorecolor = 255 : pfclear
+   if switchselect && !_b0_enableStart{0} then _level = _level + 1 : pfhline 0 6 _level on : goto __done
 
    ;Se il gioco non è ancora iniziato skippa tutto
-   if !_b0_gameStart{0} then goto __done
+   if !_b0_enableStart{0} then goto __done
 
    ;!!!!!!!!!!!!!!!!!!! START
    if _frame_counter&7 then AUDV0 = 0 : callmacro sound 0 0 0
-   if _frame_counter>32 && _b6_palyerslowMotion{6} then AUDF0 = 30 : AUDC0 = 6: AUDV0 = 4
+   if _frame_counter>32 && _b5_enableSlowMotion{6} then AUDF0 = 30 : AUDC0 = 6: AUDV0 = 4
 
    ;*************************************************************************************************************************
    ; TIMER
@@ -220,20 +218,18 @@ __main_loop
    ; l'aggiornamento viene in base alla velocità dello schema di gioco
    ; (inizialmente 8 secondi)
    ;*************************************************************************************************************************
-   if _frame_counter = 0 && _seconds_counter&(_speed-1)= 1 && _b5_palyer1Enable{5} then player1x = (rand & 125) + 20 : player1y = (rand & 80) + 8
+   if _frame_counter = 0 && _seconds_counter&(_speed-1)= 1 && _b5_enablePalyer1{5} then player1x = (rand & 125) + 20 : player1y = (rand & 80) + 8
 
    ;*************************************************************************************************************************
    ; ZUCCHERO (MISSILE1)
    ;_________________________________________________________________________________________________________________________
-   ; Gli zuccheri nel playfield sono 8 e verranno visualizzati uno alla volta
-   ; Il player una volta che viene a contatto con lo zucchero aumenta di 10
-   ; unità degli spari
-   ; !!!!IMPORTANTE distruggere il missile dopo il contatto che si ottiene
-   ; facendolo sparire dallo schermo missile1x = 255 e missile1y = 255
+   ; Gli zuccheri nel playfield sono 8 e verranno visualizzati uno alla volta.Il player una volta che viene a contatto con 
+   ; lo zucchero aumenta di 10 spari
+   ; !!!!IMPORTANTE distruggere il missile dopo il contatto facendolo sparire dallo schermo missile1y = 200
    ;*************************************************************************************************************************
-   if _current_sugar_x = 146 || _seconds_counter&7= 1 then _current_sugar_x = (rand & 125) + 20 : _current_sugar_y = (rand & 80) + 8
+   if missile1y = 200 || _seconds_counter&7= 1 then _current_sugar_x = (rand & 125) + 20 : _current_sugar_y = (rand & 80) + 8
    if _sugar_count < 8 && _current_sugar_x < 146 then missile1x = _current_sugar_x: missile1y = _current_sugar_y
-   if collision(player0, missile1) then callmacro sound 12 4 2 :missile1x = 255 : missile1y = 255 : _sugar_count = _sugar_count + 1 : score = score + 100000 : _current_sugar_x = 146
+   if collision(player0, missile1) then callmacro sound 12 4 2 : missile1y = 200 : _sugar_count = _sugar_count + 1 : score = score + 100000
 
    ;*************************************************************************************************************************
    ; LUCE (PLAYFIELD)
@@ -243,16 +239,16 @@ __main_loop
    ; !!IMP Cambia il colore del playfield tranne la fascia centrale
    ;*************************************************************************************************************************
    ;>>>> SPEGNIMENTO <<<<
-   if _seconds_counter && (_seconds_counter & 31 = 0) then _b4_gameLight{4} = 0
+   if _seconds_counter && (_seconds_counter & 31 = 0) then _b4_enableLight{4} = 0
 
    ;>>>> ACCENSIONE <<<<
    ; TO DO VEDO AGGIUNGERE LA POSIONE DI __current_lamp ad X (es.: %10010000, due lampade alla posizone 128 e 16)
    temp5 = (player0x-10)/4
    ;temp6 = (player0y-5)/8
-   if !_b4_gameLight{4} && temp5 = _current_lamp then _b4_gameLight{4} = 1
+   if !_b4_enableLight{4} && temp5 = _current_lamp then _b4_enableLight{4} = 1
 
    ;Background visibile
-   if _b4_gameLight{4} then pfcolors:
+   if _b4_enableLight{4} then pfcolors:
    $28
    $26
    $20
@@ -267,7 +263,7 @@ __main_loop
 end
 
    ; Background
-   if !_b4_gameLight{4} then pfcolors:
+   if !_b4_enableLight{4} then pfcolors:
    $0
 end
 
@@ -276,7 +272,7 @@ end
    ;_________________________________________________________________________________________________________________________
    ; dopo 8 secondi si disattiva lo slow motion
    ;*************************************************************************************************************************
-   if _seconds_counter&7 = 0 then _b6_palyerslowMotion{6} = 0
+   if _seconds_counter&7 = 0 then _b5_enableSlowMotion{6} = 0
 
    ;*************************************************************************************************************************
    ; CONTENITORE FINALE (BALL)
@@ -284,7 +280,7 @@ end
    ; il sacchetto finale individuato come ball viene visualizzato solo dopo
    ; aver trovato gli 8 zuccherini nel playfield
    ;*************************************************************************************************************************
-   if _sugar_count = 8 && !_b5_palyer1Enable{5} then ballx = 18  : bally = 18
+   if _sugar_count = 8 && !_b5_enablePalyer1{5} then ballx = 18  : bally = 18
 
    ;*************************************************************************************************************************
    ; PLAYFIELD DIAMICO
@@ -326,8 +322,8 @@ __skip_oggetti
    ; CHECK
    ;_________________________________________________________________________________________________________________________
    ; 1) ogni 16 secondi elimina uno spazio tempo
-   ; 2) se lo spazio tempo è finito elimina una health
-   ; 3) se non ci sono più health allora il gioco è completato o terminato
+   ; 2) se lo spazio tempo è finito elimina una vita
+   ; 3) se non ci sono più vite allora il gioco è terminato
    ; 4) lampeggio in scadenza del tempo ogni frame_limit
    ;*************************************************************************************************************************
 
@@ -337,8 +333,8 @@ __skip_oggetti
    if pfscore1 = 0 then goto __decrease_health_bar
    ; ---- 3 ----
    if pfscore2 = 0 || _level > 10 then goto __game_start
-   ; ---- 4 ---- (TO DO)
-   if _frame_counter=frame_limit && pfscore1 <=8  then COLUBK = _frame_counter & 32 : COLUBK = rand&16
+   ; ---- 4 ----
+   if _frame_counter=frame_limit && pfscore1 <=8  then COLUBK = rand&16
 
 
    if !joy0up && !joy0down && !joy0left && !joy0right then goto __Skip_Joystick_Precheck
@@ -352,6 +348,7 @@ __Skip_Joystick_Precheck
 
    _b7_gameMissile0Moving{7} = 1 : score = score - 10000
    callmacro sound 12 4 10
+
    ; Direzione iniziale del missile esattamente uguale a a quella del giocatore
    _Bit4_M0_Dir_Up{4} = _Bit0_P0_Dir_Up{0}
    _Bit5_M0_Dir_Down{5} = _Bit1_P0_Dir_Down{1}
@@ -432,7 +429,7 @@ end
 
 __skip_animation_player0
 
-   if _frame_counter & 8 = 0 then player1:
+   if _frame_counter & 7 = 0 then player1:
    %01111110
    %10000001
    %10011001
@@ -445,7 +442,7 @@ end
    %11111111
    %01100110
 end
-   if !_b0_gameStart{0} then goto __done
+   if !_b0_enableStart{0} then goto __done
 
 
    ;***************************************************************
@@ -469,20 +466,20 @@ end
 
    temp6 = (player0y-5)/8
 
-   if temp5 < 34 then if pfread(temp5,temp6) then _b6_palyerslowMotion{6} =1 :goto __Skip_Joy0_Up
+   if temp5 < 34 then if pfread(temp5,temp6) then _b5_enableSlowMotion{6} =1 :goto __Skip_Joy0_Up
 
    temp4 = (player0x-17)/4
 
-   if temp4 < 34 then if pfread(temp4,temp6) then _b6_palyerslowMotion{6} =1 :goto __Skip_Joy0_Up
+   if temp4 < 34 then if pfread(temp4,temp6) then _b5_enableSlowMotion{6} =1 :goto __Skip_Joy0_Up
 
    temp3 = temp5 - 1
 
-   if temp3 < 34 then if pfread(temp3,temp6) then _b6_palyerslowMotion{6} =1 :goto __Skip_Joy0_Up
+   if temp3 < 34 then if pfread(temp3,temp6) then _b5_enableSlowMotion{6} =1 :goto __Skip_Joy0_Up
 
    ;```````````````````````````````````````````````````````````````
    ;  Moves player0 up.
    ;
-   if _b6_palyerslowMotion{6} then if (_frame_counter & 3) <> 0 then goto __Skip_Joy0_Up
+   if _b5_enableSlowMotion{6} then if (_frame_counter & 3) <> 0 then goto __Skip_Joy0_Up
    player0y = player0y - 1 
    _Bit0_P0_Dir_Up{0} = 1
 
@@ -509,17 +506,17 @@ __Skip_Joy0_Up
 
    temp6 = (player0y)/8
 
-   if temp5 < 34 then if pfread(temp5,temp6) then _b6_palyerslowMotion{6} = 1 :goto __Skip_Joy0_Down
+   if temp5 < 34 then if pfread(temp5,temp6) then _b5_enableSlowMotion{6} = 1 :goto __Skip_Joy0_Down
 
    temp4 = (player0x-17)/4
 
-   if temp4 < 34 then if pfread(temp4,temp6) then _b6_palyerslowMotion{6} = 1 :goto __Skip_Joy0_Down
+   if temp4 < 34 then if pfread(temp4,temp6) then _b5_enableSlowMotion{6} = 1 :goto __Skip_Joy0_Down
 
    temp3 = temp5 - 1
 
-   if temp3 < 34 then if pfread(temp3,temp6) then _b6_palyerslowMotion{6} = 1 :goto __Skip_Joy0_Down
+   if temp3 < 34 then if pfread(temp3,temp6) then _b5_enableSlowMotion{6} = 1 :goto __Skip_Joy0_Down
 
-   if _b6_palyerslowMotion{6} then if (_frame_counter & 3) <> 0 then goto __Skip_Joy0_Down
+   if _b5_enableSlowMotion{6} then if (_frame_counter & 3) <> 0 then goto __Skip_Joy0_Down
    player0y = player0y + 1 
 
 
@@ -552,16 +549,16 @@ __Skip_Joy0_Down
 
    temp6 = (player0x-18)/4
 
-   if temp6 < 34 then if pfread(temp6,temp5) then _b6_palyerslowMotion{6} = 1 : goto __Skip_Joy0_Left
+   if temp6 < 34 then if pfread(temp6,temp5) then _b5_enableSlowMotion{6} = 1 : goto __Skip_Joy0_Left
 
    temp3 = (player0y-4)/8
 
-   if temp6 < 34 then if pfread(temp6,temp3) then _b6_palyerslowMotion{6} = 1 : goto __Skip_Joy0_Left
+   if temp6 < 34 then if pfread(temp6,temp3) then _b5_enableSlowMotion{6} = 1 : goto __Skip_Joy0_Left
 
    ;```````````````````````````````````````````````````````````````
    ;  Moves player0 left.
    ;
-   if _b6_palyerslowMotion{6} then if (_frame_counter & 3) <> 0 then goto __Skip_Joy0_Left
+   if _b5_enableSlowMotion{6} then if (_frame_counter & 3) <> 0 then goto __Skip_Joy0_Left
    player0x = player0x - 1 
 
    _Bit2_P0_Dir_Left{2} = 1
@@ -589,16 +586,16 @@ __Skip_Joy0_Left
 
    temp6 = (player0x-9)/4
 
-   if temp6 < 34 then if pfread(temp6,temp5) then _b6_palyerslowMotion{6} = 1 : goto __Skip_Joy0_Right
+   if temp6 < 34 then if pfread(temp6,temp5) then _b5_enableSlowMotion{6} = 1 : goto __Skip_Joy0_Right
 
    temp3 = (player0y-4)/8
 
-   if temp6 < 34 then if pfread(temp6,temp3) then _b6_palyerslowMotion{6} = 1 : goto __Skip_Joy0_Right
+   if temp6 < 34 then if pfread(temp6,temp3) then _b5_enableSlowMotion{6} = 1 : goto __Skip_Joy0_Right
 
    ;```````````````````````````````````````````````````````````````
    ;  Moves player0 right.
    ;
-   if _b6_palyerslowMotion{6} then if (_frame_counter & 3) <> 0 then goto __Skip_Joy0_Right
+   if _b5_enableSlowMotion{6} then if (_frame_counter & 3) <> 0 then goto __Skip_Joy0_Right
    player0x = player0x + 1 
 
    _Bit3_P0_Dir_Right{3} = 1
@@ -608,8 +605,8 @@ __game_collision
    ;*************************************************************************************************************************
    ; COLLISIONI 
    ;_________________________________________________________________________________________________________________________
-   ; Biscotto e Bocca: decremento la barra della salute
-   ; Missile e Bocca: incremento dei punti di 10 unità e Bocca disabilitata
+   ; Biscotto e Bocca: decremento la barra di una vita
+   ; Missile e Bocca: incremento dei punti di 10 unità e e disabilito la bocca
    ; Biscotto e Arrivo : cambio di livello
    ;*************************************************************************************************************************   
    if collision(player0, player1) then goto __decrease_health_bar
@@ -635,7 +632,7 @@ __game_collision
    ;*************************************************************************************************************************   
 __destroy_player1
    score = score + 10 
-   _b5_palyer1Enable{5} = 0
+   _b5_enablePalyer1{5} = 0
    goto __delete_player1
 
 __decrease_health_bar
@@ -660,8 +657,8 @@ __skip_speed
   bally=200
   player0x=30:player0y=54
   callmacro sound 12 6 2
-  _b3_showLevel{3}=0
-  _b5_palyer1Enable{5}=1
+  _b3_enableLevel{3}=0
+  _b5_enablePalyer1{5}=1
   pfclear
 
 __done
@@ -749,6 +746,7 @@ end
       q = f + 4
    next
 end
+
    macro sound
    AUDV1 = {1}
    AUDC1 = {2}
