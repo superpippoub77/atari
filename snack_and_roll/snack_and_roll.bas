@@ -610,36 +610,36 @@ __game_collision
    ; Biscotto e Arrivo : cambio di livello
    ;*************************************************************************************************************************   
    if collision(player0, player1) then goto __decrease_health_bar
-   if collision(missile0, player1) then goto __destroy_player1
+   if collision(missile0, player1) then goto __destroy_mouth
    if collision(player0, ball)  then goto __change_level
    goto __done
 
    ;*************************************************************************************************************************
    ; DINAMICHE PUNTEGGI DI GIOCO 
    ;_________________________________________________________________________________________________________________________
-   ; __destroy_player1 => Distrugge il player 1 disattivandolo e incremeta lo
+   ; __destroy_mouth => Distrugge il player 1 disattivandolo e incremeta lo
    ; score di 10 punti
    ; ........................................................................
    ; __decrease_health_bar => Decrementa di una vita se le fite sono finite
    ; finisce il gico
    ; ........................................................................
-   ; __delete_player1 => cancella dallo schermo il player 1
+   ; __delete_mouth => cancella dallo schermo il player 1
    ; ........................................................................
    ; __decrease_timer_bar => decremeta la barra del tempo
    ; ........................................................................
    ; __change_level => Cambia di livello
    ;
    ;*************************************************************************************************************************   
-__destroy_player1
+__destroy_mouth
    score = score + 10 
    _b5_enablePalyer1{5} = 0
-   goto __delete_player1
+   goto __delete_mouth
 
 __decrease_health_bar
   pfscore2=pfscore2/4
   if pfscore2 = 0 then goto __game_start
 
-__delete_player1 
+__delete_mouth 
   player1y=200
   goto __done
 
