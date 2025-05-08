@@ -189,6 +189,7 @@
    ;.........................................................................................................................
    ; i flag (bit) si caratterizzano nel seguente modo: on = 1/off = 0
    ; _b0_enableStart => Game start
+   ; _b2_loadPlayfield => Caricamento del playfield dinamico
    ; _b3_enableLevel => Attivazione del nuovo livello
    ; _b4_enableLight => flag per apire se lo stato della luce
    ; _b5_enablePalyer1 => Attivazione della bocca
@@ -222,6 +223,7 @@
 
    ; FLAG DI CONFIGURAZIONE
    dim _b0_enableStart = k
+   dim _b2_loadPlayfield = k
    dim _b3_enableLevel = k
    dim _b4_enableLight = k
    dim _b5_enablePalyer1 = k
@@ -309,6 +311,7 @@ end
 __game_start
    ;flag
    _b0_enableStart{0} = 0
+   _b2_loadPlayfield{2} = 0
    _b3_enableLevel{3} = 0 
    _b4_enableLight{4} = 1
    _b5_enablePalyer1{5} = 1
@@ -328,7 +331,18 @@ __game_start
    goto __done
    
 __main_loop
-  
+   ;*************************************************************************************************************************
+   ; TIMER
+   ;_________________________________________________________________________________________________________________________
+   ; E' stato definita una variabile come timer per il controllo degli 
+   ; oggetti e le dinamiche del playfield:
+   ; _frame_counter = conteggio dei frame => frame_limit(54 al secondo)
+   ; _seconds_counter = conteggio dei secondi
+   ;*************************************************************************************************************************
+   _frame_counter = _frame_counter + 1
+   if _frame_counter > frame_limit then _frame_counter = 0 : _seconds_counter = _seconds_counter + 1
+
+
    ;F2 inizio il gioco mentre F1 seleziono il livello
    if switchreset && !_b0_enableStart{0} then _b0_enableStart{0} = 1 : goto __skip_to_change
    if switchselect && !_b0_enableStart{0} then pfhline 0 6 _level on : goto __change_level
@@ -341,19 +355,10 @@ __main_loop
    ; MUSICA DI SOTTOFONDO
    ;_________________________________________________________________________________________________________________________
    if _music_index > 7 then _music_index = 0
-   if _frame_counter&15 then AUDV0 = 0 : AUDF1 = melody[_music_index] : AUDC1 = 4 :  AUDV1 = 4 : _music_index = _music_index + 1
+   if _frame_counter&31 && !_b0_enableStart{0} then AUDF1 = jingle[_music_index] : AUDC1 = 4 :  AUDV1 = 8: _music_index = _music_index + 1
+   if _frame_counter&31 && _b0_enableStart{0} then AUDV0 = 0 : AUDF1 = melody[_music_index] : AUDC1 = 4 :  AUDV1 = 8 : _music_index = _music_index + 1
    ;if _frame_counter>32 && _b6_enableSlowMotion{6} then AUDF0 = 30 : AUDC0 = 6: AUDV0 = 4
 
-   ;*************************************************************************************************************************
-   ; TIMER
-   ;_________________________________________________________________________________________________________________________
-   ; E' stato definita una variabile come timer per il controllo degli 
-   ; oggetti e le dinamiche del playfield:
-   ; _frame_counter = conteggio dei frame => frame_limit(54 al secondo)
-   ; _seconds_counter = conteggio dei secondi
-   ;*************************************************************************************************************************
-   _frame_counter = _frame_counter + 1
-   if _frame_counter > frame_limit then _frame_counter = 0 : _seconds_counter = _seconds_counter + 1
 
    ;*************************************************************************************************************************
    ; BOCCA (PLAYER1)
@@ -429,29 +434,32 @@ end
    _playfield_section = 1
    _playfield_up = 0 ; parte alta
    _playfield_down = 2 ; parte bassa
+
+   if _b2_loadPlayfield{2} then goto __skip_oggetti
 __loop_objects
    temp1 = _speed - 1
    _current_object_level = (_level - 1) * 8
-   if (_seconds_counter&temp1) = 0 && _frame_counter = _playfield_section && (objects[_current_object_level]&_current_bit_object)> 0 then callmacro cup_knife _playfield_section _playfield_down 3 ; TAZZE
+   if (_seconds_counter&temp1) = 0 && (objects[_current_object_level]&_current_bit_object)> 0 then callmacro cup_knife _playfield_section _playfield_down 3 ; TAZZE
    temp2 = _current_object_level +1
-   if (_seconds_counter&temp1) = 0 && _frame_counter = (_playfield_section+1) && (objects[temp2]&_current_bit_object)> 0 then callmacro cup_knife _playfield_section _playfield_up 2 ; COLTELLI
+   if (_seconds_counter&temp1) = 0 && (objects[temp2]&_current_bit_object)> 0 then callmacro cup_knife _playfield_section _playfield_up 2 ; COLTELLI
    temp2 = _current_object_level+2
-   if (_seconds_counter&temp1) = 0 && _frame_counter = (_playfield_section+2) && (objects[temp2]&_current_bit_object)> 0 then callmacro chocolate _playfield_section _playfield_down; MURI
+   if (_seconds_counter&temp1) = 0 && (objects[temp2]&_current_bit_object)> 0 then callmacro chocolate _playfield_section _playfield_down; MURI
    temp2 = _current_object_level+3
-   if (_seconds_counter&temp1) = 0 && _frame_counter = (_playfield_section+3) && (objects[temp2]&_current_bit_object)> 0 then callmacro choco_drops _playfield_section _playfield_up; choco_drops
+   if (_seconds_counter&temp1) = 0 && (objects[temp2]&_current_bit_object)> 0 then callmacro choco_drops _playfield_section _playfield_up; choco_drops
    
    ; !!! SALVA LA POSIZONE DELLE LAMPADE PER IL DISCORSO DI ATTIVAZIONE E DISATTIVAZIONE
    temp2 = _current_object_level+ 4
-   if (_seconds_counter&temp1) = 0 && _frame_counter = (_playfield_section+4) && (objects[temp2]&_current_bit_object)> 0 then callmacro lamp _playfield_section _playfield_up : _current_lamp = _playfield_section; LAMPADE
+   if (_seconds_counter&temp1) = 0 && (objects[temp2]&_current_bit_object)> 0 then callmacro lamp _playfield_section _playfield_up : _current_lamp = _playfield_section; LAMPADE
    temp2 = _current_object_level+ 5
-   if (_seconds_counter&temp1) = 0 && _frame_counter = (_playfield_section+5) && (objects[temp2]&_current_bit_object)> 0 then callmacro table _playfield_section _playfield_down ; TAVOLI
+   if (_seconds_counter&temp1) = 0 && (objects[temp2]&_current_bit_object)> 0 then callmacro table _playfield_section _playfield_down ; TAVOLI
    temp2 = _current_object_level+ 6
-   if (_seconds_counter&temp1) = 0 && _frame_counter = (_playfield_section+6) && (objects[temp2]&_current_bit_object)> 0 then temp4 = objects[temp2]: callmacro divisor temp4; divisor
+   if (_seconds_counter&temp1) = 0 && (objects[temp2]&_current_bit_object)> 0 then temp4 = objects[temp2]: callmacro divisor temp4; divisor
    _current_bit_object = _current_bit_object * 2
    _playfield_section = _playfield_section + 7
    
    if _current_bit_object = 16 && _playfield_up = 0 then _playfield_section = 1 : _playfield_up = 6 : _playfield_down = 8
    if _current_bit_object > 0 then goto __loop_objects
+   _b2_loadPlayfield{2} = 1
 __skip_oggetti
 
    ;*************************************************************************************************************************
@@ -705,9 +713,11 @@ __skip_to_change
   bally=200
   player0x=10:player0y=64
   callmacro sound 12 6 2
+  _b2_loadPlayfield{2}=0
   _b3_enableLevel{3}=0
   _b5_enablePalyer1{5}=1
   _sugar_count=0
+  _seconds_counter = 0
 
   pfclear
 
@@ -727,8 +737,8 @@ __done
    ; LIVELLI (12)
 
    data objects
-   %10100100,%00000000,%00000000,%00000000,%00010000,%01010000,%00001111,
-   %00011100,%01100000,%00000000,%00000001,%10010000,%10000000,%01111000,   
+   %10100100,%00000000,%00000000,%00000000,%00010000,%01011000,%01111111,
+   %01100101,%10010000,%00000000,%00000000,%00011000,%10010011,%00001111, 
    %10100010,%01010000,%00000101,%00000010,%00100000,%00010000,%11111000,   
    %00011100,%01100000,%00000000,%00000001,%10010000,%10000000,%01111000,   
    %00011100,%01100000,%00000000,%00000001,%10010000,%10000000,%01111000,   
@@ -741,6 +751,9 @@ __done
    %00011100,%01100000,%00000000,%00000001,%10010000,%10000000,%01111000
 end
 
+   data jingle
+   20, 16, 18, 14, 12, 16, 18, 10, 12, 14, 20, 24, 22, 26, 28, 0
+end
    ; simil barilla
    data melody
    28, 24, 20, 18, 16, 14, 12, 10, 12, 14, 16, 18, 20, 24, 28, 0
