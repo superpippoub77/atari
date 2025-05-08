@@ -4188,13 +4188,13 @@
    2400  f4d9					      if	(pfwidth>2)
    2401  f4d9		       30 28		      .byte.b	%00110000, %00101000
    2402  f4db					      endif
-   2403  f4db		       0b 80		      .byte.b	%00001011, %10000000
+   2403  f4db		       16 80		      .byte.b	%00010110, %10000000
    2404  f4dd					      if	(pfwidth>2)
    2405  f4dd		       46 14		      .byte.b	%01000110, %00010100
    2406  f4df					      endif
-   2407  f4df		       19 c0		      .byte.b	%00011001, %11000000
+   2407  f4df		       19 80		      .byte.b	%00011001, %10000000
    2408  f4e1					      if	(pfwidth>2)
-   2409  f4e1		       12 05		      .byte.b	%00010010, %00000101
+   2409  f4e1		       89 0a		      .byte.b	%10001001, %00001010
    2410  f4e3					      endif
    2411  f4e3		       11 80		      .byte.b	%00010001, %10000000
    2412  f4e5					      if	(pfwidth>2)
@@ -4306,7 +4306,7 @@
    2518  f537
    2519  f537				   .L0189		;  goto __done
    2520  f537
-   2521  f537		       4c bc fe 	      jmp	.__done
+   2521  f537		       4c b9 fe 	      jmp	.__done
    2522  f53a
    2523  f53a				   .
    2524  f53a							; 
@@ -4373,7 +4373,7 @@
    2585  f554		       a5 de		      LDA	_b0_enableStart
    2586  f556		       09 01		      ORA	#1
    2587  f558		       85 de		      STA	_b0_enableStart
-   2588  f55a		       4c 78 fe 	      jmp	.__skip_to_change
+   2588  f55a		       4c 75 fe 	      jmp	.__skip_to_change
    2589  f55d
    2590  f55d				   .skip1then
    2591  f55d				   .skipL0192
@@ -4393,7 +4393,7 @@
    2605  f56f		       a0 06		      LDY	#6
    2606  f571		       a9 00		      LDA	#0
    2607  f573		       20 85 f2 	      jsr	pfhline
-   2608  f576		       4c 66 fe 	      jmp	.__change_level
+   2608  f576		       4c 63 fe 	      jmp	.__change_level
    2609  f579
    2610  f579				   .skip3then
    2611  f579				   .skipL0193
@@ -4409,7 +4409,7 @@
    2621  f57b		       4a		      LSR
    2622  f57c		       b0 03		      BCS	.skipL0194
    2623  f57e				   .condpart5
-   2624  f57e		       4c bc fe 	      jmp	.__done
+   2624  f57e		       4c b9 fe 	      jmp	.__done
    2625  f581
    2626  f581				   .skipL0194
    2627  f581				   .
@@ -4436,18 +4436,18 @@
    2648  f587		       a9 00		      LDA	#0
    2649  f589		       85 e0		      STA	_music_index
    2650  f58b				   .skipL0195
-   2651  f58b				   .L0196		;  if _frame_counter & 31  &&	!_b0_enableStart{0} then AUDF1	=  jingle[_music_index]  :  AUDC1  =  4  :  AUDV1  =  8 :  _music_index  =  _music_index  +  1
+   2651  f58b				   .L0196		;  if _frame_counter  =  frame_limit  &&  !_b0_enableStart{0} then AUDF1  =  jingle[_music_index]  :  AUDC1  =  4  :  AUDV1  =  8 :  _music_index  =  _music_index  +	1
    2652  f58b
    2653  f58b		       a5 d6		      LDA	_frame_counter
-   2654  f58d		       29 1f		      AND	#31
-   2655  f58f		       f0 16		      BEQ	.skipL0196
+   2654  f58d		       c9 36		      CMP	#frame_limit
+   2655  f58f		       d0 16		      BNE	.skipL0196
    2656  f591				   .condpart7
    2657  f591		       a5 de		      LDA	_b0_enableStart
    2658  f593		       4a		      LSR
    2659  f594		       b0 11		      BCS	.skip7then
    2660  f596				   .condpart8
    2661  f596		       a6 e0		      LDX	_music_index
-   2662  f598		       bd 1c ff 	      LDA	jingle,x
+   2662  f598		       bd 19 ff 	      LDA	jingle,x
    2663  f59b		       85 18		      STA	AUDF1
    2664  f59d		       a9 04		      LDA	#4
    2665  f59f		       85 16		      STA	AUDC1
@@ -4456,11 +4456,11 @@
    2668  f5a5		       e6 e0		      INC	_music_index
    2669  f5a7				   .skip7then
    2670  f5a7				   .skipL0196
-   2671  f5a7				   .L0197		;  if _frame_counter & 31  &&	_b0_enableStart{0} then AUDV0  =  0  :	AUDF1  =  melody[_music_index]	:  AUDC1  =  4	:  AUDV1  =  8	:  _music_index  =  _music_index  +  1
+   2671  f5a7				   .L0197		;  if _frame_counter  =  frame_limit  &&  _b0_enableStart{0} then AUDV0  =  0	:  AUDF1  =  melody[_music_index]  :  AUDC1  =	4  :  AUDV1  =	8  :  _music_index  =  _music_index  +	1
    2672  f5a7
    2673  f5a7		       a5 d6		      LDA	_frame_counter
-   2674  f5a9		       29 1f		      AND	#31
-   2675  f5ab		       f0 1a		      BEQ	.skipL0197
+   2674  f5a9		       c9 36		      CMP	#frame_limit
+   2675  f5ab		       d0 1a		      BNE	.skipL0197
    2676  f5ad				   .condpart9
    2677  f5ad		       a5 de		      LDA	_b0_enableStart
    2678  f5af		       4a		      LSR
@@ -4469,7 +4469,7 @@
    2681  f5b2		       a9 00		      LDA	#0
    2682  f5b4		       85 19		      STA	AUDV0
    2683  f5b6		       a6 e0		      LDX	_music_index
-   2684  f5b8		       bd 2f ff 	      LDA	melody,x
+   2684  f5b8		       bd 2c ff 	      LDA	melody,x
    2685  f5bb		       85 18		      STA	AUDF1
    2686  f5bd		       a9 04		      LDA	#4
    2687  f5bf		       85 16		      STA	AUDC1
@@ -4817,7 +4817,7 @@
    3016  f6ba		       d0 0b		      BNE	.skip27then
    3017  f6bc				   .condpart28
    3018  f6bc		       a6 d5		      LDX	_level
-   3019  f6be		       bd 42 ff 	      LDA	door,x
+   3019  f6be		       bd 3f ff 	      LDA	door,x
    3020  f6c1		       85 84		      STA	ballx
    3021  f6c3		       a9 1c		      LDA	#28
    3022  f6c5		       85 89		      STA	bally
@@ -4907,7 +4907,7 @@
    3106  f6f9							; complex condition detected
    3107  f6f9							; complex statement detected
    3108  f6f9		       a6 e1		      LDX	_current_object_level
-   3109  f6fb		       bd c5 fe 	      LDA	objects,x
+   3109  f6fb		       bd c2 fe 	      LDA	objects,x
    3110  f6fe		       25 e5		      AND	_current_bit_object
    3111  f700		       48		      PHA
    3112  f701		       ba		      TSX
@@ -4986,7 +4986,7 @@
    3137  f74b							; complex condition detected
    3138  f74b							; complex statement detected
    3139  f74b		       a6 9d		      LDX	temp2
-   3140  f74d		       bd c5 fe 	      LDA	objects,x
+   3140  f74d		       bd c2 fe 	      LDA	objects,x
    3141  f750		       25 e5		      AND	_current_bit_object
    3142  f752		       48		      PHA
    3143  f753		       ba		      TSX
@@ -5065,7 +5065,7 @@
    3168  f79d							; complex condition detected
    3169  f79d							; complex statement detected
    3170  f79d		       a6 9d		      LDX	temp2
-   3171  f79f		       bd c5 fe 	      LDA	objects,x
+   3171  f79f		       bd c2 fe 	      LDA	objects,x
    3172  f7a2		       25 e5		      AND	_current_bit_object
    3173  f7a4		       48		      PHA
    3174  f7a5		       ba		      TSX
@@ -5139,7 +5139,7 @@
    3199  f7eb							; complex condition detected
    3200  f7eb							; complex statement detected
    3201  f7eb		       a6 9d		      LDX	temp2
-   3202  f7ed		       bd c5 fe 	      LDA	objects,x
+   3202  f7ed		       bd c2 fe 	      LDA	objects,x
    3203  f7f0		       25 e5		      AND	_current_bit_object
    3204  f7f2		       48		      PHA
    3205  f7f3		       ba		      TSX
@@ -5194,7 +5194,7 @@
    3236  f821							; complex condition detected
    3237  f821							; complex statement detected
    3238  f821		       a6 9d		      LDX	temp2
-   3239  f823		       bd c5 fe 	      LDA	objects,x
+   3239  f823		       bd c2 fe 	      LDA	objects,x
    3240  f826		       25 e5		      AND	_current_bit_object
    3241  f828		       48		      PHA
    3242  f829		       ba		      TSX
@@ -5257,7 +5257,7 @@
    3269  f86a							; complex condition detected
    3270  f86a							; complex statement detected
    3271  f86a		       a6 9d		      LDX	temp2
-   3272  f86c		       bd c5 fe 	      LDA	objects,x
+   3272  f86c		       bd c2 fe 	      LDA	objects,x
    3273  f86f		       25 e5		      AND	_current_bit_object
    3274  f871		       48		      PHA
    3275  f872		       ba		      TSX
@@ -5340,7 +5340,7 @@
    3300  f8c8							; complex condition detected
    3301  f8c8							; complex statement detected
    3302  f8c8		       a6 9d		      LDX	temp2
-   3303  f8ca		       bd c5 fe 	      LDA	objects,x
+   3303  f8ca		       bd c2 fe 	      LDA	objects,x
    3304  f8cd		       25 e5		      AND	_current_bit_object
    3305  f8cf		       48		      PHA
    3306  f8d0		       ba		      TSX
@@ -5350,7 +5350,7 @@
    3310  f8d6		       b0 47		      BCS	.skip42then
    3311  f8d8				   .condpart43
    3312  f8d8		       a6 9d		      LDX	temp2
-   3313  f8da		       bd c5 fe 	      LDA	objects,x
+   3313  f8da		       bd c2 fe 	      LDA	objects,x
    3314  f8dd		       85 9f		      STA	temp4
       0  f8df					      divisor	temp4,
       1  f8df
@@ -5583,7 +5583,7 @@
    3485  f99d		       c9 00		      CMP	#0
    3486  f99f		       d0 03		      BNE	.skip52then
    3487  f9a1				   .condpart53
-   3488  f9a1		       4c 5e fe 	      jmp	.__decrease_timer_bar
+   3488  f9a1		       4c 5b fe 	      jmp	.__decrease_timer_bar
    3489  f9a4
    3490  f9a4				   .skip52then
    3491  f9a4				   .skipL0237
@@ -5596,7 +5596,7 @@
    3498  f9a6		       c9 00		      CMP	#0
    3499  f9a8		       d0 03		      BNE	.skipL0238
    3500  f9aa				   .condpart54
-   3501  f9aa		       4c 48 fe 	      jmp	.__decrease_health_bar
+   3501  f9aa		       4c 45 fe 	      jmp	.__decrease_health_bar
    3502  f9ad
    3503  f9ad				   .skipL0238
    3504  f9ad				   .
@@ -6211,7 +6211,7 @@
    4100  fbfb		       4a		      LSR
    4101  fbfc		       b0 03		      BCS	.skipL0270
    4102  fbfe				   .condpart88
-   4103  fbfe		       4c bc fe 	      jmp	.__done
+   4103  fbfe		       4c b9 fe 	      jmp	.__done
    4104  fc01
    4105  fc01				   .skipL0270
    4106  fc01				   .
@@ -6241,13 +6241,13 @@
    4130  fc0d		       c5 85		      CMP	player0y
    4131  fc0f		       90 03		      BCC	.skip34OR
    4132  fc11				   .condpart90
-   4133  fc11		       4c 96 fc 	      jmp	.__skip_up
+   4133  fc11		       4c 93 fc 	      jmp	.__skip_up
    4134  fc14
    4135  fc14				   .skip34OR
    4136  fc14				   .
    4137  fc14							; 
    4138  fc14
-   4139  fc14				   .L0272		;  temp5  =   ( player0x - 10 )  / 4  :  temp6  =   ( player0y - 5 )  / 8
+   4139  fc14				   .L0272		;  temp5  =   ( player0x - 10 )  / 4  :  temp6  =   ( player0y )  / 8
    4140  fc14
    4141  fc14							; complex statement detected
    4142  fc14		       a5 80		      LDA	player0x
@@ -6258,1549 +6258,1553 @@
    4147  fc1b		       85 a0		      STA	temp5
    4148  fc1d							; complex statement detected
    4149  fc1d		       a5 85		      LDA	player0y
-   4150  fc1f		       38		      SEC
-   4151  fc20		       e9 05		      SBC	#5
-   4152  fc22		       4a		      lsr
-   4153  fc23		       4a		      lsr
-   4154  fc24		       4a		      lsr
-   4155  fc25		       85 a1		      STA	temp6
-   4156  fc27				   .
-   4157  fc27							; 
-   4158  fc27
-   4159  fc27				   .L0273		;  if temp5  <  34 then if pfread ( temp5 , temp6 )  then _b6_enableSlowMotion{6}  = 1  : goto __skip_up
-   4160  fc27
-   4161  fc27		       a5 a0		      LDA	temp5
-   4162  fc29		       c9 22		      CMP	#34
-   4163  fc2b		       b0 12		      BCS	.skipL0273
-   4164  fc2d				   .condpart91
-   4165  fc2d		       a5 a0		      LDA	temp5
-   4166  fc2f		       a4 a1		      LDY	temp6
-   4167  fc31		       20 72 f2 	      jsr	pfread
-   4168  fc34		       d0 09		      BNE	.skip91then
-   4169  fc36				   .condpart92
-   4170  fc36		       a5 de		      LDA	_b6_enableSlowMotion
-   4171  fc38		       09 40		      ORA	#64
-   4172  fc3a		       85 de		      STA	_b6_enableSlowMotion
-   4173  fc3c		       4c 96 fc 	      jmp	.__skip_up
-   4174  fc3f
-   4175  fc3f				   .skip91then
-   4176  fc3f				   .skipL0273
-   4177  fc3f				   .
-   4178  fc3f							; 
-   4179  fc3f
-   4180  fc3f				   .L0274		;  temp4  =   ( player0x - 17 )  / 4
-   4181  fc3f
-   4182  fc3f							; complex statement detected
-   4183  fc3f		       a5 80		      LDA	player0x
-   4184  fc41		       38		      SEC
-   4185  fc42		       e9 11		      SBC	#17
-   4186  fc44		       4a		      lsr
-   4187  fc45		       4a		      lsr
-   4188  fc46		       85 9f		      STA	temp4
-   4189  fc48				   .
-   4190  fc48							; 
-   4191  fc48
-   4192  fc48				   .L0275		;  if temp4  <  34 then if pfread ( temp4 , temp6 )  then _b6_enableSlowMotion{6}  = 1  : goto __skip_up
-   4193  fc48
-   4194  fc48		       a5 9f		      LDA	temp4
-   4195  fc4a		       c9 22		      CMP	#34
-   4196  fc4c		       b0 12		      BCS	.skipL0275
-   4197  fc4e				   .condpart93
-   4198  fc4e		       a5 9f		      LDA	temp4
-   4199  fc50		       a4 a1		      LDY	temp6
-   4200  fc52		       20 72 f2 	      jsr	pfread
-   4201  fc55		       d0 09		      BNE	.skip93then
-   4202  fc57				   .condpart94
-   4203  fc57		       a5 de		      LDA	_b6_enableSlowMotion
-   4204  fc59		       09 40		      ORA	#64
-   4205  fc5b		       85 de		      STA	_b6_enableSlowMotion
-   4206  fc5d		       4c 96 fc 	      jmp	.__skip_up
-   4207  fc60
-   4208  fc60				   .skip93then
-   4209  fc60				   .skipL0275
-   4210  fc60				   .
-   4211  fc60							; 
-   4212  fc60
-   4213  fc60				   .L0276		;  temp3  =  temp5  -	1
-   4214  fc60
-   4215  fc60		       a5 a0		      LDA	temp5
-   4216  fc62		       38		      SEC
-   4217  fc63		       e9 01		      SBC	#1
-   4218  fc65		       85 9e		      STA	temp3
-   4219  fc67				   .
-   4220  fc67							; 
-   4221  fc67
-   4222  fc67				   .L0277		;  if temp3  <  34 then if pfread ( temp3 , temp6 )  then _b6_enableSlowMotion{6}  = 1  : goto __skip_up
-   4223  fc67
-   4224  fc67		       a5 9e		      LDA	temp3
-   4225  fc69		       c9 22		      CMP	#34
-   4226  fc6b		       b0 12		      BCS	.skipL0277
-   4227  fc6d				   .condpart95
-   4228  fc6d		       a5 9e		      LDA	temp3
-   4229  fc6f		       a4 a1		      LDY	temp6
-   4230  fc71		       20 72 f2 	      jsr	pfread
-   4231  fc74		       d0 09		      BNE	.skip95then
-   4232  fc76				   .condpart96
-   4233  fc76		       a5 de		      LDA	_b6_enableSlowMotion
-   4234  fc78		       09 40		      ORA	#64
-   4235  fc7a		       85 de		      STA	_b6_enableSlowMotion
-   4236  fc7c		       4c 96 fc 	      jmp	.__skip_up
-   4237  fc7f
-   4238  fc7f				   .skip95then
-   4239  fc7f				   .skipL0277
-   4240  fc7f				   .
-   4241  fc7f							; 
-   4242  fc7f
-   4243  fc7f				   .L0278		;  if _b6_enableSlowMotion{6} then if	( _frame_counter  &  3 )   <>  0 then goto __skip_up
-   4244  fc7f
-   4245  fc7f		       24 de		      BIT	_b6_enableSlowMotion
-   4246  fc81		       50 0b		      BVC	.skipL0278
-   4247  fc83				   .condpart97
-   4248  fc83							; complex condition detected
-   4249  fc83							; complex statement detected
-   4250  fc83		       a5 d6		      LDA	_frame_counter
-   4251  fc85		       29 03		      AND	#3
-   4252  fc87		       c9 00		      CMP	#0
-   4253  fc89		       f0 03		      BEQ	.skip97then
-   4254  fc8b				   .condpart98
-   4255  fc8b		       4c 96 fc 	      jmp	.__skip_up
-   4256  fc8e
-   4257  fc8e				   .skip97then
-   4258  fc8e				   .skipL0278
-   4259  fc8e				   .L0279		;  player0y  =  player0y  -  1  :  _Bit0_P0_Dir_Up{0}	=  1
-   4260  fc8e
-   4261  fc8e		       c6 85		      DEC	player0y
-   4262  fc90		       a5 e3		      LDA	_Bit0_P0_Dir_Up
-   4263  fc92		       09 01		      ORA	#1
-   4264  fc94		       85 e3		      STA	_Bit0_P0_Dir_Up
-   4265  fc96				   .
-   4266  fc96							; 
-   4267  fc96
-   4268  fc96				   .__skip_up
-   4269  fc96							; __skip_up
-   4270  fc96
-   4271  fc96				   .
-   4272  fc96							; 
-   4273  fc96
-   4274  fc96				   .L0280		;  if !joy0down  ||  player0y	>=  _Edge_Bottom then goto __skip_down
-   4275  fc96
-   4276  fc96		       a9 20		      lda	#$20
-   4277  fc98		       2c 80 02 	      bit	SWCHA
-   4278  fc9b		       f0 03		      BEQ	.skipL0280
-   4279  fc9d				   .condpart99
-   4280  fc9d		       4c a6 fc 	      jmp	.condpart100
-   4281  fca0				   .skipL0280
-   4282  fca0		       a5 85		      LDA	player0y
-   4283  fca2		       c9 58		      CMP	#_Edge_Bottom
-   4284  fca4		       90 03		      BCC	.skip35OR
-   4285  fca6				   .condpart100
-   4286  fca6		       4c 28 fd 	      jmp	.__skip_down
-   4287  fca9
-   4288  fca9				   .skip35OR
-   4289  fca9				   .
-   4290  fca9							; 
-   4291  fca9
-   4292  fca9				   .L0281		;  temp5  =   ( player0x - 10 )  / 4  :  temp6  =   ( player0y )  / 8
-   4293  fca9
-   4294  fca9							; complex statement detected
-   4295  fca9		       a5 80		      LDA	player0x
-   4296  fcab		       38		      SEC
-   4297  fcac		       e9 0a		      SBC	#10
-   4298  fcae		       4a		      lsr
-   4299  fcaf		       4a		      lsr
-   4300  fcb0		       85 a0		      STA	temp5
-   4301  fcb2							; complex statement detected
-   4302  fcb2		       a5 85		      LDA	player0y
-   4303  fcb4		       4a		      lsr
-   4304  fcb5		       4a		      lsr
-   4305  fcb6		       4a		      lsr
-   4306  fcb7		       85 a1		      STA	temp6
-   4307  fcb9				   .
-   4308  fcb9							; 
-   4309  fcb9
-   4310  fcb9				   .L0282		;  if temp5  <  34 then if pfread ( temp5 , temp6 )  then _b6_enableSlowMotion{6}  =  1  : goto __skip_down
-   4311  fcb9
-   4312  fcb9		       a5 a0		      LDA	temp5
-   4313  fcbb		       c9 22		      CMP	#34
-   4314  fcbd		       b0 12		      BCS	.skipL0282
-   4315  fcbf				   .condpart101
-   4316  fcbf		       a5 a0		      LDA	temp5
-   4317  fcc1		       a4 a1		      LDY	temp6
-   4318  fcc3		       20 72 f2 	      jsr	pfread
-   4319  fcc6		       d0 09		      BNE	.skip101then
-   4320  fcc8				   .condpart102
-   4321  fcc8		       a5 de		      LDA	_b6_enableSlowMotion
-   4322  fcca		       09 40		      ORA	#64
-   4323  fccc		       85 de		      STA	_b6_enableSlowMotion
-   4324  fcce		       4c 28 fd 	      jmp	.__skip_down
-   4325  fcd1
-   4326  fcd1				   .skip101then
-   4327  fcd1				   .skipL0282
-   4328  fcd1				   .
-   4329  fcd1							; 
-   4330  fcd1
-   4331  fcd1				   .L0283		;  temp4  =   ( player0x - 17 )  / 4
-   4332  fcd1
-   4333  fcd1							; complex statement detected
-   4334  fcd1		       a5 80		      LDA	player0x
-   4335  fcd3		       38		      SEC
-   4336  fcd4		       e9 11		      SBC	#17
-   4337  fcd6		       4a		      lsr
-   4338  fcd7		       4a		      lsr
-   4339  fcd8		       85 9f		      STA	temp4
-   4340  fcda				   .
-   4341  fcda							; 
-   4342  fcda
-   4343  fcda				   .L0284		;  if temp4  <  34 then if pfread ( temp4 , temp6 )  then _b6_enableSlowMotion{6}  =  1  : goto __skip_down
-   4344  fcda
-   4345  fcda		       a5 9f		      LDA	temp4
-   4346  fcdc		       c9 22		      CMP	#34
-   4347  fcde		       b0 12		      BCS	.skipL0284
-   4348  fce0				   .condpart103
-   4349  fce0		       a5 9f		      LDA	temp4
-   4350  fce2		       a4 a1		      LDY	temp6
-   4351  fce4		       20 72 f2 	      jsr	pfread
-   4352  fce7		       d0 09		      BNE	.skip103then
-   4353  fce9				   .condpart104
-   4354  fce9		       a5 de		      LDA	_b6_enableSlowMotion
-   4355  fceb		       09 40		      ORA	#64
-   4356  fced		       85 de		      STA	_b6_enableSlowMotion
-   4357  fcef		       4c 28 fd 	      jmp	.__skip_down
-   4358  fcf2
-   4359  fcf2				   .skip103then
-   4360  fcf2				   .skipL0284
-   4361  fcf2				   .
-   4362  fcf2							; 
-   4363  fcf2
-   4364  fcf2				   .L0285		;  temp3  =  temp5  -	1
-   4365  fcf2
-   4366  fcf2		       a5 a0		      LDA	temp5
-   4367  fcf4		       38		      SEC
-   4368  fcf5		       e9 01		      SBC	#1
-   4369  fcf7		       85 9e		      STA	temp3
-   4370  fcf9				   .
-   4371  fcf9							; 
-   4372  fcf9
-   4373  fcf9				   .L0286		;  if temp3  <  34 then if pfread ( temp3 , temp6 )  then _b6_enableSlowMotion{6}  =  1  : goto __skip_down
-   4374  fcf9
-   4375  fcf9		       a5 9e		      LDA	temp3
-   4376  fcfb		       c9 22		      CMP	#34
-   4377  fcfd		       b0 12		      BCS	.skipL0286
-   4378  fcff				   .condpart105
-   4379  fcff		       a5 9e		      LDA	temp3
-   4380  fd01		       a4 a1		      LDY	temp6
-   4381  fd03		       20 72 f2 	      jsr	pfread
-   4382  fd06		       d0 09		      BNE	.skip105then
-   4383  fd08				   .condpart106
-   4384  fd08		       a5 de		      LDA	_b6_enableSlowMotion
-   4385  fd0a		       09 40		      ORA	#64
-   4386  fd0c		       85 de		      STA	_b6_enableSlowMotion
-   4387  fd0e		       4c 28 fd 	      jmp	.__skip_down
-   4388  fd11
-   4389  fd11				   .skip105then
-   4390  fd11				   .skipL0286
-   4391  fd11				   .
-   4392  fd11							; 
-   4393  fd11
-   4394  fd11				   .L0287		;  if _b6_enableSlowMotion{6} then if	( _frame_counter  &  3 )   <>  0 then goto __skip_down
-   4395  fd11
-   4396  fd11		       24 de		      BIT	_b6_enableSlowMotion
-   4397  fd13		       50 0b		      BVC	.skipL0287
-   4398  fd15				   .condpart107
-   4399  fd15							; complex condition detected
-   4400  fd15							; complex statement detected
-   4401  fd15		       a5 d6		      LDA	_frame_counter
-   4402  fd17		       29 03		      AND	#3
-   4403  fd19		       c9 00		      CMP	#0
-   4404  fd1b		       f0 03		      BEQ	.skip107then
-   4405  fd1d				   .condpart108
-   4406  fd1d		       4c 28 fd 	      jmp	.__skip_down
-   4407  fd20
-   4408  fd20				   .skip107then
-   4409  fd20				   .skipL0287
-   4410  fd20				   .L0288		;  player0y  =  player0y  +  1  :  _Bit1_P0_Dir_Down{1}  =  1
-   4411  fd20
-   4412  fd20		       e6 85		      INC	player0y
-   4413  fd22		       a5 e3		      LDA	_Bit1_P0_Dir_Down
-   4414  fd24		       09 02		      ORA	#2
-   4415  fd26		       85 e3		      STA	_Bit1_P0_Dir_Down
-   4416  fd28				   .__skip_down
-   4417  fd28							; __skip_down
-   4418  fd28
-   4419  fd28				   .
-   4420  fd28							; 
-   4421  fd28
-   4422  fd28				   .L0289		;  if !joy0left  ||  player0x	<=  _P_Edge_Left then goto __skip_left
-   4423  fd28
-   4424  fd28		       2c 80 02 	      bit	SWCHA
-   4425  fd2b		       50 03		      BVC	.skipL0289
-   4426  fd2d				   .condpart109
-   4427  fd2d		       4c 36 fd 	      jmp	.condpart110
-   4428  fd30				   .skipL0289
-   4429  fd30		       a9 0a		      LDA	#_P_Edge_Left
-   4430  fd32		       c5 80		      CMP	player0x
-   4431  fd34		       90 03		      BCC	.skip36OR
-   4432  fd36				   .condpart110
-   4433  fd36		       4c 9d fd 	      jmp	.__skip_left
-   4434  fd39
-   4435  fd39				   .skip36OR
-   4436  fd39				   .
-   4437  fd39							; 
-   4438  fd39
-   4439  fd39				   .L0290		;  temp5  =   ( player0y - 1 )  / 8  :  temp6	=   ( player0x - 18 )  / 4
-   4440  fd39
-   4441  fd39							; complex statement detected
-   4442  fd39		       a5 85		      LDA	player0y
-   4443  fd3b		       38		      SEC
-   4444  fd3c		       e9 01		      SBC	#1
-   4445  fd3e		       4a		      lsr
-   4446  fd3f		       4a		      lsr
-   4447  fd40		       4a		      lsr
-   4448  fd41		       85 a0		      STA	temp5
-   4449  fd43							; complex statement detected
-   4450  fd43		       a5 80		      LDA	player0x
-   4451  fd45		       38		      SEC
-   4452  fd46		       e9 12		      SBC	#18
-   4453  fd48		       4a		      lsr
-   4454  fd49		       4a		      lsr
-   4455  fd4a		       85 a1		      STA	temp6
-   4456  fd4c				   .
-   4457  fd4c							; 
-   4458  fd4c
-   4459  fd4c				   .L0291		;  if temp6  <  34 then if pfread ( temp6 , temp5 )  then _b6_enableSlowMotion{6}  =  1  :  goto __skip_left
-   4460  fd4c
-   4461  fd4c		       a5 a1		      LDA	temp6
-   4462  fd4e		       c9 22		      CMP	#34
-   4463  fd50		       b0 12		      BCS	.skipL0291
-   4464  fd52				   .condpart111
-   4465  fd52		       a5 a1		      LDA	temp6
-   4466  fd54		       a4 a0		      LDY	temp5
-   4467  fd56		       20 72 f2 	      jsr	pfread
-   4468  fd59		       d0 09		      BNE	.skip111then
-   4469  fd5b				   .condpart112
-   4470  fd5b		       a5 de		      LDA	_b6_enableSlowMotion
-   4471  fd5d		       09 40		      ORA	#64
-   4472  fd5f		       85 de		      STA	_b6_enableSlowMotion
-   4473  fd61		       4c 9d fd 	      jmp	.__skip_left
-   4474  fd64
-   4475  fd64				   .skip111then
-   4476  fd64				   .skipL0291
-   4477  fd64				   .
-   4478  fd64							; 
-   4479  fd64
-   4480  fd64				   .L0292		;  temp3  =   ( player0y - 4 )  / 8
-   4481  fd64
-   4482  fd64							; complex statement detected
-   4483  fd64		       a5 85		      LDA	player0y
-   4484  fd66		       38		      SEC
-   4485  fd67		       e9 04		      SBC	#4
-   4486  fd69		       4a		      lsr
-   4487  fd6a		       4a		      lsr
-   4488  fd6b		       4a		      lsr
-   4489  fd6c		       85 9e		      STA	temp3
-   4490  fd6e				   .
-   4491  fd6e							; 
-   4492  fd6e
-   4493  fd6e				   .L0293		;  if temp6  <  34 then if pfread ( temp6 , temp3 )  then _b6_enableSlowMotion{6}  =  1  :  goto __skip_left
-   4494  fd6e
-   4495  fd6e		       a5 a1		      LDA	temp6
-   4496  fd70		       c9 22		      CMP	#34
-   4497  fd72		       b0 12		      BCS	.skipL0293
-   4498  fd74				   .condpart113
-   4499  fd74		       a5 a1		      LDA	temp6
-   4500  fd76		       a4 9e		      LDY	temp3
-   4501  fd78		       20 72 f2 	      jsr	pfread
-   4502  fd7b		       d0 09		      BNE	.skip113then
-   4503  fd7d				   .condpart114
-   4504  fd7d		       a5 de		      LDA	_b6_enableSlowMotion
-   4505  fd7f		       09 40		      ORA	#64
-   4506  fd81		       85 de		      STA	_b6_enableSlowMotion
-   4507  fd83		       4c 9d fd 	      jmp	.__skip_left
-   4508  fd86
-   4509  fd86				   .skip113then
-   4510  fd86				   .skipL0293
-   4511  fd86				   .
-   4512  fd86							; 
-   4513  fd86
-   4514  fd86				   .L0294		;  if _b6_enableSlowMotion{6} then if	( _frame_counter  &  3 )   <>  0 then goto __skip_left
-   4515  fd86
-   4516  fd86		       24 de		      BIT	_b6_enableSlowMotion
-   4517  fd88		       50 0b		      BVC	.skipL0294
-   4518  fd8a				   .condpart115
-   4519  fd8a							; complex condition detected
-   4520  fd8a							; complex statement detected
-   4521  fd8a		       a5 d6		      LDA	_frame_counter
-   4522  fd8c		       29 03		      AND	#3
-   4523  fd8e		       c9 00		      CMP	#0
-   4524  fd90		       f0 03		      BEQ	.skip115then
-   4525  fd92				   .condpart116
-   4526  fd92		       4c 9d fd 	      jmp	.__skip_left
-   4527  fd95
-   4528  fd95				   .skip115then
-   4529  fd95				   .skipL0294
-   4530  fd95				   .L0295		;  player0x  =  player0x  -  1  :  _Bit2_P0_Dir_Left{2}  =  1
-   4531  fd95
-   4532  fd95		       c6 80		      DEC	player0x
-   4533  fd97		       a5 e3		      LDA	_Bit2_P0_Dir_Left
-   4534  fd99		       09 04		      ORA	#4
-   4535  fd9b		       85 e3		      STA	_Bit2_P0_Dir_Left
-   4536  fd9d				   .
-   4537  fd9d							; 
-   4538  fd9d
-   4539  fd9d				   .__skip_left
-   4540  fd9d							; __skip_left
-   4541  fd9d
-   4542  fd9d				   .L0296		;  if !joy0right  ||  player0x  >=  _Edge_Right then goto __skip_right
-   4543  fd9d
-   4544  fd9d		       2c 80 02 	      bit	SWCHA
-   4545  fda0		       10 03		      BPL	.skipL0296
-   4546  fda2				   .condpart117
-   4547  fda2		       4c ab fd 	      jmp	.condpart118
-   4548  fda5				   .skipL0296
-   4549  fda5		       a5 80		      LDA	player0x
-   4550  fda7		       c9 91		      CMP	#_Edge_Right
-   4551  fda9		       90 03		      BCC	.skip37OR
-   4552  fdab				   .condpart118
-   4553  fdab		       4c 12 fe 	      jmp	.__skip_right
-   4554  fdae
-   4555  fdae				   .skip37OR
-   4556  fdae				   .
-   4557  fdae							; 
-   4558  fdae
-   4559  fdae				   .L0297		;  temp5  =   ( player0y - 1 )  / 8  :  temp6	=   ( player0x - 9 )  / 4
-   4560  fdae
-   4561  fdae							; complex statement detected
-   4562  fdae		       a5 85		      LDA	player0y
-   4563  fdb0		       38		      SEC
-   4564  fdb1		       e9 01		      SBC	#1
-   4565  fdb3		       4a		      lsr
-   4566  fdb4		       4a		      lsr
-   4567  fdb5		       4a		      lsr
-   4568  fdb6		       85 a0		      STA	temp5
-   4569  fdb8							; complex statement detected
-   4570  fdb8		       a5 80		      LDA	player0x
-   4571  fdba		       38		      SEC
-   4572  fdbb		       e9 09		      SBC	#9
-   4573  fdbd		       4a		      lsr
-   4574  fdbe		       4a		      lsr
-   4575  fdbf		       85 a1		      STA	temp6
-   4576  fdc1				   .
-   4577  fdc1							; 
-   4578  fdc1
-   4579  fdc1				   .L0298		;  if temp6  <  34 then if pfread ( temp6 , temp5 )  then _b6_enableSlowMotion{6}  =  1  :  goto __skip_right
-   4580  fdc1
-   4581  fdc1		       a5 a1		      LDA	temp6
-   4582  fdc3		       c9 22		      CMP	#34
-   4583  fdc5		       b0 12		      BCS	.skipL0298
-   4584  fdc7				   .condpart119
-   4585  fdc7		       a5 a1		      LDA	temp6
-   4586  fdc9		       a4 a0		      LDY	temp5
-   4587  fdcb		       20 72 f2 	      jsr	pfread
-   4588  fdce		       d0 09		      BNE	.skip119then
-   4589  fdd0				   .condpart120
-   4590  fdd0		       a5 de		      LDA	_b6_enableSlowMotion
-   4591  fdd2		       09 40		      ORA	#64
-   4592  fdd4		       85 de		      STA	_b6_enableSlowMotion
-   4593  fdd6		       4c 12 fe 	      jmp	.__skip_right
-   4594  fdd9
-   4595  fdd9				   .skip119then
-   4596  fdd9				   .skipL0298
-   4597  fdd9				   .
-   4598  fdd9							; 
-   4599  fdd9
-   4600  fdd9				   .L0299		;  temp3  =   ( player0y - 4 )  / 8
-   4601  fdd9
-   4602  fdd9							; complex statement detected
-   4603  fdd9		       a5 85		      LDA	player0y
-   4604  fddb		       38		      SEC
-   4605  fddc		       e9 04		      SBC	#4
-   4606  fdde		       4a		      lsr
-   4607  fddf		       4a		      lsr
-   4608  fde0		       4a		      lsr
-   4609  fde1		       85 9e		      STA	temp3
-   4610  fde3				   .
-   4611  fde3							; 
-   4612  fde3
-   4613  fde3				   .L0300		;  if temp6  <  34 then if pfread ( temp6 , temp3 )  then _b6_enableSlowMotion{6}  =  1  :  goto __skip_right
-   4614  fde3
-   4615  fde3		       a5 a1		      LDA	temp6
-   4616  fde5		       c9 22		      CMP	#34
-   4617  fde7		       b0 12		      BCS	.skipL0300
-   4618  fde9				   .condpart121
-   4619  fde9		       a5 a1		      LDA	temp6
-   4620  fdeb		       a4 9e		      LDY	temp3
-   4621  fded		       20 72 f2 	      jsr	pfread
-   4622  fdf0		       d0 09		      BNE	.skip121then
-   4623  fdf2				   .condpart122
-   4624  fdf2		       a5 de		      LDA	_b6_enableSlowMotion
-   4625  fdf4		       09 40		      ORA	#64
-   4626  fdf6		       85 de		      STA	_b6_enableSlowMotion
-   4627  fdf8		       4c 12 fe 	      jmp	.__skip_right
-   4628  fdfb
-   4629  fdfb				   .skip121then
-   4630  fdfb				   .skipL0300
-   4631  fdfb				   .
-   4632  fdfb							; 
-   4633  fdfb
-   4634  fdfb				   .L0301		;  if _b6_enableSlowMotion{6} then if	( _frame_counter  &  3 )   <>  0 then goto __skip_right
-   4635  fdfb
-   4636  fdfb		       24 de		      BIT	_b6_enableSlowMotion
-   4637  fdfd		       50 0b		      BVC	.skipL0301
-   4638  fdff				   .condpart123
-   4639  fdff							; complex condition detected
-   4640  fdff							; complex statement detected
-   4641  fdff		       a5 d6		      LDA	_frame_counter
-   4642  fe01		       29 03		      AND	#3
-   4643  fe03		       c9 00		      CMP	#0
-   4644  fe05		       f0 03		      BEQ	.skip123then
-   4645  fe07				   .condpart124
-   4646  fe07		       4c 12 fe 	      jmp	.__skip_right
-   4647  fe0a
-   4648  fe0a				   .skip123then
-   4649  fe0a				   .skipL0301
-   4650  fe0a				   .L0302		;  player0x  =  player0x  +  1  :  _Bit3_P0_Dir_Right{3}  =  1
-   4651  fe0a
-   4652  fe0a		       e6 80		      INC	player0x
-   4653  fe0c		       a5 e3		      LDA	_Bit3_P0_Dir_Right
-   4654  fe0e		       09 08		      ORA	#8
-   4655  fe10		       85 e3		      STA	_Bit3_P0_Dir_Right
-   4656  fe12				   .__skip_right
-   4657  fe12							; __skip_right
-   4658  fe12
-   4659  fe12				   .
-   4660  fe12							; 
-   4661  fe12
-   4662  fe12				   .__game_collision
-   4663  fe12							; __game_collision
-   4664  fe12
-   4665  fe12				   .
-   4666  fe12							; 
-   4667  fe12
-   4668  fe12				   .
-   4669  fe12							; 
-   4670  fe12
-   4671  fe12				   .
-   4672  fe12							; 
-   4673  fe12
-   4674  fe12				   .
-   4675  fe12							; 
-   4676  fe12
-   4677  fe12				   .
-   4678  fe12							; 
-   4679  fe12
-   4680  fe12				   .
-   4681  fe12							; 
-   4682  fe12
-   4683  fe12				   .
-   4684  fe12							; 
-   4685  fe12
-   4686  fe12				   .L0303		;  if collision(player0,player1) then goto __decrease_health_bar
-   4687  fe12
-   4688  fe12		       24 07		      bit	CXPPMM
-   4689  fe14		       10 03		      BPL	.skipL0303
-   4690  fe16				   .condpart125
-   4691  fe16		       4c 48 fe 	      jmp	.__decrease_health_bar
-   4692  fe19
-   4693  fe19				   .skipL0303
-   4694  fe19				   .L0304		;  if collision(missile0,player1) then goto __destroy_mouth
-   4695  fe19
-   4696  fe19		       24 00		      bit	CXM0P
-   4697  fe1b		       10 03		      BPL	.skipL0304
-   4698  fe1d				   .condpart126
-   4699  fe1d		       4c 2a fe 	      jmp	.__destroy_mouth
-   4700  fe20
-   4701  fe20				   .skipL0304
-   4702  fe20				   .L0305		;  if collision(player0,ball) then goto __change_level
-   4703  fe20
-   4704  fe20		       24 02		      bit	CXP0FB
-   4705  fe22		       50 03		      BVC	.skipL0305
-   4706  fe24				   .condpart127
-   4707  fe24		       4c 66 fe 	      jmp	.__change_level
-   4708  fe27
-   4709  fe27				   .skipL0305
-   4710  fe27				   .L0306		;  goto __done
+   4150  fc1f		       4a		      lsr
+   4151  fc20		       4a		      lsr
+   4152  fc21		       4a		      lsr
+   4153  fc22		       85 a1		      STA	temp6
+   4154  fc24				   .
+   4155  fc24							; 
+   4156  fc24
+   4157  fc24				   .L0273		;  if temp5  <  34 then if pfread ( temp5 , temp6 )  then _b6_enableSlowMotion{6}  = 1  : goto __skip_up
+   4158  fc24
+   4159  fc24		       a5 a0		      LDA	temp5
+   4160  fc26		       c9 22		      CMP	#34
+   4161  fc28		       b0 12		      BCS	.skipL0273
+   4162  fc2a				   .condpart91
+   4163  fc2a		       a5 a0		      LDA	temp5
+   4164  fc2c		       a4 a1		      LDY	temp6
+   4165  fc2e		       20 72 f2 	      jsr	pfread
+   4166  fc31		       d0 09		      BNE	.skip91then
+   4167  fc33				   .condpart92
+   4168  fc33		       a5 de		      LDA	_b6_enableSlowMotion
+   4169  fc35		       09 40		      ORA	#64
+   4170  fc37		       85 de		      STA	_b6_enableSlowMotion
+   4171  fc39		       4c 93 fc 	      jmp	.__skip_up
+   4172  fc3c
+   4173  fc3c				   .skip91then
+   4174  fc3c				   .skipL0273
+   4175  fc3c				   .
+   4176  fc3c							; 
+   4177  fc3c
+   4178  fc3c				   .L0274		;  temp4  =   ( player0x - 17 )  / 4
+   4179  fc3c
+   4180  fc3c							; complex statement detected
+   4181  fc3c		       a5 80		      LDA	player0x
+   4182  fc3e		       38		      SEC
+   4183  fc3f		       e9 11		      SBC	#17
+   4184  fc41		       4a		      lsr
+   4185  fc42		       4a		      lsr
+   4186  fc43		       85 9f		      STA	temp4
+   4187  fc45				   .
+   4188  fc45							; 
+   4189  fc45
+   4190  fc45				   .L0275		;  if temp4  <  34 then if pfread ( temp4 , temp6 )  then _b6_enableSlowMotion{6}  = 1  : goto __skip_up
+   4191  fc45
+   4192  fc45		       a5 9f		      LDA	temp4
+   4193  fc47		       c9 22		      CMP	#34
+   4194  fc49		       b0 12		      BCS	.skipL0275
+   4195  fc4b				   .condpart93
+   4196  fc4b		       a5 9f		      LDA	temp4
+   4197  fc4d		       a4 a1		      LDY	temp6
+   4198  fc4f		       20 72 f2 	      jsr	pfread
+   4199  fc52		       d0 09		      BNE	.skip93then
+   4200  fc54				   .condpart94
+   4201  fc54		       a5 de		      LDA	_b6_enableSlowMotion
+   4202  fc56		       09 40		      ORA	#64
+   4203  fc58		       85 de		      STA	_b6_enableSlowMotion
+   4204  fc5a		       4c 93 fc 	      jmp	.__skip_up
+   4205  fc5d
+   4206  fc5d				   .skip93then
+   4207  fc5d				   .skipL0275
+   4208  fc5d				   .
+   4209  fc5d							; 
+   4210  fc5d
+   4211  fc5d				   .L0276		;  temp3  =  temp5  -	1
+   4212  fc5d
+   4213  fc5d		       a5 a0		      LDA	temp5
+   4214  fc5f		       38		      SEC
+   4215  fc60		       e9 01		      SBC	#1
+   4216  fc62		       85 9e		      STA	temp3
+   4217  fc64				   .
+   4218  fc64							; 
+   4219  fc64
+   4220  fc64				   .L0277		;  if temp3  <  34 then if pfread ( temp3 , temp6 )  then _b6_enableSlowMotion{6}  = 1  : goto __skip_up
+   4221  fc64
+   4222  fc64		       a5 9e		      LDA	temp3
+   4223  fc66		       c9 22		      CMP	#34
+   4224  fc68		       b0 12		      BCS	.skipL0277
+   4225  fc6a				   .condpart95
+   4226  fc6a		       a5 9e		      LDA	temp3
+   4227  fc6c		       a4 a1		      LDY	temp6
+   4228  fc6e		       20 72 f2 	      jsr	pfread
+   4229  fc71		       d0 09		      BNE	.skip95then
+   4230  fc73				   .condpart96
+   4231  fc73		       a5 de		      LDA	_b6_enableSlowMotion
+   4232  fc75		       09 40		      ORA	#64
+   4233  fc77		       85 de		      STA	_b6_enableSlowMotion
+   4234  fc79		       4c 93 fc 	      jmp	.__skip_up
+   4235  fc7c
+   4236  fc7c				   .skip95then
+   4237  fc7c				   .skipL0277
+   4238  fc7c				   .
+   4239  fc7c							; 
+   4240  fc7c
+   4241  fc7c				   .L0278		;  if _b6_enableSlowMotion{6} then if	( _frame_counter  &  3 )   <>  0 then goto __skip_up
+   4242  fc7c
+   4243  fc7c		       24 de		      BIT	_b6_enableSlowMotion
+   4244  fc7e		       50 0b		      BVC	.skipL0278
+   4245  fc80				   .condpart97
+   4246  fc80							; complex condition detected
+   4247  fc80							; complex statement detected
+   4248  fc80		       a5 d6		      LDA	_frame_counter
+   4249  fc82		       29 03		      AND	#3
+   4250  fc84		       c9 00		      CMP	#0
+   4251  fc86		       f0 03		      BEQ	.skip97then
+   4252  fc88				   .condpart98
+   4253  fc88		       4c 93 fc 	      jmp	.__skip_up
+   4254  fc8b
+   4255  fc8b				   .skip97then
+   4256  fc8b				   .skipL0278
+   4257  fc8b				   .L0279		;  player0y  =  player0y  -  1  :  _Bit0_P0_Dir_Up{0}	=  1
+   4258  fc8b
+   4259  fc8b		       c6 85		      DEC	player0y
+   4260  fc8d		       a5 e3		      LDA	_Bit0_P0_Dir_Up
+   4261  fc8f		       09 01		      ORA	#1
+   4262  fc91		       85 e3		      STA	_Bit0_P0_Dir_Up
+   4263  fc93				   .
+   4264  fc93							; 
+   4265  fc93
+   4266  fc93				   .__skip_up
+   4267  fc93							; __skip_up
+   4268  fc93
+   4269  fc93				   .
+   4270  fc93							; 
+   4271  fc93
+   4272  fc93				   .L0280		;  if !joy0down  ||  player0y	>=  _Edge_Bottom then goto __skip_down
+   4273  fc93
+   4274  fc93		       a9 20		      lda	#$20
+   4275  fc95		       2c 80 02 	      bit	SWCHA
+   4276  fc98		       f0 03		      BEQ	.skipL0280
+   4277  fc9a				   .condpart99
+   4278  fc9a		       4c a3 fc 	      jmp	.condpart100
+   4279  fc9d				   .skipL0280
+   4280  fc9d		       a5 85		      LDA	player0y
+   4281  fc9f		       c9 58		      CMP	#_Edge_Bottom
+   4282  fca1		       90 03		      BCC	.skip35OR
+   4283  fca3				   .condpart100
+   4284  fca3		       4c 25 fd 	      jmp	.__skip_down
+   4285  fca6
+   4286  fca6				   .skip35OR
+   4287  fca6				   .
+   4288  fca6							; 
+   4289  fca6
+   4290  fca6				   .L0281		;  temp5  =   ( player0x - 10 )  / 4  :  temp6  =   ( player0y )  / 8
+   4291  fca6
+   4292  fca6							; complex statement detected
+   4293  fca6		       a5 80		      LDA	player0x
+   4294  fca8		       38		      SEC
+   4295  fca9		       e9 0a		      SBC	#10
+   4296  fcab		       4a		      lsr
+   4297  fcac		       4a		      lsr
+   4298  fcad		       85 a0		      STA	temp5
+   4299  fcaf							; complex statement detected
+   4300  fcaf		       a5 85		      LDA	player0y
+   4301  fcb1		       4a		      lsr
+   4302  fcb2		       4a		      lsr
+   4303  fcb3		       4a		      lsr
+   4304  fcb4		       85 a1		      STA	temp6
+   4305  fcb6				   .
+   4306  fcb6							; 
+   4307  fcb6
+   4308  fcb6				   .L0282		;  if temp5  <  34 then if pfread ( temp5 , temp6 )  then _b6_enableSlowMotion{6}  =  1  : goto __skip_down
+   4309  fcb6
+   4310  fcb6		       a5 a0		      LDA	temp5
+   4311  fcb8		       c9 22		      CMP	#34
+   4312  fcba		       b0 12		      BCS	.skipL0282
+   4313  fcbc				   .condpart101
+   4314  fcbc		       a5 a0		      LDA	temp5
+   4315  fcbe		       a4 a1		      LDY	temp6
+   4316  fcc0		       20 72 f2 	      jsr	pfread
+   4317  fcc3		       d0 09		      BNE	.skip101then
+   4318  fcc5				   .condpart102
+   4319  fcc5		       a5 de		      LDA	_b6_enableSlowMotion
+   4320  fcc7		       09 40		      ORA	#64
+   4321  fcc9		       85 de		      STA	_b6_enableSlowMotion
+   4322  fccb		       4c 25 fd 	      jmp	.__skip_down
+   4323  fcce
+   4324  fcce				   .skip101then
+   4325  fcce				   .skipL0282
+   4326  fcce				   .
+   4327  fcce							; 
+   4328  fcce
+   4329  fcce				   .L0283		;  temp4  =   ( player0x - 17 )  / 4
+   4330  fcce
+   4331  fcce							; complex statement detected
+   4332  fcce		       a5 80		      LDA	player0x
+   4333  fcd0		       38		      SEC
+   4334  fcd1		       e9 11		      SBC	#17
+   4335  fcd3		       4a		      lsr
+   4336  fcd4		       4a		      lsr
+   4337  fcd5		       85 9f		      STA	temp4
+   4338  fcd7				   .
+   4339  fcd7							; 
+   4340  fcd7
+   4341  fcd7				   .L0284		;  if temp4  <  34 then if pfread ( temp4 , temp6 )  then _b6_enableSlowMotion{6}  =  1  : goto __skip_down
+   4342  fcd7
+   4343  fcd7		       a5 9f		      LDA	temp4
+   4344  fcd9		       c9 22		      CMP	#34
+   4345  fcdb		       b0 12		      BCS	.skipL0284
+   4346  fcdd				   .condpart103
+   4347  fcdd		       a5 9f		      LDA	temp4
+   4348  fcdf		       a4 a1		      LDY	temp6
+   4349  fce1		       20 72 f2 	      jsr	pfread
+   4350  fce4		       d0 09		      BNE	.skip103then
+   4351  fce6				   .condpart104
+   4352  fce6		       a5 de		      LDA	_b6_enableSlowMotion
+   4353  fce8		       09 40		      ORA	#64
+   4354  fcea		       85 de		      STA	_b6_enableSlowMotion
+   4355  fcec		       4c 25 fd 	      jmp	.__skip_down
+   4356  fcef
+   4357  fcef				   .skip103then
+   4358  fcef				   .skipL0284
+   4359  fcef				   .
+   4360  fcef							; 
+   4361  fcef
+   4362  fcef				   .L0285		;  temp3  =  temp5  -	1
+   4363  fcef
+   4364  fcef		       a5 a0		      LDA	temp5
+   4365  fcf1		       38		      SEC
+   4366  fcf2		       e9 01		      SBC	#1
+   4367  fcf4		       85 9e		      STA	temp3
+   4368  fcf6				   .
+   4369  fcf6							; 
+   4370  fcf6
+   4371  fcf6				   .L0286		;  if temp3  <  34 then if pfread ( temp3 , temp6 )  then _b6_enableSlowMotion{6}  =  1  : goto __skip_down
+   4372  fcf6
+   4373  fcf6		       a5 9e		      LDA	temp3
+   4374  fcf8		       c9 22		      CMP	#34
+   4375  fcfa		       b0 12		      BCS	.skipL0286
+   4376  fcfc				   .condpart105
+   4377  fcfc		       a5 9e		      LDA	temp3
+   4378  fcfe		       a4 a1		      LDY	temp6
+   4379  fd00		       20 72 f2 	      jsr	pfread
+   4380  fd03		       d0 09		      BNE	.skip105then
+   4381  fd05				   .condpart106
+   4382  fd05		       a5 de		      LDA	_b6_enableSlowMotion
+   4383  fd07		       09 40		      ORA	#64
+   4384  fd09		       85 de		      STA	_b6_enableSlowMotion
+   4385  fd0b		       4c 25 fd 	      jmp	.__skip_down
+   4386  fd0e
+   4387  fd0e				   .skip105then
+   4388  fd0e				   .skipL0286
+   4389  fd0e				   .
+   4390  fd0e							; 
+   4391  fd0e
+   4392  fd0e				   .L0287		;  if _b6_enableSlowMotion{6} then if	( _frame_counter  &  3 )   <>  0 then goto __skip_down
+   4393  fd0e
+   4394  fd0e		       24 de		      BIT	_b6_enableSlowMotion
+   4395  fd10		       50 0b		      BVC	.skipL0287
+   4396  fd12				   .condpart107
+   4397  fd12							; complex condition detected
+   4398  fd12							; complex statement detected
+   4399  fd12		       a5 d6		      LDA	_frame_counter
+   4400  fd14		       29 03		      AND	#3
+   4401  fd16		       c9 00		      CMP	#0
+   4402  fd18		       f0 03		      BEQ	.skip107then
+   4403  fd1a				   .condpart108
+   4404  fd1a		       4c 25 fd 	      jmp	.__skip_down
+   4405  fd1d
+   4406  fd1d				   .skip107then
+   4407  fd1d				   .skipL0287
+   4408  fd1d				   .L0288		;  player0y  =  player0y  +  1  :  _Bit1_P0_Dir_Down{1}  =  1
+   4409  fd1d
+   4410  fd1d		       e6 85		      INC	player0y
+   4411  fd1f		       a5 e3		      LDA	_Bit1_P0_Dir_Down
+   4412  fd21		       09 02		      ORA	#2
+   4413  fd23		       85 e3		      STA	_Bit1_P0_Dir_Down
+   4414  fd25				   .__skip_down
+   4415  fd25							; __skip_down
+   4416  fd25
+   4417  fd25				   .
+   4418  fd25							; 
+   4419  fd25
+   4420  fd25				   .L0289		;  if !joy0left  ||  player0x	<=  _P_Edge_Left then goto __skip_left
+   4421  fd25
+   4422  fd25		       2c 80 02 	      bit	SWCHA
+   4423  fd28		       50 03		      BVC	.skipL0289
+   4424  fd2a				   .condpart109
+   4425  fd2a		       4c 33 fd 	      jmp	.condpart110
+   4426  fd2d				   .skipL0289
+   4427  fd2d		       a9 0a		      LDA	#_P_Edge_Left
+   4428  fd2f		       c5 80		      CMP	player0x
+   4429  fd31		       90 03		      BCC	.skip36OR
+   4430  fd33				   .condpart110
+   4431  fd33		       4c 9a fd 	      jmp	.__skip_left
+   4432  fd36
+   4433  fd36				   .skip36OR
+   4434  fd36				   .
+   4435  fd36							; 
+   4436  fd36
+   4437  fd36				   .L0290		;  temp5  =   ( player0y - 1 )  / 8  :  temp6	=   ( player0x - 18 )  / 4
+   4438  fd36
+   4439  fd36							; complex statement detected
+   4440  fd36		       a5 85		      LDA	player0y
+   4441  fd38		       38		      SEC
+   4442  fd39		       e9 01		      SBC	#1
+   4443  fd3b		       4a		      lsr
+   4444  fd3c		       4a		      lsr
+   4445  fd3d		       4a		      lsr
+   4446  fd3e		       85 a0		      STA	temp5
+   4447  fd40							; complex statement detected
+   4448  fd40		       a5 80		      LDA	player0x
+   4449  fd42		       38		      SEC
+   4450  fd43		       e9 12		      SBC	#18
+   4451  fd45		       4a		      lsr
+   4452  fd46		       4a		      lsr
+   4453  fd47		       85 a1		      STA	temp6
+   4454  fd49				   .
+   4455  fd49							; 
+   4456  fd49
+   4457  fd49				   .L0291		;  if temp6  <  34 then if pfread ( temp6 , temp5 )  then _b6_enableSlowMotion{6}  =  1  :  goto __skip_left
+   4458  fd49
+   4459  fd49		       a5 a1		      LDA	temp6
+   4460  fd4b		       c9 22		      CMP	#34
+   4461  fd4d		       b0 12		      BCS	.skipL0291
+   4462  fd4f				   .condpart111
+   4463  fd4f		       a5 a1		      LDA	temp6
+   4464  fd51		       a4 a0		      LDY	temp5
+   4465  fd53		       20 72 f2 	      jsr	pfread
+   4466  fd56		       d0 09		      BNE	.skip111then
+   4467  fd58				   .condpart112
+   4468  fd58		       a5 de		      LDA	_b6_enableSlowMotion
+   4469  fd5a		       09 40		      ORA	#64
+   4470  fd5c		       85 de		      STA	_b6_enableSlowMotion
+   4471  fd5e		       4c 9a fd 	      jmp	.__skip_left
+   4472  fd61
+   4473  fd61				   .skip111then
+   4474  fd61				   .skipL0291
+   4475  fd61				   .
+   4476  fd61							; 
+   4477  fd61
+   4478  fd61				   .L0292		;  temp3  =   ( player0y - 4 )  / 8
+   4479  fd61
+   4480  fd61							; complex statement detected
+   4481  fd61		       a5 85		      LDA	player0y
+   4482  fd63		       38		      SEC
+   4483  fd64		       e9 04		      SBC	#4
+   4484  fd66		       4a		      lsr
+   4485  fd67		       4a		      lsr
+   4486  fd68		       4a		      lsr
+   4487  fd69		       85 9e		      STA	temp3
+   4488  fd6b				   .
+   4489  fd6b							; 
+   4490  fd6b
+   4491  fd6b				   .L0293		;  if temp6  <  34 then if pfread ( temp6 , temp3 )  then _b6_enableSlowMotion{6}  =  1  :  goto __skip_left
+   4492  fd6b
+   4493  fd6b		       a5 a1		      LDA	temp6
+   4494  fd6d		       c9 22		      CMP	#34
+   4495  fd6f		       b0 12		      BCS	.skipL0293
+   4496  fd71				   .condpart113
+   4497  fd71		       a5 a1		      LDA	temp6
+   4498  fd73		       a4 9e		      LDY	temp3
+   4499  fd75		       20 72 f2 	      jsr	pfread
+   4500  fd78		       d0 09		      BNE	.skip113then
+   4501  fd7a				   .condpart114
+   4502  fd7a		       a5 de		      LDA	_b6_enableSlowMotion
+   4503  fd7c		       09 40		      ORA	#64
+   4504  fd7e		       85 de		      STA	_b6_enableSlowMotion
+   4505  fd80		       4c 9a fd 	      jmp	.__skip_left
+   4506  fd83
+   4507  fd83				   .skip113then
+   4508  fd83				   .skipL0293
+   4509  fd83				   .
+   4510  fd83							; 
+   4511  fd83
+   4512  fd83				   .L0294		;  if _b6_enableSlowMotion{6} then if	( _frame_counter  &  3 )   <>  0 then goto __skip_left
+   4513  fd83
+   4514  fd83		       24 de		      BIT	_b6_enableSlowMotion
+   4515  fd85		       50 0b		      BVC	.skipL0294
+   4516  fd87				   .condpart115
+   4517  fd87							; complex condition detected
+   4518  fd87							; complex statement detected
+   4519  fd87		       a5 d6		      LDA	_frame_counter
+   4520  fd89		       29 03		      AND	#3
+   4521  fd8b		       c9 00		      CMP	#0
+   4522  fd8d		       f0 03		      BEQ	.skip115then
+   4523  fd8f				   .condpart116
+   4524  fd8f		       4c 9a fd 	      jmp	.__skip_left
+   4525  fd92
+   4526  fd92				   .skip115then
+   4527  fd92				   .skipL0294
+   4528  fd92				   .L0295		;  player0x  =  player0x  -  1  :  _Bit2_P0_Dir_Left{2}  =  1
+   4529  fd92
+   4530  fd92		       c6 80		      DEC	player0x
+   4531  fd94		       a5 e3		      LDA	_Bit2_P0_Dir_Left
+   4532  fd96		       09 04		      ORA	#4
+   4533  fd98		       85 e3		      STA	_Bit2_P0_Dir_Left
+   4534  fd9a				   .
+   4535  fd9a							; 
+   4536  fd9a
+   4537  fd9a				   .__skip_left
+   4538  fd9a							; __skip_left
+   4539  fd9a
+   4540  fd9a				   .L0296		;  if !joy0right  ||  player0x  >=  _Edge_Right then goto __skip_right
+   4541  fd9a
+   4542  fd9a		       2c 80 02 	      bit	SWCHA
+   4543  fd9d		       10 03		      BPL	.skipL0296
+   4544  fd9f				   .condpart117
+   4545  fd9f		       4c a8 fd 	      jmp	.condpart118
+   4546  fda2				   .skipL0296
+   4547  fda2		       a5 80		      LDA	player0x
+   4548  fda4		       c9 91		      CMP	#_Edge_Right
+   4549  fda6		       90 03		      BCC	.skip37OR
+   4550  fda8				   .condpart118
+   4551  fda8		       4c 0f fe 	      jmp	.__skip_right
+   4552  fdab
+   4553  fdab				   .skip37OR
+   4554  fdab				   .
+   4555  fdab							; 
+   4556  fdab
+   4557  fdab				   .L0297		;  temp5  =   ( player0y - 1 )  / 8  :  temp6	=   ( player0x - 9 )  / 4
+   4558  fdab
+   4559  fdab							; complex statement detected
+   4560  fdab		       a5 85		      LDA	player0y
+   4561  fdad		       38		      SEC
+   4562  fdae		       e9 01		      SBC	#1
+   4563  fdb0		       4a		      lsr
+   4564  fdb1		       4a		      lsr
+   4565  fdb2		       4a		      lsr
+   4566  fdb3		       85 a0		      STA	temp5
+   4567  fdb5							; complex statement detected
+   4568  fdb5		       a5 80		      LDA	player0x
+   4569  fdb7		       38		      SEC
+   4570  fdb8		       e9 09		      SBC	#9
+   4571  fdba		       4a		      lsr
+   4572  fdbb		       4a		      lsr
+   4573  fdbc		       85 a1		      STA	temp6
+   4574  fdbe				   .
+   4575  fdbe							; 
+   4576  fdbe
+   4577  fdbe				   .L0298		;  if temp6  <  34 then if pfread ( temp6 , temp5 )  then _b6_enableSlowMotion{6}  =  1  :  goto __skip_right
+   4578  fdbe
+   4579  fdbe		       a5 a1		      LDA	temp6
+   4580  fdc0		       c9 22		      CMP	#34
+   4581  fdc2		       b0 12		      BCS	.skipL0298
+   4582  fdc4				   .condpart119
+   4583  fdc4		       a5 a1		      LDA	temp6
+   4584  fdc6		       a4 a0		      LDY	temp5
+   4585  fdc8		       20 72 f2 	      jsr	pfread
+   4586  fdcb		       d0 09		      BNE	.skip119then
+   4587  fdcd				   .condpart120
+   4588  fdcd		       a5 de		      LDA	_b6_enableSlowMotion
+   4589  fdcf		       09 40		      ORA	#64
+   4590  fdd1		       85 de		      STA	_b6_enableSlowMotion
+   4591  fdd3		       4c 0f fe 	      jmp	.__skip_right
+   4592  fdd6
+   4593  fdd6				   .skip119then
+   4594  fdd6				   .skipL0298
+   4595  fdd6				   .
+   4596  fdd6							; 
+   4597  fdd6
+   4598  fdd6				   .L0299		;  temp3  =   ( player0y - 4 )  / 8
+   4599  fdd6
+   4600  fdd6							; complex statement detected
+   4601  fdd6		       a5 85		      LDA	player0y
+   4602  fdd8		       38		      SEC
+   4603  fdd9		       e9 04		      SBC	#4
+   4604  fddb		       4a		      lsr
+   4605  fddc		       4a		      lsr
+   4606  fddd		       4a		      lsr
+   4607  fdde		       85 9e		      STA	temp3
+   4608  fde0				   .
+   4609  fde0							; 
+   4610  fde0
+   4611  fde0				   .L0300		;  if temp6  <  34 then if pfread ( temp6 , temp3 )  then _b6_enableSlowMotion{6}  =  1  :  goto __skip_right
+   4612  fde0
+   4613  fde0		       a5 a1		      LDA	temp6
+   4614  fde2		       c9 22		      CMP	#34
+   4615  fde4		       b0 12		      BCS	.skipL0300
+   4616  fde6				   .condpart121
+   4617  fde6		       a5 a1		      LDA	temp6
+   4618  fde8		       a4 9e		      LDY	temp3
+   4619  fdea		       20 72 f2 	      jsr	pfread
+   4620  fded		       d0 09		      BNE	.skip121then
+   4621  fdef				   .condpart122
+   4622  fdef		       a5 de		      LDA	_b6_enableSlowMotion
+   4623  fdf1		       09 40		      ORA	#64
+   4624  fdf3		       85 de		      STA	_b6_enableSlowMotion
+   4625  fdf5		       4c 0f fe 	      jmp	.__skip_right
+   4626  fdf8
+   4627  fdf8				   .skip121then
+   4628  fdf8				   .skipL0300
+   4629  fdf8				   .
+   4630  fdf8							; 
+   4631  fdf8
+   4632  fdf8				   .L0301		;  if _b6_enableSlowMotion{6} then if	( _frame_counter  &  3 )   <>  0 then goto __skip_right
+   4633  fdf8
+   4634  fdf8		       24 de		      BIT	_b6_enableSlowMotion
+   4635  fdfa		       50 0b		      BVC	.skipL0301
+   4636  fdfc				   .condpart123
+   4637  fdfc							; complex condition detected
+   4638  fdfc							; complex statement detected
+   4639  fdfc		       a5 d6		      LDA	_frame_counter
+   4640  fdfe		       29 03		      AND	#3
+   4641  fe00		       c9 00		      CMP	#0
+   4642  fe02		       f0 03		      BEQ	.skip123then
+   4643  fe04				   .condpart124
+   4644  fe04		       4c 0f fe 	      jmp	.__skip_right
+   4645  fe07
+   4646  fe07				   .skip123then
+   4647  fe07				   .skipL0301
+   4648  fe07				   .L0302		;  player0x  =  player0x  +  1  :  _Bit3_P0_Dir_Right{3}  =  1
+   4649  fe07
+   4650  fe07		       e6 80		      INC	player0x
+   4651  fe09		       a5 e3		      LDA	_Bit3_P0_Dir_Right
+   4652  fe0b		       09 08		      ORA	#8
+   4653  fe0d		       85 e3		      STA	_Bit3_P0_Dir_Right
+   4654  fe0f				   .__skip_right
+   4655  fe0f							; __skip_right
+   4656  fe0f
+   4657  fe0f				   .
+   4658  fe0f							; 
+   4659  fe0f
+   4660  fe0f				   .__game_collision
+   4661  fe0f							; __game_collision
+   4662  fe0f
+   4663  fe0f				   .
+   4664  fe0f							; 
+   4665  fe0f
+   4666  fe0f				   .
+   4667  fe0f							; 
+   4668  fe0f
+   4669  fe0f				   .
+   4670  fe0f							; 
+   4671  fe0f
+   4672  fe0f				   .
+   4673  fe0f							; 
+   4674  fe0f
+   4675  fe0f				   .
+   4676  fe0f							; 
+   4677  fe0f
+   4678  fe0f				   .
+   4679  fe0f							; 
+   4680  fe0f
+   4681  fe0f				   .
+   4682  fe0f							; 
+   4683  fe0f
+   4684  fe0f				   .L0303		;  if collision(player0,player1) then goto __decrease_health_bar
+   4685  fe0f
+   4686  fe0f		       24 07		      bit	CXPPMM
+   4687  fe11		       10 03		      BPL	.skipL0303
+   4688  fe13				   .condpart125
+   4689  fe13		       4c 45 fe 	      jmp	.__decrease_health_bar
+   4690  fe16
+   4691  fe16				   .skipL0303
+   4692  fe16				   .L0304		;  if collision(missile0,player1) then goto __destroy_mouth
+   4693  fe16
+   4694  fe16		       24 00		      bit	CXM0P
+   4695  fe18		       10 03		      BPL	.skipL0304
+   4696  fe1a				   .condpart126
+   4697  fe1a		       4c 27 fe 	      jmp	.__destroy_mouth
+   4698  fe1d
+   4699  fe1d				   .skipL0304
+   4700  fe1d				   .L0305		;  if collision(player0,ball) then goto __change_level
+   4701  fe1d
+   4702  fe1d		       24 02		      bit	CXP0FB
+   4703  fe1f		       50 03		      BVC	.skipL0305
+   4704  fe21				   .condpart127
+   4705  fe21		       4c 63 fe 	      jmp	.__change_level
+   4706  fe24
+   4707  fe24				   .skipL0305
+   4708  fe24				   .L0306		;  goto __done
+   4709  fe24
+   4710  fe24		       4c b9 fe 	      jmp	.__done
    4711  fe27
-   4712  fe27		       4c bc fe 	      jmp	.__done
-   4713  fe2a
-   4714  fe2a				   .
-   4715  fe2a							; 
-   4716  fe2a
-   4717  fe2a				   .
-   4718  fe2a							; 
-   4719  fe2a
-   4720  fe2a				   .
-   4721  fe2a							; 
-   4722  fe2a
-   4723  fe2a				   .
-   4724  fe2a							; 
-   4725  fe2a
-   4726  fe2a				   .
-   4727  fe2a							; 
-   4728  fe2a
-   4729  fe2a				   .
-   4730  fe2a							; 
-   4731  fe2a
-   4732  fe2a				   .
-   4733  fe2a							; 
-   4734  fe2a
-   4735  fe2a				   .
-   4736  fe2a							; 
-   4737  fe2a
-   4738  fe2a				   .
-   4739  fe2a							; 
-   4740  fe2a
-   4741  fe2a				   .
-   4742  fe2a							; 
-   4743  fe2a
-   4744  fe2a				   .
-   4745  fe2a							; 
-   4746  fe2a
-   4747  fe2a				   .
-   4748  fe2a							; 
-   4749  fe2a
-   4750  fe2a				   .
-   4751  fe2a							; 
-   4752  fe2a
-   4753  fe2a				   .
-   4754  fe2a							; 
-   4755  fe2a
-   4756  fe2a				   .
-   4757  fe2a							; 
-   4758  fe2a
-   4759  fe2a				   .
-   4760  fe2a							; 
-   4761  fe2a
-   4762  fe2a				   .
-   4763  fe2a							; 
-   4764  fe2a
-   4765  fe2a				   .__destroy_mouth
-   4766  fe2a							; __destroy_mouth
-   4767  fe2a
-   4768  fe2a				   .L0307		;  score  =  score  +	10
-   4769  fe2a
-   4770  fe2a		       f8		      SED
-   4771  fe2b		       18		      CLC
-   4772  fe2c		       a5 95		      LDA	score+2
-   4773  fe2e		       69 10		      ADC	#$10
-   4774  fe30		       85 95		      STA	score+2
-   4775  fe32		       a5 94		      LDA	score+1
-   4776  fe34		       69 00		      ADC	#$00
-   4777  fe36		       85 94		      STA	score+1
-   4778  fe38		       a5 93		      LDA	score
-   4779  fe3a		       69 00		      ADC	#$00
-   4780  fe3c		       85 93		      STA	score
-   4781  fe3e		       d8		      CLD
-   4782  fe3f				   .L0308		;  _b5_enablePalyer1{5}  =  0
-   4783  fe3f
-   4784  fe3f		       a5 de		      LDA	_b5_enablePalyer1
-   4785  fe41		       29 df		      AND	#223
-   4786  fe43		       85 de		      STA	_b5_enablePalyer1
-   4787  fe45				   .L0309		;  goto __delete_mouth
+   4712  fe27				   .
+   4713  fe27							; 
+   4714  fe27
+   4715  fe27				   .
+   4716  fe27							; 
+   4717  fe27
+   4718  fe27				   .
+   4719  fe27							; 
+   4720  fe27
+   4721  fe27				   .
+   4722  fe27							; 
+   4723  fe27
+   4724  fe27				   .
+   4725  fe27							; 
+   4726  fe27
+   4727  fe27				   .
+   4728  fe27							; 
+   4729  fe27
+   4730  fe27				   .
+   4731  fe27							; 
+   4732  fe27
+   4733  fe27				   .
+   4734  fe27							; 
+   4735  fe27
+   4736  fe27				   .
+   4737  fe27							; 
+   4738  fe27
+   4739  fe27				   .
+   4740  fe27							; 
+   4741  fe27
+   4742  fe27				   .
+   4743  fe27							; 
+   4744  fe27
+   4745  fe27				   .
+   4746  fe27							; 
+   4747  fe27
+   4748  fe27				   .
+   4749  fe27							; 
+   4750  fe27
+   4751  fe27				   .
+   4752  fe27							; 
+   4753  fe27
+   4754  fe27				   .
+   4755  fe27							; 
+   4756  fe27
+   4757  fe27				   .
+   4758  fe27							; 
+   4759  fe27
+   4760  fe27				   .
+   4761  fe27							; 
+   4762  fe27
+   4763  fe27				   .__destroy_mouth
+   4764  fe27							; __destroy_mouth
+   4765  fe27
+   4766  fe27				   .L0307		;  score  =  score  +	10
+   4767  fe27
+   4768  fe27		       f8		      SED
+   4769  fe28		       18		      CLC
+   4770  fe29		       a5 95		      LDA	score+2
+   4771  fe2b		       69 10		      ADC	#$10
+   4772  fe2d		       85 95		      STA	score+2
+   4773  fe2f		       a5 94		      LDA	score+1
+   4774  fe31		       69 00		      ADC	#$00
+   4775  fe33		       85 94		      STA	score+1
+   4776  fe35		       a5 93		      LDA	score
+   4777  fe37		       69 00		      ADC	#$00
+   4778  fe39		       85 93		      STA	score
+   4779  fe3b		       d8		      CLD
+   4780  fe3c				   .L0308		;  _b5_enablePalyer1{5}  =  0
+   4781  fe3c
+   4782  fe3c		       a5 de		      LDA	_b5_enablePalyer1
+   4783  fe3e		       29 df		      AND	#223
+   4784  fe40		       85 de		      STA	_b5_enablePalyer1
+   4785  fe42				   .L0309		;  goto __delete_mouth
+   4786  fe42
+   4787  fe42		       4c 54 fe 	      jmp	.__delete_mouth
    4788  fe45
-   4789  fe45		       4c 57 fe 	      jmp	.__delete_mouth
-   4790  fe48
-   4791  fe48				   .
-   4792  fe48							; 
-   4793  fe48
-   4794  fe48				   .__decrease_health_bar
-   4795  fe48							; __decrease_health_bar
-   4796  fe48
-   4797  fe48				   .L0310		;  pfscore2 = pfscore2 / 4
-   4798  fe48
-   4799  fe48		       a5 f3		      LDA	pfscore2
-   4800  fe4a		       4a		      lsr
-   4801  fe4b		       4a		      lsr
-   4802  fe4c		       85 f3		      STA	pfscore2
-   4803  fe4e				   .L0311		;  if pfscore2  =  0 then goto __game_start
-   4804  fe4e
-   4805  fe4e		       a5 f3		      LDA	pfscore2
-   4806  fe50		       c9 00		      CMP	#0
-   4807  fe52		       d0 03		      BNE	.skipL0311
-   4808  fe54				   .condpart128
-   4809  fe54		       4c fb f4 	      jmp	.__game_start
-   4810  fe57
-   4811  fe57				   .skipL0311
-   4812  fe57				   .
-   4813  fe57							; 
-   4814  fe57
-   4815  fe57				   .__delete_mouth
-   4816  fe57							; __delete_mouth
-   4817  fe57
-   4818  fe57				   .L0312		;  player1y = 200
-   4819  fe57
-   4820  fe57		       a9 c8		      LDA	#200
-   4821  fe59		       85 86		      STA	player1y
-   4822  fe5b				   .L0313		;  goto __done
+   4789  fe45				   .
+   4790  fe45							; 
+   4791  fe45
+   4792  fe45				   .__decrease_health_bar
+   4793  fe45							; __decrease_health_bar
+   4794  fe45
+   4795  fe45				   .L0310		;  pfscore2 = pfscore2 / 4
+   4796  fe45
+   4797  fe45		       a5 f3		      LDA	pfscore2
+   4798  fe47		       4a		      lsr
+   4799  fe48		       4a		      lsr
+   4800  fe49		       85 f3		      STA	pfscore2
+   4801  fe4b				   .L0311		;  if pfscore2  =  0 then goto __game_start
+   4802  fe4b
+   4803  fe4b		       a5 f3		      LDA	pfscore2
+   4804  fe4d		       c9 00		      CMP	#0
+   4805  fe4f		       d0 03		      BNE	.skipL0311
+   4806  fe51				   .condpart128
+   4807  fe51		       4c fb f4 	      jmp	.__game_start
+   4808  fe54
+   4809  fe54				   .skipL0311
+   4810  fe54				   .
+   4811  fe54							; 
+   4812  fe54
+   4813  fe54				   .__delete_mouth
+   4814  fe54							; __delete_mouth
+   4815  fe54
+   4816  fe54				   .L0312		;  player1y = 200
+   4817  fe54
+   4818  fe54		       a9 c8		      LDA	#200
+   4819  fe56		       85 86		      STA	player1y
+   4820  fe58				   .L0313		;  goto __done
+   4821  fe58
+   4822  fe58		       4c b9 fe 	      jmp	.__done
    4823  fe5b
-   4824  fe5b		       4c bc fe 	      jmp	.__done
-   4825  fe5e
-   4826  fe5e				   .
-   4827  fe5e							; 
-   4828  fe5e
-   4829  fe5e				   .__decrease_timer_bar
-   4830  fe5e							; __decrease_timer_bar
-   4831  fe5e
-   4832  fe5e				   .L0314		;  pfscore1  =  pfscore1  *  2
-   4833  fe5e
-   4834  fe5e		       a5 f2		      LDA	pfscore1
-   4835  fe60		       0a		      asl
-   4836  fe61		       85 f2		      STA	pfscore1
-   4837  fe63				   .L0315		;  goto __done
+   4824  fe5b				   .
+   4825  fe5b							; 
+   4826  fe5b
+   4827  fe5b				   .__decrease_timer_bar
+   4828  fe5b							; __decrease_timer_bar
+   4829  fe5b
+   4830  fe5b				   .L0314		;  pfscore1  =  pfscore1  *  2
+   4831  fe5b
+   4832  fe5b		       a5 f2		      LDA	pfscore1
+   4833  fe5d		       0a		      asl
+   4834  fe5e		       85 f2		      STA	pfscore1
+   4835  fe60				   .L0315		;  goto __done
+   4836  fe60
+   4837  fe60		       4c b9 fe 	      jmp	.__done
    4838  fe63
-   4839  fe63		       4c bc fe 	      jmp	.__done
-   4840  fe66
-   4841  fe66				   .
-   4842  fe66							; 
-   4843  fe66
-   4844  fe66				   .__change_level
-   4845  fe66							; __change_level
-   4846  fe66
-   4847  fe66				   .L0316		;  _level = _level + 1
-   4848  fe66
-   4849  fe66		       e6 d5		      INC	_level
-   4850  fe68				   .L0317		;  if _speed < 2 then goto __skip_to_change
-   4851  fe68
-   4852  fe68		       a5 da		      LDA	_speed
-   4853  fe6a		       c9 02		      CMP	#2
-   4854  fe6c		       b0 03		      BCS	.skipL0317
-   4855  fe6e				   .condpart129
-   4856  fe6e		       4c 78 fe 	      jmp	.__skip_to_change
-   4857  fe71
-   4858  fe71				   .skipL0317
-   4859  fe71				   .L0318		;  _speed = _speed - 2
-   4860  fe71
-   4861  fe71		       a5 da		      LDA	_speed
-   4862  fe73		       38		      SEC
-   4863  fe74		       e9 02		      SBC	#2
-   4864  fe76		       85 da		      STA	_speed
-   4865  fe78				   .
-   4866  fe78							; 
-   4867  fe78
-   4868  fe78				   .__skip_to_change
-   4869  fe78							; __skip_to_change
-   4870  fe78
-   4871  fe78				   .L0319		;  pfscorecolor  =  _0C
-   4872  fe78
-   4873  fe78		       a9 0c		      LDA	#_0C
-   4874  fe7a		       85 f4		      STA	pfscorecolor
-   4875  fe7c				   .L0320		;  scorecolor	=   ( scorecolor  +  $10 )   &	$F0
-   4876  fe7c
-   4877  fe7c							; complex statement detected
-   4878  fe7c		       a5 a3		      LDA	scorecolor
-   4879  fe7e		       18		      CLC
-   4880  fe7f		       69 10		      ADC	#$10
-   4881  fe81		       29 f0		      AND	#$F0
-   4882  fe83		       85 a3		      STA	scorecolor
-   4883  fe85				   .L0321		;  bally = 200
-   4884  fe85
-   4885  fe85		       a9 c8		      LDA	#200
-   4886  fe87		       85 89		      STA	bally
-   4887  fe89				   .L0322		;  player0x = 10 : player0y = 64
-   4888  fe89
-   4889  fe89		       a9 0a		      LDA	#10
-   4890  fe8b		       85 80		      STA	player0x
-   4891  fe8d		       a9 40		      LDA	#64
-   4892  fe8f		       85 85		      STA	player0y
-   4893  fe91				   .L0323		;  callmacro sound 12 6 2
-   4894  fe91
-      0  fe91					      sound	#12, #6, #2,
-      1  fe91
-      2  fe91				   .L0379
-      3  fe91
-      4  fe91		       a9 0c		      LDA	#12
-      5  fe93		       85 1a		      STA	AUDV1
-      6  fe95				   .L0380
-      7  fe95
-      8  fe95		       a9 06		      LDA	#6
-      9  fe97		       85 16		      STA	AUDC1
-     10  fe99				   .L0381
-     11  fe99
-     12  fe99		       a9 02		      LDA	#2
-     13  fe9b		       85 18		      STA	AUDF1
-   4896  fe9d				   .L0324		;  _b2_loadPlayfield{2} = 0
-   4897  fe9d
-   4898  fe9d		       a5 de		      LDA	_b2_loadPlayfield
-   4899  fe9f		       29 fb		      AND	#251
-   4900  fea1		       85 de		      STA	_b2_loadPlayfield
-   4901  fea3				   .L0325		;  _b3_enableLevel{3} = 0
-   4902  fea3
-   4903  fea3		       a5 de		      LDA	_b3_enableLevel
-   4904  fea5		       29 f7		      AND	#247
-   4905  fea7		       85 de		      STA	_b3_enableLevel
-   4906  fea9				   .L0326		;  _b5_enablePalyer1{5} = 1
-   4907  fea9
-   4908  fea9		       a5 de		      LDA	_b5_enablePalyer1
-   4909  feab		       09 20		      ORA	#32
-   4910  fead		       85 de		      STA	_b5_enablePalyer1
-   4911  feaf				   .L0327		;  _sugar_count = 0
-   4912  feaf
-   4913  feaf		       a9 00		      LDA	#0
-   4914  feb1		       85 e7		      STA	_sugar_count
-   4915  feb3				   .L0328		;  _seconds_counter  =  0
-   4916  feb3
-   4917  feb3		       a9 00		      LDA	#0
-   4918  feb5		       85 d7		      STA	_seconds_counter
-   4919  feb7				   .
-   4920  feb7							; 
-   4921  feb7
-   4922  feb7				   .L0329		;  pfclear
-   4923  feb7
-   4924  feb7		       a9 00		      LDA	#0
-   4925  feb9		       20 58 f2 	      jsr	pfclear
-   4926  febc				   .
-   4927  febc							; 
-   4928  febc
-   4929  febc				   .__done
-   4930  febc							; __done
-   4931  febc
-   4932  febc				   .
-   4933  febc							; 
-   4934  febc
-   4935  febc				   .L0330		;  drawscreen
-   4936  febc
-   4937  febc		       20 c4 f3 	      jsr	drawscreen
-   4938  febf				   .L0331		;  goto __main_loop
+   4839  fe63				   .
+   4840  fe63							; 
+   4841  fe63
+   4842  fe63				   .__change_level
+   4843  fe63							; __change_level
+   4844  fe63
+   4845  fe63				   .L0316		;  _level = _level + 1
+   4846  fe63
+   4847  fe63		       e6 d5		      INC	_level
+   4848  fe65				   .L0317		;  if _speed < 2 then goto __skip_to_change
+   4849  fe65
+   4850  fe65		       a5 da		      LDA	_speed
+   4851  fe67		       c9 02		      CMP	#2
+   4852  fe69		       b0 03		      BCS	.skipL0317
+   4853  fe6b				   .condpart129
+   4854  fe6b		       4c 75 fe 	      jmp	.__skip_to_change
+   4855  fe6e
+   4856  fe6e				   .skipL0317
+   4857  fe6e				   .L0318		;  _speed = _speed - 2
+   4858  fe6e
+   4859  fe6e		       a5 da		      LDA	_speed
+   4860  fe70		       38		      SEC
+   4861  fe71		       e9 02		      SBC	#2
+   4862  fe73		       85 da		      STA	_speed
+   4863  fe75				   .
+   4864  fe75							; 
+   4865  fe75
+   4866  fe75				   .__skip_to_change
+   4867  fe75							; __skip_to_change
+   4868  fe75
+   4869  fe75				   .L0319		;  pfscorecolor  =  _0C
+   4870  fe75
+   4871  fe75		       a9 0c		      LDA	#_0C
+   4872  fe77		       85 f4		      STA	pfscorecolor
+   4873  fe79				   .L0320		;  scorecolor	=   ( scorecolor  +  $10 )   &	$F0
+   4874  fe79
+   4875  fe79							; complex statement detected
+   4876  fe79		       a5 a3		      LDA	scorecolor
+   4877  fe7b		       18		      CLC
+   4878  fe7c		       69 10		      ADC	#$10
+   4879  fe7e		       29 f0		      AND	#$F0
+   4880  fe80		       85 a3		      STA	scorecolor
+   4881  fe82				   .L0321		;  bally = 200
+   4882  fe82
+   4883  fe82		       a9 c8		      LDA	#200
+   4884  fe84		       85 89		      STA	bally
+   4885  fe86				   .L0322		;  player0x = 10 : player0y = 64
+   4886  fe86
+   4887  fe86		       a9 0a		      LDA	#10
+   4888  fe88		       85 80		      STA	player0x
+   4889  fe8a		       a9 40		      LDA	#64
+   4890  fe8c		       85 85		      STA	player0y
+   4891  fe8e				   .L0323		;  callmacro sound 12 6 2
+   4892  fe8e
+      0  fe8e					      sound	#12, #6, #2,
+      1  fe8e
+      2  fe8e				   .L0379
+      3  fe8e
+      4  fe8e		       a9 0c		      LDA	#12
+      5  fe90		       85 1a		      STA	AUDV1
+      6  fe92				   .L0380
+      7  fe92
+      8  fe92		       a9 06		      LDA	#6
+      9  fe94		       85 16		      STA	AUDC1
+     10  fe96				   .L0381
+     11  fe96
+     12  fe96		       a9 02		      LDA	#2
+     13  fe98		       85 18		      STA	AUDF1
+   4894  fe9a				   .L0324		;  _b2_loadPlayfield{2} = 0
+   4895  fe9a
+   4896  fe9a		       a5 de		      LDA	_b2_loadPlayfield
+   4897  fe9c		       29 fb		      AND	#251
+   4898  fe9e		       85 de		      STA	_b2_loadPlayfield
+   4899  fea0				   .L0325		;  _b3_enableLevel{3} = 0
+   4900  fea0
+   4901  fea0		       a5 de		      LDA	_b3_enableLevel
+   4902  fea2		       29 f7		      AND	#247
+   4903  fea4		       85 de		      STA	_b3_enableLevel
+   4904  fea6				   .L0326		;  _b5_enablePalyer1{5} = 1
+   4905  fea6
+   4906  fea6		       a5 de		      LDA	_b5_enablePalyer1
+   4907  fea8		       09 20		      ORA	#32
+   4908  feaa		       85 de		      STA	_b5_enablePalyer1
+   4909  feac				   .L0327		;  _sugar_count = 0
+   4910  feac
+   4911  feac		       a9 00		      LDA	#0
+   4912  feae		       85 e7		      STA	_sugar_count
+   4913  feb0				   .L0328		;  _seconds_counter  =  0
+   4914  feb0
+   4915  feb0		       a9 00		      LDA	#0
+   4916  feb2		       85 d7		      STA	_seconds_counter
+   4917  feb4				   .
+   4918  feb4							; 
+   4919  feb4
+   4920  feb4				   .L0329		;  pfclear
+   4921  feb4
+   4922  feb4		       a9 00		      LDA	#0
+   4923  feb6		       20 58 f2 	      jsr	pfclear
+   4924  feb9				   .
+   4925  feb9							; 
+   4926  feb9
+   4927  feb9				   .__done
+   4928  feb9							; __done
+   4929  feb9
+   4930  feb9				   .
+   4931  feb9							; 
+   4932  feb9
+   4933  feb9				   .L0330		;  drawscreen
+   4934  feb9
+   4935  feb9		       20 c4 f3 	      jsr	drawscreen
+   4936  febc				   .L0331		;  goto __main_loop
+   4937  febc
+   4938  febc		       4c 3a f5 	      jmp	.__main_loop
    4939  febf
-   4940  febf		       4c 3a f5 	      jmp	.__main_loop
-   4941  fec2
-   4942  fec2				   .
-   4943  fec2							; 
-   4944  fec2
-   4945  fec2				   .
-   4946  fec2							; 
-   4947  fec2
-   4948  fec2				   .
-   4949  fec2							; 
-   4950  fec2
-   4951  fec2				   .
-   4952  fec2							; 
-   4953  fec2
-   4954  fec2				   .
-   4955  fec2							; 
-   4956  fec2
-   4957  fec2				   .
-   4958  fec2							; 
-   4959  fec2
-   4960  fec2				   .
-   4961  fec2							; 
-   4962  fec2
-   4963  fec2				   .
-   4964  fec2							; 
-   4965  fec2
-   4966  fec2				   .
-   4967  fec2							; 
-   4968  fec2
-   4969  fec2				   .
-   4970  fec2							; 
-   4971  fec2
-   4972  fec2				   .
-   4973  fec2							; 
-   4974  fec2
-   4975  fec2				   .L0332		;  data objects
-   4976  fec2
-   4977  fec2		       4c 19 ff 	      JMP	.skipL0332
-   4978  fec5				   objects
-   4979  fec5		       a4 00 00 00*	      .byte.b	%10100100,%00000000,%00000000,%00000000,%00010000,%01011000,%01111111
-   4980  fecc
-   4981  fecc		       65 90 00 00*	      .byte.b	%01100101,%10010000,%00000000,%00000000,%00011000,%10010011,%00001111
-   4982  fed3
-   4983  fed3		       a2 50 05 02*	      .byte.b	%10100010,%01010000,%00000101,%00000010,%00100000,%00010000,%11111000
-   4984  feda
-   4985  feda		       1c 60 00 01*	      .byte.b	%00011100,%01100000,%00000000,%00000001,%10010000,%10000000,%01111000
-   4986  fee1
-   4987  fee1		       1c 60 00 01*	      .byte.b	%00011100,%01100000,%00000000,%00000001,%10010000,%10000000,%01111000
-   4988  fee8
-   4989  fee8		       1c 60 00 01*	      .byte.b	%00011100,%01100000,%00000000,%00000001,%10010000,%10000000,%01111000
-   4990  feef
-   4991  feef		       1c 60 00 01*	      .byte.b	%00011100,%01100000,%00000000,%00000001,%10010000,%10000000,%01111000
-   4992  fef6
-   4993  fef6		       1c 60 00 01*	      .byte.b	%00011100,%01100000,%00000000,%00000001,%10010000,%10000000,%01111000
-   4994  fefd
-   4995  fefd		       1c 60 00 01*	      .byte.b	%00011100,%01100000,%00000000,%00000001,%10010000,%10000000,%01111000
-   4996  ff04
-   4997  ff04		       1c 60 00 01*	      .byte.b	%00011100,%01100000,%00000000,%00000001,%10010000,%10000000,%01111000
-   4998  ff0b
-   4999  ff0b		       1c 60 00 01*	      .byte.b	%00011100,%01100000,%00000000,%00000001,%10010000,%10000000,%01111000
-   5000  ff12
-   5001  ff12		       1c 60 00 01*	      .byte.b	%00011100,%01100000,%00000000,%00000001,%10010000,%10000000,%01111000
-   5002  ff19
-   5003  ff19				   .skipL0332
-   5004  ff19				   .
-   5005  ff19							; 
-   5006  ff19
-   5007  ff19				   .L0333		;  data jingle
-   5008  ff19
-   5009  ff19		       4c 2c ff 	      JMP	.skipL0333
-   5010  ff1c				   jingle
-   5011  ff1c		       14 10 12 0e*	      .byte.b	20, 16, 18, 14, 12, 16, 18, 10, 12, 14, 20, 24, 22, 26, 28, 0
-   5012  ff2c
-   5013  ff2c				   .skipL0333
-   5014  ff2c				   .
-   5015  ff2c							; 
-   5016  ff2c
-   5017  ff2c				   .L0334		;  data melody
-   5018  ff2c
-   5019  ff2c		       4c 3f ff 	      JMP	.skipL0334
-   5020  ff2f				   melody
-   5021  ff2f		       1c 18 14 12*	      .byte.b	28, 24, 20, 18, 16, 14, 12, 10, 12, 14, 16, 18, 20, 24, 28, 0
-   5022  ff3f
-   5023  ff3f				   .skipL0334
-   5024  ff3f				   .
-   5025  ff3f							; 
-   5026  ff3f
-   5027  ff3f				   .
-   5028  ff3f							; 
-   5029  ff3f
-   5030  ff3f				   .L0335		;  data door
-   5031  ff3f
-   5032  ff3f		       4c 4f ff 	      JMP	.skipL0335
-   5033  ff42				   door
-   5034  ff42		       c8 12 9c 12*	      .byte.b	200, 18, 156,18,156,18,156,18,156,18,156,18,156
-   5035  ff4f
-   5036  ff4f				   .skipL0335
-   5037  ff4f				   .
-   5038  ff4f							; 
-   5039  ff4f
-   5040  ff4f				   .L0336		;  macro cup_knife
-   5041  ff4f
-   5042  ff4f					      MAC	cup_knife
-   5043  ff4f
-   5044  ff4f				   .L0337		;  temp5  =  {2}  +  {3}  - 1
-   5045  ff4f
-   5046  ff4f							; complex statement detected
-   5047  ff4f					      LDA	{2}
-   5048  ff4f					      CLC
-   5049  ff4f					      ADC	{3}
-   5050  ff4f					      SEC
-   5051  ff4f					      SBC	#1
-   5052  ff4f					      STA	temp5
-   5053  ff4f				   .L0338		;  temp6  =  {1}  +  4
-   5054  ff4f
-   5055  ff4f					      LDA	{1}
-   5056  ff4f					      CLC
-   5057  ff4f					      ADC	#4
-   5058  ff4f					      STA	temp6
-   5059  ff4f				   .
-   5060  ff4f							; 
-   5061  ff4f
-   5062  ff4f				   .L0339		;  for y  =  {2} to temp5
-   5063  ff4f
-   5064  ff4f					      LDA	{2}
-   5065  ff4f					      STA	y
-   5066  ff4f				   .L0339fory
-   5067  ff4f				   .L0340		;  pfhline {1} y temp6 on
-   5068  ff4f
-   5069  ff4f					      LDX	#0
-   5070  ff4f					      LDA	temp6
-   5071  ff4f					      STA	temp3
-   5072  ff4f					      LDY	y
-   5073  ff4f					      LDA	{1}
-   5074  ff4f					      jsr	pfhline
-   5075  ff4f				   .L0341		;  next
-   5076  ff4f
-   5077  ff4f					      LDA	y
-   5078  ff4f					      CMP	temp5
-   5079  ff4f
-   5080  ff4f					      INC	y
-   5081  ff4f					      bcc	.L0339fory
-   5082  ff4f				   .
-   5083  ff4f							; 
-   5084  ff4f
-   5085  ff4f				   .L0342		;  pfpixel temp6 temp5 off
-   5086  ff4f
-   5087  ff4f					      LDX	#1
-   5088  ff4f					      LDY	temp5
-   5089  ff4f					      LDA	temp6
-   5090  ff4f					      jsr	pfpixel
-   5091  ff4f					      ENDM
-   5092  ff4f				   .
-   5093  ff4f							; 
-   5094  ff4f
-   5095  ff4f				   .L0343		;  macro choco_drops
-   5096  ff4f
-   5097  ff4f					      MAC	choco_drops
-   5098  ff4f
-   5099  ff4f				   .L0344		;  o  =  rand & 3
-   5100  ff4f
-   5101  ff4f					      jsr	randomize
-   5102  ff4f					      AND	#3
-   5103  ff4f					      STA	o
-   5104  ff4f				   .L0345		;  y  =  {2}  +  o
-   5105  ff4f
-   5106  ff4f					      LDA	{2}
-   5107  ff4f					      CLC
-   5108  ff4f					      ADC	o
-   5109  ff4f					      STA	y
-   5110  ff4f				   .L0346		;  pfpixel {1} o flip
-   5111  ff4f
-   5112  ff4f					      LDX	#2
-   5113  ff4f					      LDY	o
-   5114  ff4f					      LDA	{1}
-   5115  ff4f					      jsr	pfpixel
-   5116  ff4f					      ENDM
-   5117  ff4f				   .
-   5118  ff4f							; 
-   5119  ff4f
-   5120  ff4f				   .L0347		;  macro chocolate
-   5121  ff4f
-   5122  ff4f					      MAC	chocolate
-   5123  ff4f
-   5124  ff4f				   .L0348		;  u  =  {1}
-   5125  ff4f
-   5126  ff4f					      LDA	{1}
-   5127  ff4f					      STA	u
-   5128  ff4f				   .L0349		;  o  =  {2}  +  2
-   5129  ff4f
-   5130  ff4f					      LDA	{2}
-   5131  ff4f					      CLC
-   5132  ff4f					      ADC	#2
-   5133  ff4f					      STA	o
-   5134  ff4f				   .
-   5135  ff4f							; 
-   5136  ff4f
-   5137  ff4f				   .L0350		;  pfvline u {2} o on
-   5138  ff4f
-   5139  ff4f					      LDX	#0
-   5140  ff4f					      LDA	o
-   5141  ff4f					      STA	temp3
-   5142  ff4f					      LDY	{2}
-   5143  ff4f					      LDA	u
-   5144  ff4f					      jsr	pfvline
-   5145  ff4f				   .L0351		;  u  =  {1}  +  4
-   5146  ff4f
-   5147  ff4f					      LDA	{1}
-   5148  ff4f					      CLC
-   5149  ff4f					      ADC	#4
-   5150  ff4f					      STA	u
-   5151  ff4f				   .L0352		;  o  =  {2}  - 2
-   5152  ff4f
-   5153  ff4f					      LDA	{2}
-   5154  ff4f					      SEC
-   5155  ff4f					      SBC	#2
-   5156  ff4f					      STA	o
-   5157  ff4f				   .
-   5158  ff4f							; 
-   5159  ff4f
-   5160  ff4f				   .L0353		;  pfpixel u o on
-   5161  ff4f
-   5162  ff4f					      LDX	#0
-   5163  ff4f					      LDY	o
-   5164  ff4f					      LDA	u
-   5165  ff4f					      jsr	pfpixel
-   5166  ff4f					      ENDM
-   5167  ff4f				   .
-   5168  ff4f							; 
-   5169  ff4f
-   5170  ff4f				   .L0354		;  macro lamp
-   5171  ff4f
-   5172  ff4f					      MAC	lamp
-   5173  ff4f
-   5174  ff4f				   .L0355		;  o  =  {1}  +  2
-   5175  ff4f
-   5176  ff4f					      LDA	{1}
-   5177  ff4f					      CLC
-   5178  ff4f					      ADC	#2
-   5179  ff4f					      STA	o
-   5180  ff4f				   .L0356		;  u  =  {2}  +  1
-   5181  ff4f
-   5182  ff4f					      LDA	{2}
-   5183  ff4f					      CLC
-   5184  ff4f					      ADC	#1
-   5185  ff4f					      STA	u
-   5186  ff4f				   .L0357		;  pfhline {1} {2} o on
-   5187  ff4f
-   5188  ff4f					      LDX	#0
-   5189  ff4f					      LDA	o
-   5190  ff4f					      STA	temp3
-   5191  ff4f					      LDY	{2}
-   5192  ff4f					      LDA	{1}
-   5193  ff4f					      jsr	pfhline
-   5194  ff4f				   .L0358		;  o  =  o  -	1
-   5195  ff4f
-   5196  ff4f					      DEC	o
-   5197  ff4f				   .L0359		;  pfpixel o u on
-   5198  ff4f
-   5199  ff4f					      LDX	#0
-   5200  ff4f					      LDY	u
-   5201  ff4f					      LDA	o
-   5202  ff4f					      jsr	pfpixel
-   5203  ff4f					      ENDM
-   5204  ff4f				   .
-   5205  ff4f							; 
-   5206  ff4f
-   5207  ff4f				   .L0360		;  macro table
-   5208  ff4f
-   5209  ff4f					      MAC	table
-   5210  ff4f
-   5211  ff4f				   .L0361		;  o  =  {1}  +  2
-   5212  ff4f
-   5213  ff4f					      LDA	{1}
-   5214  ff4f					      CLC
-   5215  ff4f					      ADC	#2
-   5216  ff4f					      STA	o
-   5217  ff4f				   .L0362		;  u  =  {2}  +  1
-   5218  ff4f
-   5219  ff4f					      LDA	{2}
-   5220  ff4f					      CLC
-   5221  ff4f					      ADC	#1
-   5222  ff4f					      STA	u
-   5223  ff4f				   .
-   5224  ff4f							; 
-   5225  ff4f
-   5226  ff4f				   .L0363		;  pfhline {1} u o on
-   5227  ff4f
-   5228  ff4f					      LDX	#0
-   5229  ff4f					      LDA	o
-   5230  ff4f					      STA	temp3
-   5231  ff4f					      LDY	u
-   5232  ff4f					      LDA	{1}
-   5233  ff4f					      jsr	pfhline
-   5234  ff4f				   .L0364		;  u  =  u  +	1
-   5235  ff4f
-   5236  ff4f					      INC	u
-   5237  ff4f				   .L0365		;  pfpixel {1} u on  :  pfpixel o u on
-   5238  ff4f
-   5239  ff4f					      LDX	#0
-   5240  ff4f					      LDY	u
-   5241  ff4f					      LDA	{1}
-   5242  ff4f					      jsr	pfpixel
-   5243  ff4f					      LDX	#0
-   5244  ff4f					      LDY	u
-   5245  ff4f					      LDA	o
-   5246  ff4f					      jsr	pfpixel
-   5247  ff4f				   .
-   5248  ff4f							; 
-   5249  ff4f
-   5250  ff4f				   .L0366		;  o  =  o  +	2
-   5251  ff4f
-   5252  ff4f					      LDA	o
-   5253  ff4f					      CLC
-   5254  ff4f					      ADC	#2
-   5255  ff4f					      STA	o
-   5256  ff4f				   .L0367		;  pfpixel o u on
-   5257  ff4f
-   5258  ff4f					      LDX	#0
-   5259  ff4f					      LDY	u
-   5260  ff4f					      LDA	o
-   5261  ff4f					      jsr	pfpixel
-   5262  ff4f					      ENDM
-   5263  ff4f				   .
-   5264  ff4f							; 
-   5265  ff4f
-   5266  ff4f				   .L0368		;  macro divisor
-   5267  ff4f
-   5268  ff4f					      MAC	divisor
-   5269  ff4f
-   5270  ff4f				   .L0369		;  o  =  1
-   5271  ff4f
-   5272  ff4f					      LDA	#1
-   5273  ff4f					      STA	o
-   5274  ff4f				   .L0370		;  f  =  0
-   5275  ff4f
-   5276  ff4f					      LDA	#0
-   5277  ff4f					      STA	f
-   5278  ff4f				   .L0371		;  q  =  7
-   5279  ff4f
-   5280  ff4f					      LDA	#7
-   5281  ff4f					      STA	q
-   5282  ff4f				   .L0372		;  for u  =  0 to 6
-   5283  ff4f
-   5284  ff4f					      LDA	#0
-   5285  ff4f					      STA	u
-   5286  ff4f				   .L0372foru
-   5287  ff4f				   .L0373		;  if	( {1}  &  o )	<>  0 then pfhline f 5 q on
-   5288  ff4f
-   5289  ff4f							; complex condition detected
-   5290  ff4f							; complex statement detected
-   5291  ff4f					      LDA	{1}
-   5292  ff4f					      AND	o
-   5293  ff4f					      CMP	#0
-   5294  ff4f					      BEQ	.skipL0373
-   5295  ff4f				   .condpart130
-   5296  ff4f					      LDX	#0
-   5297  ff4f					      LDA	q
-   5298  ff4f					      STA	temp3
-   5299  ff4f					      LDY	#5
-   5300  ff4f					      LDA	f
-   5301  ff4f					      jsr	pfhline
-   5302  ff4f				   .skipL0373
-   5303  ff4f				   .L0374		;  o  =  o  *	2
-   5304  ff4f
-   5305  ff4f					      LDA	o
-   5306  ff4f					      asl
-   5307  ff4f					      STA	o
-   5308  ff4f				   .L0375		;  f  =  f  +	4
-   5309  ff4f
-   5310  ff4f					      LDA	f
-   5311  ff4f					      CLC
-   5312  ff4f					      ADC	#4
-   5313  ff4f					      STA	f
-   5314  ff4f				   .L0376		;  q  =  f  +	4
-   5315  ff4f
-   5316  ff4f					      LDA	f
-   5317  ff4f					      CLC
-   5318  ff4f					      ADC	#4
-   5319  ff4f					      STA	q
-   5320  ff4f				   .L0377		;  next
-   5321  ff4f
-   5322  ff4f					      LDA	u
-   5323  ff4f					      CMP	#6
-   5324  ff4f
-   5325  ff4f					      INC	u
-   5326  ff4f					      bcc	.L0372foru
-   5327  ff4f					      ENDM
-   5328  ff4f				   .
-   5329  ff4f							; 
-   5330  ff4f
-   5331  ff4f				   .L0378		;  macro sound
-   5332  ff4f
-   5333  ff4f					      MAC	sound
-   5334  ff4f
-   5335  ff4f				   .L0379		;  AUDV1  =  {1}
-   5336  ff4f
-   5337  ff4f					      LDA	{1}
-   5338  ff4f					      STA	AUDV1
-   5339  ff4f				   .L0380		;  AUDC1  =  {2}
-   5340  ff4f
-   5341  ff4f					      LDA	{2}
-   5342  ff4f					      STA	AUDC1
-   5343  ff4f				   .L0381		;  AUDF1  =  {3}
-   5344  ff4f
-   5345  ff4f					      LDA	{3}
-   5346  ff4f					      STA	AUDF1
-   5347  ff4f					      ENDM
-   5348  ff4f				  -	      ifconst	pfres
-   5349  ff4f				  -	      if	(<*) > (254-pfres*pfwidth)
-   5350  ff4f				  -	      align	256
-   5351  ff4f				  -	      endif
-   5352  ff4f				  -	      if	(<*) < (136-pfres*pfwidth)
-   5353  ff4f				  -	      repeat	((136-pfres*pfwidth)-(<*))
-   5354  ff4f				  -	      .byte	0
-   5355  ff4f				  -	      repend
-   5356  ff4f				  -	      endif
-   5357  ff4f					      else
-   5358  ff4f				  -	      if	(<*) > 206
-   5359  ff4f				  -	      align	256
-   5360  ff4f					      endif
-   5361  ff4f					      if	(<*) < 88
-   5362  ff4f					      repeat	(88-(<*))
-   5363  ff4f		       00		      .byte.b	0
-   5362  ff4f					      repend
-   5363  ff50		       00		      .byte.b	0
-   5362  ff50					      repend
-   5363  ff51		       00		      .byte.b	0
-   5362  ff51					      repend
-   5363  ff52		       00		      .byte.b	0
-   5362  ff52					      repend
-   5363  ff53		       00		      .byte.b	0
-   5362  ff53					      repend
-   5363  ff54		       00		      .byte.b	0
-   5362  ff54					      repend
-   5363  ff55		       00		      .byte.b	0
-   5362  ff55					      repend
-   5363  ff56		       00		      .byte.b	0
-   5362  ff56					      repend
-   5363  ff57		       00		      .byte.b	0
-   5364  ff58					      repend
-   5365  ff58					      endif
-   5366  ff58					      endif
-   5367  ff58				   pfcolorlabel13
-   5368  ff58		       24 26 00 00	      .byte.b	$24, $26,0,0
-   5369  ff5c		       26 20 00 00	      .byte.b	$26, $20,0,0
-   5370  ff60		       28 22 00 00	      .byte.b	$28, $22,0,0
-   5371  ff64		       2a 20 00 00	      .byte.b	$2A, $20,0,0
-   5372  ff68		       22 02 00 00	      .byte.b	$22, $02,0,0
-   5373  ff6c		       24 05 00 00	      .byte.b	$24, $05,0,0
-   5374  ff70		       26 9e 00 00	      .byte.b	$26, $9E,0,0
-   5375  ff74		       28 0e 00 00	      .byte.b	$28, $0E,0,0
-   5376  ff78		       2a 24 00 00	      .byte.b	$2A, $24,0,0
-   5377  ff7c		       2b 26 00 00	      .byte.b	$2B, $26,0,0
-   5378  ff80				  -	      if	(<*) > (<(*+3))
-   5379  ff80				  -	      repeat	($100-<*)
-   5380  ff80				  -	      .byte	0
-   5381  ff80				  -	      repend
-   5382  ff80					      endif
-   5383  ff80				   player80then_0
-   5384  ff80		       24		      .byte.b	%00100100
-   5385  ff81		       bd		      .byte.b	%10111101
-   5386  ff82		       5a		      .byte.b	%01011010
-   5387  ff83		       7e		      .byte.b	%01111110
-   5388  ff84				  -	      if	(<*) > (<(*+3))
-   5389  ff84				  -	      repeat	($100-<*)
-   5390  ff84				  -	      .byte	0
-   5391  ff84				  -	      repend
-   5392  ff84					      endif
-   5393  ff84				   player85then_0
-   5394  ff84		       18		      .byte.b	%00011000
-   5395  ff85		       bd		      .byte.b	%10111101
-   5396  ff86		       5a		      .byte.b	%01011010
-   5397  ff87		       7e		      .byte.b	%01111110
-   5398  ff88				  -	      if	(<*) > (<(*+3))
-   5399  ff88				  -	      repeat	($100-<*)
-   5400  ff88				  -	      .byte	0
-   5401  ff88				  -	      repend
-   5402  ff88					      endif
-   5403  ff88				   player86then_1
-   5404  ff88		       7e		      .byte.b	%01111110
-   5405  ff89		       81		      .byte.b	%10000001
-   5406  ff8a		       99		      .byte.b	%10011001
-   5407  ff8b		       66		      .byte.b	%01100110
-   5408  ff8c				  -	      if	(<*) > (<(*+3))
-   5409  ff8c				  -	      repeat	($100-<*)
-   5410  ff8c				  -	      .byte	0
-   5411  ff8c				  -	      repend
-   5412  ff8c					      endif
-   5413  ff8c				   player87then_1
-   5414  ff8c		       7e		      .byte.b	%01111110
-   5415  ff8d		       ff		      .byte.b	%11111111
-   5416  ff8e		       ff		      .byte.b	%11111111
-   5417  ff8f		       66		      .byte.b	%01100110
-   5418  ff90					      if	ECHOFIRST
+   4940  febf				   .
+   4941  febf							; 
+   4942  febf
+   4943  febf				   .
+   4944  febf							; 
+   4945  febf
+   4946  febf				   .
+   4947  febf							; 
+   4948  febf
+   4949  febf				   .
+   4950  febf							; 
+   4951  febf
+   4952  febf				   .
+   4953  febf							; 
+   4954  febf
+   4955  febf				   .
+   4956  febf							; 
+   4957  febf
+   4958  febf				   .
+   4959  febf							; 
+   4960  febf
+   4961  febf				   .
+   4962  febf							; 
+   4963  febf
+   4964  febf				   .
+   4965  febf							; 
+   4966  febf
+   4967  febf				   .
+   4968  febf							; 
+   4969  febf
+   4970  febf				   .
+   4971  febf							; 
+   4972  febf
+   4973  febf				   .L0332		;  data objects
+   4974  febf
+   4975  febf		       4c 16 ff 	      JMP	.skipL0332
+   4976  fec2				   objects
+   4977  fec2		       a4 00 00 00*	      .byte.b	%10100100,%00000000,%00000000,%00000000,%00010000,%01011000,%01111111
+   4978  fec9
+   4979  fec9		       65 90 00 00*	      .byte.b	%01100101,%10010000,%00000000,%00000000,%00011000,%10010011,%00001111
+   4980  fed0
+   4981  fed0		       a2 50 05 02*	      .byte.b	%10100010,%01010000,%00000101,%00000010,%00100000,%00010000,%11111000
+   4982  fed7
+   4983  fed7		       1c 60 00 01*	      .byte.b	%00011100,%01100000,%00000000,%00000001,%10010000,%10000000,%01111000
+   4984  fede
+   4985  fede		       1c 60 00 01*	      .byte.b	%00011100,%01100000,%00000000,%00000001,%10010000,%10000000,%01111000
+   4986  fee5
+   4987  fee5		       1c 60 00 01*	      .byte.b	%00011100,%01100000,%00000000,%00000001,%10010000,%10000000,%01111000
+   4988  feec
+   4989  feec		       1c 60 00 01*	      .byte.b	%00011100,%01100000,%00000000,%00000001,%10010000,%10000000,%01111000
+   4990  fef3
+   4991  fef3		       1c 60 00 01*	      .byte.b	%00011100,%01100000,%00000000,%00000001,%10010000,%10000000,%01111000
+   4992  fefa
+   4993  fefa		       1c 60 00 01*	      .byte.b	%00011100,%01100000,%00000000,%00000001,%10010000,%10000000,%01111000
+   4994  ff01
+   4995  ff01		       1c 60 00 01*	      .byte.b	%00011100,%01100000,%00000000,%00000001,%10010000,%10000000,%01111000
+   4996  ff08
+   4997  ff08		       1c 60 00 01*	      .byte.b	%00011100,%01100000,%00000000,%00000001,%10010000,%10000000,%01111000
+   4998  ff0f
+   4999  ff0f		       1c 60 00 01*	      .byte.b	%00011100,%01100000,%00000000,%00000001,%10010000,%10000000,%01111000
+   5000  ff16
+   5001  ff16				   .skipL0332
+   5002  ff16				   .
+   5003  ff16							; 
+   5004  ff16
+   5005  ff16				   .L0333		;  data jingle
+   5006  ff16
+   5007  ff16		       4c 29 ff 	      JMP	.skipL0333
+   5008  ff19				   jingle
+   5009  ff19		       14 10 12 0e*	      .byte.b	20, 16, 18, 14, 12, 16, 18, 10, 12, 14, 20, 24, 22, 26, 28, 0
+   5010  ff29
+   5011  ff29				   .skipL0333
+   5012  ff29				   .
+   5013  ff29							; 
+   5014  ff29
+   5015  ff29				   .L0334		;  data melody
+   5016  ff29
+   5017  ff29		       4c 3c ff 	      JMP	.skipL0334
+   5018  ff2c				   melody
+   5019  ff2c		       1c 18 14 12*	      .byte.b	28, 24, 20, 18, 16, 14, 12, 10, 12, 14, 16, 18, 20, 24, 28, 0
+   5020  ff3c
+   5021  ff3c				   .skipL0334
+   5022  ff3c				   .
+   5023  ff3c							; 
+   5024  ff3c
+   5025  ff3c				   .
+   5026  ff3c							; 
+   5027  ff3c
+   5028  ff3c				   .L0335		;  data door
+   5029  ff3c
+   5030  ff3c		       4c 4c ff 	      JMP	.skipL0335
+   5031  ff3f				   door
+   5032  ff3f		       c8 12 9c 12*	      .byte.b	200, 18, 156,18,156,18,156,18,156,18,156,18,156
+   5033  ff4c
+   5034  ff4c				   .skipL0335
+   5035  ff4c				   .
+   5036  ff4c							; 
+   5037  ff4c
+   5038  ff4c				   .L0336		;  macro cup_knife
+   5039  ff4c
+   5040  ff4c					      MAC	cup_knife
+   5041  ff4c
+   5042  ff4c				   .L0337		;  temp5  =  {2}  +  {3}  - 1
+   5043  ff4c
+   5044  ff4c							; complex statement detected
+   5045  ff4c					      LDA	{2}
+   5046  ff4c					      CLC
+   5047  ff4c					      ADC	{3}
+   5048  ff4c					      SEC
+   5049  ff4c					      SBC	#1
+   5050  ff4c					      STA	temp5
+   5051  ff4c				   .L0338		;  temp6  =  {1}  +  4
+   5052  ff4c
+   5053  ff4c					      LDA	{1}
+   5054  ff4c					      CLC
+   5055  ff4c					      ADC	#4
+   5056  ff4c					      STA	temp6
+   5057  ff4c				   .
+   5058  ff4c							; 
+   5059  ff4c
+   5060  ff4c				   .L0339		;  for y  =  {2} to temp5
+   5061  ff4c
+   5062  ff4c					      LDA	{2}
+   5063  ff4c					      STA	y
+   5064  ff4c				   .L0339fory
+   5065  ff4c				   .L0340		;  pfhline {1} y temp6 on
+   5066  ff4c
+   5067  ff4c					      LDX	#0
+   5068  ff4c					      LDA	temp6
+   5069  ff4c					      STA	temp3
+   5070  ff4c					      LDY	y
+   5071  ff4c					      LDA	{1}
+   5072  ff4c					      jsr	pfhline
+   5073  ff4c				   .L0341		;  next
+   5074  ff4c
+   5075  ff4c					      LDA	y
+   5076  ff4c					      CMP	temp5
+   5077  ff4c
+   5078  ff4c					      INC	y
+   5079  ff4c					      bcc	.L0339fory
+   5080  ff4c				   .
+   5081  ff4c							; 
+   5082  ff4c
+   5083  ff4c				   .L0342		;  pfpixel temp6 temp5 off
+   5084  ff4c
+   5085  ff4c					      LDX	#1
+   5086  ff4c					      LDY	temp5
+   5087  ff4c					      LDA	temp6
+   5088  ff4c					      jsr	pfpixel
+   5089  ff4c					      ENDM
+   5090  ff4c				   .
+   5091  ff4c							; 
+   5092  ff4c
+   5093  ff4c				   .L0343		;  macro choco_drops
+   5094  ff4c
+   5095  ff4c					      MAC	choco_drops
+   5096  ff4c
+   5097  ff4c				   .L0344		;  o  =  rand & 3
+   5098  ff4c
+   5099  ff4c					      jsr	randomize
+   5100  ff4c					      AND	#3
+   5101  ff4c					      STA	o
+   5102  ff4c				   .L0345		;  y  =  {2}  +  o
+   5103  ff4c
+   5104  ff4c					      LDA	{2}
+   5105  ff4c					      CLC
+   5106  ff4c					      ADC	o
+   5107  ff4c					      STA	y
+   5108  ff4c				   .L0346		;  pfpixel {1} o flip
+   5109  ff4c
+   5110  ff4c					      LDX	#2
+   5111  ff4c					      LDY	o
+   5112  ff4c					      LDA	{1}
+   5113  ff4c					      jsr	pfpixel
+   5114  ff4c					      ENDM
+   5115  ff4c				   .
+   5116  ff4c							; 
+   5117  ff4c
+   5118  ff4c				   .L0347		;  macro chocolate
+   5119  ff4c
+   5120  ff4c					      MAC	chocolate
+   5121  ff4c
+   5122  ff4c				   .L0348		;  u  =  {1}
+   5123  ff4c
+   5124  ff4c					      LDA	{1}
+   5125  ff4c					      STA	u
+   5126  ff4c				   .L0349		;  o  =  {2}  +  2
+   5127  ff4c
+   5128  ff4c					      LDA	{2}
+   5129  ff4c					      CLC
+   5130  ff4c					      ADC	#2
+   5131  ff4c					      STA	o
+   5132  ff4c				   .
+   5133  ff4c							; 
+   5134  ff4c
+   5135  ff4c				   .L0350		;  pfvline u {2} o on
+   5136  ff4c
+   5137  ff4c					      LDX	#0
+   5138  ff4c					      LDA	o
+   5139  ff4c					      STA	temp3
+   5140  ff4c					      LDY	{2}
+   5141  ff4c					      LDA	u
+   5142  ff4c					      jsr	pfvline
+   5143  ff4c				   .L0351		;  u  =  {1}  +  4
+   5144  ff4c
+   5145  ff4c					      LDA	{1}
+   5146  ff4c					      CLC
+   5147  ff4c					      ADC	#4
+   5148  ff4c					      STA	u
+   5149  ff4c				   .L0352		;  o  =  {2}  - 2
+   5150  ff4c
+   5151  ff4c					      LDA	{2}
+   5152  ff4c					      SEC
+   5153  ff4c					      SBC	#2
+   5154  ff4c					      STA	o
+   5155  ff4c				   .
+   5156  ff4c							; 
+   5157  ff4c
+   5158  ff4c				   .L0353		;  pfpixel u o on
+   5159  ff4c
+   5160  ff4c					      LDX	#0
+   5161  ff4c					      LDY	o
+   5162  ff4c					      LDA	u
+   5163  ff4c					      jsr	pfpixel
+   5164  ff4c					      ENDM
+   5165  ff4c				   .
+   5166  ff4c							; 
+   5167  ff4c
+   5168  ff4c				   .L0354		;  macro lamp
+   5169  ff4c
+   5170  ff4c					      MAC	lamp
+   5171  ff4c
+   5172  ff4c				   .L0355		;  o  =  {1}  +  2
+   5173  ff4c
+   5174  ff4c					      LDA	{1}
+   5175  ff4c					      CLC
+   5176  ff4c					      ADC	#2
+   5177  ff4c					      STA	o
+   5178  ff4c				   .L0356		;  u  =  {2}  +  1
+   5179  ff4c
+   5180  ff4c					      LDA	{2}
+   5181  ff4c					      CLC
+   5182  ff4c					      ADC	#1
+   5183  ff4c					      STA	u
+   5184  ff4c				   .L0357		;  pfhline {1} {2} o on
+   5185  ff4c
+   5186  ff4c					      LDX	#0
+   5187  ff4c					      LDA	o
+   5188  ff4c					      STA	temp3
+   5189  ff4c					      LDY	{2}
+   5190  ff4c					      LDA	{1}
+   5191  ff4c					      jsr	pfhline
+   5192  ff4c				   .L0358		;  o  =  o  -	1
+   5193  ff4c
+   5194  ff4c					      DEC	o
+   5195  ff4c				   .L0359		;  pfpixel o u on
+   5196  ff4c
+   5197  ff4c					      LDX	#0
+   5198  ff4c					      LDY	u
+   5199  ff4c					      LDA	o
+   5200  ff4c					      jsr	pfpixel
+   5201  ff4c					      ENDM
+   5202  ff4c				   .
+   5203  ff4c							; 
+   5204  ff4c
+   5205  ff4c				   .L0360		;  macro table
+   5206  ff4c
+   5207  ff4c					      MAC	table
+   5208  ff4c
+   5209  ff4c				   .L0361		;  o  =  {1}  +  2
+   5210  ff4c
+   5211  ff4c					      LDA	{1}
+   5212  ff4c					      CLC
+   5213  ff4c					      ADC	#2
+   5214  ff4c					      STA	o
+   5215  ff4c				   .L0362		;  u  =  {2}  +  1
+   5216  ff4c
+   5217  ff4c					      LDA	{2}
+   5218  ff4c					      CLC
+   5219  ff4c					      ADC	#1
+   5220  ff4c					      STA	u
+   5221  ff4c				   .
+   5222  ff4c							; 
+   5223  ff4c
+   5224  ff4c				   .L0363		;  pfhline {1} u o on
+   5225  ff4c
+   5226  ff4c					      LDX	#0
+   5227  ff4c					      LDA	o
+   5228  ff4c					      STA	temp3
+   5229  ff4c					      LDY	u
+   5230  ff4c					      LDA	{1}
+   5231  ff4c					      jsr	pfhline
+   5232  ff4c				   .L0364		;  u  =  u  +	1
+   5233  ff4c
+   5234  ff4c					      INC	u
+   5235  ff4c				   .L0365		;  pfpixel {1} u on  :  pfpixel o u on
+   5236  ff4c
+   5237  ff4c					      LDX	#0
+   5238  ff4c					      LDY	u
+   5239  ff4c					      LDA	{1}
+   5240  ff4c					      jsr	pfpixel
+   5241  ff4c					      LDX	#0
+   5242  ff4c					      LDY	u
+   5243  ff4c					      LDA	o
+   5244  ff4c					      jsr	pfpixel
+   5245  ff4c				   .
+   5246  ff4c							; 
+   5247  ff4c
+   5248  ff4c				   .L0366		;  o  =  o  +	2
+   5249  ff4c
+   5250  ff4c					      LDA	o
+   5251  ff4c					      CLC
+   5252  ff4c					      ADC	#2
+   5253  ff4c					      STA	o
+   5254  ff4c				   .L0367		;  pfpixel o u on
+   5255  ff4c
+   5256  ff4c					      LDX	#0
+   5257  ff4c					      LDY	u
+   5258  ff4c					      LDA	o
+   5259  ff4c					      jsr	pfpixel
+   5260  ff4c					      ENDM
+   5261  ff4c				   .
+   5262  ff4c							; 
+   5263  ff4c
+   5264  ff4c				   .L0368		;  macro divisor
+   5265  ff4c
+   5266  ff4c					      MAC	divisor
+   5267  ff4c
+   5268  ff4c				   .L0369		;  o  =  1
+   5269  ff4c
+   5270  ff4c					      LDA	#1
+   5271  ff4c					      STA	o
+   5272  ff4c				   .L0370		;  f  =  0
+   5273  ff4c
+   5274  ff4c					      LDA	#0
+   5275  ff4c					      STA	f
+   5276  ff4c				   .L0371		;  q  =  7
+   5277  ff4c
+   5278  ff4c					      LDA	#7
+   5279  ff4c					      STA	q
+   5280  ff4c				   .L0372		;  for u  =  0 to 6
+   5281  ff4c
+   5282  ff4c					      LDA	#0
+   5283  ff4c					      STA	u
+   5284  ff4c				   .L0372foru
+   5285  ff4c				   .L0373		;  if	( {1}  &  o )	<>  0 then pfhline f 5 q on
+   5286  ff4c
+   5287  ff4c							; complex condition detected
+   5288  ff4c							; complex statement detected
+   5289  ff4c					      LDA	{1}
+   5290  ff4c					      AND	o
+   5291  ff4c					      CMP	#0
+   5292  ff4c					      BEQ	.skipL0373
+   5293  ff4c				   .condpart130
+   5294  ff4c					      LDX	#0
+   5295  ff4c					      LDA	q
+   5296  ff4c					      STA	temp3
+   5297  ff4c					      LDY	#5
+   5298  ff4c					      LDA	f
+   5299  ff4c					      jsr	pfhline
+   5300  ff4c				   .skipL0373
+   5301  ff4c				   .L0374		;  o  =  o  *	2
+   5302  ff4c
+   5303  ff4c					      LDA	o
+   5304  ff4c					      asl
+   5305  ff4c					      STA	o
+   5306  ff4c				   .L0375		;  f  =  f  +	4
+   5307  ff4c
+   5308  ff4c					      LDA	f
+   5309  ff4c					      CLC
+   5310  ff4c					      ADC	#4
+   5311  ff4c					      STA	f
+   5312  ff4c				   .L0376		;  q  =  f  +	4
+   5313  ff4c
+   5314  ff4c					      LDA	f
+   5315  ff4c					      CLC
+   5316  ff4c					      ADC	#4
+   5317  ff4c					      STA	q
+   5318  ff4c				   .L0377		;  next
+   5319  ff4c
+   5320  ff4c					      LDA	u
+   5321  ff4c					      CMP	#6
+   5322  ff4c
+   5323  ff4c					      INC	u
+   5324  ff4c					      bcc	.L0372foru
+   5325  ff4c					      ENDM
+   5326  ff4c				   .
+   5327  ff4c							; 
+   5328  ff4c
+   5329  ff4c				   .L0378		;  macro sound
+   5330  ff4c
+   5331  ff4c					      MAC	sound
+   5332  ff4c
+   5333  ff4c				   .L0379		;  AUDV1  =  {1}
+   5334  ff4c
+   5335  ff4c					      LDA	{1}
+   5336  ff4c					      STA	AUDV1
+   5337  ff4c				   .L0380		;  AUDC1  =  {2}
+   5338  ff4c
+   5339  ff4c					      LDA	{2}
+   5340  ff4c					      STA	AUDC1
+   5341  ff4c				   .L0381		;  AUDF1  =  {3}
+   5342  ff4c
+   5343  ff4c					      LDA	{3}
+   5344  ff4c					      STA	AUDF1
+   5345  ff4c					      ENDM
+   5346  ff4c				  -	      ifconst	pfres
+   5347  ff4c				  -	      if	(<*) > (254-pfres*pfwidth)
+   5348  ff4c				  -	      align	256
+   5349  ff4c				  -	      endif
+   5350  ff4c				  -	      if	(<*) < (136-pfres*pfwidth)
+   5351  ff4c				  -	      repeat	((136-pfres*pfwidth)-(<*))
+   5352  ff4c				  -	      .byte	0
+   5353  ff4c				  -	      repend
+   5354  ff4c				  -	      endif
+   5355  ff4c					      else
+   5356  ff4c				  -	      if	(<*) > 206
+   5357  ff4c				  -	      align	256
+   5358  ff4c					      endif
+   5359  ff4c					      if	(<*) < 88
+   5360  ff4c					      repeat	(88-(<*))
+   5361  ff4c		       00		      .byte.b	0
+   5360  ff4c					      repend
+   5361  ff4d		       00		      .byte.b	0
+   5360  ff4d					      repend
+   5361  ff4e		       00		      .byte.b	0
+   5360  ff4e					      repend
+   5361  ff4f		       00		      .byte.b	0
+   5360  ff4f					      repend
+   5361  ff50		       00		      .byte.b	0
+   5360  ff50					      repend
+   5361  ff51		       00		      .byte.b	0
+   5360  ff51					      repend
+   5361  ff52		       00		      .byte.b	0
+   5360  ff52					      repend
+   5361  ff53		       00		      .byte.b	0
+   5360  ff53					      repend
+   5361  ff54		       00		      .byte.b	0
+   5360  ff54					      repend
+   5361  ff55		       00		      .byte.b	0
+   5360  ff55					      repend
+   5361  ff56		       00		      .byte.b	0
+   5360  ff56					      repend
+   5361  ff57		       00		      .byte.b	0
+   5362  ff58					      repend
+   5363  ff58					      endif
+   5364  ff58					      endif
+   5365  ff58				   pfcolorlabel13
+   5366  ff58		       24 26 00 00	      .byte.b	$24, $26,0,0
+   5367  ff5c		       26 20 00 00	      .byte.b	$26, $20,0,0
+   5368  ff60		       28 22 00 00	      .byte.b	$28, $22,0,0
+   5369  ff64		       2a 20 00 00	      .byte.b	$2A, $20,0,0
+   5370  ff68		       22 02 00 00	      .byte.b	$22, $02,0,0
+   5371  ff6c		       24 05 00 00	      .byte.b	$24, $05,0,0
+   5372  ff70		       26 9e 00 00	      .byte.b	$26, $9E,0,0
+   5373  ff74		       28 0e 00 00	      .byte.b	$28, $0E,0,0
+   5374  ff78		       2a 24 00 00	      .byte.b	$2A, $24,0,0
+   5375  ff7c		       2b 26 00 00	      .byte.b	$2B, $26,0,0
+   5376  ff80				  -	      if	(<*) > (<(*+3))
+   5377  ff80				  -	      repeat	($100-<*)
+   5378  ff80				  -	      .byte	0
+   5379  ff80				  -	      repend
+   5380  ff80					      endif
+   5381  ff80				   player80then_0
+   5382  ff80		       24		      .byte.b	%00100100
+   5383  ff81		       bd		      .byte.b	%10111101
+   5384  ff82		       5a		      .byte.b	%01011010
+   5385  ff83		       7e		      .byte.b	%01111110
+   5386  ff84				  -	      if	(<*) > (<(*+3))
+   5387  ff84				  -	      repeat	($100-<*)
+   5388  ff84				  -	      .byte	0
+   5389  ff84				  -	      repend
+   5390  ff84					      endif
+   5391  ff84				   player85then_0
+   5392  ff84		       18		      .byte.b	%00011000
+   5393  ff85		       bd		      .byte.b	%10111101
+   5394  ff86		       5a		      .byte.b	%01011010
+   5395  ff87		       7e		      .byte.b	%01111110
+   5396  ff88				  -	      if	(<*) > (<(*+3))
+   5397  ff88				  -	      repeat	($100-<*)
+   5398  ff88				  -	      .byte	0
+   5399  ff88				  -	      repend
+   5400  ff88					      endif
+   5401  ff88				   player86then_1
+   5402  ff88		       7e		      .byte.b	%01111110
+   5403  ff89		       81		      .byte.b	%10000001
+   5404  ff8a		       99		      .byte.b	%10011001
+   5405  ff8b		       66		      .byte.b	%01100110
+   5406  ff8c				  -	      if	(<*) > (<(*+3))
+   5407  ff8c				  -	      repeat	($100-<*)
+   5408  ff8c				  -	      .byte	0
+   5409  ff8c				  -	      repend
+   5410  ff8c					      endif
+   5411  ff8c				   player87then_1
+   5412  ff8c		       7e		      .byte.b	%01111110
+   5413  ff8d		       ff		      .byte.b	%11111111
+   5414  ff8e		       ff		      .byte.b	%11111111
+   5415  ff8f		       66		      .byte.b	%01100110
+   5416  ff90					      if	ECHOFIRST
       12 bytes of ROM space left
-   5419  ff90					      echo	"    ",[(scoretable - *)]d , "bytes of ROM space left")
-   5420  ff90					      endif
-   5421  ff90		       00 01	   ECHOFIRST  =	1
+   5417  ff90					      echo	"    ",[(scoretable - *)]d , "bytes of ROM space left")
+   5418  ff90					      endif
+   5419  ff90		       00 01	   ECHOFIRST  =	1
+   5420  ff90
+   5421  ff90
    5422  ff90
-   5423  ff90
+   5423  ff90							; Provided under the CC0 license. See the included LICENSE.txt for details.
    5424  ff90
-   5425  ff90							; Provided under the CC0 license. See the included LICENSE.txt for details.
-   5426  ff90
-   5427  ff90							; feel free to modify the score graphics - just keep each digit 8 high
-   5428  ff90							; and keep the conditional compilation stuff intact
-   5429  ff90				  -	      ifconst	ROM2k
-   5430  ff90				  -	      ORG	$F7AC-8
-   5431  ff90					      else
-   5432  ff90				  -	      ifconst	bankswitch
-   5433  ff90				  -	      if	bankswitch == 8
-   5434  ff90				  -	      ORG	$2F94-bscode_length
-   5435  ff90				  -	      RORG	$FF94-bscode_length
-   5436  ff90				  -	      endif
-   5437  ff90				  -	      if	bankswitch == 16
-   5438  ff90				  -	      ORG	$4F94-bscode_length
-   5439  ff90				  -	      RORG	$FF94-bscode_length
-   5440  ff90				  -	      endif
-   5441  ff90				  -	      if	bankswitch == 32
-   5442  ff90				  -	      ORG	$8F94-bscode_length
-   5443  ff90				  -	      RORG	$FF94-bscode_length
-   5444  ff90				  -	      endif
-   5445  ff90				  -	      if	bankswitch == 64
-   5446  ff90				  -	      ORG	$10F80-bscode_length
-   5447  ff90				  -	      RORG	$1FF80-bscode_length
-   5448  ff90				  -	      endif
-   5449  ff90					      else
-   5450  ff9c					      ORG	$FF9C
-   5451  ff9c					      endif
-   5452  ff9c					      endif
-   5453  ff9c
-   5454  ff9c							; font equates
-   5455  ff9c		       00 01	   .21stcentury =	1
-   5456  ff9c		       00 02	   alarmclock =	2
-   5457  ff9c		       00 03	   handwritten =	3
-   5458  ff9c		       00 04	   interrupted =	4
-   5459  ff9c		       00 05	   retroputer =	5
-   5460  ff9c		       00 06	   whimsey    =	6
-   5461  ff9c		       00 07	   tiny       =	7
-   5462  ff9c		       00 08	   hex	      =	8
-   5463  ff9c
-   5464  ff9c				  -	      ifconst	font
-   5465  ff9c				  -	      if	font == hex
-   5466  ff9c				  -	      ORG	. - 48
-   5467  ff9c				  -	      endif
-   5468  ff9c					      endif
+   5425  ff90							; feel free to modify the score graphics - just keep each digit 8 high
+   5426  ff90							; and keep the conditional compilation stuff intact
+   5427  ff90				  -	      ifconst	ROM2k
+   5428  ff90				  -	      ORG	$F7AC-8
+   5429  ff90					      else
+   5430  ff90				  -	      ifconst	bankswitch
+   5431  ff90				  -	      if	bankswitch == 8
+   5432  ff90				  -	      ORG	$2F94-bscode_length
+   5433  ff90				  -	      RORG	$FF94-bscode_length
+   5434  ff90				  -	      endif
+   5435  ff90				  -	      if	bankswitch == 16
+   5436  ff90				  -	      ORG	$4F94-bscode_length
+   5437  ff90				  -	      RORG	$FF94-bscode_length
+   5438  ff90				  -	      endif
+   5439  ff90				  -	      if	bankswitch == 32
+   5440  ff90				  -	      ORG	$8F94-bscode_length
+   5441  ff90				  -	      RORG	$FF94-bscode_length
+   5442  ff90				  -	      endif
+   5443  ff90				  -	      if	bankswitch == 64
+   5444  ff90				  -	      ORG	$10F80-bscode_length
+   5445  ff90				  -	      RORG	$1FF80-bscode_length
+   5446  ff90				  -	      endif
+   5447  ff90					      else
+   5448  ff9c					      ORG	$FF9C
+   5449  ff9c					      endif
+   5450  ff9c					      endif
+   5451  ff9c
+   5452  ff9c							; font equates
+   5453  ff9c		       00 01	   .21stcentury =	1
+   5454  ff9c		       00 02	   alarmclock =	2
+   5455  ff9c		       00 03	   handwritten =	3
+   5456  ff9c		       00 04	   interrupted =	4
+   5457  ff9c		       00 05	   retroputer =	5
+   5458  ff9c		       00 06	   whimsey    =	6
+   5459  ff9c		       00 07	   tiny       =	7
+   5460  ff9c		       00 08	   hex	      =	8
+   5461  ff9c
+   5462  ff9c				  -	      ifconst	font
+   5463  ff9c				  -	      if	font == hex
+   5464  ff9c				  -	      ORG	. - 48
+   5465  ff9c				  -	      endif
+   5466  ff9c					      endif
+   5467  ff9c
+   5468  ff9c				   scoretable
    5469  ff9c
-   5470  ff9c				   scoretable
-   5471  ff9c
-   5472  ff9c				  -	      ifconst	font
-   5473  ff9c				  -	      if	font == .21stcentury
-   5474  ff9c				  -	      include	"score_graphics.asm.21stcentury"
-   5475  ff9c				  -	      endif
-   5476  ff9c				  -	      if	font == alarmclock
-   5477  ff9c				  -	      include	"score_graphics.asm.alarmclock"
-   5478  ff9c				  -	      endif
-   5479  ff9c				  -	      if	font == handwritten
-   5480  ff9c				  -	      include	"score_graphics.asm.handwritten"
-   5481  ff9c				  -	      endif
-   5482  ff9c				  -	      if	font == interrupted
-   5483  ff9c				  -	      include	"score_graphics.asm.interrupted"
-   5484  ff9c				  -	      endif
-   5485  ff9c				  -	      if	font == retroputer
-   5486  ff9c				  -	      include	"score_graphics.asm.retroputer"
-   5487  ff9c				  -	      endif
-   5488  ff9c				  -	      if	font == whimsey
-   5489  ff9c				  -	      include	"score_graphics.asm.whimsey"
-   5490  ff9c				  -	      endif
-   5491  ff9c				  -	      if	font == tiny
-   5492  ff9c				  -	      include	"score_graphics.asm.tiny"
-   5493  ff9c				  -	      endif
-   5494  ff9c				  -	      if	font == hex
-   5495  ff9c				  -	      include	"score_graphics.asm.hex"
-   5496  ff9c				  -	      endif
-   5497  ff9c					      else		; default font
-   5498  ff9c
-   5499  ff9c		       3c		      .byte.b	%00111100
-   5500  ff9d		       66		      .byte.b	%01100110
-   5501  ff9e		       66		      .byte.b	%01100110
-   5502  ff9f		       66		      .byte.b	%01100110
-   5503  ffa0		       66		      .byte.b	%01100110
-   5504  ffa1		       66		      .byte.b	%01100110
-   5505  ffa2		       66		      .byte.b	%01100110
-   5506  ffa3		       3c		      .byte.b	%00111100
-   5507  ffa4
-   5508  ffa4		       7e		      .byte.b	%01111110
-   5509  ffa5		       18		      .byte.b	%00011000
-   5510  ffa6		       18		      .byte.b	%00011000
-   5511  ffa7		       18		      .byte.b	%00011000
-   5512  ffa8		       18		      .byte.b	%00011000
-   5513  ffa9		       38		      .byte.b	%00111000
-   5514  ffaa		       18		      .byte.b	%00011000
-   5515  ffab		       08		      .byte.b	%00001000
-   5516  ffac
-   5517  ffac		       7e		      .byte.b	%01111110
-   5518  ffad		       60		      .byte.b	%01100000
-   5519  ffae		       60		      .byte.b	%01100000
-   5520  ffaf		       3c		      .byte.b	%00111100
-   5521  ffb0		       06		      .byte.b	%00000110
-   5522  ffb1		       06		      .byte.b	%00000110
-   5523  ffb2		       46		      .byte.b	%01000110
-   5524  ffb3		       3c		      .byte.b	%00111100
-   5525  ffb4
-   5526  ffb4		       3c		      .byte.b	%00111100
-   5527  ffb5		       46		      .byte.b	%01000110
-   5528  ffb6		       06		      .byte.b	%00000110
-   5529  ffb7		       06		      .byte.b	%00000110
-   5530  ffb8		       1c		      .byte.b	%00011100
-   5531  ffb9		       06		      .byte.b	%00000110
-   5532  ffba		       46		      .byte.b	%01000110
-   5533  ffbb		       3c		      .byte.b	%00111100
-   5534  ffbc
-   5535  ffbc		       0c		      .byte.b	%00001100
-   5536  ffbd		       0c		      .byte.b	%00001100
-   5537  ffbe		       7e		      .byte.b	%01111110
-   5538  ffbf		       4c		      .byte.b	%01001100
-   5539  ffc0		       4c		      .byte.b	%01001100
-   5540  ffc1		       2c		      .byte.b	%00101100
-   5541  ffc2		       1c		      .byte.b	%00011100
-   5542  ffc3		       0c		      .byte.b	%00001100
-   5543  ffc4
-   5544  ffc4		       3c		      .byte.b	%00111100
-   5545  ffc5		       46		      .byte.b	%01000110
-   5546  ffc6		       06		      .byte.b	%00000110
-   5547  ffc7		       06		      .byte.b	%00000110
-   5548  ffc8		       3c		      .byte.b	%00111100
-   5549  ffc9		       60		      .byte.b	%01100000
-   5550  ffca		       60		      .byte.b	%01100000
-   5551  ffcb		       7e		      .byte.b	%01111110
-   5552  ffcc
-   5553  ffcc		       3c		      .byte.b	%00111100
-   5554  ffcd		       66		      .byte.b	%01100110
-   5555  ffce		       66		      .byte.b	%01100110
-   5556  ffcf		       66		      .byte.b	%01100110
-   5557  ffd0		       7c		      .byte.b	%01111100
-   5558  ffd1		       60		      .byte.b	%01100000
-   5559  ffd2		       62		      .byte.b	%01100010
-   5560  ffd3		       3c		      .byte.b	%00111100
-   5561  ffd4
-   5562  ffd4		       30		      .byte.b	%00110000
-   5563  ffd5		       30		      .byte.b	%00110000
-   5564  ffd6		       30		      .byte.b	%00110000
-   5565  ffd7		       18		      .byte.b	%00011000
-   5566  ffd8		       0c		      .byte.b	%00001100
-   5567  ffd9		       06		      .byte.b	%00000110
-   5568  ffda		       42		      .byte.b	%01000010
-   5569  ffdb		       3e		      .byte.b	%00111110
-   5570  ffdc
-   5571  ffdc		       3c		      .byte.b	%00111100
-   5572  ffdd		       66		      .byte.b	%01100110
-   5573  ffde		       66		      .byte.b	%01100110
-   5574  ffdf		       66		      .byte.b	%01100110
-   5575  ffe0		       3c		      .byte.b	%00111100
-   5576  ffe1		       66		      .byte.b	%01100110
-   5577  ffe2		       66		      .byte.b	%01100110
-   5578  ffe3		       3c		      .byte.b	%00111100
-   5579  ffe4
-   5580  ffe4		       3c		      .byte.b	%00111100
-   5581  ffe5		       46		      .byte.b	%01000110
-   5582  ffe6		       06		      .byte.b	%00000110
-   5583  ffe7		       3e		      .byte.b	%00111110
-   5584  ffe8		       66		      .byte.b	%01100110
-   5585  ffe9		       66		      .byte.b	%01100110
-   5586  ffea		       66		      .byte.b	%01100110
-   5587  ffeb		       3c		      .byte.b	%00111100
+   5470  ff9c				  -	      ifconst	font
+   5471  ff9c				  -	      if	font == .21stcentury
+   5472  ff9c				  -	      include	"score_graphics.asm.21stcentury"
+   5473  ff9c				  -	      endif
+   5474  ff9c				  -	      if	font == alarmclock
+   5475  ff9c				  -	      include	"score_graphics.asm.alarmclock"
+   5476  ff9c				  -	      endif
+   5477  ff9c				  -	      if	font == handwritten
+   5478  ff9c				  -	      include	"score_graphics.asm.handwritten"
+   5479  ff9c				  -	      endif
+   5480  ff9c				  -	      if	font == interrupted
+   5481  ff9c				  -	      include	"score_graphics.asm.interrupted"
+   5482  ff9c				  -	      endif
+   5483  ff9c				  -	      if	font == retroputer
+   5484  ff9c				  -	      include	"score_graphics.asm.retroputer"
+   5485  ff9c				  -	      endif
+   5486  ff9c				  -	      if	font == whimsey
+   5487  ff9c				  -	      include	"score_graphics.asm.whimsey"
+   5488  ff9c				  -	      endif
+   5489  ff9c				  -	      if	font == tiny
+   5490  ff9c				  -	      include	"score_graphics.asm.tiny"
+   5491  ff9c				  -	      endif
+   5492  ff9c				  -	      if	font == hex
+   5493  ff9c				  -	      include	"score_graphics.asm.hex"
+   5494  ff9c				  -	      endif
+   5495  ff9c					      else		; default font
+   5496  ff9c
+   5497  ff9c		       3c		      .byte.b	%00111100
+   5498  ff9d		       66		      .byte.b	%01100110
+   5499  ff9e		       66		      .byte.b	%01100110
+   5500  ff9f		       66		      .byte.b	%01100110
+   5501  ffa0		       66		      .byte.b	%01100110
+   5502  ffa1		       66		      .byte.b	%01100110
+   5503  ffa2		       66		      .byte.b	%01100110
+   5504  ffa3		       3c		      .byte.b	%00111100
+   5505  ffa4
+   5506  ffa4		       7e		      .byte.b	%01111110
+   5507  ffa5		       18		      .byte.b	%00011000
+   5508  ffa6		       18		      .byte.b	%00011000
+   5509  ffa7		       18		      .byte.b	%00011000
+   5510  ffa8		       18		      .byte.b	%00011000
+   5511  ffa9		       38		      .byte.b	%00111000
+   5512  ffaa		       18		      .byte.b	%00011000
+   5513  ffab		       08		      .byte.b	%00001000
+   5514  ffac
+   5515  ffac		       7e		      .byte.b	%01111110
+   5516  ffad		       60		      .byte.b	%01100000
+   5517  ffae		       60		      .byte.b	%01100000
+   5518  ffaf		       3c		      .byte.b	%00111100
+   5519  ffb0		       06		      .byte.b	%00000110
+   5520  ffb1		       06		      .byte.b	%00000110
+   5521  ffb2		       46		      .byte.b	%01000110
+   5522  ffb3		       3c		      .byte.b	%00111100
+   5523  ffb4
+   5524  ffb4		       3c		      .byte.b	%00111100
+   5525  ffb5		       46		      .byte.b	%01000110
+   5526  ffb6		       06		      .byte.b	%00000110
+   5527  ffb7		       06		      .byte.b	%00000110
+   5528  ffb8		       1c		      .byte.b	%00011100
+   5529  ffb9		       06		      .byte.b	%00000110
+   5530  ffba		       46		      .byte.b	%01000110
+   5531  ffbb		       3c		      .byte.b	%00111100
+   5532  ffbc
+   5533  ffbc		       0c		      .byte.b	%00001100
+   5534  ffbd		       0c		      .byte.b	%00001100
+   5535  ffbe		       7e		      .byte.b	%01111110
+   5536  ffbf		       4c		      .byte.b	%01001100
+   5537  ffc0		       4c		      .byte.b	%01001100
+   5538  ffc1		       2c		      .byte.b	%00101100
+   5539  ffc2		       1c		      .byte.b	%00011100
+   5540  ffc3		       0c		      .byte.b	%00001100
+   5541  ffc4
+   5542  ffc4		       3c		      .byte.b	%00111100
+   5543  ffc5		       46		      .byte.b	%01000110
+   5544  ffc6		       06		      .byte.b	%00000110
+   5545  ffc7		       06		      .byte.b	%00000110
+   5546  ffc8		       3c		      .byte.b	%00111100
+   5547  ffc9		       60		      .byte.b	%01100000
+   5548  ffca		       60		      .byte.b	%01100000
+   5549  ffcb		       7e		      .byte.b	%01111110
+   5550  ffcc
+   5551  ffcc		       3c		      .byte.b	%00111100
+   5552  ffcd		       66		      .byte.b	%01100110
+   5553  ffce		       66		      .byte.b	%01100110
+   5554  ffcf		       66		      .byte.b	%01100110
+   5555  ffd0		       7c		      .byte.b	%01111100
+   5556  ffd1		       60		      .byte.b	%01100000
+   5557  ffd2		       62		      .byte.b	%01100010
+   5558  ffd3		       3c		      .byte.b	%00111100
+   5559  ffd4
+   5560  ffd4		       30		      .byte.b	%00110000
+   5561  ffd5		       30		      .byte.b	%00110000
+   5562  ffd6		       30		      .byte.b	%00110000
+   5563  ffd7		       18		      .byte.b	%00011000
+   5564  ffd8		       0c		      .byte.b	%00001100
+   5565  ffd9		       06		      .byte.b	%00000110
+   5566  ffda		       42		      .byte.b	%01000010
+   5567  ffdb		       3e		      .byte.b	%00111110
+   5568  ffdc
+   5569  ffdc		       3c		      .byte.b	%00111100
+   5570  ffdd		       66		      .byte.b	%01100110
+   5571  ffde		       66		      .byte.b	%01100110
+   5572  ffdf		       66		      .byte.b	%01100110
+   5573  ffe0		       3c		      .byte.b	%00111100
+   5574  ffe1		       66		      .byte.b	%01100110
+   5575  ffe2		       66		      .byte.b	%01100110
+   5576  ffe3		       3c		      .byte.b	%00111100
+   5577  ffe4
+   5578  ffe4		       3c		      .byte.b	%00111100
+   5579  ffe5		       46		      .byte.b	%01000110
+   5580  ffe6		       06		      .byte.b	%00000110
+   5581  ffe7		       3e		      .byte.b	%00111110
+   5582  ffe8		       66		      .byte.b	%01100110
+   5583  ffe9		       66		      .byte.b	%01100110
+   5584  ffea		       66		      .byte.b	%01100110
+   5585  ffeb		       3c		      .byte.b	%00111100
+   5586  ffec
+   5587  ffec					      ifnconst	DPC_kernel_options
    5588  ffec
-   5589  ffec					      ifnconst	DPC_kernel_options
-   5590  ffec
-   5591  ffec		       00		      .byte.b	%00000000
-   5592  ffed		       00		      .byte.b	%00000000
-   5593  ffee		       00		      .byte.b	%00000000
-   5594  ffef		       00		      .byte.b	%00000000
-   5595  fff0		       00		      .byte.b	%00000000
-   5596  fff1		       00		      .byte.b	%00000000
-   5597  fff2		       00		      .byte.b	%00000000
-   5598  fff3		       00		      .byte.b	%00000000
+   5589  ffec		       00		      .byte.b	%00000000
+   5590  ffed		       00		      .byte.b	%00000000
+   5591  ffee		       00		      .byte.b	%00000000
+   5592  ffef		       00		      .byte.b	%00000000
+   5593  fff0		       00		      .byte.b	%00000000
+   5594  fff1		       00		      .byte.b	%00000000
+   5595  fff2		       00		      .byte.b	%00000000
+   5596  fff3		       00		      .byte.b	%00000000
+   5597  fff4
+   5598  fff4					      endif
    5599  fff4
    5600  fff4					      endif
    5601  fff4
-   5602  fff4					      endif
-   5603  fff4
-   5604  fff4				  -	      ifconst	ROM2k
-   5605  fff4				  -	      ORG	$F7FC
-   5606  fff4					      else
-   5607  fff4				  -	      ifconst	bankswitch
-   5608  fff4				  -	      if	bankswitch == 8
-   5609  fff4				  -	      ORG	$2FF4-bscode_length
-   5610  fff4				  -	      RORG	$FFF4-bscode_length
-   5611  fff4				  -	      endif
-   5612  fff4				  -	      if	bankswitch == 16
-   5613  fff4				  -	      ORG	$4FF4-bscode_length
-   5614  fff4				  -	      RORG	$FFF4-bscode_length
-   5615  fff4				  -	      endif
-   5616  fff4				  -	      if	bankswitch == 32
-   5617  fff4				  -	      ORG	$8FF4-bscode_length
-   5618  fff4				  -	      RORG	$FFF4-bscode_length
-   5619  fff4				  -	      endif
-   5620  fff4				  -	      if	bankswitch == 64
-   5621  fff4				  -	      ORG	$10FE0-bscode_length
-   5622  fff4				  -	      RORG	$1FFE0-bscode_length
-   5623  fff4				  -	      endif
-   5624  fff4					      else
-   5625  fffc					      ORG	$FFFC
-   5626  fffc					      endif
-   5627  fffc					      endif
-   5628  fffc							; Provided under the CC0 license. See the included LICENSE.txt for details.
-   5629  fffc
-   5630  fffc				  -	      ifconst	bankswitch
-   5631  fffc				  -	      if	bankswitch == 8
-   5632  fffc				  -	      ORG	$2FFC
-   5633  fffc				  -	      RORG	$FFFC
-   5634  fffc				  -	      endif
-   5635  fffc				  -	      if	bankswitch == 16
-   5636  fffc				  -	      ORG	$4FFC
-   5637  fffc				  -	      RORG	$FFFC
-   5638  fffc				  -	      endif
-   5639  fffc				  -	      if	bankswitch == 32
-   5640  fffc				  -	      ORG	$8FFC
-   5641  fffc				  -	      RORG	$FFFC
-   5642  fffc				  -	      endif
-   5643  fffc				  -	      if	bankswitch == 64
-   5644  fffc				  -	      ORG	$10FF0
-   5645  fffc				  -	      RORG	$1FFF0
-   5646  fffc				  -	      lda	$ffe0	; we use wasted space to assist stella with EF format auto-detection
-   5647  fffc				  -	      ORG	$10FF8
-   5648  fffc				  -	      RORG	$1FFF8
-   5649  fffc				  -	      ifconst	superchip
-   5650  fffc				  -	      .byte	"E","F","S","C"
-   5651  fffc				  -	      else
-   5652  fffc				  -	      .byte	"E","F","E","F"
-   5653  fffc				  -	      endif
-   5654  fffc				  -	      ORG	$10FFC
-   5655  fffc				  -	      RORG	$1FFFC
-   5656  fffc				  -	      endif
-   5657  fffc					      else
-   5658  fffc				  -	      ifconst	ROM2k
-   5659  fffc				  -	      ORG	$F7FC
-   5660  fffc					      else
-   5661  fffc					      ORG	$FFFC
-   5662  fffc					      endif
-   5663  fffc					      endif
-   5664  fffc		       00 f0		      .word.w	(start & $ffff)
-   5665  fffe		       00 f0		      .word.w	(start & $ffff)
+   5602  fff4				  -	      ifconst	ROM2k
+   5603  fff4				  -	      ORG	$F7FC
+   5604  fff4					      else
+   5605  fff4				  -	      ifconst	bankswitch
+   5606  fff4				  -	      if	bankswitch == 8
+   5607  fff4				  -	      ORG	$2FF4-bscode_length
+   5608  fff4				  -	      RORG	$FFF4-bscode_length
+   5609  fff4				  -	      endif
+   5610  fff4				  -	      if	bankswitch == 16
+   5611  fff4				  -	      ORG	$4FF4-bscode_length
+   5612  fff4				  -	      RORG	$FFF4-bscode_length
+   5613  fff4				  -	      endif
+   5614  fff4				  -	      if	bankswitch == 32
+   5615  fff4				  -	      ORG	$8FF4-bscode_length
+   5616  fff4				  -	      RORG	$FFF4-bscode_length
+   5617  fff4				  -	      endif
+   5618  fff4				  -	      if	bankswitch == 64
+   5619  fff4				  -	      ORG	$10FE0-bscode_length
+   5620  fff4				  -	      RORG	$1FFE0-bscode_length
+   5621  fff4				  -	      endif
+   5622  fff4					      else
+   5623  fffc					      ORG	$FFFC
+   5624  fffc					      endif
+   5625  fffc					      endif
+   5626  fffc							; Provided under the CC0 license. See the included LICENSE.txt for details.
+   5627  fffc
+   5628  fffc				  -	      ifconst	bankswitch
+   5629  fffc				  -	      if	bankswitch == 8
+   5630  fffc				  -	      ORG	$2FFC
+   5631  fffc				  -	      RORG	$FFFC
+   5632  fffc				  -	      endif
+   5633  fffc				  -	      if	bankswitch == 16
+   5634  fffc				  -	      ORG	$4FFC
+   5635  fffc				  -	      RORG	$FFFC
+   5636  fffc				  -	      endif
+   5637  fffc				  -	      if	bankswitch == 32
+   5638  fffc				  -	      ORG	$8FFC
+   5639  fffc				  -	      RORG	$FFFC
+   5640  fffc				  -	      endif
+   5641  fffc				  -	      if	bankswitch == 64
+   5642  fffc				  -	      ORG	$10FF0
+   5643  fffc				  -	      RORG	$1FFF0
+   5644  fffc				  -	      lda	$ffe0	; we use wasted space to assist stella with EF format auto-detection
+   5645  fffc				  -	      ORG	$10FF8
+   5646  fffc				  -	      RORG	$1FFF8
+   5647  fffc				  -	      ifconst	superchip
+   5648  fffc				  -	      .byte	"E","F","S","C"
+   5649  fffc				  -	      else
+   5650  fffc				  -	      .byte	"E","F","E","F"
+   5651  fffc				  -	      endif
+   5652  fffc				  -	      ORG	$10FFC
+   5653  fffc				  -	      RORG	$1FFFC
+   5654  fffc				  -	      endif
+   5655  fffc					      else
+   5656  fffc				  -	      ifconst	ROM2k
+   5657  fffc				  -	      ORG	$F7FC
+   5658  fffc					      else
+   5659  fffc					      ORG	$FFFC
+   5660  fffc					      endif
+   5661  fffc					      endif
+   5662  fffc		       00 f0		      .word.w	(start & $ffff)
+   5663  fffe		       00 f0		      .word.w	(start & $ffff)

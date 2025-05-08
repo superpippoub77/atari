@@ -355,8 +355,8 @@ __main_loop
    ; MUSICA DI SOTTOFONDO
    ;_________________________________________________________________________________________________________________________
    if _music_index > 7 then _music_index = 0
-   if _frame_counter&31 && !_b0_enableStart{0} then AUDF1 = jingle[_music_index] : AUDC1 = 4 :  AUDV1 = 8: _music_index = _music_index + 1
-   if _frame_counter&31 && _b0_enableStart{0} then AUDV0 = 0 : AUDF1 = melody[_music_index] : AUDC1 = 4 :  AUDV1 = 8 : _music_index = _music_index + 1
+   if _frame_counter = frame_limit && !_b0_enableStart{0} then AUDF1 = jingle[_music_index] : AUDC1 = 4 :  AUDV1 = 8: _music_index = _music_index + 1
+   if _frame_counter = frame_limit && _b0_enableStart{0} then AUDV0 = 0 : AUDF1 = melody[_music_index] : AUDC1 = 4 :  AUDV1 = 8 : _music_index = _music_index + 1
    ;if _frame_counter>32 && _b6_enableSlowMotion{6} then AUDF0 = 30 : AUDC0 = 6: AUDV0 = 4
 
 
