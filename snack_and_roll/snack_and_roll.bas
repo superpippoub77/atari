@@ -347,18 +347,17 @@ __main_loop
    if switchreset && !_b0_enableStart{0} then _b0_enableStart{0} = 1 : goto __skip_to_change
    if switchselect && !_b0_enableStart{0} then pfhline 0 6 _level on : goto __change_level
 
-   ;Se il gioco non è ancora iniziato skippa tutto
-   if !_b0_enableStart{0} then goto __done
-
    ;!!!!!!!!!!!!!!!!!!! START !!!!!!!!!!!!!!!!!!!
    ;*************************************************************************************************************************
    ; MUSICA DI SOTTOFONDO
    ;_________________________________________________________________________________________________________________________
-   if _music_index > 7 then _music_index = 0
-   if _frame_counter = frame_limit && !_b0_enableStart{0} then AUDF1 = jingle[_music_index] : AUDC1 = 4 :  AUDV1 = 8: _music_index = _music_index + 1
-   if _frame_counter = frame_limit && _b0_enableStart{0} then AUDV0 = 0 : AUDF1 = melody[_music_index] : AUDC1 = 4 :  AUDV1 = 8 : _music_index = _music_index + 1
+   if _music_index > 20 then _music_index = 0
+   if _frame_counter&15 = 0 && !_b0_enableStart{0} then AUDF1 = jingle[_music_index] : AUDC1 = 4 :  AUDV1 = 2: _music_index = _music_index + 1
+   if _frame_counter&3 = 0 && _b0_enableStart{0} then AUDV0 = 0 : AUDF1 = melody[_music_index] : AUDC1 = melody[_music_index] :  AUDV1 = 2 : _music_index = _music_index + 1
    ;if _frame_counter>32 && _b6_enableSlowMotion{6} then AUDF0 = 30 : AUDC0 = 6: AUDV0 = 4
 
+   ;Se il gioco non è ancora iniziato skippa tutto
+   if !_b0_enableStart{0} then goto __done
 
    ;*************************************************************************************************************************
    ; BOCCA (PLAYER1)
@@ -376,8 +375,8 @@ __main_loop
    ; lo zucchero aumenta di 10 spari
    ; !!!!IMPORTANTE distruggere il missile dopo il contatto facendolo sparire dallo schermo missile1y = 200
    ;*************************************************************************************************************************
-   if missile1y = 200 || _frame_counter=frame_limit then _current_sugar_x = (rand & 125) + 20 : _current_sugar_y = (rand & 80) + 8
-   if _sugar_count < 8 && _current_sugar_x < 146 then missile1x = _current_sugar_x: missile1y = _current_sugar_y
+   if missile1y = 200 || _seconds_counter&15 = 0 then _current_sugar_x = (rand & 125) + 20 : _current_sugar_y = (rand & 80) + 8
+   if _sugar_count < 8 && _current_sugar_x < 146 && _frame_counter=frame_limit then missile1x = _current_sugar_x: missile1y = _current_sugar_y
    if collision(player0, missile1) then callmacro sound 12 4 2 : missile1y = 200 : _sugar_count = _sugar_count + 1 : score = score + 100000
 
    ;*************************************************************************************************************************
@@ -392,11 +391,11 @@ __main_loop
 
    ;>>>> ACCENSIONE <<<<
    ; TO DO VEDO AGGIUNGERE LA POSIONE DI __current_lamp ( che può essere 0, 7, 14, 21)
-   temp5 = (player0x-10)/4
-   if !_b4_enableLight{4} && temp5 < _current_lamp then _b4_enableLight{4} = 1
+   ;temp5 = (player0x-10)/4
+   ;if !_b4_enableLight{4} && temp5 < _current_lamp then _b4_enableLight{4} = 1
 
    ;Background visibile con effetto flash se il flag della lamp è spento
-   if _b4_enableLight{4} || _frame_counter&7 = 0 then pfcolors:
+   if _b4_enableLight{4} || _frame_counter&31 = 0 then pfcolors:
    $28
    $26
    $20
@@ -531,8 +530,8 @@ __Skip_Fire
    if _Bit7_M0_Dir_Right{7} then missile0x = missile0x + 2 : temp5 = (missile0x-18)/4 : temp6 = (missile0y-1)/8
 
    ;se raggiunge il bordo o colpisce il divisor di mezzo si elimina
-   if temp6 = 5 then goto __delete_missile
-   if  missile0y < _M_Edge_Top || missile0y > _Edge_Bottom then goto __delete_missile
+   if temp6 = 5 then _b4_enableLight{4}=1 : goto __delete_missile
+   if missile0y < _M_Edge_Top || missile0y > _Edge_Bottom then goto __delete_missile
    if missile0x > _Edge_Right || missile0x < _M_Edge_Left then goto __delete_missile
 
    ;non colpisce nulla
@@ -712,7 +711,6 @@ __skip_to_change
   scorecolor = (scorecolor + $10) & $F0
   bally=200
   player0x=10:player0y=64
-  callmacro sound 12 6 2
   _b2_loadPlayfield{2}=0
   _b3_enableLevel{3}=0
   _b5_enablePalyer1{5}=1
@@ -748,15 +746,19 @@ __done
    %00011100,%01100000,%00000000,%00000001,%10010000,%10000000,%01111000,   
    %00011100,%01100000,%00000000,%00000001,%10010000,%10000000,%01111000,
    %00011100,%01100000,%00000000,%00000001,%10010000,%10000000,%01111000,
+   %00011100,%01100000,%00000000,%00000001,%10010000,%10000000,%01111000,
+   %00011100,%01100000,%00000000,%00000001,%10010000,%10000000,%01111000,
+   %00011100,%01100000,%00000000,%00000001,%10010000,%10000000,%01111000,
+   %00011100,%01100000,%00000000,%00000001,%10010000,%10000000,%01111000,
    %00011100,%01100000,%00000000,%00000001,%10010000,%10000000,%01111000
 end
 
    data jingle
-   20, 16, 18, 14, 12, 16, 18, 10, 12, 14, 20, 24, 22, 26, 28, 0
+   16, 18, 20, 22, 24, 22, 20, 18, 16, 18, 20, 22, 20, 18, 16, 18, 16, 16, 18, 16
 end
    ; simil barilla
    data melody
-   28, 24, 20, 18, 16, 14, 12, 10, 12, 14, 16, 18, 20, 24, 28, 0
+   16, 18, 16, 20, 18, 20, 22, 20, 18, 16, 18, 20, 22, 20, 18, 16, 18, 16, 20, 22
 end
 
    ; simil barilla
