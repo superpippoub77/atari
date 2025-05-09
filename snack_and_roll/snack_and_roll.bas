@@ -189,7 +189,6 @@
    ; i flag (bit) si caratterizzano nel seguente modo: on = 1/off = 0
    ; _b0_enableStart => Game start
    ; _b2_loadPlayfield => Caricamento del playfield dinamico
-   ; _b3_enableLevel => Attivazione del nuovo livello
    ; _b4_enableLight => flag per apire se lo stato della luce
    ; _b5_enablePalyer1 => Attivazione della bocca
    ; _b6_enableSlowMotion => Opzione lentezza del biscotto
@@ -222,7 +221,6 @@
    ; FLAG DI CONFIGURAZIONE
    dim _b0_enableStart = k
    dim _b2_loadPlayfield = k
-   dim _b3_enableLevel = k
    dim _b4_enableLight = k
    dim _b5_enablePalyer1 = k
    dim _b6_enableSlowMotion = k
@@ -279,7 +277,7 @@ __inizialize
    ; E' visibile solo dalla riga 1 alla riga 11 Snack 'n' Roll
    ; pfcolors => varaiazioni di marrone da $22 a $2B
    ;*************************************************************************************************************************
-   playfield:
+   /* 
    ................................
    ....XXXXXXXXX....XX.......X..X..
    ...X...............X......X.X...
@@ -290,7 +288,20 @@ __inizialize
    .X.......X.....X..XX.......X.X..
    ...X.XX........X.X...XX...X.X...
    ...XX..X.......XX...X..X.X.X....
-   ...X...X.......X.....XX..X.X....
+   ...X...X.......X.....XX..X.X.... */
+
+   playfield:
+   ................................
+   ...XXX..X..X...XX....XXX..X..X..
+   ..X.....XX.X..X..X..X.....X.X...
+   ...XX...X.XX..XXXX..X.....XX....
+   .....X..X..X..X..X..X.....X.X...
+   ..XXX...X..X..X..X...XXX..X..X..
+   ................................
+   X......X.X.XX.XX..X.X...X...XXX.
+   ..XX.X...XX..X..X.X.X...XX.XX...
+   ..X.XX...X...X..X.X.X...X.X.XX..
+   ..X..X...X....XX..X.X...X...X...
 end
    pfcolors:
    $22
@@ -310,7 +321,6 @@ __game_start
    ;flag
    _b0_enableStart{0} = 0
    _b2_loadPlayfield{2} = 0
-   _b3_enableLevel{3} = 0 
    _b4_enableLight{4} = 1
    _b5_enablePalyer1{5} = 1
 
@@ -341,10 +351,9 @@ __main_loop
    _frame_counter = _frame_counter + 1
    if _frame_counter > frame_limit then _frame_counter = 0 : _seconds_counter = _seconds_counter + 1
 
-
    ;F2 inizio il gioco mentre F1 seleziono il livello
    if switchreset && !_b0_enableStart{0} then _b0_enableStart{0} = 1 : goto __skip_to_change
-   if switchselect && !_b0_enableStart{0} then pfhline 0 6 _level on : goto __change_level
+   if switchselect && !_b0_enableStart{0} && _frame_counter=frame_limit then pfpixel _level 6 on : goto __change_level
 
    ;!!!!!!!!!!!!!!!!!!! START !!!!!!!!!!!!!!!!!!!
    ;*************************************************************************************************************************
@@ -353,7 +362,6 @@ __main_loop
    if _music_index > 20 then _music_index = 0
    if _frame_counter&15 = 0 && !_b0_enableStart{0} then AUDF1 = jingle[_music_index] : AUDC1 = 4 :  AUDV1 = 0: _music_index = _music_index + 1
    if _frame_counter&3 = 0 && _b0_enableStart{0} then AUDV0 = 0 : AUDF1 = melody[_music_index] : AUDC1 = melody[_music_index] :  AUDV1 = 0 : _music_index = _music_index + 1
-   ;if _frame_counter>32 && _b6_enableSlowMotion{6} then AUDF0 = 30 : AUDC0 = 6: AUDV0 = 4
 
    ;Se il gioco non è ancora iniziato skippa tutto
    if !_b0_enableStart{0} then goto __done
@@ -670,7 +678,7 @@ __game_collision
    ;*************************************************************************************************************************   
    if collision(player0, player1) then goto __decrease_health_bar
    if collision(missile0, player1) then goto __destroy_mouth
-   if collision(player0, ball)  then goto __change_level
+   if collision(player0, ball) then goto __change_level
    goto __done
 
    ;*************************************************************************************************************************
@@ -710,6 +718,7 @@ __change_level
    _level=_level+1
    if _speed<2 then goto __skip_to_change
    _speed=_speed-2
+   if !_b0_enableStart{0} then goto __main_loop
 
 __skip_to_change
    pfscorecolor = _0C
@@ -718,7 +727,6 @@ __skip_to_change
    bally=200
    player0x=10:player0y=64
    _b2_loadPlayfield{2}=0
-   _b3_enableLevel{3}=0
    _b5_enablePalyer1{5}=1
    _choco_count=0
    _seconds_counter = 0
@@ -787,7 +795,7 @@ end
          pfhline {1} y temp6 on
       next
       ;MANICO
-      pfpixel temp6 temp5 off ; manico
+      pfpixel temp6 temp5 off
 end
 
    macro choco_drops
@@ -799,12 +807,10 @@ end
 
    macro chocolate
       o = {2} + 2
-      ;BARRETTA
+      ;BARRETTE
       pfvline {1} {2} o on
       u = {1} + 4
       o = {2} -2
-      ;PEZZETTINO
-      ;pfpixel u o on
       pfvline u o {2} on
 end
 
