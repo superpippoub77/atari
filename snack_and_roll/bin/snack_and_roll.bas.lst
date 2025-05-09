@@ -4228,7 +4228,7 @@
    2448  f4ed		       10 f8		      bpl	pflabel0
    2449  f4ef				   .L0176		;  pfcolors:
    2450  f4ef
-   2451  f4ef		       a9 22		      lda	# $22
+   2451  f4ef		       a9 2b		      lda	# $2B
    2452  f4f1		       85 08		      sta	COLUPF
    2453  f4f3				  -	      ifconst	pfres
    2454  f4f3				  -	      lda	#>(pfcolorlabel13-132+pfres*pfwidth)
@@ -7481,16 +7481,16 @@
    5378  ff63					      endif
    5379  ff63					      endif
    5380  ff63				   pfcolorlabel13
-   5381  ff63		       24 26 00 00	      .byte.b	$24, $26,0,0
-   5382  ff67		       26 20 00 00	      .byte.b	$26, $20,0,0
-   5383  ff6b		       28 22 00 00	      .byte.b	$28, $22,0,0
-   5384  ff6f		       2a 20 00 00	      .byte.b	$2A, $20,0,0
-   5385  ff73		       22 02 00 00	      .byte.b	$22, $02,0,0
-   5386  ff77		       24 05 00 00	      .byte.b	$24, $05,0,0
-   5387  ff7b		       26 9e 00 00	      .byte.b	$26, $9E,0,0
-   5388  ff7f		       28 0e 00 00	      .byte.b	$28, $0E,0,0
-   5389  ff83		       2a 24 00 00	      .byte.b	$2A, $24,0,0
-   5390  ff87		       2b 26 00 00	      .byte.b	$2B, $26,0,0
+   5381  ff63		       22 26 00 00	      .byte.b	$22, $26,0,0
+   5382  ff67		       24 20 00 00	      .byte.b	$24, $20,0,0
+   5383  ff6b		       26 22 00 00	      .byte.b	$26, $22,0,0
+   5384  ff6f		       28 20 00 00	      .byte.b	$28, $20,0,0
+   5385  ff73		       2b 02 00 00	      .byte.b	$2B, $02,0,0
+   5386  ff77		       2a 05 00 00	      .byte.b	$2A, $05,0,0
+   5387  ff7b		       28 9e 00 00	      .byte.b	$28, $9E,0,0
+   5388  ff7f		       26 0e 00 00	      .byte.b	$26, $0E,0,0
+   5389  ff83		       24 24 00 00	      .byte.b	$24, $24,0,0
+   5390  ff87		       22 26 00 00	      .byte.b	$22, $26,0,0
    5391  ff8b				  -	      if	(<*) > (<(*+3))
    5392  ff8b				  -	      repeat	($100-<*)
    5393  ff8b				  -	      .byte	0
