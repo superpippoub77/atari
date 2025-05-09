@@ -180,12 +180,11 @@
    ; _playfield_down => parte bassa della section 
    ; _playfield_section => sezione del playfield (le sezioni sono 8, vedi schema livelli)
    ;.........................................................................................................................
-   ; _sugar_count => numero di zuccherini reuperati dal biscotto (ad ogni livello parte da 0)
-   ; _current_sugar_x => coordinate temporanee dello zuccherino da catturare (colonna)
-   ; _current_sugar_y => coordinate temporanee dello zuccherino da catturare (riga)
+   ; _choco_count => numero di cioccolatini reuperati dal biscotto (ad ogni livello parte da 0)
+   ; _current_choco_x => coordinate temporanee del cioccolatino da catturare (colonna)
+   ; _current_choco_y => coordinate temporanee del cioccolatino da catturare (riga)
    ;.........................................................................................................................
    ; _speed => velocià di attivazione del playfield dinamico e della bocca (parte da 8 e scende di 2 unità al cambio livello)
-   ; _current_lamp => rappresenta in quale zona è stata impostata la lamp utile per l'accensione
    ;.........................................................................................................................
    ; i flag (bit) si caratterizzano nel seguente modo: on = 1/off = 0
    ; _b0_enableStart => Game start
@@ -212,14 +211,13 @@
    dim _playfield_down = j
    dim _playfield_section = x
 
-   ; questa variabile è usata per capire quanti "zuccheri" sono stati colpiti
-   dim _sugar_count = t
-   dim _current_sugar_x = v
-   dim _current_sugar_y = z
+   ; questa variabile è usata per capire quanti "cioccolatini" sono stati colpiti
+   dim _choco_count = t
+   dim _current_choco_x = v
+   dim _current_choco_y = z
 
    ; velocità corrente
    dim _speed = g
-   dim _current_lamp = w
 
    ; FLAG DI CONFIGURAZIONE
    dim _b0_enableStart = k
@@ -265,7 +263,7 @@ __inizialize
 
    ; Altezze oggeti base
    missile0height = 4 
-   missile1height = 1
+   missile1height = 2
    ballheight = 16
 
    a = 0 : b = 0 : c = 0 : d = 0 : e = 0 : f = 0 : g = 3 : h = 3 : i = 0
@@ -320,7 +318,7 @@ __game_start
    _level = 1
    _speed = 8
 
-   ; 10 lancia a dispozione per il biscotto
+   ; 10 lanci a dispozione per il biscotto iniziali
    score = 100000
 
    ;Per evitare che si veda nella schermata del titolo
@@ -331,6 +329,7 @@ __game_start
    goto __done
    
 __main_loop
+
    ;*************************************************************************************************************************
    ; TIMER
    ;_________________________________________________________________________________________________________________________
@@ -352,8 +351,8 @@ __main_loop
    ; MUSICA DI SOTTOFONDO
    ;_________________________________________________________________________________________________________________________
    if _music_index > 20 then _music_index = 0
-   if _frame_counter&15 = 0 && !_b0_enableStart{0} then AUDF1 = jingle[_music_index] : AUDC1 = 4 :  AUDV1 = 2: _music_index = _music_index + 1
-   if _frame_counter&3 = 0 && _b0_enableStart{0} then AUDV0 = 0 : AUDF1 = melody[_music_index] : AUDC1 = melody[_music_index] :  AUDV1 = 2 : _music_index = _music_index + 1
+   if _frame_counter&15 = 0 && !_b0_enableStart{0} then AUDF1 = jingle[_music_index] : AUDC1 = 4 :  AUDV1 = 0: _music_index = _music_index + 1
+   if _frame_counter&3 = 0 && _b0_enableStart{0} then AUDV0 = 0 : AUDF1 = melody[_music_index] : AUDC1 = melody[_music_index] :  AUDV1 = 0 : _music_index = _music_index + 1
    ;if _frame_counter>32 && _b6_enableSlowMotion{6} then AUDF0 = 30 : AUDC0 = 6: AUDV0 = 4
 
    ;Se il gioco non è ancora iniziato skippa tutto
@@ -369,15 +368,14 @@ __main_loop
    if _frame_counter = 0 && _seconds_counter&(_speed-1)= 1 && _b5_enablePalyer1{5} then player1x = (rand & 125) + 20 : player1y = (rand & 80) + 8
 
    ;*************************************************************************************************************************
-   ; ZUCCHERO (MISSILE1)
+   ; CIOCCOLATO (MISSILE1)
    ;_________________________________________________________________________________________________________________________
-   ; Gli zuccheri nel playfield sono 8 e verranno visualizzati uno alla volta.Il player una volta che viene a contatto con 
-   ; lo zucchero aumenta di 10 spari
-   ; !!!!IMPORTANTE distruggere il missile dopo il contatto facendolo sparire dallo schermo missile1y = 200
+   ; I cioccolatini nel playfield sono 8 e verranno visualizzati uno alla volta.Il player una volta che viene a contatto con 
+   ; il cioccolato aumenta di 10 spari
    ;*************************************************************************************************************************
-   if missile1y = 200 || _seconds_counter&15 = 0 then _current_sugar_x = (rand & 125) + 20 : _current_sugar_y = (rand & 80) + 8
-   if _sugar_count < 8 && _current_sugar_x < 146 && _frame_counter=frame_limit then missile1x = _current_sugar_x: missile1y = _current_sugar_y
-   if collision(player0, missile1) then callmacro sound 12 4 2 : missile1y = 200 : _sugar_count = _sugar_count + 1 : score = score + 100000
+   if missile1y = 200 || _seconds_counter&15 = 0 then _current_choco_x = (rand & 125) + 20 : _current_choco_y = (rand & 80) + 8
+   if _choco_count < 8 && _current_choco_x < 146 && _frame_counter=frame_limit then missile1x = _current_choco_x: missile1y = _current_choco_y
+   if collision(player0, missile1) then callmacro sound 12 4 2 : missile1y = 200 : _choco_count = _choco_count + 1 : score = score + 100000
 
    ;*************************************************************************************************************************
    ; LUCE (PLAYFIELD)
@@ -388,11 +386,6 @@ __main_loop
    ;*************************************************************************************************************************
    ;>>>> SPEGNIMENTO <<<<
    if _seconds_counter && (_seconds_counter&31 = 0) then _b4_enableLight{4} = 0
-
-   ;>>>> ACCENSIONE <<<<
-   ; TO DO VEDO AGGIUNGERE LA POSIONE DI __current_lamp ( che può essere 0, 7, 14, 21)
-   ;temp5 = (player0x-10)/4
-   ;if !_b4_enableLight{4} && temp5 < _current_lamp then _b4_enableLight{4} = 1
 
    ;Background visibile con effetto flash se il flag della lamp è spento
    if _b4_enableLight{4} || _frame_counter&31 = 0 then pfcolors:
@@ -417,10 +410,10 @@ end
    ;*************************************************************************************************************************
    ; CONTENITORE FINALE (BALL)
    ;_________________________________________________________________________________________________________________________
-   ; il sacchetto finale individuato come ball viene visualizzato solo dopo aver trovato gli 8 zuccherini nel playfield
+   ; il sacchetto finale individuato come ball viene visualizzato solo dopo aver trovato gli 8 cioccolatini nel playfield
    ; e la bocca è stata colpita
    ;*************************************************************************************************************************
-   if _sugar_count = 8 && !_b5_enablePalyer1{5} then ballx = door[_level] : bally = 28
+   if _choco_count = 8 && !_b5_enablePalyer1{5} then ballx = door[_level] : bally = 28
 
    ;*************************************************************************************************************************
    ; PLAYFIELD DIAMICO
@@ -434,25 +427,32 @@ end
    _playfield_up = 0 ; parte alta
    _playfield_down = 2 ; parte bassa
 
-   if _b2_loadPlayfield{2} then goto __skip_oggetti
+   ;if _b2_loadPlayfield{2} then goto __skip_oggetti
 __loop_objects
    temp1 = _speed - 1
    _current_object_level = (_level - 1) * 8
-   if (_seconds_counter&temp1) = 0 && (objects[_current_object_level]&_current_bit_object)> 0 then callmacro cup_knife _playfield_section _playfield_down 3 ; TAZZE
+   ;
+   if _b2_loadPlayfield{2} then goto __skip_to_dynamic_objects
+
+   if (objects[_current_object_level]&_current_bit_object)> 0 then callmacro cup_knife _playfield_section _playfield_down 3 ; TAZZE
    temp2 = _current_object_level +1
-   if (_seconds_counter&temp1) = 0 && (objects[temp2]&_current_bit_object)> 0 then callmacro cup_knife _playfield_section _playfield_up 2 ; COLTELLI
+   if (objects[temp2]&_current_bit_object)> 0 then callmacro cup_knife _playfield_section _playfield_up 2 ; COLTELLI
    temp2 = _current_object_level+2
-   if (_seconds_counter&temp1) = 0 && (objects[temp2]&_current_bit_object)> 0 then callmacro chocolate _playfield_section _playfield_down; MURI
-   temp2 = _current_object_level+3
-   if (_seconds_counter&temp1) = 0 && (objects[temp2]&_current_bit_object)> 0 then callmacro choco_drops _playfield_section _playfield_up; choco_drops
+   if (objects[temp2]&_current_bit_object)> 0 then callmacro chocolate _playfield_section _playfield_down; MURI
    
    ; !!! SALVA LA POSIZONE DELLE LAMPADE PER IL DISCORSO DI ATTIVAZIONE E DISATTIVAZIONE
    temp2 = _current_object_level+ 4
-   if (_seconds_counter&temp1) = 0 && (objects[temp2]&_current_bit_object)> 0 then callmacro lamp _playfield_section _playfield_up : _current_lamp = _playfield_section; LAMPADE
+   if (objects[temp2]&_current_bit_object)> 0 then callmacro lamp _playfield_section _playfield_up ; LAMPADE
    temp2 = _current_object_level+ 5
-   if (_seconds_counter&temp1) = 0 && (objects[temp2]&_current_bit_object)> 0 then callmacro table _playfield_section _playfield_down ; TAVOLI
+   if (objects[temp2]&_current_bit_object)> 0 then callmacro table _playfield_section _playfield_down ; TAVOLI
    temp2 = _current_object_level+ 6
-   if (_seconds_counter&temp1) = 0 && (objects[temp2]&_current_bit_object)> 0 then temp4 = objects[temp2]: callmacro divisor temp4; divisor
+   if (objects[temp2]&_current_bit_object)> 0 then temp4 = objects[temp2]: callmacro divisor temp4; divisor
+
+__skip_to_dynamic_objects
+   temp2 = _current_object_level+3
+   if (objects[temp2]&_current_bit_object)> 0 then callmacro choco_drops _playfield_section _playfield_up; choco_drops
+
+
    _current_bit_object = _current_bit_object * 2
    _playfield_section = _playfield_section + 7
    
@@ -471,8 +471,13 @@ __skip_oggetti
    ; 5) dopo 8 secondi si disattiva lo slow motion
    ; 6) se le luce non è attiva non si vede la bocca
    ; 7) se attivo lo slowmotion allora il biscotto cambia colore
-   ; 8) il lancio degli zuccherini è disabilitato se non ho più zuccheri o sono in slow motion
+   ; 8) il lancio dei cioccolatini è disabilitato se non ho più scorte o sono in slow motion
+   ; 9) aumenta la dimensione della bocca dopo il livello 6 e dopo il livello 12
    ;*************************************************************************************************************************
+   ; ---- 9 ----
+   NUSIZ1=$20
+   if _level> 6 then NUSIZ1=$25
+   if _level> 12 then NUSIZ1=$27
 
    ; ---- 4 ----
    if _frame_counter=frame_limit && pfscore1 <=8 then COLUBK = rand&16
@@ -487,7 +492,7 @@ __skip_oggetti
    ; ---- 2 ----
    if pfscore1 = 0 then goto __decrease_health_bar
    ; ---- 3 ----
-   if pfscore2 = 0 || _level > 12 then goto __game_start
+   if pfscore2 = 0 || _level > 20 then goto __game_start
 
    if !joy0up && !joy0down && !joy0left && !joy0right then goto __Skip_Joystick_Precheck
 
@@ -516,7 +521,7 @@ __Skip_Joystick_Precheck
 __Skip_Fire
 
    ;*************************************************************************************************************************
-   ; LANCIO ZUCCHERI
+   ; LANCIO DEI CIOCCOLATINI
    ;_________________________________________________________________________________________________________________________
    ; se attivo
    ;*************************************************************************************************************************
@@ -594,15 +599,15 @@ end
 
    temp5 = (player0x-10)/4 : temp6 = (player0y-5)/8
 
-   if temp5 < 34 then if pfread(temp5,temp6) then _b6_enableSlowMotion{6} =1 :goto __skip_up
+   if temp5 < 31 then if pfread(temp5,temp6) then _b6_enableSlowMotion{6} =1 :goto __skip_up
 
    temp4 = (player0x-17)/4
 
-   if temp4 < 34 then if pfread(temp4,temp6) then _b6_enableSlowMotion{6} =1 :goto __skip_up
+   if temp4 < 31 then if pfread(temp4,temp6) then _b6_enableSlowMotion{6} =1 :goto __skip_up
 
    temp3 = temp5 - 1
 
-   if temp3 < 34 then if pfread(temp3,temp6) then _b6_enableSlowMotion{6} =1 :goto __skip_up
+   if temp3 < 31 then if pfread(temp3,temp6) then _b6_enableSlowMotion{6} =1 :goto __skip_up
 
    if _b6_enableSlowMotion{6} then if (_frame_counter & 3) <> 0 then goto __skip_up
    player0y = player0y - 1 : _Bit0_P0_Dir_Up{0} = 1
@@ -613,15 +618,15 @@ __skip_up
 
    temp5 = (player0x-10)/4 : temp6 = (player0y)/8
 
-   if temp5 < 34 then if pfread(temp5,temp6) then _b6_enableSlowMotion{6} = 1 :goto __skip_down
+   if temp5 < 31 then if pfread(temp5,temp6) then _b6_enableSlowMotion{6} = 1 :goto __skip_down
 
    temp4 = (player0x-17)/4
 
-   if temp4 < 34 then if pfread(temp4,temp6) then _b6_enableSlowMotion{6} = 1 :goto __skip_down
+   if temp4 < 31 then if pfread(temp4,temp6) then _b6_enableSlowMotion{6} = 1 :goto __skip_down
 
    temp3 = temp5 - 1
 
-   if temp3 < 34 then if pfread(temp3,temp6) then _b6_enableSlowMotion{6} = 1 :goto __skip_down
+   if temp3 < 31 then if pfread(temp3,temp6) then _b6_enableSlowMotion{6} = 1 :goto __skip_down
 
    if _b6_enableSlowMotion{6} then if (_frame_counter & 3) <> 0 then goto __skip_down
    player0y = player0y + 1 : _Bit1_P0_Dir_Down{1} = 1
@@ -671,17 +676,17 @@ __game_collision
    ;*************************************************************************************************************************
    ; DINAMICHE PUNTEGGI DI GIOCO 
    ;_________________________________________________________________________________________________________________________
-   ; __destroy_mouth => Distrugge il player 1 disattivandolo e incremeta lo
+   ; __destroy_mouth => distrugge la bocca disattivandolo e incremeta lo
    ; score di 10 punti
    ; ........................................................................
-   ; __decrease_health_bar => Decrementa di una vita se le fite sono finite
+   ; __decrease_health_bar => decrementa di una vita se le fite sono finite
    ; finisce il gico
    ; ........................................................................
    ; __delete_mouth => cancella dallo schermo il player 1
    ; ........................................................................
    ; __decrease_timer_bar => decremeta la barra del tempo
    ; ........................................................................
-   ; __change_level => Cambia di livello
+   ; __change_level => cambia di livello
    ;
    ;*************************************************************************************************************************   
 __destroy_mouth
@@ -702,22 +707,22 @@ __decrease_timer_bar
    goto __done
 
 __change_level
-  _level=_level+1
-  if _speed<2 then goto __skip_to_change
-  _speed=_speed-2
+   _level=_level+1
+   if _speed<2 then goto __skip_to_change
+   _speed=_speed-2
 
 __skip_to_change
-  pfscorecolor = _0C
-  scorecolor = (scorecolor + $10) & $F0
-  bally=200
-  player0x=10:player0y=64
-  _b2_loadPlayfield{2}=0
-  _b3_enableLevel{3}=0
-  _b5_enablePalyer1{5}=1
-  _sugar_count=0
-  _seconds_counter = 0
-
-  pfclear
+   pfscorecolor = _0C
+   scorecolor=(scorecolor + $10) & $F0
+   pfscore1=%11111111
+   bally=200
+   player0x=10:player0y=64
+   _b2_loadPlayfield{2}=0
+   _b3_enableLevel{3}=0
+   _b5_enablePalyer1{5}=1
+   _choco_count=0
+   _seconds_counter = 0
+   pfclear
 
 __done
    
@@ -725,14 +730,14 @@ __done
    goto __main_loop
 
    ;*************************************************************************************************************************
-   ; SUDDIVISIONE DEL PLAYFIELD
+   ; SUDDIVISIONE DEL PLAYFIELD E DOOR
    ;_________________________________________________________________________________________________________________________
    ; b0 | b1 | b2 | b3
    ;----|----|----|---
    ; b4 | b5 | b6 | b7
    ;_________________________________________________________________________________________________________________________
    ;0.TAZZE 1.COLTELLI 2.CIOCCOLATO 3.GOCCE 4.LAMPADE 5.TAVOLI 7.PIANO
-   ; LIVELLI (12)
+   ; LIVELLI (20)
 
    data objects
    %10100100,%00000000,%00000000,%00000000,%00010000,%01011000,%01111111,
@@ -750,20 +755,28 @@ __done
    %00011100,%01100000,%00000000,%00000001,%10010000,%10000000,%01111000,
    %00011100,%01100000,%00000000,%00000001,%10010000,%10000000,%01111000,
    %00011100,%01100000,%00000000,%00000001,%10010000,%10000000,%01111000,
-   %00011100,%01100000,%00000000,%00000001,%10010000,%10000000,%01111000
+   %00011100,%01100000,%00000000,%00000001,%10010000,%10000000,%01111000,
+   %00011100,%01100000,%00000000,%00000001,%10010000,%10000000,%01111000,
+   %00011100,%01100000,%00000000,%00000001,%10010000,%10000000,%01111000,
+   %00011100,%01100000,%00000000,%00000001,%10010000,%10000000,%01111000,
+   %00011100,%01100000,%00000000,%00000001,%10010000,%10000000,%01111000 
 end
 
+   ;il primo valore indica solo che non è attivo
+   data door
+   200,18,156,18,156,18,156,18,156,18,156,18,156,18,156,18,156,18,156,18,156
+end
+   ;*************************************************************************************************************************
+   ; MUSICHE
+   ;_________________________________________________________________________________________________________________________
+   ; jingle => allegra
+   ; melody => suspance
+   ;_________________________________________________________________________________________________________________________
    data jingle
    16, 18, 20, 22, 24, 22, 20, 18, 16, 18, 20, 22, 20, 18, 16, 18, 16, 16, 18, 16
 end
-   ; simil barilla
    data melody
    16, 18, 16, 20, 18, 20, 22, 20, 18, 16, 18, 20, 22, 20, 18, 16, 18, 16, 20, 22
-end
-
-   ; simil barilla
-   data door
-      200, 18, 156,18,156,18,156,18,156,18,156,18,156
 end
 
    macro cup_knife
@@ -778,20 +791,21 @@ end
 end
 
    macro choco_drops
-      o = rand&3
-      y = {2} + o
-      pfpixel {1} o flip
+      ;o = rand&3
+      y = rand&3
+      u = {1} + rand&3
+      pfpixel {1} y flip
 end
 
    macro chocolate
-      u = {1}
       o = {2} + 2
       ;BARRETTA
-      pfvline u {2} o on
+      pfvline {1} {2} o on
       u = {1} + 4
       o = {2} -2
       ;PEZZETTINO
-      pfpixel u o on
+      ;pfpixel u o on
+      pfvline u o {2} on
 end
 
    macro lamp
