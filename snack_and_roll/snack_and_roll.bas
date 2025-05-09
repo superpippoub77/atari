@@ -292,15 +292,15 @@ __inizialize
 
    playfield:
    ................................
-   ...XXX..X..X...XX....XXX..X..X..
-   ..X.....XX.X..X..X..X.....X.X...
+   ...XXX..X..X...XX....XX...X..X..
+   ..X.....XX.X..X..X..X..X..X.X...
    ...XX...X.XX..XXXX..X.....XX....
-   .....X..X..X..X..X..X.....X.X...
-   ..XXX...X..X..X..X...XXX..X..X..
+   .....X..X..X..X..X..X..X..X.X...
+   ..XXX...X..X..X..X...XX...X..X..
    ................................
-   X......X.X.XX.XX..X.X...X...XXX.
-   ..XX.X...XX..X..X.X.X...XX.XX...
-   ..X.XX...X...X..X.X.X...X.X.XX..
+   X......X.X.X..XX..X.X...X...XXX.
+   ..X.XX...XX..X..X.X.X...XX.XX...
+   ..XX.X...X...X..X.X.X...X.X.XX..
    ..X..X...X....XX..X.X...X...X...
 end
    pfcolors:
@@ -352,7 +352,7 @@ __main_loop
    if _frame_counter > frame_limit then _frame_counter = 0 : _seconds_counter = _seconds_counter + 1
 
    ;F2 inizio il gioco mentre F1 seleziono il livello
-   if switchreset && !_b0_enableStart{0} then _b0_enableStart{0} = 1 : goto __skip_to_change
+   if switchreset then _b0_enableStart{0} = 1 : _level = 1 : _speed = 8 : goto __skip_to_change
    if switchselect && !_b0_enableStart{0} && _frame_counter=frame_limit then pfpixel _level 6 on : goto __change_level
 
    ;!!!!!!!!!!!!!!!!!!! START !!!!!!!!!!!!!!!!!!!
@@ -360,8 +360,8 @@ __main_loop
    ; MUSICA DI SOTTOFONDO
    ;_________________________________________________________________________________________________________________________
    if _music_index > 20 then _music_index = 0
-   if _frame_counter&15 = 0 && !_b0_enableStart{0} then AUDF1 = jingle[_music_index] : AUDC1 = 4 :  AUDV1 = 0: _music_index = _music_index + 1
-   if _frame_counter&3 = 0 && _b0_enableStart{0} then AUDV0 = 0 : AUDF1 = melody[_music_index] : AUDC1 = melody[_music_index] :  AUDV1 = 0 : _music_index = _music_index + 1
+   if _frame_counter&15 = 0 && !_b0_enableStart{0} then AUDF1 = jingle[_music_index] : AUDC1 = 4 :  AUDV1 = 2: _music_index = _music_index + 1
+   if _frame_counter&3 = 0 && _b0_enableStart{0} then AUDV0 = 0 : AUDF1 = melody[_music_index] : AUDC1 = melody[_music_index] :  AUDV1 = 2 : _music_index = _music_index + 1
 
    ;Se il gioco non è ancora iniziato skippa tutto
    if !_b0_enableStart{0} then goto __done
