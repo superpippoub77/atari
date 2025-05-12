@@ -454,11 +454,11 @@ __loop_objects
    temp2 = _current_object_level+ 5
    if (objects[temp2]&_current_bit_object)> 0 then callmacro table _playfield_section _playfield_down ; TAVOLI
    temp2 = _current_object_level+ 6
-   if (objects[temp2]&_current_bit_object)> 0 then temp4 = objects[temp2]: callmacro divisor temp4; divisor
+   if (objects[temp2]&_current_bit_object)> 0 then temp4 = objects[temp2]: callmacro divisor temp4; PIANO
 
 __skip_to_dynamic_objects
    temp2 = _current_object_level+3
-   if (objects[temp2]&_current_bit_object)> 0 then callmacro choco_drops _playfield_section _playfield_up; choco_drops
+   if (objects[temp2]&_current_bit_object)> 0 then callmacro choco_drops _playfield_section _playfield_up; GOCCE
 
 
    _current_bit_object = _current_bit_object * 2
