@@ -475,7 +475,7 @@ __skip_oggetti
    ; 1) ogni 16 secondi elimina uno spazio tempo
    ; 2) se lo spazio tempo è finito elimina una vita
    ; 3) se non ci sono più vite allora il gioco è terminato
-   ; 4) lampeggio in scadenza del tempo ogni frame_limit
+   ; 4) lampeggio in scadenza del tempo
    ; 5) dopo 8 secondi si disattiva lo slow motion
    ; 6) se le luce non è attiva non si vede la bocca
    ; 7) se attivo lo slowmotion allora il biscotto cambia colore
@@ -488,7 +488,7 @@ __skip_oggetti
    if _level> 12 then NUSIZ1=$27
 
    ; ---- 4 ----
-   if _frame_counter=frame_limit && pfscore1 <=8 then COLUBK = rand&16
+   if _frame_counter&15 && pfscore1 <=8 then pfscorecolor = rand&16
    ; ---- 5 ----
    if _seconds_counter&7 = 0 then _b6_enableSlowMotion{6} = 0
    ; ---- 6 ----

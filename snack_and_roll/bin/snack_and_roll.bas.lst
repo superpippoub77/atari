@@ -5479,11 +5479,11 @@
    3389  f91e				   .
    3390  f91e							; 
    3391  f91e
-   3392  f91e				   .L0231		;  if _frame_counter = frame_limit  &&  pfscore1  <= 8 then COLUBK  =	rand & 16
+   3392  f91e				   .L0231		;  if _frame_counter & 15  &&	pfscore1  <= 8 then pfscorecolor  =  rand & 16
    3393  f91e
    3394  f91e		       a5 d6		      LDA	_frame_counter
-   3395  f920		       c9 36		      CMP	#frame_limit
-   3396  f922		       d0 0d		      BNE	.skipL0231
+   3395  f920		       29 0f		      AND	#15
+   3396  f922		       f0 0d		      BEQ	.skipL0231
    3397  f924				   .condpart41
    3398  f924		       a9 08		      LDA	#8
    3399  f926		       c5 f2		      CMP	pfscore1
@@ -5491,7 +5491,7 @@
    3401  f92a				   .condpart42
    3402  f92a		       20 ba f3 	      jsr	randomize
    3403  f92d		       29 10		      AND	#16
-   3404  f92f		       85 09		      STA	COLUBK
+   3404  f92f		       85 f4		      STA	pfscorecolor
    3405  f931				   .skip41then
    3406  f931				   .skipL0231
    3407  f931				   .
