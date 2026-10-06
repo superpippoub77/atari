@@ -4,6 +4,11 @@
 
 ---
 
+> 🎮 **Novità:** c'è anche la versione **Godot 4**, un platform 2D a scorrimento orizzontale con effetti e trabocchetti in più.
+> Si trova in [`snack_and_roll_godot/`](snack_and_roll_godot/README.md).
+
+---
+
 ## 🕹 INTRODUZIONE  
 Benvenuto nella cucina più pericolosa del mondo!  
 In *Snack 'n' Roll™*, tu sei **BISCO**, un piccolo biscotto tondo e veloce che deve attraversare una serie di livelli casalinghi pieni di ostacoli, nemici e pericoli... per poter raggiungere il Dispenser Supremo di Biscotti!  
