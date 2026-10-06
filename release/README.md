@@ -20,6 +20,16 @@ Tutte le versioni del gioco, pronte da usare.
   Per aggiornarlo con una build firmata con una chiave diversa, disinstalla prima la versione precedente.
 - iOS: un'app nativa richiede macOS e Xcode. Su iPhone e iPad si può giocare con la versione **Browser**.
 
+## Verifiche fatte
+
+| Versione | Come è stata provata |
+|---|---|
+| Atari 2600 | Emulatore Stella: titolo, modalità attract, avvio con Reset, livello 1 |
+| Windows | Wine 9 su Linux: avvio, titolo, partita |
+| Linux | Avvio diretto del binario esportato |
+| Browser | Chromium: caricamento, titolo, partita, nessun errore in console |
+| Android | Firma APK verificata con `apksigner` (v1/v2/v3); da provare su un dispositivo |
+
 ## Come ricompilare
 
 ```bash
