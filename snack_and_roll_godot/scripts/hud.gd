@@ -143,7 +143,8 @@ func _draw_game() -> void:
 	if main.hit_cooldown > 0 and main.golden_rush:
 		_text("SUGAR RUSH!", Vector2(ix, y), 9, Color(1, 0.85, 0.3, 0.6 + 0.4 * sin(_t * 12.0)))
 
-	_text("Z/Spazio salta (2x = roll)  X spara  Su = spara in alto", Vector2(6, 264), 7, Color(1, 1, 1, 0.35))
+	if not main.touch.visible:
+		_text("Z/Spazio salta (2x = roll)  X spara  Su = spara in alto", Vector2(6, 264), 7, Color(1, 1, 1, 0.35))
 
 
 func _draw_end(title: String, col: Color, sub: String) -> void:
@@ -205,7 +206,10 @@ func _draw_title() -> void:
 	Art.draw_mouth(self, Vector2(mx, ay), 9.0, D.pal(D.P1_COLOR), absf(sin(_t * 8.0)))
 
 	var blink := 0.55 + 0.45 * sin(_t * 4.0)
-	_center("INVIO / F2 (RESET) = GIOCA      TAB / F1 (SELECT) = LIVELLO", 244, 10, Color(1, 1, 0.8, blink))
+	if main.touch.visible:
+		_center("TOCCA UN NUMERO PER IL LIVELLO, ALTROVE PER GIOCARE", 244, 10, Color(1, 1, 0.8, blink))
+	else:
+		_center("INVIO / F2 (RESET) = GIOCA      TAB / F1 (SELECT) = LIVELLO", 244, 10, Color(1, 1, 0.8, blink))
 	_center("ULTIMO %06d   -   RECORD %06d" % [main.last_score, main.hiscore], 262, 9, Color(1, 1, 1, 0.6))
 
 

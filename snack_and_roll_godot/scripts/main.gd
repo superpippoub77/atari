@@ -16,6 +16,7 @@ const ProjectileScript := preload("res://scripts/projectile.gd")
 const HudScript := preload("res://scripts/hud.gd")
 const BgScript := preload("res://scripts/background.gd")
 const Fx := preload("res://scripts/fx.gd")
+const TouchScript := preload("res://scripts/touch_controls.gd")
 
 const SAVE_PATH := "user://snack_and_roll.cfg"
 
@@ -54,6 +55,7 @@ var camera: Camera2D
 var canvas_mod: CanvasModulate
 var hud
 var background
+var touch
 var player = null
 var mouths: Array = []
 var chunks: Array = []
@@ -86,6 +88,9 @@ func _ready() -> void:
 	hud = HudScript.new()
 	hud.main = self
 	layer.add_child(hud)
+	touch = TouchScript.new()
+	touch.main = self
+	layer.add_child(touch)
 	_load_hiscore()
 	_go_title()
 

@@ -20,6 +20,15 @@ func _frames(n: int) -> void:
 		await physics_frame
 
 
+func _tap(index: int, pos: Vector2, pressed: bool) -> void:
+	var e := InputEventScreenTouch.new()
+	e.index = index
+	# le coordinate del tocco sono in pixel della finestra
+	e.position = root.get_final_transform() * pos
+	e.pressed = pressed
+	Input.parse_input_event(e)
+
+
 func _init() -> void:
 	_run.call_deferred()
 
@@ -143,6 +152,24 @@ func _run() -> void:
 	main.change_level()
 	await _frames(3)
 	_check(main.state == "victory", "oltre il livello 5 -> vittoria")
+
+	# --- controlli touch (versione mobile) ---
+	main._go_title()
+	await _frames(3)
+	_tap(0, Vector2(240 - 70 + 1 * 28 + 11, 160), true)
+	_tap(0, Vector2(240 - 70 + 1 * 28 + 11, 160), false)
+	await _frames(2)
+	_check(main.choco_count == 1, "touch: tocco sul numero 2 sceglie il livello 2")
+	_tap(0, Vector2(240, 60), true)
+	_tap(0, Vector2(240, 60), false)
+	await _frames(3)
+	_check(main.state == "playing" and main.level == 2, "touch: tocco sul titolo avvia la partita")
+	_tap(1, Vector2(440, 196), true)
+	await _frames(2)
+	_check(Input.is_action_pressed("jump"), "touch: il pulsante SALTA preme jump")
+	_tap(1, Vector2(440, 196), false)
+	await _frames(2)
+	_check(not Input.is_action_pressed("jump"), "touch: rilasciando si rilascia jump")
 
 	print("")
 	print("RISULTATO: ", "TUTTO OK" if failures == 0 else "%d FALLIMENTI" % failures)

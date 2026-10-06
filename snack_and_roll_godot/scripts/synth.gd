@@ -71,6 +71,8 @@ func _ready() -> void:
 	gen.buffer_length = 0.1
 	_player.stream = gen
 	_player.volume_db = -4.0
+	# sul Web Godot 4.3 usa i "sample" di default, che non supportano il generatore
+	_player.playback_type = AudioServer.PLAYBACK_TYPE_STREAM
 	add_child(_player)
 	_player.play()
 	_playback = _player.get_stream_playback() as AudioStreamGeneratorPlayback

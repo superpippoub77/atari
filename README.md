@@ -6,6 +6,8 @@
 
 > 🎮 **Novità:** c'è anche la versione **Godot 4**, un platform 2D a scorrimento orizzontale con effetti e trabocchetti in più.
 > Si trova in [`snack_and_roll_godot/`](snack_and_roll_godot/README.md).
+>
+> 📦 **Download** (Atari 2600 `.bin`, Windows, Linux, Android, Browser): cartella [`release/`](release/README.md).
 
 ---
 

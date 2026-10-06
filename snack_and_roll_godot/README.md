@@ -17,7 +17,13 @@ Test automatico (non serve la finestra):
 godot --headless --path snack_and_roll_godot -s tests/smoke_test.gd
 ```
 
+Le versioni già pronte per Windows, Linux, Android e Browser sono in [`../release/`](../release/README.md).
+Le impostazioni di esportazione sono in `export_presets.cfg`.
+
 ## Comandi
+
+Su telefono e tablet compaiono i pulsanti touch: ◀ ▶ per muoversi, SALTA, SPARA, ^ per mirare in alto, II per la pausa.
+Sul titolo tocca un numero per scegliere il livello, oppure tocca altrove per iniziare.
 
 | Azione | Tastiera | Joypad | Atari 2600 |
 |---|---|---|---|
@@ -80,6 +86,8 @@ scripts/hazards.gd       gocce, lampade, cancello, muro spingibile, vapore, colt
 scripts/hud.gd           pfscore1/pfscore2/score + titolo e modalità attract
 scripts/synth.gd         audio TIA emulato (autoload "Synth")
 scripts/background.gd    sfondo a parallasse
+scripts/touch_controls.gd pulsanti touch per la versione mobile
+export_presets.cfg       esportazione Windows / Linux / Android / Web
 tests/                   test automatico e cattura screenshot
 ```
 
