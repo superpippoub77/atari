@@ -11,6 +11,17 @@
 
 ---
 
+> 🔧 **Versione Atari aggiornata**
+> - Gli zuccherini compaiono uno alla volta, fermi, senza sfarfallio.
+> - Gli oggetti della parte alta poggiano sempre sul piano di lavoro; lampade, gocce e cioccolato della parte bassa sono appesi al piano.
+> - Il muro del livello 5 si sposta davvero quando il biscotto lo spinge.
+> - Gli zuccherini che cadevano sul piano o dentro gli oggetti sono stati spostati.
+> - Si può sparare tenendo premuta una direzione.
+> - Altre correzioni: un colpo alla bocca vale +10 una volta sola; la luce si spegne a 32 secondi ma si può riaccendere subito, e ogni nuovo livello parte con la luce accesa (tranne il 5).
+> - La ROM viene provata in automatico nell'emulatore Stella: [`snack_and_roll/tests`](snack_and_roll/tests/README.md).
+
+---
+
 ## 🕹 INTRODUZIONE  
 Benvenuto nella cucina più pericolosa del mondo!  
 In *Snack 'n' Roll™*, tu sei **BISCO**, un piccolo biscotto tondo e veloce che deve attraversare una serie di livelli casalinghi pieni di ostacoli, nemici e pericoli... per poter raggiungere il Dispenser Supremo di Biscotti!  
