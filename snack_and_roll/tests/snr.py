@@ -63,14 +63,18 @@ class Stella:
     def __init__(self, rom, tag="t"):
         self.home = f"{SP}/stellahome_{tag}"
         os.makedirs(self.home, exist_ok=True)
-        self.rom = rom
-        self.name = os.path.splitext(os.path.basename(rom))[0]
+        # copia della ROM con un nome senza spazi (Stella ci basa il nome dello stato)
+        os.makedirs(SP, exist_ok=True)
+        self.rom = os.path.join(SP, "snr_test.bin")
+        with open(rom, "rb") as src, open(self.rom, "wb") as dst:
+            dst.write(src.read())
+        rom = self.rom
+        self.name = "snr_test"
         self.state = f"{self.home}/.config/stella/state/{self.name}.st0"
         self.ram_off = None
         env = dict(os.environ, HOME=self.home)
         self.p = subprocess.Popen(
-            ["stella", "-fullscreen", "0", "-tia.zoom", "2", "-sound", "0", "-uimessages", "0",
-             "-confirmexit", "0", rom],
+            ["stella", "-fullscreen", "0", "-tia.zoom", "2", "-sound", "0", "-uimessages", "0", rom],
             env=env, stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
         # aspetta che la finestra esista e che F9 produca davvero uno stato
         for _ in range(120):
