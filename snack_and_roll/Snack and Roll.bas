@@ -937,13 +937,17 @@ __push_wall
    ;_________________________________________________________________________________________________________________________
    ;0.TAZZE 1.(inutilizzato, ex-COLTELLI) 2.CIOCCOLATO 3.GOCCE 4.LAMPADE 5.TAVOLI+SEDIA 6.PIANO 7.ballx
    ; LIVELLI (5)
+   ; Livello 1: lampade basse in b5 e b7 (appese al piano).
+   ; Livello 2: una lampada bassa in b7; nelle sezioni con le tazze una
+   ; lampada chiuderebbe la colonna dal piano al pavimento e taglierebbe
+   ; in due la parte bassa (in b4 chiuderebbe il biscotto alla partenza).
    ; Livello 5: un solo tavolo in basso (sezione b4) per lasciare la
    ; corsia libera (colonne 8-16) al muro spingibile.
 
    data objects
 
-   %00000000, %00000000, %00000000, %00000000, %00001010, %01111010, %00100010, 18,
-   %01111111, %00000000, %00000000, %00000000, %00000000, %00000000, %00101011, 136,
+   %00000000, %00000000, %00000000, %00000000, %10101010, %01111010, %00100010, 18,
+   %01111111, %00000000, %00000000, %00000000, %10000000, %00000000, %00101011, 136,
    %00000000, %00000000, %00110111, %00000000, %00000000, %00000000, %00001011, 18,
    %00000000, %00000000, %10101010, %01010101, %00000000, %00000000, %00101011, 136,
    %11000000, %00000000, %00000011, %00001100, %00010000, %00010000, %00101011, 18,

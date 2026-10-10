@@ -8131,696 +8131,708 @@
    6485  2833				   .
    6486  2833							;;line 942;;
    6487  2833
-   6488  2833				   .L0365		;;line 943;;  data objects
-   6489  2833
-   6490  2833		       4c 5e f8 	      JMP	.skipL0365
-   6491  2836				   objects
-   6492  2836		       00 00 00 00*	      .byte.b	%00000000, %00000000, %00000000, %00000000, %00001010, %01111010, %00100010, 18
-   6493  283e
-   6494  283e		       7f 00 00 00*	      .byte.b	%01111111, %00000000, %00000000, %00000000, %00000000, %00000000, %00101011, 136
-   6495  2846
-   6496  2846		       00 00 37 00*	      .byte.b	%00000000, %00000000, %00110111, %00000000, %00000000, %00000000, %00001011, 18
-   6497  284e
-   6498  284e		       00 00 aa 55*	      .byte.b	%00000000, %00000000, %10101010, %01010101, %00000000, %00000000, %00101011, 136
-   6499  2856
-   6500  2856		       c0 00 03 0c*	      .byte.b	%11000000, %00000000, %00000011, %00001100, %00010000, %00010000, %00101011, 18
-   6501  285e
-   6502  285e				   .skipL0365
-   6503  285e				   .
-   6504  285e							;;line 951;;
-   6505  285e
-   6506  285e				   .
-   6507  285e							;;line 952;;
-   6508  285e
-   6509  285e				   .
-   6510  285e							;;line 953;;
-   6511  285e
-   6512  285e				   .
-   6513  285e							;;line 954;;
-   6514  285e
+   6488  2833				   .
+   6489  2833							;;line 943;;
+   6490  2833
+   6491  2833				   .
+   6492  2833							;;line 944;;
+   6493  2833
+   6494  2833				   .
+   6495  2833							;;line 945;;
+   6496  2833
+   6497  2833				   .
+   6498  2833							;;line 946;;
+   6499  2833
+   6500  2833				   .L0365		;;line 947;;  data objects
+   6501  2833
+   6502  2833		       4c 5e f8 	      JMP	.skipL0365
+   6503  2836				   objects
+   6504  2836		       00 00 00 00*	      .byte.b	%00000000, %00000000, %00000000, %00000000, %10101010, %01111010, %00100010, 18
+   6505  283e
+   6506  283e		       7f 00 00 00*	      .byte.b	%01111111, %00000000, %00000000, %00000000, %10000000, %00000000, %00101011, 136
+   6507  2846
+   6508  2846		       00 00 37 00*	      .byte.b	%00000000, %00000000, %00110111, %00000000, %00000000, %00000000, %00001011, 18
+   6509  284e
+   6510  284e		       00 00 aa 55*	      .byte.b	%00000000, %00000000, %10101010, %01010101, %00000000, %00000000, %00101011, 136
+   6511  2856
+   6512  2856		       c0 00 03 0c*	      .byte.b	%11000000, %00000000, %00000011, %00001100, %00010000, %00010000, %00101011, 18
+   6513  285e
+   6514  285e				   .skipL0365
    6515  285e				   .
    6516  285e							;;line 955;;
    6517  285e
    6518  285e				   .
    6519  285e							;;line 956;;
    6520  285e
-   6521  285e				   .L0366		;;line 957;;  macro cup
-   6522  285e
-   6523  285e					      MAC	cup
-   6524  285e				   .L0367		;;line 958;;  temp6 = {2}  +  2
-   6525  285e
-   6526  285e					      LDA	{2}
-   6527  285e					      CLC
-   6528  285e					      ADC	#2
-   6529  285e					      STA	temp6
-   6530  285e				   .L0368		;;line 959;;  temp5 = {1}  +  4
-   6531  285e
-   6532  285e					      LDA	{1}
-   6533  285e					      CLC
-   6534  285e					      ADC	#4
-   6535  285e					      STA	temp5
-   6536  285e				   .L0369		;;line 960;;  for temp4 = {2} to temp6
+   6521  285e				   .
+   6522  285e							;;line 957;;
+   6523  285e
+   6524  285e				   .
+   6525  285e							;;line 958;;
+   6526  285e
+   6527  285e				   .
+   6528  285e							;;line 959;;
+   6529  285e
+   6530  285e				   .
+   6531  285e							;;line 960;;
+   6532  285e
+   6533  285e				   .L0366		;;line 961;;  macro cup
+   6534  285e
+   6535  285e					      MAC	cup
+   6536  285e				   .L0367		;;line 962;;  temp6 = {2}  +  2
    6537  285e
    6538  285e					      LDA	{2}
-   6539  285e					      STA	temp4
-   6540  285e				   .L0369fortemp4
-   6541  285e				   .L0370		;;line 961;;  pfhline {1} temp4 temp5 on
-   6542  285e
-   6543  285e					      LDX	#0
-   6544  285e					      LDA	temp5
-   6545  285e					      STA	temp3
-   6546  285e					      LDY	temp4
-   6547  285e					      LDA	{1}
-   6548  285e					      jsr	pfhline
-   6549  285e				   .L0371		;;line 962;;  next
-   6550  285e
-   6551  285e					      LDA	temp4
-   6552  285e					      CMP	temp6
-   6553  285e					      INC	temp4
-   6554  285e					      bcc	.L0369fortemp4
-   6555  285e					      if	( (((((#>*)&$1f)*256)|(#<.L0369fortemp4))>=bankswitch_hotspot) && (((((#>*)&$1f)*256)|(#<.L0369fortemp4))<=(bankswitch_hotspot+bs_mask)) )
-   6556  285e					      echo	"WARNING: branch near the end of bank 2 may accidentally trigger a bankswitch. Reposition code there if bad things happen."
-   6557  285e					      endif
-   6558  285e				   .L0372		;;line 963;;  pfpixel temp5 temp6 off
-   6559  285e
-   6560  285e					      LDX	#1
-   6561  285e					      LDY	temp6
-   6562  285e					      LDA	temp5
-   6563  285e					      jsr	pfpixel
-   6564  285e					      ENDM
-   6565  285e				   .
-   6566  285e							;;line 965;;
-   6567  285e
-   6568  285e				   .
-   6569  285e							;;line 966;;
-   6570  285e
-   6571  285e				   .
-   6572  285e							;;line 967;;
-   6573  285e
-   6574  285e				   .L0373		;;line 968;;  macro chocolate
-   6575  285e
-   6576  285e					      MAC	chocolate
-   6577  285e				   .L0374		;;line 969;;  temp6 = {2}  +  2
-   6578  285e
-   6579  285e					      LDA	{2}
-   6580  285e					      CLC
-   6581  285e					      ADC	#2
-   6582  285e					      STA	temp6
-   6583  285e				   .L0375		;;line 970;;  pfvline {1} {2} temp6 on
-   6584  285e
-   6585  285e					      LDX	#0
-   6586  285e					      LDA	temp6
-   6587  285e					      STA	temp3
-   6588  285e					      LDY	{2}
-   6589  285e					      LDA	{1}
-   6590  285e					      jsr	pfvline
-   6591  285e				   .L0376		;;line 971;;  temp5 = {1}  +  4
-   6592  285e
-   6593  285e					      LDA	{1}
-   6594  285e					      CLC
-   6595  285e					      ADC	#4
-   6596  285e					      STA	temp5
-   6597  285e				   .L0377		;;line 972;;  temp6 = {2}  -  2
-   6598  285e
-   6599  285e					      LDA	{2}
-   6600  285e					      SEC
-   6601  285e					      SBC	#2
-   6602  285e					      STA	temp6
-   6603  285e				   .L0378		;;line 973;;  pfvline temp5 temp6 {2} on
+   6539  285e					      CLC
+   6540  285e					      ADC	#2
+   6541  285e					      STA	temp6
+   6542  285e				   .L0368		;;line 963;;  temp5 = {1}  +  4
+   6543  285e
+   6544  285e					      LDA	{1}
+   6545  285e					      CLC
+   6546  285e					      ADC	#4
+   6547  285e					      STA	temp5
+   6548  285e				   .L0369		;;line 964;;  for temp4 = {2} to temp6
+   6549  285e
+   6550  285e					      LDA	{2}
+   6551  285e					      STA	temp4
+   6552  285e				   .L0369fortemp4
+   6553  285e				   .L0370		;;line 965;;  pfhline {1} temp4 temp5 on
+   6554  285e
+   6555  285e					      LDX	#0
+   6556  285e					      LDA	temp5
+   6557  285e					      STA	temp3
+   6558  285e					      LDY	temp4
+   6559  285e					      LDA	{1}
+   6560  285e					      jsr	pfhline
+   6561  285e				   .L0371		;;line 966;;  next
+   6562  285e
+   6563  285e					      LDA	temp4
+   6564  285e					      CMP	temp6
+   6565  285e					      INC	temp4
+   6566  285e					      bcc	.L0369fortemp4
+   6567  285e					      if	( (((((#>*)&$1f)*256)|(#<.L0369fortemp4))>=bankswitch_hotspot) && (((((#>*)&$1f)*256)|(#<.L0369fortemp4))<=(bankswitch_hotspot+bs_mask)) )
+   6568  285e					      echo	"WARNING: branch near the end of bank 2 may accidentally trigger a bankswitch. Reposition code there if bad things happen."
+   6569  285e					      endif
+   6570  285e				   .L0372		;;line 967;;  pfpixel temp5 temp6 off
+   6571  285e
+   6572  285e					      LDX	#1
+   6573  285e					      LDY	temp6
+   6574  285e					      LDA	temp5
+   6575  285e					      jsr	pfpixel
+   6576  285e					      ENDM
+   6577  285e				   .
+   6578  285e							;;line 969;;
+   6579  285e
+   6580  285e				   .
+   6581  285e							;;line 970;;
+   6582  285e
+   6583  285e				   .
+   6584  285e							;;line 971;;
+   6585  285e
+   6586  285e				   .L0373		;;line 972;;  macro chocolate
+   6587  285e
+   6588  285e					      MAC	chocolate
+   6589  285e				   .L0374		;;line 973;;  temp6 = {2}  +  2
+   6590  285e
+   6591  285e					      LDA	{2}
+   6592  285e					      CLC
+   6593  285e					      ADC	#2
+   6594  285e					      STA	temp6
+   6595  285e				   .L0375		;;line 974;;  pfvline {1} {2} temp6 on
+   6596  285e
+   6597  285e					      LDX	#0
+   6598  285e					      LDA	temp6
+   6599  285e					      STA	temp3
+   6600  285e					      LDY	{2}
+   6601  285e					      LDA	{1}
+   6602  285e					      jsr	pfvline
+   6603  285e				   .L0376		;;line 975;;  temp5 = {1}  +  4
    6604  285e
-   6605  285e					      LDX	#0
-   6606  285e					      LDA	{2}
-   6607  285e					      STA	temp3
-   6608  285e					      LDY	temp6
-   6609  285e					      LDA	temp5
-   6610  285e					      jsr	pfvline
-   6611  285e					      ENDM
-   6612  285e				   .
-   6613  285e							;;line 975;;
-   6614  285e
-   6615  285e				   .
-   6616  285e							;;line 976;;
-   6617  285e
-   6618  285e				   .L0379		;;line 977;;  macro lamp
-   6619  285e
-   6620  285e					      MAC	lamp
-   6621  285e				   .L0380		;;line 978;;  temp5 = {1}  +  2
-   6622  285e
-   6623  285e					      LDA	{1}
-   6624  285e					      CLC
-   6625  285e					      ADC	#2
-   6626  285e					      STA	temp5
-   6627  285e				   .L0381		;;line 979;;  pfhline {1} {2} temp5 on
-   6628  285e
-   6629  285e					      LDX	#0
-   6630  285e					      LDA	temp5
-   6631  285e					      STA	temp3
-   6632  285e					      LDY	{2}
-   6633  285e					      LDA	{1}
-   6634  285e					      jsr	pfhline
-   6635  285e				   .L0382		;;line 980;;  temp5 = {1}  +  1
-   6636  285e
-   6637  285e					      LDA	{1}
-   6638  285e					      CLC
-   6639  285e					      ADC	#1
-   6640  285e					      STA	temp5
-   6641  285e				   .L0383		;;line 981;;  temp6 = {2}  +  1
-   6642  285e
-   6643  285e					      LDA	{2}
-   6644  285e					      CLC
-   6645  285e					      ADC	#1
-   6646  285e					      STA	temp6
-   6647  285e				   .L0384		;;line 982;;  pfpixel temp5 temp6 on
+   6605  285e					      LDA	{1}
+   6606  285e					      CLC
+   6607  285e					      ADC	#4
+   6608  285e					      STA	temp5
+   6609  285e				   .L0377		;;line 976;;  temp6 = {2}  -  2
+   6610  285e
+   6611  285e					      LDA	{2}
+   6612  285e					      SEC
+   6613  285e					      SBC	#2
+   6614  285e					      STA	temp6
+   6615  285e				   .L0378		;;line 977;;  pfvline temp5 temp6 {2} on
+   6616  285e
+   6617  285e					      LDX	#0
+   6618  285e					      LDA	{2}
+   6619  285e					      STA	temp3
+   6620  285e					      LDY	temp6
+   6621  285e					      LDA	temp5
+   6622  285e					      jsr	pfvline
+   6623  285e					      ENDM
+   6624  285e				   .
+   6625  285e							;;line 979;;
+   6626  285e
+   6627  285e				   .
+   6628  285e							;;line 980;;
+   6629  285e
+   6630  285e				   .L0379		;;line 981;;  macro lamp
+   6631  285e
+   6632  285e					      MAC	lamp
+   6633  285e				   .L0380		;;line 982;;  temp5 = {1}  +  2
+   6634  285e
+   6635  285e					      LDA	{1}
+   6636  285e					      CLC
+   6637  285e					      ADC	#2
+   6638  285e					      STA	temp5
+   6639  285e				   .L0381		;;line 983;;  pfhline {1} {2} temp5 on
+   6640  285e
+   6641  285e					      LDX	#0
+   6642  285e					      LDA	temp5
+   6643  285e					      STA	temp3
+   6644  285e					      LDY	{2}
+   6645  285e					      LDA	{1}
+   6646  285e					      jsr	pfhline
+   6647  285e				   .L0382		;;line 984;;  temp5 = {1}  +  1
    6648  285e
-   6649  285e					      LDX	#0
-   6650  285e					      LDY	temp6
-   6651  285e					      LDA	temp5
-   6652  285e					      jsr	pfpixel
-   6653  285e					      ENDM
-   6654  285e				   .
-   6655  285e							;;line 984;;
-   6656  285e
-   6657  285e				   .
-   6658  285e							;;line 985;;
-   6659  285e
-   6660  285e				   .L0385		;;line 986;;  macro table
-   6661  285e
-   6662  285e					      MAC	table
-   6663  285e				   .L0386		;;line 987;;  temp5 = {1}  +  2
-   6664  285e
-   6665  285e					      LDA	{1}
-   6666  285e					      CLC
-   6667  285e					      ADC	#2
-   6668  285e					      STA	temp5
-   6669  285e				   .L0387		;;line 988;;  temp6 = {2}  +  1
-   6670  285e
-   6671  285e					      LDA	{2}
-   6672  285e					      CLC
-   6673  285e					      ADC	#1
-   6674  285e					      STA	temp6
-   6675  285e				   .L0388		;;line 989;;  pfhline {1} temp6 temp5 on
+   6649  285e					      LDA	{1}
+   6650  285e					      CLC
+   6651  285e					      ADC	#1
+   6652  285e					      STA	temp5
+   6653  285e				   .L0383		;;line 985;;  temp6 = {2}  +  1
+   6654  285e
+   6655  285e					      LDA	{2}
+   6656  285e					      CLC
+   6657  285e					      ADC	#1
+   6658  285e					      STA	temp6
+   6659  285e				   .L0384		;;line 986;;  pfpixel temp5 temp6 on
+   6660  285e
+   6661  285e					      LDX	#0
+   6662  285e					      LDY	temp6
+   6663  285e					      LDA	temp5
+   6664  285e					      jsr	pfpixel
+   6665  285e					      ENDM
+   6666  285e				   .
+   6667  285e							;;line 988;;
+   6668  285e
+   6669  285e				   .
+   6670  285e							;;line 989;;
+   6671  285e
+   6672  285e				   .L0385		;;line 990;;  macro table
+   6673  285e
+   6674  285e					      MAC	table
+   6675  285e				   .L0386		;;line 991;;  temp5 = {1}  +  2
    6676  285e
-   6677  285e					      LDX	#0
-   6678  285e					      LDA	temp5
-   6679  285e					      STA	temp3
-   6680  285e					      LDY	temp6
-   6681  285e					      LDA	{1}
-   6682  285e					      jsr	pfhline
-   6683  285e				   .L0389		;;line 990;;  temp6 = temp6  +  1
-   6684  285e
-   6685  285e					      INC	temp6
-   6686  285e				   .L0390		;;line 991;;  pfpixel {1} temp6 on
-   6687  285e
-   6688  285e					      LDX	#0
-   6689  285e					      LDY	temp6
-   6690  285e					      LDA	{1}
-   6691  285e					      jsr	pfpixel
-   6692  285e				   .L0391		;;line 992;;  pfpixel temp5 temp6 on
-   6693  285e
-   6694  285e					      LDX	#0
-   6695  285e					      LDY	temp6
-   6696  285e					      LDA	temp5
-   6697  285e					      jsr	pfpixel
-   6698  285e				   .L0392		;;line 993;;  temp5 = {1}  +  4
+   6677  285e					      LDA	{1}
+   6678  285e					      CLC
+   6679  285e					      ADC	#2
+   6680  285e					      STA	temp5
+   6681  285e				   .L0387		;;line 992;;  temp6 = {2}  +  1
+   6682  285e
+   6683  285e					      LDA	{2}
+   6684  285e					      CLC
+   6685  285e					      ADC	#1
+   6686  285e					      STA	temp6
+   6687  285e				   .L0388		;;line 993;;  pfhline {1} temp6 temp5 on
+   6688  285e
+   6689  285e					      LDX	#0
+   6690  285e					      LDA	temp5
+   6691  285e					      STA	temp3
+   6692  285e					      LDY	temp6
+   6693  285e					      LDA	{1}
+   6694  285e					      jsr	pfhline
+   6695  285e				   .L0389		;;line 994;;  temp6 = temp6  +  1
+   6696  285e
+   6697  285e					      INC	temp6
+   6698  285e				   .L0390		;;line 995;;  pfpixel {1} temp6 on
    6699  285e
-   6700  285e					      LDA	{1}
-   6701  285e					      CLC
-   6702  285e					      ADC	#4
-   6703  285e					      STA	temp5
-   6704  285e				   .L0393		;;line 994;;  pfpixel temp5 temp6 on
+   6700  285e					      LDX	#0
+   6701  285e					      LDY	temp6
+   6702  285e					      LDA	{1}
+   6703  285e					      jsr	pfpixel
+   6704  285e				   .L0391		;;line 996;;  pfpixel temp5 temp6 on
    6705  285e
    6706  285e					      LDX	#0
    6707  285e					      LDY	temp6
    6708  285e					      LDA	temp5
    6709  285e					      jsr	pfpixel
-   6710  285e					      ENDM
-   6711  285e				   .
-   6712  285e							;;line 996;;
-   6713  285e
-   6714  285e				   .
-   6715  285e							;;line 997;;
-   6716  285e
-   6717  285e				   .L0394		;;line 998;;  macro piano
-   6718  285e
-   6719  285e					      MAC	piano
-   6720  285e				   .L0395		;;line 999;;  temp5 = {1}  +  {2}
-   6721  285e
-   6722  285e					      LDA	{1}
-   6723  285e					      CLC
-   6724  285e					      ADC	{2}
-   6725  285e					      STA	temp5
-   6726  285e				   .L0396		;;line 1000;;	pfhline {1} 5 temp5 on
-   6727  285e
-   6728  285e					      LDX	#0
-   6729  285e					      LDA	temp5
-   6730  285e					      STA	temp3
-   6731  285e					      LDY	#5
-   6732  285e					      LDA	{1}
-   6733  285e					      jsr	pfhline
-   6734  285e					      ENDM
-   6735  285e				   .
-   6736  285e							;;line 1002;;
-   6737  285e
-   6738  285e				   .
-   6739  285e							;;line 1003;;
-   6740  285e
-   6741  285e				   .L0397		;;line 1004;;	macro divisor
-   6742  285e
-   6743  285e					      MAC	divisor
-   6744  285e				   .L0398		;;line 1005;;	temp5 = 0
-   6745  285e
-   6746  285e					      LDA	#0
-   6747  285e					      STA	temp5
-   6748  285e				   .L0399		;;line 1006;;	temp6 = 7
+   6710  285e				   .L0392		;;line 997;;  temp5 = {1}  +  4
+   6711  285e
+   6712  285e					      LDA	{1}
+   6713  285e					      CLC
+   6714  285e					      ADC	#4
+   6715  285e					      STA	temp5
+   6716  285e				   .L0393		;;line 998;;  pfpixel temp5 temp6 on
+   6717  285e
+   6718  285e					      LDX	#0
+   6719  285e					      LDY	temp6
+   6720  285e					      LDA	temp5
+   6721  285e					      jsr	pfpixel
+   6722  285e					      ENDM
+   6723  285e				   .
+   6724  285e							;;line 1000;;
+   6725  285e
+   6726  285e				   .
+   6727  285e							;;line 1001;;
+   6728  285e
+   6729  285e				   .L0394		;;line 1002;;	macro piano
+   6730  285e
+   6731  285e					      MAC	piano
+   6732  285e				   .L0395		;;line 1003;;	temp5 = {1}  +	{2}
+   6733  285e
+   6734  285e					      LDA	{1}
+   6735  285e					      CLC
+   6736  285e					      ADC	{2}
+   6737  285e					      STA	temp5
+   6738  285e				   .L0396		;;line 1004;;	pfhline {1} 5 temp5 on
+   6739  285e
+   6740  285e					      LDX	#0
+   6741  285e					      LDA	temp5
+   6742  285e					      STA	temp3
+   6743  285e					      LDY	#5
+   6744  285e					      LDA	{1}
+   6745  285e					      jsr	pfhline
+   6746  285e					      ENDM
+   6747  285e				   .
+   6748  285e							;;line 1006;;
    6749  285e
-   6750  285e					      LDA	#7
-   6751  285e					      STA	temp6
-   6752  285e				   .__divisor_loop
-   6753  285e							;;line 1007;; __divisor_loop
+   6750  285e				   .
+   6751  285e							;;line 1007;;
+   6752  285e
+   6753  285e				   .L0397		;;line 1008;;	macro divisor
    6754  285e
-   6755  285e				   .L0400		;;line 1008;;	if temp4  &  1 then pfhline temp5 5 temp6 on
-   6756  285e
-   6757  285e					      LDA	temp4
-   6758  285e					      AND	#1
-   6759  285e					      BEQ	.skipL0400
-   6760  285e				   .condpart201
-   6761  285e					      LDX	#0
-   6762  285e					      LDA	temp6
-   6763  285e					      STA	temp3
-   6764  285e					      LDY	#5
-   6765  285e					      LDA	temp5
-   6766  285e					      jsr	pfhline
-   6767  285e				   .skipL0400
-   6768  285e				   .L0401		;;line 1009;;	temp4 = temp4  /  2
-   6769  285e
-   6770  285e					      LDA	temp4
-   6771  285e					      lsr
-   6772  285e					      STA	temp4
-   6773  285e				   .L0402		;;line 1010;;	temp5 = temp5  +  4
-   6774  285e
-   6775  285e					      LDA	temp5
-   6776  285e					      CLC
-   6777  285e					      ADC	#4
-   6778  285e					      STA	temp5
-   6779  285e				   .L0403		;;line 1011;;	temp6 = temp5  +  4
-   6780  285e
-   6781  285e					      LDA	temp5
-   6782  285e					      CLC
-   6783  285e					      ADC	#4
-   6784  285e					      STA	temp6
-   6785  285e				   .L0404		;;line 1012;;	if temp5  <  28 then goto __divisor_loop
+   6755  285e					      MAC	divisor
+   6756  285e				   .L0398		;;line 1009;;	temp5 = 0
+   6757  285e
+   6758  285e					      LDA	#0
+   6759  285e					      STA	temp5
+   6760  285e				   .L0399		;;line 1010;;	temp6 = 7
+   6761  285e
+   6762  285e					      LDA	#7
+   6763  285e					      STA	temp6
+   6764  285e				   .__divisor_loop
+   6765  285e							;;line 1011;; __divisor_loop
+   6766  285e
+   6767  285e				   .L0400		;;line 1012;;	if temp4  &  1 then pfhline temp5 5 temp6 on
+   6768  285e
+   6769  285e					      LDA	temp4
+   6770  285e					      AND	#1
+   6771  285e					      BEQ	.skipL0400
+   6772  285e				   .condpart201
+   6773  285e					      LDX	#0
+   6774  285e					      LDA	temp6
+   6775  285e					      STA	temp3
+   6776  285e					      LDY	#5
+   6777  285e					      LDA	temp5
+   6778  285e					      jsr	pfhline
+   6779  285e				   .skipL0400
+   6780  285e				   .L0401		;;line 1013;;	temp4 = temp4  /  2
+   6781  285e
+   6782  285e					      LDA	temp4
+   6783  285e					      lsr
+   6784  285e					      STA	temp4
+   6785  285e				   .L0402		;;line 1014;;	temp5 = temp5  +  4
    6786  285e
    6787  285e					      LDA	temp5
-   6788  285e					      CMP	#28
-   6789  285e					      BCS	.skipL0404
-   6790  285e				   .condpart202
-   6791  285e					      jmp	.__divisor_loop
-   6792  285e				   .skipL0404
-   6793  285e					      ENDM
-   6794  285e				  -	      ifconst	pfres
-   6795  285e				  -	      if	(<*) > (254-pfres*pfwidth)
-   6796  285e				  -	      align	256
-   6797  285e				  -	      endif
-   6798  285e				  -	      if	(<*) < (136-pfres*pfwidth)
-   6799  285e				  -	      repeat	((136-pfres*pfwidth)-(<*))
-   6800  285e				  -	      .byte	0
-   6801  285e				  -	      repend
-   6802  285e				  -	      endif
-   6803  285e					      else
-   6804  285e				  -	      if	(<*) > 206
-   6805  285e				  -	      align	256
-   6806  285e					      endif
-   6807  285e				  -	      if	(<*) < 88
-   6808  285e				  -	      repeat	(88-(<*))
-   6809  285e				  -	      .byte	0
-   6810  285e				  -	      repend
-   6811  285e					      endif
-   6812  285e					      endif
-   6813  285e				   pfcolorlabel13
-   6814  285e		       21 9e 26 00	      .byte.b	$21, $9E, $26,0
-   6815  2862		       22 0e 20 00	      .byte.b	$22, $0E, $20,0
-   6816  2866		       23 24 22 00	      .byte.b	$23, $24, $22,0
-   6817  286a		       24 26 20 00	      .byte.b	$24, $26, $20,0
-   6818  286e		       20 02 02 00	      .byte.b	$20, $02, $02,0
-   6819  2872		       9e 05 28 00	      .byte.b	$9E, $05, $28,0
-   6820  2876		       28 9e 26 00	      .byte.b	$28, $9E, $26,0
-   6821  287a		       26 0e 20 00	      .byte.b	$26, $0E, $20,0
-   6822  287e		       24 24 22 00	      .byte.b	$24, $24, $22,0
-   6823  2882		       22 26 20 00	      .byte.b	$22, $26, $20,0
-   6824  2886				  -	      if	(<*) > (<(*+3))
-   6825  2886				  -	      repeat	($100-<*)
-   6826  2886				  -	      .byte	0
-   6827  2886				  -	      repend
-   6828  2886					      endif
-   6829  2886				   player114then_0
-   6830  2886		       24		      .byte.b	%00100100
-   6831  2887		       bd		      .byte.b	%10111101
-   6832  2888		       5a		      .byte.b	%01011010
-   6833  2889		       7e		      .byte.b	%01111110
-   6834  288a				  -	      if	(<*) > (<(*+3))
-   6835  288a				  -	      repeat	($100-<*)
-   6836  288a				  -	      .byte	0
-   6837  288a				  -	      repend
-   6838  288a					      endif
-   6839  288a				   player120then_0
-   6840  288a		       18		      .byte.b	%00011000
-   6841  288b		       bd		      .byte.b	%10111101
-   6842  288c		       5a		      .byte.b	%01011010
-   6843  288d		       7e		      .byte.b	%01111110
-   6844  288e				  -	      if	(<*) > (<(*+3))
-   6845  288e				  -	      repeat	($100-<*)
-   6846  288e				  -	      .byte	0
-   6847  288e				  -	      repend
-   6848  288e					      endif
-   6849  288e				   player121then_1
-   6850  288e		       7e		      .byte.b	%01111110
-   6851  288f		       81		      .byte.b	%10000001
-   6852  2890		       99		      .byte.b	%10011001
-   6853  2891		       66		      .byte.b	%01100110
-   6854  2892				  -	      if	(<*) > (<(*+3))
-   6855  2892				  -	      repeat	($100-<*)
-   6856  2892				  -	      .byte	0
-   6857  2892				  -	      repend
-   6858  2892					      endif
-   6859  2892				   player122then_1
-   6860  2892		       7e		      .byte.b	%01111110
-   6861  2893		       ff		      .byte.b	%11111111
-   6862  2894		       ff		      .byte.b	%11111111
-   6863  2895		       66		      .byte.b	%01100110
-   6864  2896					      if	ECHOFIRST
+   6788  285e					      CLC
+   6789  285e					      ADC	#4
+   6790  285e					      STA	temp5
+   6791  285e				   .L0403		;;line 1015;;	temp6 = temp5  +  4
+   6792  285e
+   6793  285e					      LDA	temp5
+   6794  285e					      CLC
+   6795  285e					      ADC	#4
+   6796  285e					      STA	temp6
+   6797  285e				   .L0404		;;line 1016;;	if temp5  <  28 then goto __divisor_loop
+   6798  285e
+   6799  285e					      LDA	temp5
+   6800  285e					      CMP	#28
+   6801  285e					      BCS	.skipL0404
+   6802  285e				   .condpart202
+   6803  285e					      jmp	.__divisor_loop
+   6804  285e				   .skipL0404
+   6805  285e					      ENDM
+   6806  285e				  -	      ifconst	pfres
+   6807  285e				  -	      if	(<*) > (254-pfres*pfwidth)
+   6808  285e				  -	      align	256
+   6809  285e				  -	      endif
+   6810  285e				  -	      if	(<*) < (136-pfres*pfwidth)
+   6811  285e				  -	      repeat	((136-pfres*pfwidth)-(<*))
+   6812  285e				  -	      .byte	0
+   6813  285e				  -	      repend
+   6814  285e				  -	      endif
+   6815  285e					      else
+   6816  285e				  -	      if	(<*) > 206
+   6817  285e				  -	      align	256
+   6818  285e					      endif
+   6819  285e				  -	      if	(<*) < 88
+   6820  285e				  -	      repeat	(88-(<*))
+   6821  285e				  -	      .byte	0
+   6822  285e				  -	      repend
+   6823  285e					      endif
+   6824  285e					      endif
+   6825  285e				   pfcolorlabel13
+   6826  285e		       21 9e 26 00	      .byte.b	$21, $9E, $26,0
+   6827  2862		       22 0e 20 00	      .byte.b	$22, $0E, $20,0
+   6828  2866		       23 24 22 00	      .byte.b	$23, $24, $22,0
+   6829  286a		       24 26 20 00	      .byte.b	$24, $26, $20,0
+   6830  286e		       20 02 02 00	      .byte.b	$20, $02, $02,0
+   6831  2872		       9e 05 28 00	      .byte.b	$9E, $05, $28,0
+   6832  2876		       28 9e 26 00	      .byte.b	$28, $9E, $26,0
+   6833  287a		       26 0e 20 00	      .byte.b	$26, $0E, $20,0
+   6834  287e		       24 24 22 00	      .byte.b	$24, $24, $22,0
+   6835  2882		       22 26 20 00	      .byte.b	$22, $26, $20,0
+   6836  2886				  -	      if	(<*) > (<(*+3))
+   6837  2886				  -	      repeat	($100-<*)
+   6838  2886				  -	      .byte	0
+   6839  2886				  -	      repend
+   6840  2886					      endif
+   6841  2886				   player114then_0
+   6842  2886		       24		      .byte.b	%00100100
+   6843  2887		       bd		      .byte.b	%10111101
+   6844  2888		       5a		      .byte.b	%01011010
+   6845  2889		       7e		      .byte.b	%01111110
+   6846  288a				  -	      if	(<*) > (<(*+3))
+   6847  288a				  -	      repeat	($100-<*)
+   6848  288a				  -	      .byte	0
+   6849  288a				  -	      repend
+   6850  288a					      endif
+   6851  288a				   player120then_0
+   6852  288a		       18		      .byte.b	%00011000
+   6853  288b		       bd		      .byte.b	%10111101
+   6854  288c		       5a		      .byte.b	%01011010
+   6855  288d		       7e		      .byte.b	%01111110
+   6856  288e				  -	      if	(<*) > (<(*+3))
+   6857  288e				  -	      repeat	($100-<*)
+   6858  288e				  -	      .byte	0
+   6859  288e				  -	      repend
+   6860  288e					      endif
+   6861  288e				   player121then_1
+   6862  288e		       7e		      .byte.b	%01111110
+   6863  288f		       81		      .byte.b	%10000001
+   6864  2890		       99		      .byte.b	%10011001
+   6865  2891		       66		      .byte.b	%01100110
+   6866  2892				  -	      if	(<*) > (<(*+3))
+   6867  2892				  -	      repeat	($100-<*)
+   6868  2892				  -	      .byte	0
+   6869  2892				  -	      repend
+   6870  2892					      endif
+   6871  2892				   player122then_1
+   6872  2892		       7e		      .byte.b	%01111110
+   6873  2893		       ff		      .byte.b	%11111111
+   6874  2894		       ff		      .byte.b	%11111111
+   6875  2895		       66		      .byte.b	%01100110
+   6876  2896					      if	ECHOFIRST
       1758 bytes of ROM space left in bank 2
-   6865  2896					      echo	"    ",[(scoretable - *)]d , "bytes of ROM space left in bank 2")
-   6866  2896					      endif
-   6867  2896		       00 01	   ECHOFIRST  =	1
-   6868  2896
-   6869  2896
-   6870  2896							; Provided under the CC0 license. See the included LICENSE.txt for details.
-   6871  2896							; font equates
-   6872  2896		       00 01	   .21stcentury =	1
-   6873  2896		       00 02	   alarmclock =	2
-   6874  2896		       00 03	   handwritten =	3
-   6875  2896		       00 04	   interrupted =	4
-   6876  2896		       00 05	   retroputer =	5
-   6877  2896		       00 06	   whimsey    =	6
-   6878  2896		       00 07	   tiny       =	7
-   6879  2896		       00 08	   hex	      =	8
+   6877  2896					      echo	"    ",[(scoretable - *)]d , "bytes of ROM space left in bank 2")
+   6878  2896					      endif
+   6879  2896		       00 01	   ECHOFIRST  =	1
    6880  2896
-   6881  2896							; feel free to modify the score graphics - just keep each digit 8 high
-   6882  2896							; and keep the conditional compilation stuff intact
-   6883  2896					      ifnconst	PXE
-   6884  2896				  -	      ifconst	ROM2k
-   6885  2896				  -	      ORG	$F7AC-8
-   6886  2896					      else
-   6887  2896					      ifconst	bankswitch
-   6888  2896					      if	bankswitch == 8
-   6889  2f74					      ORG	$2F94-bscode_length
-   6890  2f74					      RORG	$FF94-bscode_length
-   6891  2f74					      endif
-   6892  2f74				  -	      if	bankswitch == 16
-   6893  2f74				  -	      ORG	$4F94-bscode_length
-   6894  2f74				  -	      RORG	$FF94-bscode_length
-   6895  2f74					      endif
-   6896  2f74				  -	      if	bankswitch == 32
-   6897  2f74				  -	      ORG	$8F94-bscode_length
-   6898  2f74				  -	      RORG	$FF94-bscode_length
-   6899  2f74					      endif
-   6900  2f74				  -	      if	bankswitch == 64
-   6901  2f74				  -	      ORG	$10F80-bscode_length
-   6902  2f74				  -	      RORG	$1FF80-bscode_length
+   6881  2896
+   6882  2896							; Provided under the CC0 license. See the included LICENSE.txt for details.
+   6883  2896							; font equates
+   6884  2896		       00 01	   .21stcentury =	1
+   6885  2896		       00 02	   alarmclock =	2
+   6886  2896		       00 03	   handwritten =	3
+   6887  2896		       00 04	   interrupted =	4
+   6888  2896		       00 05	   retroputer =	5
+   6889  2896		       00 06	   whimsey    =	6
+   6890  2896		       00 07	   tiny       =	7
+   6891  2896		       00 08	   hex	      =	8
+   6892  2896
+   6893  2896							; feel free to modify the score graphics - just keep each digit 8 high
+   6894  2896							; and keep the conditional compilation stuff intact
+   6895  2896					      ifnconst	PXE
+   6896  2896				  -	      ifconst	ROM2k
+   6897  2896				  -	      ORG	$F7AC-8
+   6898  2896					      else
+   6899  2896					      ifconst	bankswitch
+   6900  2896					      if	bankswitch == 8
+   6901  2f74					      ORG	$2F94-bscode_length
+   6902  2f74					      RORG	$FF94-bscode_length
    6903  2f74					      endif
-   6904  2f74				  -	      else
-   6905  2f74				  -	      ORG	$FF9C
-   6906  2f74					      endif
+   6904  2f74				  -	      if	bankswitch == 16
+   6905  2f74				  -	      ORG	$4F94-bscode_length
+   6906  2f74				  -	      RORG	$FF94-bscode_length
    6907  2f74					      endif
-   6908  2f74
-   6909  2f74
-   6910  2f74				  -	      ifconst	font
-   6911  2f74				  -	      if	font == hex
-   6912  2f74				  -	      ORG	. - 48
-   6913  2f74				  -	      endif
-   6914  2f74					      endif
+   6908  2f74				  -	      if	bankswitch == 32
+   6909  2f74				  -	      ORG	$8F94-bscode_length
+   6910  2f74				  -	      RORG	$FF94-bscode_length
+   6911  2f74					      endif
+   6912  2f74				  -	      if	bankswitch == 64
+   6913  2f74				  -	      ORG	$10F80-bscode_length
+   6914  2f74				  -	      RORG	$1FF80-bscode_length
    6915  2f74					      endif
-   6916  2f74
-   6917  2f74				   scoretable
-   6918  2f74
-   6919  2f74				  -	      ifconst	font
-   6920  2f74				  -	      if	font == .21stcentury
-   6921  2f74				  -	      include	"score_graphics.asm.21stcentury"
-   6922  2f74				  -	      endif
-   6923  2f74				  -	      if	font == alarmclock
-   6924  2f74				  -	      include	"score_graphics.asm.alarmclock"
+   6916  2f74				  -	      else
+   6917  2f74				  -	      ORG	$FF9C
+   6918  2f74					      endif
+   6919  2f74					      endif
+   6920  2f74
+   6921  2f74
+   6922  2f74				  -	      ifconst	font
+   6923  2f74				  -	      if	font == hex
+   6924  2f74				  -	      ORG	. - 48
    6925  2f74				  -	      endif
-   6926  2f74				  -	      if	font == handwritten
-   6927  2f74				  -	      include	"score_graphics.asm.handwritten"
-   6928  2f74				  -	      endif
-   6929  2f74				  -	      if	font == interrupted
-   6930  2f74				  -	      include	"score_graphics.asm.interrupted"
-   6931  2f74				  -	      endif
-   6932  2f74				  -	      if	font == retroputer
-   6933  2f74				  -	      include	"score_graphics.asm.retroputer"
+   6926  2f74					      endif
+   6927  2f74					      endif
+   6928  2f74
+   6929  2f74				   scoretable
+   6930  2f74
+   6931  2f74				  -	      ifconst	font
+   6932  2f74				  -	      if	font == .21stcentury
+   6933  2f74				  -	      include	"score_graphics.asm.21stcentury"
    6934  2f74				  -	      endif
-   6935  2f74				  -	      if	font == whimsey
-   6936  2f74				  -	      include	"score_graphics.asm.whimsey"
+   6935  2f74				  -	      if	font == alarmclock
+   6936  2f74				  -	      include	"score_graphics.asm.alarmclock"
    6937  2f74				  -	      endif
-   6938  2f74				  -	      if	font == tiny
-   6939  2f74				  -	      include	"score_graphics.asm.tiny"
+   6938  2f74				  -	      if	font == handwritten
+   6939  2f74				  -	      include	"score_graphics.asm.handwritten"
    6940  2f74				  -	      endif
-   6941  2f74				  -	      if	font == hex
-   6942  2f74				  -	      include	"score_graphics.asm.hex"
+   6941  2f74				  -	      if	font == interrupted
+   6942  2f74				  -	      include	"score_graphics.asm.interrupted"
    6943  2f74				  -	      endif
-   6944  2f74					      else		; default font
-   6945  2f74
-   6946  2f74		       3c		      .byte.b	%00111100
-   6947  2f75		       66		      .byte.b	%01100110
-   6948  2f76		       66		      .byte.b	%01100110
-   6949  2f77		       66		      .byte.b	%01100110
-   6950  2f78		       66		      .byte.b	%01100110
-   6951  2f79		       66		      .byte.b	%01100110
-   6952  2f7a		       66		      .byte.b	%01100110
-   6953  2f7b		       3c		      .byte.b	%00111100
-   6954  2f7c
-   6955  2f7c		       7e		      .byte.b	%01111110
-   6956  2f7d		       18		      .byte.b	%00011000
-   6957  2f7e		       18		      .byte.b	%00011000
-   6958  2f7f		       18		      .byte.b	%00011000
-   6959  2f80		       18		      .byte.b	%00011000
-   6960  2f81		       38		      .byte.b	%00111000
-   6961  2f82		       18		      .byte.b	%00011000
-   6962  2f83		       08		      .byte.b	%00001000
-   6963  2f84
-   6964  2f84		       7e		      .byte.b	%01111110
-   6965  2f85		       60		      .byte.b	%01100000
-   6966  2f86		       60		      .byte.b	%01100000
-   6967  2f87		       3c		      .byte.b	%00111100
-   6968  2f88		       06		      .byte.b	%00000110
-   6969  2f89		       06		      .byte.b	%00000110
-   6970  2f8a		       46		      .byte.b	%01000110
-   6971  2f8b		       3c		      .byte.b	%00111100
-   6972  2f8c
-   6973  2f8c		       3c		      .byte.b	%00111100
-   6974  2f8d		       46		      .byte.b	%01000110
-   6975  2f8e		       06		      .byte.b	%00000110
-   6976  2f8f		       06		      .byte.b	%00000110
-   6977  2f90		       1c		      .byte.b	%00011100
-   6978  2f91		       06		      .byte.b	%00000110
-   6979  2f92		       46		      .byte.b	%01000110
-   6980  2f93		       3c		      .byte.b	%00111100
-   6981  2f94
-   6982  2f94		       0c		      .byte.b	%00001100
-   6983  2f95		       0c		      .byte.b	%00001100
-   6984  2f96		       7e		      .byte.b	%01111110
-   6985  2f97		       4c		      .byte.b	%01001100
-   6986  2f98		       4c		      .byte.b	%01001100
-   6987  2f99		       2c		      .byte.b	%00101100
-   6988  2f9a		       1c		      .byte.b	%00011100
-   6989  2f9b		       0c		      .byte.b	%00001100
-   6990  2f9c
-   6991  2f9c		       3c		      .byte.b	%00111100
-   6992  2f9d		       46		      .byte.b	%01000110
-   6993  2f9e		       06		      .byte.b	%00000110
-   6994  2f9f		       06		      .byte.b	%00000110
-   6995  2fa0		       3c		      .byte.b	%00111100
-   6996  2fa1		       60		      .byte.b	%01100000
-   6997  2fa2		       60		      .byte.b	%01100000
-   6998  2fa3		       7e		      .byte.b	%01111110
-   6999  2fa4
-   7000  2fa4		       3c		      .byte.b	%00111100
-   7001  2fa5		       66		      .byte.b	%01100110
-   7002  2fa6		       66		      .byte.b	%01100110
-   7003  2fa7		       66		      .byte.b	%01100110
-   7004  2fa8		       7c		      .byte.b	%01111100
-   7005  2fa9		       60		      .byte.b	%01100000
-   7006  2faa		       62		      .byte.b	%01100010
-   7007  2fab		       3c		      .byte.b	%00111100
-   7008  2fac
-   7009  2fac		       30		      .byte.b	%00110000
-   7010  2fad		       30		      .byte.b	%00110000
-   7011  2fae		       30		      .byte.b	%00110000
-   7012  2faf		       18		      .byte.b	%00011000
-   7013  2fb0		       0c		      .byte.b	%00001100
-   7014  2fb1		       06		      .byte.b	%00000110
-   7015  2fb2		       42		      .byte.b	%01000010
-   7016  2fb3		       3e		      .byte.b	%00111110
-   7017  2fb4
-   7018  2fb4		       3c		      .byte.b	%00111100
-   7019  2fb5		       66		      .byte.b	%01100110
-   7020  2fb6		       66		      .byte.b	%01100110
-   7021  2fb7		       66		      .byte.b	%01100110
-   7022  2fb8		       3c		      .byte.b	%00111100
-   7023  2fb9		       66		      .byte.b	%01100110
-   7024  2fba		       66		      .byte.b	%01100110
-   7025  2fbb		       3c		      .byte.b	%00111100
-   7026  2fbc
-   7027  2fbc		       3c		      .byte.b	%00111100
-   7028  2fbd		       46		      .byte.b	%01000110
-   7029  2fbe		       06		      .byte.b	%00000110
-   7030  2fbf		       3e		      .byte.b	%00111110
-   7031  2fc0		       66		      .byte.b	%01100110
-   7032  2fc1		       66		      .byte.b	%01100110
-   7033  2fc2		       66		      .byte.b	%01100110
-   7034  2fc3		       3c		      .byte.b	%00111100
-   7035  2fc4
-   7036  2fc4					      ifnconst	DPC_kernel_options
-   7037  2fc4
-   7038  2fc4		       00		      .byte.b	%00000000
-   7039  2fc5		       00		      .byte.b	%00000000
-   7040  2fc6		       00		      .byte.b	%00000000
-   7041  2fc7		       00		      .byte.b	%00000000
-   7042  2fc8		       00		      .byte.b	%00000000
-   7043  2fc9		       00		      .byte.b	%00000000
-   7044  2fca		       00		      .byte.b	%00000000
-   7045  2fcb		       00		      .byte.b	%00000000
-   7046  2fcc
-   7047  2fcc					      endif
-   7048  2fcc
-   7049  2fcc					      endif
-   7050  2fcc
-   7051  2fcc					      ifnconst	PXE
-   7052  2fcc				  -	      ifconst	ROM2k
-   7053  2fcc				  -	      ORG	$F7FC
-   7054  2fcc					      else
-   7055  2fcc					      ifconst	bankswitch
-   7056  2fcc					      if	bankswitch == 8
-   7057  2fd4					      ORG	$2FF4-bscode_length
-   7058  2fd4					      RORG	$FFF4-bscode_length
-   7059  2fd4					      endif
-   7060  2fd4				  -	      if	bankswitch == 16
-   7061  2fd4				  -	      ORG	$4FF4-bscode_length
-   7062  2fd4				  -	      RORG	$FFF4-bscode_length
-   7063  2fd4					      endif
-   7064  2fd4				  -	      if	bankswitch == 32
-   7065  2fd4				  -	      ORG	$8FF4-bscode_length
-   7066  2fd4				  -	      RORG	$FFF4-bscode_length
-   7067  2fd4					      endif
-   7068  2fd4				  -	      if	bankswitch == 64
-   7069  2fd4				  -	      ORG	$10FE0-bscode_length
-   7070  2fd4				  -	      RORG	$1FFE0-bscode_length
+   6944  2f74				  -	      if	font == retroputer
+   6945  2f74				  -	      include	"score_graphics.asm.retroputer"
+   6946  2f74				  -	      endif
+   6947  2f74				  -	      if	font == whimsey
+   6948  2f74				  -	      include	"score_graphics.asm.whimsey"
+   6949  2f74				  -	      endif
+   6950  2f74				  -	      if	font == tiny
+   6951  2f74				  -	      include	"score_graphics.asm.tiny"
+   6952  2f74				  -	      endif
+   6953  2f74				  -	      if	font == hex
+   6954  2f74				  -	      include	"score_graphics.asm.hex"
+   6955  2f74				  -	      endif
+   6956  2f74					      else		; default font
+   6957  2f74
+   6958  2f74		       3c		      .byte.b	%00111100
+   6959  2f75		       66		      .byte.b	%01100110
+   6960  2f76		       66		      .byte.b	%01100110
+   6961  2f77		       66		      .byte.b	%01100110
+   6962  2f78		       66		      .byte.b	%01100110
+   6963  2f79		       66		      .byte.b	%01100110
+   6964  2f7a		       66		      .byte.b	%01100110
+   6965  2f7b		       3c		      .byte.b	%00111100
+   6966  2f7c
+   6967  2f7c		       7e		      .byte.b	%01111110
+   6968  2f7d		       18		      .byte.b	%00011000
+   6969  2f7e		       18		      .byte.b	%00011000
+   6970  2f7f		       18		      .byte.b	%00011000
+   6971  2f80		       18		      .byte.b	%00011000
+   6972  2f81		       38		      .byte.b	%00111000
+   6973  2f82		       18		      .byte.b	%00011000
+   6974  2f83		       08		      .byte.b	%00001000
+   6975  2f84
+   6976  2f84		       7e		      .byte.b	%01111110
+   6977  2f85		       60		      .byte.b	%01100000
+   6978  2f86		       60		      .byte.b	%01100000
+   6979  2f87		       3c		      .byte.b	%00111100
+   6980  2f88		       06		      .byte.b	%00000110
+   6981  2f89		       06		      .byte.b	%00000110
+   6982  2f8a		       46		      .byte.b	%01000110
+   6983  2f8b		       3c		      .byte.b	%00111100
+   6984  2f8c
+   6985  2f8c		       3c		      .byte.b	%00111100
+   6986  2f8d		       46		      .byte.b	%01000110
+   6987  2f8e		       06		      .byte.b	%00000110
+   6988  2f8f		       06		      .byte.b	%00000110
+   6989  2f90		       1c		      .byte.b	%00011100
+   6990  2f91		       06		      .byte.b	%00000110
+   6991  2f92		       46		      .byte.b	%01000110
+   6992  2f93		       3c		      .byte.b	%00111100
+   6993  2f94
+   6994  2f94		       0c		      .byte.b	%00001100
+   6995  2f95		       0c		      .byte.b	%00001100
+   6996  2f96		       7e		      .byte.b	%01111110
+   6997  2f97		       4c		      .byte.b	%01001100
+   6998  2f98		       4c		      .byte.b	%01001100
+   6999  2f99		       2c		      .byte.b	%00101100
+   7000  2f9a		       1c		      .byte.b	%00011100
+   7001  2f9b		       0c		      .byte.b	%00001100
+   7002  2f9c
+   7003  2f9c		       3c		      .byte.b	%00111100
+   7004  2f9d		       46		      .byte.b	%01000110
+   7005  2f9e		       06		      .byte.b	%00000110
+   7006  2f9f		       06		      .byte.b	%00000110
+   7007  2fa0		       3c		      .byte.b	%00111100
+   7008  2fa1		       60		      .byte.b	%01100000
+   7009  2fa2		       60		      .byte.b	%01100000
+   7010  2fa3		       7e		      .byte.b	%01111110
+   7011  2fa4
+   7012  2fa4		       3c		      .byte.b	%00111100
+   7013  2fa5		       66		      .byte.b	%01100110
+   7014  2fa6		       66		      .byte.b	%01100110
+   7015  2fa7		       66		      .byte.b	%01100110
+   7016  2fa8		       7c		      .byte.b	%01111100
+   7017  2fa9		       60		      .byte.b	%01100000
+   7018  2faa		       62		      .byte.b	%01100010
+   7019  2fab		       3c		      .byte.b	%00111100
+   7020  2fac
+   7021  2fac		       30		      .byte.b	%00110000
+   7022  2fad		       30		      .byte.b	%00110000
+   7023  2fae		       30		      .byte.b	%00110000
+   7024  2faf		       18		      .byte.b	%00011000
+   7025  2fb0		       0c		      .byte.b	%00001100
+   7026  2fb1		       06		      .byte.b	%00000110
+   7027  2fb2		       42		      .byte.b	%01000010
+   7028  2fb3		       3e		      .byte.b	%00111110
+   7029  2fb4
+   7030  2fb4		       3c		      .byte.b	%00111100
+   7031  2fb5		       66		      .byte.b	%01100110
+   7032  2fb6		       66		      .byte.b	%01100110
+   7033  2fb7		       66		      .byte.b	%01100110
+   7034  2fb8		       3c		      .byte.b	%00111100
+   7035  2fb9		       66		      .byte.b	%01100110
+   7036  2fba		       66		      .byte.b	%01100110
+   7037  2fbb		       3c		      .byte.b	%00111100
+   7038  2fbc
+   7039  2fbc		       3c		      .byte.b	%00111100
+   7040  2fbd		       46		      .byte.b	%01000110
+   7041  2fbe		       06		      .byte.b	%00000110
+   7042  2fbf		       3e		      .byte.b	%00111110
+   7043  2fc0		       66		      .byte.b	%01100110
+   7044  2fc1		       66		      .byte.b	%01100110
+   7045  2fc2		       66		      .byte.b	%01100110
+   7046  2fc3		       3c		      .byte.b	%00111100
+   7047  2fc4
+   7048  2fc4					      ifnconst	DPC_kernel_options
+   7049  2fc4
+   7050  2fc4		       00		      .byte.b	%00000000
+   7051  2fc5		       00		      .byte.b	%00000000
+   7052  2fc6		       00		      .byte.b	%00000000
+   7053  2fc7		       00		      .byte.b	%00000000
+   7054  2fc8		       00		      .byte.b	%00000000
+   7055  2fc9		       00		      .byte.b	%00000000
+   7056  2fca		       00		      .byte.b	%00000000
+   7057  2fcb		       00		      .byte.b	%00000000
+   7058  2fcc
+   7059  2fcc					      endif
+   7060  2fcc
+   7061  2fcc					      endif
+   7062  2fcc
+   7063  2fcc					      ifnconst	PXE
+   7064  2fcc				  -	      ifconst	ROM2k
+   7065  2fcc				  -	      ORG	$F7FC
+   7066  2fcc					      else
+   7067  2fcc					      ifconst	bankswitch
+   7068  2fcc					      if	bankswitch == 8
+   7069  2fd4					      ORG	$2FF4-bscode_length
+   7070  2fd4					      RORG	$FFF4-bscode_length
    7071  2fd4					      endif
-   7072  2fd4				  -	      else
-   7073  2fd4				  -	      ORG	$FFFC
-   7074  2fd4					      endif
+   7072  2fd4				  -	      if	bankswitch == 16
+   7073  2fd4				  -	      ORG	$4FF4-bscode_length
+   7074  2fd4				  -	      RORG	$FFF4-bscode_length
    7075  2fd4					      endif
-   7076  2fd4					      endif
-   7077  2fd4							; Provided under the CC0 license. See the included LICENSE.txt for details.
-   7078  2fd4
-   7079  2fd4							; every bank has this stuff at the same place
-   7080  2fd4							; this code can switch to/from any bank at any entry point
-   7081  2fd4							; and can preserve register values
-   7082  2fd4							; note: lines not starting with a space are not placed in all banks
-   7083  2fd4							;
-   7084  2fd4							; line below tells the compiler how long this is - do not remove
-   7085  2fd4							;size=32
-   7086  2fd4
-   7087  2fd4				   begin_bscode
-   7088  2fd4		       a2 ff		      ldx	#$ff
-   7089  2fd6				  -	      ifconst	FASTFETCH	; using DPC+
-   7090  2fd6				  -	      stx	FASTFETCH
-   7091  2fd6					      endif
-   7092  2fd6		       9a		      txs
-   7093  2fd7				  -	      if	bankswitch == 64
-   7094  2fd7				  -	      lda	#(((>(start-1)) & $0F) | $F0)
-   7095  2fd7					      else
-   7096  2fd7		       a9 f2		      lda	#>(start-1)
-   7097  2fd9					      endif
-   7098  2fd9		       48		      pha
-   7099  2fda		       a9 51		      lda	#<(start-1)
-   7100  2fdc		       48		      pha
-   7101  2fdd
-   7102  2fdd				   BS_return
-   7103  2fdd		       48		      pha
-   7104  2fde		       8a		      txa
-   7105  2fdf		       48		      pha
-   7106  2fe0		       ba		      tsx
-   7107  2fe1
-   7108  2fe1					      if	bankswitch != 64
-   7109  2fe1		       b5 04		      lda	4,x	; get high byte of return address
-   7110  2fe3
-   7111  2fe3		       2a		      rol
-   7112  2fe4		       2a		      rol
-   7113  2fe5		       2a		      rol
-   7114  2fe6		       2a		      rol
-   7115  2fe7		       29 01		      and	#bs_mask	;1 3 or 7 for F8/F6/F4
-   7116  2fe9		       aa		      tax
-   7117  2fea		       e8		      inx
-   7118  2feb				  -	      else
-   7119  2feb				  -	      lda	4,x	; get high byte of return address
-   7120  2feb				  -	      tay
-   7121  2feb				  -	      ora	#$10	; change our bank nibble into a valid rom mirror
-   7122  2feb				  -	      sta	4,x
-   7123  2feb				  -	      tya
-   7124  2feb				  -	      lsr
-   7125  2feb				  -	      lsr
-   7126  2feb				  -	      lsr
-   7127  2feb				  -	      lsr
-   7128  2feb				  -	      tax
-   7129  2feb				  -	      inx
-   7130  2feb					      endif
-   7131  2feb
-   7132  2feb				   BS_jsr
-   7133  2feb		       bd f7 1f 	      lda	bankswitch_hotspot-1,x
-   7134  2fee		       68		      pla
-   7135  2fef		       aa		      tax
-   7136  2ff0		       68		      pla
-   7137  2ff1		       60		      rts
-   7138  2ff2				  -	      if	((* & $1FFF) > ((bankswitch_hotspot & $1FFF) - 1))
-   7139  2ff2				  -	      echo	"WARNING: size parameter in banksw.asm too small - the program probably will not work."
-   7140  2ff2				  -	      echo	"Change to",[(*-begin_bscode+1)&$FF]d,"and try again."
-   7141  2ff2					      endif
-   7142  2ff2							; Provided under the CC0 license. See the included LICENSE.txt for details.
-   7143  2ff2
-   7144  2ff2					      ifconst	bankswitch
-   7145  2ff2					      if	bankswitch == 8
-   7146  2ffc					      ORG	$2FFC
-   7147  2ffc					      RORG	$FFFC
-   7148  2ffc					      endif
-   7149  2ffc				  -	      if	bankswitch == 16
-   7150  2ffc				  -	      ORG	$4FFC
-   7151  2ffc				  -	      RORG	$FFFC
-   7152  2ffc					      endif
-   7153  2ffc				  -	      if	bankswitch == 32
-   7154  2ffc				  -	      ORG	$8FFC
-   7155  2ffc				  -	      RORG	$FFFC
-   7156  2ffc					      endif
-   7157  2ffc				  -	      if	bankswitch == 64
-   7158  2ffc				  -	      ORG	$10FF0
-   7159  2ffc				  -	      RORG	$1FFF0
-   7160  2ffc				  -	      lda	$ffe0	; we use wasted space to assist stella with EF format auto-detection
-   7161  2ffc				  -	      ORG	$10FF8
-   7162  2ffc				  -	      RORG	$1FFF8
-   7163  2ffc				  -	      ifconst	superchip
-   7164  2ffc				  -	      .byte	"E","F","S","C"
-   7165  2ffc				  -	      else
-   7166  2ffc				  -	      .byte	"E","F","E","F"
-   7167  2ffc				  -	      endif
-   7168  2ffc				  -	      ORG	$10FFC
-   7169  2ffc				  -	      RORG	$1FFFC
-   7170  2ffc					      endif
-   7171  2ffc				  -	      else
-   7172  2ffc				  -	      ifconst	ROM2k
-   7173  2ffc				  -	      ORG	$F7FC
-   7174  2ffc				  -	      else
-   7175  2ffc				  -	      ORG	$FFFC
-   7176  2ffc				  -	      endif
-   7177  2ffc					      endif
-   7178  2ffc		       52 f2		      .word.w	(start & $ffff)
-   7179  2ffe		       52 f2		      .word.w	(start & $ffff)
+   7076  2fd4				  -	      if	bankswitch == 32
+   7077  2fd4				  -	      ORG	$8FF4-bscode_length
+   7078  2fd4				  -	      RORG	$FFF4-bscode_length
+   7079  2fd4					      endif
+   7080  2fd4				  -	      if	bankswitch == 64
+   7081  2fd4				  -	      ORG	$10FE0-bscode_length
+   7082  2fd4				  -	      RORG	$1FFE0-bscode_length
+   7083  2fd4					      endif
+   7084  2fd4				  -	      else
+   7085  2fd4				  -	      ORG	$FFFC
+   7086  2fd4					      endif
+   7087  2fd4					      endif
+   7088  2fd4					      endif
+   7089  2fd4							; Provided under the CC0 license. See the included LICENSE.txt for details.
+   7090  2fd4
+   7091  2fd4							; every bank has this stuff at the same place
+   7092  2fd4							; this code can switch to/from any bank at any entry point
+   7093  2fd4							; and can preserve register values
+   7094  2fd4							; note: lines not starting with a space are not placed in all banks
+   7095  2fd4							;
+   7096  2fd4							; line below tells the compiler how long this is - do not remove
+   7097  2fd4							;size=32
+   7098  2fd4
+   7099  2fd4				   begin_bscode
+   7100  2fd4		       a2 ff		      ldx	#$ff
+   7101  2fd6				  -	      ifconst	FASTFETCH	; using DPC+
+   7102  2fd6				  -	      stx	FASTFETCH
+   7103  2fd6					      endif
+   7104  2fd6		       9a		      txs
+   7105  2fd7				  -	      if	bankswitch == 64
+   7106  2fd7				  -	      lda	#(((>(start-1)) & $0F) | $F0)
+   7107  2fd7					      else
+   7108  2fd7		       a9 f2		      lda	#>(start-1)
+   7109  2fd9					      endif
+   7110  2fd9		       48		      pha
+   7111  2fda		       a9 51		      lda	#<(start-1)
+   7112  2fdc		       48		      pha
+   7113  2fdd
+   7114  2fdd				   BS_return
+   7115  2fdd		       48		      pha
+   7116  2fde		       8a		      txa
+   7117  2fdf		       48		      pha
+   7118  2fe0		       ba		      tsx
+   7119  2fe1
+   7120  2fe1					      if	bankswitch != 64
+   7121  2fe1		       b5 04		      lda	4,x	; get high byte of return address
+   7122  2fe3
+   7123  2fe3		       2a		      rol
+   7124  2fe4		       2a		      rol
+   7125  2fe5		       2a		      rol
+   7126  2fe6		       2a		      rol
+   7127  2fe7		       29 01		      and	#bs_mask	;1 3 or 7 for F8/F6/F4
+   7128  2fe9		       aa		      tax
+   7129  2fea		       e8		      inx
+   7130  2feb				  -	      else
+   7131  2feb				  -	      lda	4,x	; get high byte of return address
+   7132  2feb				  -	      tay
+   7133  2feb				  -	      ora	#$10	; change our bank nibble into a valid rom mirror
+   7134  2feb				  -	      sta	4,x
+   7135  2feb				  -	      tya
+   7136  2feb				  -	      lsr
+   7137  2feb				  -	      lsr
+   7138  2feb				  -	      lsr
+   7139  2feb				  -	      lsr
+   7140  2feb				  -	      tax
+   7141  2feb				  -	      inx
+   7142  2feb					      endif
+   7143  2feb
+   7144  2feb				   BS_jsr
+   7145  2feb		       bd f7 1f 	      lda	bankswitch_hotspot-1,x
+   7146  2fee		       68		      pla
+   7147  2fef		       aa		      tax
+   7148  2ff0		       68		      pla
+   7149  2ff1		       60		      rts
+   7150  2ff2				  -	      if	((* & $1FFF) > ((bankswitch_hotspot & $1FFF) - 1))
+   7151  2ff2				  -	      echo	"WARNING: size parameter in banksw.asm too small - the program probably will not work."
+   7152  2ff2				  -	      echo	"Change to",[(*-begin_bscode+1)&$FF]d,"and try again."
+   7153  2ff2					      endif
+   7154  2ff2							; Provided under the CC0 license. See the included LICENSE.txt for details.
+   7155  2ff2
+   7156  2ff2					      ifconst	bankswitch
+   7157  2ff2					      if	bankswitch == 8
+   7158  2ffc					      ORG	$2FFC
+   7159  2ffc					      RORG	$FFFC
+   7160  2ffc					      endif
+   7161  2ffc				  -	      if	bankswitch == 16
+   7162  2ffc				  -	      ORG	$4FFC
+   7163  2ffc				  -	      RORG	$FFFC
+   7164  2ffc					      endif
+   7165  2ffc				  -	      if	bankswitch == 32
+   7166  2ffc				  -	      ORG	$8FFC
+   7167  2ffc				  -	      RORG	$FFFC
+   7168  2ffc					      endif
+   7169  2ffc				  -	      if	bankswitch == 64
+   7170  2ffc				  -	      ORG	$10FF0
+   7171  2ffc				  -	      RORG	$1FFF0
+   7172  2ffc				  -	      lda	$ffe0	; we use wasted space to assist stella with EF format auto-detection
+   7173  2ffc				  -	      ORG	$10FF8
+   7174  2ffc				  -	      RORG	$1FFF8
+   7175  2ffc				  -	      ifconst	superchip
+   7176  2ffc				  -	      .byte	"E","F","S","C"
+   7177  2ffc				  -	      else
+   7178  2ffc				  -	      .byte	"E","F","E","F"
+   7179  2ffc				  -	      endif
+   7180  2ffc				  -	      ORG	$10FFC
+   7181  2ffc				  -	      RORG	$1FFFC
+   7182  2ffc					      endif
+   7183  2ffc				  -	      else
+   7184  2ffc				  -	      ifconst	ROM2k
+   7185  2ffc				  -	      ORG	$F7FC
+   7186  2ffc				  -	      else
+   7187  2ffc				  -	      ORG	$FFFC
+   7188  2ffc				  -	      endif
+   7189  2ffc					      endif
+   7190  2ffc		       52 f2		      .word.w	(start & $ffff)
+   7191  2ffe		       52 f2		      .word.w	(start & $ffff)
