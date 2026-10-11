@@ -128,6 +128,23 @@ class Grid:
                 out.append((x + 1, y))
         return out
 
+    def path(self, start, goals):
+        prev = {start: None}
+        q = deque([start])
+        while q:
+            p = q.popleft()
+            if p in goals:
+                out = []
+                while p is not None:
+                    out.append(p)
+                    p = prev[p]
+                return out[::-1]
+            for n in self.moves(*p):
+                if n not in prev:
+                    prev[n] = p
+                    q.append(n)
+        return None
+
     def reachable(self, start=(10, 64)):
         seen = {start}
         q = deque([start])

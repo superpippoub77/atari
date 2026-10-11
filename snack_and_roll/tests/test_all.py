@@ -233,34 +233,59 @@ def footprint(x, y):
     return {(c, r) for c in cols for r in rws}
 
 
+def shoot_spots(g, level, target, push):
+    """Posizioni raggiungibili da cui il cioccolatino colpisce target, per
+    direzione, senza essere appoggiati all'oggetto (toccandolo scatta lo
+    slow motion e in slow motion il BAS non fa sparare)."""
+    steps = {"up": (0, -1), "down": (0, 1), "left": (-1, 0), "right": (1, 0)}
+    return steps
+
+
 def shoot_pixel(s, level, target):
     """Va in una posizione da cui il cioccolatino colpisce target e spara."""
     r = s.save()
     g = Grid(r, level)
     push = r.v("pushCol") if level >= 5 else None
     start = (r[PLAYER0X], r[PLAYER0Y])
-    # BFS delle posizioni raggiungibili, in ordine di distanza
+    steps = {"up": (0, -1), "down": (0, 1), "left": (-1, 0), "right": (1, 0)}
+    keys = {"up": "Up", "down": "Down", "left": "Left", "right": "Right"}
+    spots = {d: set() for d in steps}
+    first = None
     seen, q = {start}, deque([start])
-    spot = None
-    while q and spot is None:
+    while q:
         p = q.popleft()
-        for d, key in (("up", "Up"), ("down", "Down"), ("left", "Left"), ("right", "Right")):
-            if missile_hit(g, p[0], p[1], d, level, push) == target:
-                spot = (p, key)
-                break
+        for d, st in steps.items():
+            if missile_hit(g, p[0], p[1], d, level, push) != target:
+                continue
+            q2, free = p, True
+            for _ in range(3):
+                nxt = (q2[0] + st[0], q2[1] + st[1])
+                if nxt not in g.moves(*q2):
+                    free = False
+                    break
+                q2 = nxt
+            if free:
+                spots[d].add(p)
+                if first is None:
+                    first = d
         for n in g.moves(*p):
             if n not in seen:
                 seen.add(n)
                 q.append(n)
-    if spot is None:
+    if first is None:
+        print(f"     (nessuna posizione da cui colpire {target})")
         return False
-    walk_to(s, level, {spot[0]})
+    d = first
     for _ in range(3):
+        ok, r = walk_to(s, level, spots[d])
+        if not ok:
+            print(f"     (non raggiungo una posizione di tiro verso {d})")
         r = s.save()
         s.poke({V["flags"]: r.v("flags") & ~0xC0, V["hitCooldown"]: 250})
-        s.down(spot[1])
-        s.tap("space", 0.12)
-        s.up(spot[1])
+        # direzione e fuoco nello stesso istante
+        s.down(keys[d], "space")
+        s.wait(0.06)
+        s.up(keys[d], "space")
         s.wait(0.5)
         r = s.save()
         if not r.pf(*target):
@@ -268,7 +293,32 @@ def shoot_pixel(s, level, target):
     return False
 
 
-def open_way(s, level, goals, max_shots=14):
+def cheapest_path(fg, start, goals, breakable):
+    """Percorso che richiede di bucare il minor numero di blocchi."""
+    import heapq
+    dist = {start: 0}
+    prev = {start: None}
+    heap = [(0, start)]
+    while heap:
+        d, p = heapq.heappop(heap)
+        if d > dist[p]:
+            continue
+        if p in goals:
+            out = []
+            while p is not None:
+                out.append(p)
+                p = prev[p]
+            return out[::-1]
+        for n in fg.moves(*p):
+            nd = d + 1 + 60 * len(footprint(*n) & breakable)
+            if nd < dist.get(n, 1 << 30):
+                dist[n] = nd
+                prev[n] = p
+                heapq.heappush(heap, (nd, n))
+    return None
+
+
+def open_way(s, level, goals, max_shots=30):
     """Buca gli oggetti distruttibili che separano il biscotto dallo zuccherino."""
     shots = 0
     while shots < max_shots:
@@ -280,9 +330,9 @@ def open_way(s, level, goals, max_shots=14):
         push = r.v("pushCol") if level >= 5 else None
         final, destroyed, _ = destroy_closure(g.cells, level, start=start, push_col=push)
         destroyed -= drop_cells(level)
-        fg = Grid(final)
-        fpath = fg.path(start, goals)
+        fpath = cheapest_path(model.Grid(final), start, goals, g.cells & destroyed)
         if fpath is None:
+            print(f"     (nessun percorso nemmeno bucando, da {start})")
             return False, shots
         target = None
         for p in fpath:
@@ -290,7 +340,12 @@ def open_way(s, level, goals, max_shots=14):
             if blocking:
                 target = blocking[0]
                 break
-        if target is None or not shoot_pixel(s, level, target):
+        if target is None:
+            print(f"     (nessun blocco da bucare trovato sul percorso)")
+            return False, shots
+        if not shoot_pixel(s, level, target):
+            r = s.save()
+            print(f"     (non riesco a bucare {target}: biscotto in ({r[PLAYER0X]},{r[PLAYER0Y]}))")
             return False, shots
         shots += 1
     return False, shots
@@ -581,4 +636,5 @@ def main():
         print("  FAIL", f)
 
 
-main()
+if __name__ == "__main__":
+    main()
