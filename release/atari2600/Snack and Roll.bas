@@ -348,8 +348,12 @@ __sugar_index_ok
    temp1 = (_level-1)*8
    temp3 = temp1 + _sugarIndex
    temp3 = sugar[temp3]
-   missile1x = (temp3&7)*8+20
-   missile1y = (temp3/8)*8+8
+   ; colonna: x = col*16+22 -> colonne del playfield 1,5,9,...,29
+   ; riga: 0-3 -> righe 0-3 (sopra il piano), 4-7 -> righe 6-9 (sotto)
+   missile1x = (temp3&7)*16+22
+   temp4 = temp3/8
+   missile1y = temp4*8+4
+   if temp4 > 3 then missile1y = missile1y + 16
    _prevSugarBit = temp2
    ; lo zuccherino 0 (dorato) e' giallo, gli altri prendono il colore della bocca
    if !_sugarIndex then COLUP1 = $1E
@@ -507,6 +511,9 @@ __Skip_Fire
    ;se raggiunge il bordo o colpisce il divisor di mezzo si elimina
    if missile0y < _M_Edge_Top || missile0y > _Edge_Bottom then goto __delete_missile
    if missile0x > _Edge_Right || missile0x < _M_Edge_Left then goto __delete_missile
+   ; a sinistra della colonna 0 (x<18) il calcolo della colonna "scavalca"
+   ; e pfread leggerebbe pixel della riga sotto: li' non c'e' nulla da colpire
+   if temp5 > 31 then goto __skip_missile
    if temp6 = 5 && pfread(temp5,temp6) then _b4_enableLight{4}=1 : goto __delete_missile
 
    ;non colpisce nulla
@@ -625,9 +632,9 @@ __skip_down
    goto __skip_left
 __no_push_left
 
-   if temp6 < 34 then if pfread(temp6,temp5) then _b6_enableSlowMotion{6} = 1 : goto __skip_left
+   if temp6 < 32 then if pfread(temp6,temp5) then _b6_enableSlowMotion{6} = 1 : goto __skip_left
 
-   if temp6 < 34 then if pfread(temp6,temp3) then _b6_enableSlowMotion{6} = 1 : goto __skip_left
+   if temp6 < 32 then if pfread(temp6,temp3) then _b6_enableSlowMotion{6} = 1 : goto __skip_left
 
    if _b6_enableSlowMotion{6} then if (_frame_counter & 3) <> 0 then goto __skip_left
    player0x = player0x - 1 : _Bit2_P0_Dir_Left{2} = 1
@@ -646,9 +653,10 @@ __skip_left
    goto __skip_right
 __no_push_right
 
-   if temp6 < 34 then if pfread(temp6,temp5) then _b6_enableSlowMotion{6} = 1 : goto __skip_right
+   ; colonne 32-33 sono fuori dallo schermo: pfread leggerebbe la riga sotto
+   if temp6 < 32 then if pfread(temp6,temp5) then _b6_enableSlowMotion{6} = 1 : goto __skip_right
 
-   if temp6 < 34 then if pfread(temp6,temp3) then _b6_enableSlowMotion{6} = 1 : goto __skip_right
+   if temp6 < 32 then if pfread(temp6,temp3) then _b6_enableSlowMotion{6} = 1 : goto __skip_right
 
    if _b6_enableSlowMotion{6} then if (_frame_counter & 3) <> 0 then goto __skip_right
    player0x = player0x + 1 :  _Bit3_P0_Dir_Right{3} = 1
@@ -757,23 +765,25 @@ end
    ; POSIZIONI FISSE DEGLI ZUCCHERINI (compaiono uno alla volta, in questo ordine)
    ;_________________________________________________________________________________________________________________________
    ; Griglia 8 colonne x 8 righe (indici 0-63). 8 valori per livello.
-   ; indice = riga*8 + colonna (es. 15 = riga 1, colonna 7)
-   ; missile1x = colonna*8+20 , missile1y = riga*8+8
-   ; La riga dello zuccherino coincide con la riga del playfield: la riga
-   ; 5 (valori 40-47) e' quella del piano di lavoro e non va usata.
-   ; Le posizioni sono state verificate una per una: nessuna cade dentro
-   ; un oggetto, sul piano, in una colonna di gocce o in un punto
-   ; irraggiungibile. Corrette rispetto alla versione precedente:
-   ; L1: 42->50  L2: 34->10, 40->48  L3: 7->31, 17->9, 33->1, 40->56
-   ; L4: 1->33, 9->8, 40->56, 57->58  L5: 40->32
+   ; indice = riga*8 + colonna
+   ;  colonna 0-7 -> colonne del playfield 1,5,9,13,17,21,25,29 (tutta la larghezza)
+   ;  riga 0-3    -> righe 0-3 del playfield (sopra il piano di lavoro)
+   ;  riga 4-7    -> righe 6-9 del playfield (sotto il piano di lavoro)
+   ; Ogni sezione b0..b7 ha le sue 2 colonne x 4 righe: c'e' uno
+   ; zuccherino per sezione, cosi' sono distribuiti su tutto lo schema.
+   ; Ogni zuccherino e' fuori dagli oggetti indistruttibili oppure dentro
+   ; la riga distruttibile di una tazza o di un muro di cioccolato (si buca
+   ; a colpi di cioccolatino). Ordine di comparsa: si parte in basso a
+   ; sinistra e si attraversa lo schermo alternando sotto e sopra.
+   ; Posizioni calcolate e verificate con snack_and_roll/tests/sugar_layout.py
    ;*************************************************************************************************************************
    data sugar
 
-   0, 10, 18, 24, 34, 50, 48, 56,
-   0, 8, 16, 24, 10, 48, 50, 58,
-   31, 8, 9, 24, 1, 56, 48, 61,
-   33, 8, 18, 30, 39, 56, 48, 58,
-   0, 8, 18, 31, 38, 32, 48, 56,
+   49, 9, 58, 10, 37, 29, 54, 22,
+   49, 17, 51, 19, 52, 20, 39, 22,
+   33, 25, 42, 18, 53, 21, 62, 14,
+   56, 8, 35, 27, 37, 21, 55, 14,
+   49, 9, 34, 10, 53, 29, 54, 23,
 end
 
    data jingle
