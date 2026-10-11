@@ -298,20 +298,12 @@ __move_current_mouth
    temp3 = _mouth0x : temp4 = _mouth0y
    if _mouthIndex then temp3=_mouth1x : temp4=_mouth1y
 
-   ; insegue il biscotto
+   ; insegue il biscotto passando sopra a qualsiasi oggetto (in tutti i
+   ; livelli le bocche non vengono mai fermate dal playfield)
    if temp3 < player0x then temp3 = temp3 + 1
    if temp3 > player0x then temp3 = temp3 - 1
    if temp4 < player0y then temp4 = temp4 + 1
    if temp4 > player0y then temp4 = temp4 - 1
-
-   ; la bocca 0 (livelli 1-4) non attraversa gli oggetti: controlla la
-   ; posizione NUOVA (il centro della bocca) prima di spostarsi
-   if _mouthIndex || _level > 4 then goto __mouth_free
-   temp5 = 0
-   if temp3 > 13 then temp5 = (temp3-13)/4
-   temp6 = (temp4-2)/8
-   if temp6<>5 && pfread(temp5,temp6) then temp3=_mouth0x : temp4=_mouth0y
-__mouth_free
 
    if !_mouthIndex then _mouth0x=temp3 : _mouth0y=temp4
    if _mouthIndex then _mouth1x=temp3 : _mouth1y=temp4
