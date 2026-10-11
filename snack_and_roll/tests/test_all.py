@@ -42,6 +42,22 @@ def check(level, name, ok, detail=""):
 # modello: drop e muro come ostacoli, movimento identico al BAS
 # ---------------------------------------------------------------------
 MOUTH_SPEED = [12, 10, 9, 8, 8, 7]   # BAS: data mouthspeed (frame per passo)
+FRAME_LIMIT = 47                     # BAS: const frame_limit (48 frame = 1 "secondo")
+# effetti sonori (BAS: callmacro sfx N)
+SFX = {"sparo": 1, "muro": 2, "scossa": 3, "blocco": 4, "zuccherino": 5, "bocca": 6, "potere": 7, "livello": 8}
+
+
+def sfx_seen(s, seconds, first=None):
+    """Effetti sonori ascoltati (valori di _sfxId) nei prossimi secondi."""
+    seen = set()
+    if first is not None:
+        seen.add(first.v("sfxId"))
+    t0 = time.time()
+    while time.time() - t0 < seconds:
+        seen.add(s.save().v("sfxId"))
+        s.wait(0.05)
+    seen.discard(0)
+    return seen
 LEVELS = len(OBJECTS)
 
 
@@ -145,8 +161,12 @@ def protect(s):
     s.poke({V["hitCooldown"]: 250, PFSCORE1: 0xFF})
 
 
+WALK_SFX = set()   # effetti sonori visti durante l'ultima camminata
+
+
 def walk_to(s, level, goals, max_time=40.0):
     """Muove il biscotto con i tasti lungo il percorso calcolato."""
+    WALK_SFX.clear()
     t0 = time.time()
     start_level_no = None
     last_protect = 0
@@ -155,6 +175,7 @@ def walk_to(s, level, goals, max_time=40.0):
             protect(s)
             last_protect = time.time()
         r = s.save()
+        WALK_SFX.add(r.v("sfxId"))
         if start_level_no is None:
             start_level_no = r.v("level")
         if r.v("level") != start_level_no:
@@ -295,9 +316,11 @@ def shoot_pixel(s, level, target):
         s.down(keys[d], "space")
         s.wait(0.06)
         s.up(keys[d], "space")
-        s.wait(0.5)
+        heard = sfx_seen(s, 0.5)
         r = s.save()
         if not r.pf(*target):
+            check(level, f"suono del blocco abbattuto {target}", SFX["blocco"] in heard,
+                  f"effetti sentiti={sorted(heard)}")
             return True
     return False
 
@@ -374,7 +397,9 @@ def sugar_phase(s, level):
         pos = []
         for _ in range(3):
             rr = s.save()
-            pos.append((rr[MISSILE1X], rr[MISSILE1Y], rr.v("sugarIndex")))
+            bits = rr.v("choco_bits")
+            idx = next((i for i in range(8) if not bits >> i & 1), 8)
+            pos.append((rr[MISSILE1X], rr[MISSILE1Y], idx))
             s.wait(0.07)
         steady = all(p == (ex, ey, k) for p in pos)
         check(level, f"zuccherino {k}: visibile da solo e fermo in ({ex},{ey})", steady, str(pos))
@@ -391,9 +416,13 @@ def sugar_phase(s, level):
             s.poke({V["choco_bits"]: r.v("choco_bits") | (1 << k), V["choco_count"]: k + 1})
             continue
         ok, r = walk_to(s, level, goals)
-        s.wait(0.25)
+        heard = sfx_seen(s, 0.3, r) | (WALK_SFX - {0})
         r = s.save()
         got = (r.v("choco_bits") >> k) & 1
+        want = SFX["potere"] if k == 0 else SFX["zuccherino"]
+        if got:
+            check(level, f"zuccherino {k}: suono " + ("del super potere" if k == 0 else "dello zuccherino"),
+                  want in heard, f"effetti sentiti={sorted(heard)}")
         check(level, f"zuccherino {k}: raccolto camminando", ok and got and r.v("choco_count") == k + 1,
               f"bits={bin(r.v('choco_bits'))} count={r.v('choco_count')}")
         if not got:
@@ -401,7 +430,7 @@ def sugar_phase(s, level):
         if k == 0:
             check(level, "zuccherino dorato: congela le bocche (_hitCooldown)", r.v("hitCooldown") > 0)
         if k == 1:
-            check(level, "zuccherino 1: chiave (_hasKey)", r.v("hasKey") == 1)
+            check(level, "zuccherino 1: chiave (_b2_hasKey)", r.flag(2) == 1)
     r = s.save()
     check(level, "8 zuccherini, nessuno contato due volte", r.v("choco_count") == 8 and r.v("choco_bits") == 0xFF,
           f"count={r.v('choco_count')}")
@@ -451,10 +480,12 @@ def mouth_phase(s, level):
         s.down("Right")
         s.tap("space", 0.12)
         s.up("Right")
-        s.wait(0.8)
+        heard = sfx_seen(s, 0.8)
         r = s.save()
         if r.flag(5) == 0:
             break
+    check(level, "suoni: sparo e bocca uccisa", SFX["bocca"] in heard and SFX["sparo"] in heard,
+          f"effetti sentiti={sorted(heard)}")
     check(level, "cioccolatino colpisce la bocca: +10 (una volta sola) e bocca colpita",
           r.flag(5) == 0 and r.score() == score0 + 10,
           f"flag5={r.flag(5)} score {score0}->{r.score()} tentativi={attempts}")
@@ -506,6 +537,8 @@ def bag_phase(s, level):
         r = s.save()
     check(level, "toccando il sacchetto si passa al livello successivo", r.v("level") == nxt,
           f"level={r.v('level')}")
+    heard = sfx_seen(s, 0.2, r)
+    check(level, "suono del cambio livello", SFX["livello"] in heard, f"effetti sentiti={sorted(heard)}")
     if True:
         check(nxt, "partenza dal punto (10,64) con 4 vite e tempo pieno",
               abs(r[PLAYER0X] - 10) <= 16 and abs(r[PLAYER0Y] - 64) <= 16 and r[PFSCORE2] == 0xAA and r[PFSCORE1] == 0xFF,
@@ -550,9 +583,12 @@ def push_phase(s, level):
     for k, c in enumerate(cols if level != 6 else []):
         # biscotto a sinistra del muro, sul pavimento, Destra tenuto premuto
         s.poke({PLAYER0X: 4 * c + 9 - 3, PLAYER0Y: 84, V["hitCooldown"]: 250})
-        s.hold(["Right"], 1.4)
+        s.down("Right")
+        heard = sfx_seen(s, 1.4)
+        s.up("Right")
         r = s.save()
         c2 = r.v(names[k])
+        check(level, f"muro {k + 1}: suono del muro spinto", SFX["muro"] in heard, f"effetti sentiti={sorted(heard)}")
         ok_cols = all(r.pf(c2, rr) for rr in (8, 9, 10)) and not any(r.pf(c, rr) for rr in (8, 9, 10))
         check(level, f"muro {k + 1}: spingendo a destra si sposta", c2 > c and ok_cols, f"colonna {c}->{c2}")
         check(level, f"muro {k + 1}: spingere non attiva lo slow motion", r.flag(6) == 0)
@@ -594,7 +630,7 @@ def push_phase(s, level):
 
 
 def light_phase(s, level):
-    s.poke({V["seconds"]: 31, V["frame"]: 54, V["hitCooldown"]: 250})
+    s.poke({V["seconds"]: 31, V["frame"]: FRAME_LIMIT, V["hitCooldown"]: 250})
     s.wait(0.4)
     r = s.save()
     check(level, "dopo 32 secondi la luce si spegne", r.flag(4) == 0)
@@ -631,10 +667,39 @@ def light_phase(s, level):
     check(level, "sparando sul piano la luce si riaccende", r.flag(4) == 1)
 
 
+def slow_sound_phase(s, level):
+    """Toccando un oggetto parte il rallentamento con il suono della scossa."""
+    r = s.save()
+    g = Grid(r, level)
+    reach = model.Grid(g.cells).reachable()
+    spot = None
+    fixed = {(c, rr) for rr in range(11) for c in range(32) if r.pf(c, rr)} - drop_cells(level)
+    fixed -= {(c, rr) for c in walls(r) for rr in (8, 9, 10)}
+    for (x, y) in sorted(reach):
+        if x >= 140 or not 20 < y < 88 or (x + 1, y) in g.moves(x, y):
+            continue
+        # a destra c'e' un oggetto fisso vero (non una goccia, non un muro mobile)
+        col = ((x - 9) & 255) // 4
+        if (col, ((y - 1) & 255) // 8) in fixed or (col, ((y - 4) & 255) // 8) in fixed:
+            spot = (x, y)
+            break
+    if not check(level, "trovato un oggetto da toccare", spot is not None):
+        return
+    s.poke({PLAYER0X: spot[0], PLAYER0Y: spot[1], V["flags"]: r.v("flags") & ~0x48, V["hitCooldown"]: 250,
+            V["seconds"]: 1})
+    s.down("Right")
+    heard = sfx_seen(s, 0.4)
+    s.up("Right")
+    r = s.save()
+    check(level, "toccando un oggetto: rallentamento e suono della scossa",
+          r.flag(6) == 1 and SFX["scossa"] in heard, f"slow={r.flag(6)} effetti sentiti={sorted(heard)}")
+    s.poke({V["flags"]: r.v("flags") & ~0x48, PLAYER0X: 10, PLAYER0Y: 64})
+
+
 def life_phase(s, level):
     r = s.save()
     lives = r[PFSCORE2]
-    s.poke({PFSCORE1: 0x80, V["seconds"]: 15, V["frame"]: 54, V["hitCooldown"]: 0,
+    s.poke({PFSCORE1: 0x80, V["seconds"]: 15, V["frame"]: FRAME_LIMIT, V["hitCooldown"]: 0,
             V["mouth0x"]: 20, V["mouth0y"]: 8, V["mouth1x"]: 140, V["mouth1y"]: 90})
     s.wait(0.5)
     r = s.save()
@@ -707,6 +772,7 @@ def play_level(s, level, extra=True):
         if model.wall_cols(level):
             push_phase(s, level)
         life_phase(s, level)
+        slow_sound_phase(s, level)
     sugar_phase(s, level)
     mouth_phase(s, level)
     if extra and level != LEVELS:

@@ -18,6 +18,7 @@
 > - I muri mobili si spostano quando il biscotto li spinge e **schiacciano le bocche** (+10, conta come bocca colpita).
 > - Bocche più lente, che passano sopra a qualsiasi oggetto. Una bocca uccisa ricompare nel suo angolo dopo circa 4 secondi.
 > - Schermata iniziale: il biscotto, inseguito dalla bocca, scorre in continuo entrando sempre da destra.
+> - **Audio**: tema iniziale stile Indiana Jones, musica leggera di sottofondo ed effetti presi dal *bbsoundtest* di batari Basic (sparo, zuccherino, blocco abbattuto, bocca uccisa, super potere, scossa, cambio livello, muro spinto).
 > - Zuccherini ben distribuiti: uno per ognuna delle 8 sezioni, su tutta la larghezza dello schermo, sopra e sotto il piano. Ognuno è fuori dagli oggetti indistruttibili oppure dentro una tazza o un muro di cioccolato, da bucare a colpi di cioccolatino.
 > - Si può sparare tenendo premuta una direzione.
 > - Altre correzioni: un colpo alla bocca vale +10 una volta sola; la luce si spegne a 32 secondi ma si può riaccendere subito, e ogni nuovo livello parte con la luce accesa (tranne il 5).

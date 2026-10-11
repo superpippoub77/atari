@@ -22,9 +22,9 @@ PFSCORE1, PFSCORE2 = 0xF2, 0xF3
 V = {
     "mouthIndex": A["a"], "level": A["b"], "frame": A["c"], "seconds": A["d"],
     "choco_bits": A["e"], "mouth0x": A["f"], "speed": A["g"], "mouth0y": A["h"],
-    "sugarIndex": A["i"], "flags": A["k"], "mouth1x": A["l"], "music": A["m"],
-    "mouth1y": A["o"], "dir": A["p"], "prevSugarBit": A["q"], "pushCol": A["s"],
-    "choco_count": A["t"], "ballx_var": A["u"], "hitCooldown": A["v"], "hasKey": A["z"],
+    "sfxId": A["i"], "flags": A["k"], "mouth1x": A["l"], "music": A["m"],
+    "mouth1y": A["o"], "dir": A["p"], "sfxPos": A["q"], "pushCol": A["s"],
+    "choco_count": A["t"], "ballx_var": A["u"], "hitCooldown": A["v"], "sfxDur": A["z"],
     "pushCol2": A["w"], "pushCol3": A["x"], "mouth0wait": A["j"], "mouth1wait": A["r"],
     "mouthTick": A["n"], "lap": A["y"],
 }
