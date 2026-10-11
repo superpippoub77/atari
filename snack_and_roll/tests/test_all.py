@@ -161,8 +161,12 @@ def protect(s):
     s.poke({V["hitCooldown"]: 250, PFSCORE1: 0xFF})
 
 
+WALK_SFX = set()   # effetti sonori visti durante l'ultima camminata
+
+
 def walk_to(s, level, goals, max_time=40.0):
     """Muove il biscotto con i tasti lungo il percorso calcolato."""
+    WALK_SFX.clear()
     t0 = time.time()
     start_level_no = None
     last_protect = 0
@@ -171,6 +175,7 @@ def walk_to(s, level, goals, max_time=40.0):
             protect(s)
             last_protect = time.time()
         r = s.save()
+        WALK_SFX.add(r.v("sfxId"))
         if start_level_no is None:
             start_level_no = r.v("level")
         if r.v("level") != start_level_no:
@@ -411,7 +416,7 @@ def sugar_phase(s, level):
             s.poke({V["choco_bits"]: r.v("choco_bits") | (1 << k), V["choco_count"]: k + 1})
             continue
         ok, r = walk_to(s, level, goals)
-        heard = sfx_seen(s, 0.3, r)
+        heard = sfx_seen(s, 0.3, r) | (WALK_SFX - {0})
         r = s.save()
         got = (r.v("choco_bits") >> k) & 1
         want = SFX["potere"] if k == 0 else SFX["zuccherino"]
@@ -668,9 +673,14 @@ def slow_sound_phase(s, level):
     g = Grid(r, level)
     reach = model.Grid(g.cells).reachable()
     spot = None
+    fixed = {(c, rr) for rr in range(11) for c in range(32) if r.pf(c, rr)} - drop_cells(level)
+    fixed -= {(c, rr) for c in walls(r) for rr in (8, 9, 10)}
     for (x, y) in sorted(reach):
-        nxt = (x + 1, y)
-        if nxt not in g.moves(x, y) and x < 140 and 20 < y < 88:
+        if x >= 140 or not 20 < y < 88 or (x + 1, y) in g.moves(x, y):
+            continue
+        # a destra c'e' un oggetto fisso vero (non una goccia, non un muro mobile)
+        col = ((x - 9) & 255) // 4
+        if (col, ((y - 1) & 255) // 8) in fixed or (col, ((y - 4) & 255) // 8) in fixed:
             spot = (x, y)
             break
     if not check(level, "trovato un oggetto da toccare", spot is not None):
