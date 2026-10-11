@@ -230,7 +230,8 @@ __main_loop
 
 __handle_level_select
    temp1 = (_level-1)*2
-   _speed = 0
+   ; livello 5: _speed = 1 (con 0 le bocche si muovevano una volta al secondo)
+   _speed = 1
    if _level<5 then _speed=8-temp1
    goto __skip_to_change
 __skip_level_select
@@ -285,7 +286,11 @@ __skip_attract
    _mouthIndex = _mouthIndex + 1
    if _mouthIndex >= temp1 then _mouthIndex = 0
 
-   if !_hitCooldown && !(_frame_counter & (_speed-1)) then gosub __move_current_mouth
+   ; con due bocche si conta a coppie di frame (una per bocca), altrimenti
+   ; si muoverebbe sempre la stessa bocca e l'altra resterebbe ferma
+   temp2 = _frame_counter
+   if temp1 = 2 then temp2 = _frame_counter / 2
+   if !_hitCooldown && !(temp2 & (_speed-1)) then gosub __move_current_mouth
 
    if !_mouthIndex then player1x = _mouth0x : player1y = _mouth0y
    if _mouthIndex then player1x = _mouth1x : player1y = _mouth1y
@@ -298,20 +303,12 @@ __move_current_mouth
    temp3 = _mouth0x : temp4 = _mouth0y
    if _mouthIndex then temp3=_mouth1x : temp4=_mouth1y
 
-   ; insegue il biscotto
+   ; insegue il biscotto passando sopra a qualsiasi oggetto (in tutti i
+   ; livelli le bocche non vengono mai fermate dal playfield)
    if temp3 < player0x then temp3 = temp3 + 1
    if temp3 > player0x then temp3 = temp3 - 1
    if temp4 < player0y then temp4 = temp4 + 1
    if temp4 > player0y then temp4 = temp4 - 1
-
-   ; la bocca 0 (livelli 1-4) non attraversa gli oggetti: controlla la
-   ; posizione NUOVA (il centro della bocca) prima di spostarsi
-   if _mouthIndex || _level > 4 then goto __mouth_free
-   temp5 = 0
-   if temp3 > 13 then temp5 = (temp3-13)/4
-   temp6 = (temp4-2)/8
-   if temp6<>5 && pfread(temp5,temp6) then temp3=_mouth0x : temp4=_mouth0y
-__mouth_free
 
    if !_mouthIndex then _mouth0x=temp3 : _mouth0y=temp4
    if _mouthIndex then _mouth1x=temp3 : _mouth1y=temp4
@@ -723,6 +720,7 @@ __change_level
    _level=_level+1
    if _speed<2 then goto __skip_to_change
    _speed=_speed-2
+   if !_speed then _speed = 1
 
 __skip_to_change
    pfscorecolor = $08

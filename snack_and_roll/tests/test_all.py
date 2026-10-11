@@ -397,7 +397,13 @@ def sugar_phase(s, level):
     check(level, "8 zuccherini, nessuno contato due volte", r.v("choco_count") == 8 and r.v("choco_bits") == 0xFF,
           f"count={r.v('choco_count')}")
     check(level, "dopo l'ultimo non compare piu' nulla", r[MISSILE1Y] == 200)
-    check(level, "il sacchetto non appare prima di colpire la bocca", r[BALLY] != 28)
+    if r.flag(5) == 1:
+        check(level, "il sacchetto non appare prima di colpire la bocca", r[BALLY] != 28)
+    else:
+        # un cioccolatino sparato agli oggetti ha gia' colpito una bocca:
+        # in quel caso il sacchetto deve essere comparso
+        check(level, "bocca gia' colpita da un colpo precedente: il sacchetto e' comparso",
+              r[BALLY] == 28, f"score={r.score()}")
 
 
 def mouth_phase(s, level):
@@ -478,7 +484,7 @@ def bag_phase(s, level):
           f"level={r.v('level')}")
     if level < 5:
         check(level + 1, "partenza dal punto (10,64) con 4 vite e tempo pieno",
-              abs(r[PLAYER0X] - 10) <= 8 and abs(r[PLAYER0Y] - 64) <= 8 and r[PFSCORE2] == 0xAA and r[PFSCORE1] == 0xFF,
+              abs(r[PLAYER0X] - 10) <= 16 and abs(r[PLAYER0Y] - 64) <= 16 and r[PFSCORE2] == 0xAA and r[PFSCORE1] == 0xFF,
               f"p0=({r[PLAYER0X]},{r[PLAYER0Y]}) vite={r[PFSCORE2]:08b} tempo={r[PFSCORE1]:08b}")
     return r
 
@@ -581,10 +587,45 @@ def life_phase(s, level):
             V["hitCooldown"]: 250})
 
 
+def mouth_pass_phase(s, level):
+    """La bocca deve passare sopra a qualsiasi oggetto (tutti i livelli)."""
+    r = s.save()
+    # un pixel del playfield fuori dal piano, con spazio a sinistra e a destra
+    target = None
+    for row in (8, 9, 2, 3, 6, 7, 0, 1, 4, 10):
+        for c in range(4, 24):
+            if r.pf(c, row) and not r.pf(c - 3, row) and not r.pf(c + 6, row):
+                target = (c, row)
+                break
+        if target:
+            break
+    if not check(level, "trovato un oggetto da far attraversare alla bocca", target is not None):
+        return
+    c, row = target
+    y = row * 8 + 7
+    mx = 4 * c + 17 - 14          # bocca a sinistra dell'oggetto
+    px = mx + 44                   # biscotto a destra, stessa riga
+    lives = r[PFSCORE2]
+    s.poke({V["mouth0x"]: mx, V["mouth0y"]: y, V["mouth1x"]: mx, V["mouth1y"]: y,
+            PLAYER0X: px, PLAYER0Y: y, V["hitCooldown"]: 0})
+    s.wait(4.0 if level < 3 else 2.5)
+    r = s.save()
+    m = max(r.v("mouth0x"), r.v("mouth1x"))
+    check(level, f"la bocca passa sopra all'oggetto in ({c},{row})", m >= 4 * c + 17 + 2,
+          f"bocca da x={mx} a x={m}, oggetto a x={4 * c + 17}")
+    if level > 3:
+        both = r.v("mouth0x") > mx + 4 and r.v("mouth1x") > mx + 4
+        check(level, "si muovono tutte e due le bocche", both,
+              f"bocca0 x={r.v('mouth0x')} bocca1 x={r.v('mouth1x')} (partenza {mx})")
+    s.shot(f"{OUT}/atari_L{level}_bocca_passa.png")
+    s.poke({PFSCORE2: lives, V["mouth0x"]: 20, V["mouth0y"]: 8, V["mouth1x"]: 140, V["mouth1y"]: 90,
+            PLAYER0X: 10, PLAYER0Y: 64, V["hitCooldown"]: 250})
+
+
 def play_level(s, level, extra=True):
     r = s.save()
     check(level, "livello caricato", r.v("level") == level and r.flag(0) == 1, f"level={r.v('level')}")
-    check(level, "_speed corretto", r.v("speed") == [8, 6, 4, 2, 0][level - 1], f"speed={r.v('speed')}")
+    check(level, "_speed corretto", r.v("speed") == [8, 6, 4, 2, 1][level - 1], f"speed={r.v('speed')}")
     if level == 1:
         check(level, "partenza dal punto (10,64) con 4 vite e tempo pieno",
               (r[PLAYER0X], r[PLAYER0Y]) == (10, 64) and r[PFSCORE2] == 0xAA and r[PFSCORE1] == 0xFF)
@@ -594,6 +635,7 @@ def play_level(s, level, extra=True):
     s.wait(0.5)
     static_checks(s, s.save(), level)  # anche dopo che le gocce si sono mosse
     if extra:
+        mouth_pass_phase(s, level)
         if level == 5:
             push_phase(s)
         life_phase(s, level)

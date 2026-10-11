@@ -32,6 +32,7 @@ Dura circa 25 minuti e salva gli screenshot di ogni livello nella cartella indic
   - le gocce: un solo pixel che scende, senza residui;
   - gli zuccherini: uno per sezione, compaiono uno alla volta e restano fermi, ognuno è fuori dagli oggetti indistruttibili o dentro uno distruttibile; tutti si raccolgono (il test buca gli oggetti a colpi di cioccolatino quando serve); nessuno viene contato due volte;
   - lo zuccherino dorato congela le bocche e lo zuccherino 1 dà la chiave;
+  - la bocca passa sopra a qualsiasi oggetto, in tutti i livelli;
   - il cioccolatino lanciato con direzione e fuoco premuti insieme colpisce la bocca: +10, una volta sola;
   - il sacchetto compare solo alle condizioni giuste, si raggiunge e porta al livello successivo;
   - la luce si spegne dopo 32 secondi e si riaccende sparando sul piano di lavoro;
