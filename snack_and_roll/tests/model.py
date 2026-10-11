@@ -118,13 +118,13 @@ class Grid:
             t5 = ((y - 1) & 255) // 8
             t6 = ((x - 18) & 255) // 4
             t3 = ((y - 4) & 255) // 8
-            if not (t6 < 34 and (pf(t6, t5) or pf(t6, t3))):
+            if not (t6 < 32 and (pf(t6, t5) or pf(t6, t3))):
                 out.append((x - 1, y))
         if x < 145:
             t5 = ((y - 1) & 255) // 8
             t6 = ((x - 9) & 255) // 4
             t3 = ((y - 4) & 255) // 8
-            if not (t6 < 34 and (pf(t6, t5) or pf(t6, t3))):
+            if not (t6 < 32 and (pf(t6, t5) or pf(t6, t3))):
                 out.append((x + 1, y))
         return out
 
@@ -141,18 +141,103 @@ class Grid:
 
 
 def sugar_xy(v):
-    return (v & 7) * 8 + 20, (v // 8) * 8 + 8
+    """Posizione dello zuccherino come nel BAS: colonne del playfield
+    1,5,9,...,29; righe 0-3 della tabella = righe 0-3 del playfield (sopra),
+    righe 4-7 = righe 6-9 (sotto). Lo zuccherino sta al centro della riga."""
+    r = v // 8
+    y = r * 8 + 4 + (16 if r > 3 else 0)
+    return (v & 7) * 16 + 22, y
 
 
-def sugar_ok(v, on, reach):
+def sugar_cell(v):
     mx, my = sugar_xy(v)
-    col, row = (mx - 18) // 4, (my - 1) // 8
-    if (col, row) in on or (col + 1, row) in on:
-        return False
+    return (mx - 18) // 4, (my - 1) // 8
+
+
+def sugar_reachable(v, reach):
+    mx, my = sugar_xy(v)
     return any((mx + dx, my + dy) in reach for dx, dy in SUGAR_HIT)
+
+
+# --- cioccolatino (missile0) e oggetti distruttibili ---------------------
+DESTRUCTIBLE_ROWS = (0, 2, 6, 8)   # BAS: solo la riga in cima di ogni gruppo
+
+
+def missile_hit(grid, px, py, d, level=1, push_col=None):
+    """Simula il volo del cioccolatino come nel BAS. Ritorna la cella
+    distrutta, 'light' se colpisce il piano, oppure None."""
+    if d == "up":
+        mx, my = px + 4, py - 5
+    elif d == "down":
+        mx, my = px + 4, py - 1
+    elif d == "left":
+        mx, my = px + 2, py - 3
+    else:
+        mx, my = px + 6, py - 3
+    for _ in range(100):
+        if d == "up":
+            my -= 2
+            t5, t6 = ((mx - 18) & 255) // 4, ((my - 1) & 255) // 8
+        elif d == "down":
+            my += 2
+            t5, t6 = ((mx - 18) & 255) // 4, (my & 255) // 8
+        elif d == "left":
+            mx -= 2
+            t5, t6 = ((mx - 18) & 255) // 4, ((my - 1) & 255) // 8
+        else:
+            mx += 2
+            t5, t6 = ((mx - 18) & 255) // 4, ((my - 1) & 255) // 8
+        mx &= 255
+        my &= 255
+        if my < 2 or my > 88 or mx > 145 or mx < 2:
+            return None
+        if t5 > 31:      # fuori dal playfield (a sinistra): nessun urto
+            continue
+        hit = grid.pf(t5, t6)
+        if t6 == 5 and hit:
+            return "light"
+        if not hit:
+            continue
+        if level > 4 and push_col is not None and t5 == push_col and t6 > 7:
+            return None
+        if t6 in DESTRUCTIBLE_ROWS:
+            return (t5, t6)
+        return None
+    return None
+
+
+def destroy_closure(cells, level=1, start=(10, 64), push_col=None):
+    """Tutti i pixel che il giocatore riesce a distruggere sparando
+    (ripetendo finche' nuovi buchi aprono nuovi passaggi)."""
+    cells = set(cells)
+    destroyed = set()
+    while True:
+        g = Grid(cells)
+        reach = g.reachable(start)
+        new = set()
+        for (x, y) in reach:
+            for d in ("up", "down", "left", "right"):
+                h = missile_hit(g, x, y, d, level, push_col)
+                if isinstance(h, tuple) and h in cells:
+                    new.add(h)
+        if not new:
+            return cells, destroyed, reach
+        cells -= new
+        destroyed |= new
 
 BALL_HIT = {(dx, dy) for dx in range(-7, -1) for dy in range(-12, 4)}
 
 
 def ball_ok(bx, by, reach):
     return any((bx + dx, by + dy) in reach for dx, dy in BALL_HIT)
+
+
+def lamp_cells(level, objects=OBJECTS):
+    cells = set()
+    bits = objects[level - 1][4]
+    for i in range(8):
+        if bits & (1 << i):
+            s = 3 + 7 * (i % 4)
+            up = 0 if i < 4 else 6
+            cells |= {(s, up), (s + 1, up), (s + 2, up), (s + 1, up + 1)}
+    return cells

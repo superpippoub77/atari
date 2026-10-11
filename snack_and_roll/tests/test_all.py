@@ -20,13 +20,14 @@ ROM = sys.argv[2]
 OUT = sys.argv[3]
 RESULTS = []
 
-from model import OBJECTS  # noqa
+from model import OBJECTS, DESTRUCTIBLE_ROWS, missile_hit, sugar_cell, sugar_xy, destroy_closure  # noqa
+import model  # noqa
 SUGAR = [
-    0, 10, 18, 24, 34, 50, 48, 56,
-    0, 8, 16, 24, 10, 48, 50, 58,
-    31, 8, 9, 24, 1, 56, 48, 61,
-    33, 8, 18, 30, 39, 56, 48, 58,
-    0, 8, 18, 31, 38, 32, 48, 56,
+    49, 9, 58, 10, 37, 29, 54, 22,
+    49, 17, 51, 19, 52, 20, 39, 22,
+    33, 25, 42, 18, 53, 21, 62, 14,
+    56, 8, 35, 27, 37, 21, 55, 14,
+    49, 9, 34, 10, 53, 29, 54, 23,
 ]
 
 
@@ -89,14 +90,14 @@ class Grid:
             t5 = ((y - 1) & 255) // 8
             t6 = ((x - 18) & 255) // 4
             t3 = ((y - 4) & 255) // 8
-            if not (t6 < 34 and (pf(t6, t5) or pf(t6, t3))):
+            if not (t6 < 32 and (pf(t6, t5) or pf(t6, t3))):
                 out.append((x - 1, y))
         # destra
         if x < 145:
             t5 = ((y - 1) & 255) // 8
             t6 = ((x - 9) & 255) // 4
             t3 = ((y - 4) & 255) // 8
-            if not (t6 < 34 and (pf(t6, t5) or pf(t6, t3))):
+            if not (t6 < 32 and (pf(t6, t5) or pf(t6, t3))):
                 out.append((x + 1, y))
         return out
 
@@ -226,12 +227,85 @@ def static_checks(s, r, level):
         check(level, "gocce: un solo pixel che scende, appeso", not bad, str(bad))
 
 
+def footprint(x, y):
+    cols = range(((x - 17) & 255) // 4, ((x - 10) & 255) // 4 + 1)
+    rws = range(((y - 4) & 255) // 8, ((y - 1) & 255) // 8 + 1)
+    return {(c, r) for c in cols for r in rws}
+
+
+def shoot_pixel(s, level, target):
+    """Va in una posizione da cui il cioccolatino colpisce target e spara."""
+    r = s.save()
+    g = Grid(r, level)
+    push = r.v("pushCol") if level >= 5 else None
+    start = (r[PLAYER0X], r[PLAYER0Y])
+    # BFS delle posizioni raggiungibili, in ordine di distanza
+    seen, q = {start}, deque([start])
+    spot = None
+    while q and spot is None:
+        p = q.popleft()
+        for d, key in (("up", "Up"), ("down", "Down"), ("left", "Left"), ("right", "Right")):
+            if missile_hit(g, p[0], p[1], d, level, push) == target:
+                spot = (p, key)
+                break
+        for n in g.moves(*p):
+            if n not in seen:
+                seen.add(n)
+                q.append(n)
+    if spot is None:
+        return False
+    walk_to(s, level, {spot[0]})
+    for _ in range(3):
+        r = s.save()
+        s.poke({V["flags"]: r.v("flags") & ~0xC0, V["hitCooldown"]: 250})
+        s.down(spot[1])
+        s.tap("space", 0.12)
+        s.up(spot[1])
+        s.wait(0.5)
+        r = s.save()
+        if not r.pf(*target):
+            return True
+    return False
+
+
+def open_way(s, level, goals, max_shots=14):
+    """Buca gli oggetti distruttibili che separano il biscotto dallo zuccherino."""
+    shots = 0
+    while shots < max_shots:
+        r = s.save()
+        g = Grid(r, level)
+        start = (r[PLAYER0X], r[PLAYER0Y])
+        if g.path(start, goals) is not None:
+            return True, shots
+        push = r.v("pushCol") if level >= 5 else None
+        final, destroyed, _ = destroy_closure(g.cells, level, start=start, push_col=push)
+        destroyed -= drop_cells(level)
+        fg = Grid(final)
+        fpath = fg.path(start, goals)
+        if fpath is None:
+            return False, shots
+        target = None
+        for p in fpath:
+            blocking = sorted(c for c in footprint(*p) if c in g.cells and c in destroyed)
+            if blocking:
+                target = blocking[0]
+                break
+        if target is None or not shoot_pixel(s, level, target):
+            return False, shots
+        shots += 1
+    return False, shots
+
+
 def sugar_phase(s, level):
     s.poke({V["hitCooldown"]: 250})
+    r0 = s.save()
+    secs = sorted(((sugar_cell(v)[0] - 1) // 8 + (4 if sugar_cell(v)[1] > 5 else 0))
+                  for v in SUGAR[(level - 1) * 8:level * 8])
+    check(level, "zuccherini distribuiti: uno per ogni sezione b0..b7", secs == list(range(8)), str(secs))
     for k in range(8):
         r = s.save()
         v = SUGAR[(level - 1) * 8 + k]
-        ex, ey = (v & 7) * 8 + 20, (v // 8) * 8 + 8
+        ex, ey = sugar_xy(v)
         # uno alla volta: posizione ferma su tre letture
         pos = []
         for _ in range(3):
@@ -240,15 +314,16 @@ def sugar_phase(s, level):
             s.wait(0.07)
         steady = all(p == (ex, ey, k) for p in pos)
         check(level, f"zuccherino {k}: visibile da solo e fermo in ({ex},{ey})", steady, str(pos))
-        col, row = (ex - 18) // 4, (ey - 1) // 8
-        check(level, f"zuccherino {k}: non dentro un oggetto", not r.pf(col, row) and not r.pf(col + 1, row),
-              f"cella pf ({col},{row})")
-        g = Grid(r, level)
+        col, row = sugar_cell(v)
+        inside = r0.pf(col, row)
+        lamps = model.lamp_cells(level)
+        ok_place = (not inside) or (row in DESTRUCTIBLE_ROWS and (col, row) not in lamps)
+        check(level, f"zuccherino {k}: " + ("dentro un oggetto distruttibile" if inside else "fuori dagli oggetti"),
+              ok_place, f"cella pf ({col},{row})")
         goals = sugar_goals(ex, ey)
-        p = g.path((r[PLAYER0X], r[PLAYER0Y]), goals)
-        check(level, f"zuccherino {k}: raggiungibile", p is not None)
-        if p is None:
-            # per proseguire il test lo raccogliamo d'ufficio
+        opened, shots = open_way(s, level, goals)
+        check(level, f"zuccherino {k}: raggiungibile" + (f" (bucati {shots} blocchi)" if shots else ""), opened)
+        if not opened:
             s.poke({V["choco_bits"]: r.v("choco_bits") | (1 << k), V["choco_count"]: k + 1})
             continue
         ok, r = walk_to(s, level, goals)
