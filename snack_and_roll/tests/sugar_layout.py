@@ -14,10 +14,23 @@ Uso:  python3 sugar_layout.py          -> stampa mappe e tabella per il BAS
 import sys
 
 import model
-from model import (OBJECTS, Grid, build, destroy_closure, drop_cells, lamp_cells, rows,
+from model import (OBJECTS, LEVELS, Grid, build, destroy_closure, drop_cells, lamp_cells, rows, wall_cols,
                    sugar_cell, sugar_reachable, sugar_xy, ball_ok)
 
-PUSH_LANE = {(c, r) for c in range(8, 17) for r in (8, 9, 10)}
+
+
+def push_lanes(level, base, objects=OBJECTS):
+    """Celle in cui un muro spingibile puo' arrivare (righe 8-10)."""
+    lane = set()
+    for c0 in wall_cols(level, objects):
+        for step in (-1, 1):
+            c = c0
+            while 0 <= c <= 31:
+                if c != c0 and any((c, r) in base for r in (8, 9, 10)):
+                    break
+                lane |= {(c, r) for r in (8, 9, 10)}
+                c += step
+    return lane
 
 
 def section_of(v):
@@ -29,7 +42,8 @@ def section_of(v):
 def analyse(level, objects=OBJECTS):
     base = build(level, objects)
     drops = drop_cells(level, objects)
-    push = model.PUSH_START if level >= 5 else None
+    push = wall_cols(level, objects) or None
+    lane = push_lanes(level, base, objects)
     # le gocce sono ostacoli che si muovono: non si contano come distruttibili
     final, destroyed, reach = destroy_closure(base | drops, level, push_col=push)
     final |= drops
@@ -39,7 +53,7 @@ def analyse(level, objects=OBJECTS):
     info = {}
     for v in range(64):
         cell = sugar_cell(v)
-        if cell in drops or (level >= 5 and cell in PUSH_LANE):
+        if cell in drops or cell in lane:
             kind = "no"          # colonna delle gocce o corsia del muro
         elif cell in lamps:
             kind = "no"          # dentro una lampada no
@@ -91,7 +105,7 @@ ORDER = [4, 0, 5, 1, 6, 2, 7, 3]
 
 def layout(objects=OBJECTS, verbose=True):
     table = []
-    for level in range(1, 6):
+    for level in range(1, LEVELS + 1):
         base, destroyed, reach, info = analyse(level, objects)
         picks = choose(level, info, base)
         seq = [picks[sec] for sec in ORDER]

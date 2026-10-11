@@ -2,13 +2,14 @@
 from collections import deque
 
 OBJECTS = [
-    [0b00000000, 0, 0b00000000, 0b00000000, 0b10101010, 0b01111010, 0b00100010, 18],
-    [0b01111111, 0, 0b00000000, 0b00000000, 0b10000000, 0b00000000, 0b00101011, 136],
-    [0b00000000, 0, 0b00110111, 0b00000000, 0b00000000, 0b00000000, 0b00001011, 18],
-    [0b00000000, 0, 0b10101010, 0b01010101, 0b00000000, 0b00000000, 0b00101011, 136],
-    [0b11000000, 0, 0b00000011, 0b00001100, 0b00010000, 0b00010000, 0b00101011, 18],
+    [0b00000000, 0b00000000, 0b00000000, 0b00000000, 0b10101010, 0b01111010, 0b00100010, 18],
+    [0b01111111, 0b00000000, 0b00000000, 0b00000000, 0b10000000, 0b00000000, 0b00101011, 136],
+    [0b00000000, 0b00000000, 0b00110111, 0b00000000, 0b00000000, 0b00000000, 0b00001011, 18],
+    [0b00000000, 0b00000000, 0b10101010, 0b01010101, 0b00000000, 0b00000000, 0b00101011, 136],
+    [0b00000000, 0b11100000, 0b00000000, 0b00000000, 0b00000000, 0b00000000, 0b00011011, 136],
+    [0b11000000, 0b00100000, 0b00000011, 0b00001100, 0b00010000, 0b00010000, 0b00101011, 18],
 ]
-PUSH_START = 12
+LEVELS = len(OBJECTS)
 
 # collisione biscotto/zuccherino misurata in Stella (dx, dy rispetto allo zuccherino)
 SUGAR_HIT = {(dx, dy) for dy in (1, 2, 3) for dx in range(-7, -1)} | {(dx, 0) for dx in (-6, -5, -4, -3)}
@@ -68,9 +69,15 @@ def build(level, objects=OBJECTS):
             on.add((s + 4, down + 2))
             if upper:
                 hline(s, 5, s + 4)
-    if level >= 5:
-        vline(PUSH_START, 8, 10)
+    for c in wall_cols(level, objects):
+        vline(c, 8, 10)
     return on
+
+
+def wall_cols(level, objects=OBJECTS):
+    """Muri spingibili: colonna 1 di objects, bit 4-7 -> colonne 5, 12, 19, 26."""
+    bits = objects[level - 1][1] >> 4
+    return [3 + 7 * k + 2 for k in range(4) if bits & (1 << k)][:3]
 
 
 def drop_cells(level, objects=OBJECTS):
@@ -215,7 +222,7 @@ def missile_hit(grid, px, py, d, level=1, push_col=None):
             return "light"
         if not hit:
             continue
-        if level > 4 and push_col is not None and t5 == push_col and t6 > 7:
+        if push_col is not None and t6 > 7 and t5 in (push_col if isinstance(push_col, (list, set, tuple)) else [push_col]):
             return None
         if t6 in DESTRUCTIBLE_ROWS:
             return (t5, t6)
