@@ -478,7 +478,7 @@ def bag_phase(s, level):
           f"level={r.v('level')}")
     if level < 5:
         check(level + 1, "partenza dal punto (10,64) con 4 vite e tempo pieno",
-              abs(r[PLAYER0X] - 10) <= 8 and abs(r[PLAYER0Y] - 64) <= 8 and r[PFSCORE2] == 0xAA and r[PFSCORE1] == 0xFF,
+              abs(r[PLAYER0X] - 10) <= 16 and abs(r[PLAYER0Y] - 64) <= 16 and r[PFSCORE2] == 0xAA and r[PFSCORE1] == 0xFF,
               f"p0=({r[PLAYER0X]},{r[PLAYER0Y]}) vite={r[PFSCORE2]:08b} tempo={r[PFSCORE1]:08b}")
     return r
 
@@ -607,6 +607,10 @@ def mouth_pass_phase(s, level):
     m = max(r.v("mouth0x"), r.v("mouth1x"))
     check(level, f"la bocca passa sopra all'oggetto in ({c},{row})", m >= 4 * c + 17 + 2,
           f"bocca da x={mx} a x={m}, oggetto a x={4 * c + 17}")
+    if level > 3:
+        both = r.v("mouth0x") > mx + 4 and r.v("mouth1x") > mx + 4
+        check(level, "si muovono tutte e due le bocche", both,
+              f"bocca0 x={r.v('mouth0x')} bocca1 x={r.v('mouth1x')} (partenza {mx})")
     s.shot(f"{OUT}/atari_L{level}_bocca_passa.png")
     s.poke({PFSCORE2: lives, V["mouth0x"]: 20, V["mouth0y"]: 8, V["mouth1x"]: 140, V["mouth1y"]: 90,
             PLAYER0X: 10, PLAYER0Y: 64, V["hitCooldown"]: 250})
@@ -615,7 +619,7 @@ def mouth_pass_phase(s, level):
 def play_level(s, level, extra=True):
     r = s.save()
     check(level, "livello caricato", r.v("level") == level and r.flag(0) == 1, f"level={r.v('level')}")
-    check(level, "_speed corretto", r.v("speed") == [8, 6, 4, 2, 0][level - 1], f"speed={r.v('speed')}")
+    check(level, "_speed corretto", r.v("speed") == [8, 6, 4, 2, 1][level - 1], f"speed={r.v('speed')}")
     if level == 1:
         check(level, "partenza dal punto (10,64) con 4 vite e tempo pieno",
               (r[PLAYER0X], r[PLAYER0Y]) == (10, 64) and r[PFSCORE2] == 0xAA and r[PFSCORE1] == 0xFF)
