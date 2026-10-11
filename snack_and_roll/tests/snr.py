@@ -25,6 +25,8 @@ V = {
     "sugarIndex": A["i"], "flags": A["k"], "mouth1x": A["l"], "music": A["m"],
     "mouth1y": A["o"], "dir": A["p"], "prevSugarBit": A["q"], "pushCol": A["s"],
     "choco_count": A["t"], "ballx_var": A["u"], "hitCooldown": A["v"], "hasKey": A["z"],
+    "pushCol2": A["w"], "pushCol3": A["x"], "mouth0wait": A["j"], "mouth1wait": A["r"],
+    "mouthTick": A["n"], "lap": A["y"],
 }
 
 

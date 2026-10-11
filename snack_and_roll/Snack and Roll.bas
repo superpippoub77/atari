@@ -31,10 +31,11 @@
    const _P1_color = $48 ;Rosso (hue4 in PAL, luminosità media)
    const frame_limit = 54
 
-   ; muro spingibile (livello 5): colonna di partenza e corsia libera
-   const _Push_Start = 12
-   const _Push_Min = 8
-   const _Push_Max = 16
+   ; numero di livelli: dopo l'ultimo si riparte dal primo con le bocche
+   ; piu' veloci (un "giro" in piu')
+   const _Levels = 6
+   ; frame di attesa prima che una bocca uccisa ricompaia (circa 4 secondi)
+   const _Mouth_Respawn = 200
 
    ;*************************************************************************************************************************
    ; VARIABILI
@@ -108,6 +109,20 @@
    dim _Bit5_M0_Dir_Down = p
    dim _Bit6_M0_Dir_Left = p
    dim _Bit7_M0_Dir_Right = p
+
+   ; muri spingibili (fino a 3 per livello, 255 = nessuno). _pushCol2/3 e i
+   ; contatori qui sotto usano variabili che servono solo durante il
+   ; caricamento del livello (w, x, j, r, n): vengono impostati dopo.
+   dim _pushCol2 = w
+   dim _pushCol3 = x
+   ; bocche uccise: frame che mancano alla ricomparsa (0 = bocca viva)
+   dim _mouth0wait = j
+   dim _mouth1wait = r
+   ; frame trascorsi dall'ultimo passo delle bocche
+   dim _mouthTick = n
+   ; giro (0 = primo passaggio dei livelli). Durante il titolo la stessa
+   ; variabile serve alla modalita' attract (_attractDir).
+   dim _lap = y
 
    dim _music_index = m
    dim _sugarIndex = i
@@ -225,16 +240,7 @@ __main_loop
    if _frame_counter > frame_limit then _frame_counter = 0 : _seconds_counter = _seconds_counter + 1
 
    ;F2 (reset) inizia il gioco
-   if switchreset && !_b0_enableStart{0} then _b0_enableStart{0} = 1 : _level = _choco_count+1 : _speed = 8 : score = 0 : goto __handle_level_select
-   goto __skip_level_select
-
-__handle_level_select
-   temp1 = (_level-1)*2
-   ; livello 5: _speed = 1 (con 0 le bocche si muovevano una volta al secondo)
-   _speed = 1
-   if _level<5 then _speed=8-temp1
-   goto __skip_to_change
-__skip_level_select
+   if switchreset && !_b0_enableStart{0} then _b0_enableStart{0} = 1 : _level = _choco_count+1 : _lap = 0 : score = 0 : goto __skip_to_change
 
    ;!!!!!!!!!!!!!!!!!!! START !!!!!!!!!!!!!!!!!!!
    ;*************************************************************************************************************************
@@ -250,18 +256,18 @@ __skip_level_select
    goto __skip_attract
 
 __attract_mode
-   if !(_frame_counter&3) then _attractTimer = _attractTimer + 1
-   if _attractTimer >= 55 && _attractTimer <= 70 then goto __attract_paused
-   if !_attractDir && !(_frame_counter&3) then player0x = player0x + 1
-   if _attractDir && !(_frame_counter&3) then player0x = player0x - 1
-   if player0x > 140 then _attractDir = 1
-   if player0x < 10 then _attractDir = 0 : _attractTimer = 0
-__attract_paused
-   player0y=53 : player1y=53 : player1x = player0x - 15 : COLUP1=_P1_color : COLUP0=_P0_color
+   ; scorrimento continuo: il biscotto entra sempre da destra e attraversa
+   ; lo schermo verso sinistra inseguito dalla bocca, senza pause e senza
+   ; tornare indietro; uscito a sinistra rientra da destra
+   if !(_frame_counter&1) then player0x = player0x - 1
+   if player0x < 2 || player0x > 150 then player0x = 150
+   player0y=53 : player1y=53 : player1x = player0x + 15 : COLUP1=_P1_color : COLUP0=_P0_color
+   ; la bocca, ancora fuori dallo schermo a destra, non si disegna
+   if player1x > 152 then player1y = 200
 
-   ; selettore di livello iniziale con lo switch Select (5 scelte),
+   ; selettore di livello iniziale con lo switch Select (6 scelte),
    ; indicatore a segmenti nella riga libera del titolo
-   if switchselect && !_b1_prevSelect{1} then _choco_count = _choco_count + 1 : if _choco_count = 5 then _choco_count = 0
+   if switchselect && !_b1_prevSelect{1} then _choco_count = _choco_count + 1 : if _choco_count = _Levels then _choco_count = 0
    _b1_prevSelect{1} = 0
    if switchselect then _b1_prevSelect{1} = 1
    pfhline 1 6 9 off
@@ -277,31 +283,57 @@ __skip_attract
    ;_________________________________________________________________________________________________________________________
    ; Dal livello 4 le bocche sono 2. Un solo player1 fisico viene
    ; riposizionato ad ogni frame sulla bocca virtuale successiva.
+   ; Le bocche fanno un passo ogni _speed frame (tabella mouthspeed, piu'
+   ; veloce a ogni giro). Una bocca uccisa sparisce e ricompare nel suo
+   ; angolo dopo _Mouth_Respawn frame.
    ;*************************************************************************************************************************
    temp1 = 1
    if _level > 3 then temp1 = 2
 
    if _hitCooldown then _hitCooldown = _hitCooldown - 1
 
+   ; conto alla rovescia delle bocche uccise
+   if !_mouth0wait then goto __mouth0_alive
+   _mouth0wait = _mouth0wait - 1
+   if !_mouth0wait then _mouth0x = 20 : _mouth0y = 8
+__mouth0_alive
+   if !_mouth1wait then goto __mouth1_alive
+   _mouth1wait = _mouth1wait - 1
+   if !_mouth1wait then _mouth1x = 140 : _mouth1y = 90
+__mouth1_alive
+
    _mouthIndex = _mouthIndex + 1
    if _mouthIndex >= temp1 then _mouthIndex = 0
 
-   ; con due bocche si conta a coppie di frame (una per bocca), altrimenti
-   ; si muoverebbe sempre la stessa bocca e l'altra resterebbe ferma
-   temp2 = _frame_counter
-   if temp1 = 2 then temp2 = _frame_counter / 2
-   if !_hitCooldown && !(temp2 & (_speed-1)) then gosub __move_current_mouth
+   ; passo delle bocche (tutte insieme) ogni _speed frame
+   if _hitCooldown then goto __mouth_still
+   _mouthTick = _mouthTick + 1
+   if _mouthTick < _speed then goto __mouth_still
+   _mouthTick = 0
+   temp6 = 0
+   if !_mouth0wait then gosub __move_mouth
+   temp6 = 1
+   if temp1 = 2 && !_mouth1wait then gosub __move_mouth
+__mouth_still
 
-   if !_mouthIndex then player1x = _mouth0x : player1y = _mouth0y
-   if _mouthIndex then player1x = _mouth1x : player1y = _mouth1y
+   ; una bocca uccisa non si disegna (player1 fuori dallo schermo)
+   if _mouthIndex then goto __show_mouth1
+   player1x = _mouth0x : player1y = _mouth0y
+   if _mouth0wait then player1y = 200
+   goto __mouth_shown
+__show_mouth1
+   player1x = _mouth1x : player1y = _mouth1y
+   if _mouth1wait then player1y = 200
+__mouth_shown
 
    COLUP1 = mouthcolors[_mouthIndex]
 
    goto __skip_bocche
 
-__move_current_mouth
+   ; temp6 = bocca da muovere (0 o 1)
+__move_mouth
    temp3 = _mouth0x : temp4 = _mouth0y
-   if _mouthIndex then temp3=_mouth1x : temp4=_mouth1y
+   if temp6 then temp3=_mouth1x : temp4=_mouth1y
 
    ; insegue il biscotto passando sopra a qualsiasi oggetto (in tutti i
    ; livelli le bocche non vengono mai fermate dal playfield)
@@ -310,8 +342,8 @@ __move_current_mouth
    if temp4 < player0y then temp4 = temp4 + 1
    if temp4 > player0y then temp4 = temp4 - 1
 
-   if !_mouthIndex then _mouth0x=temp3 : _mouth0y=temp4
-   if _mouthIndex then _mouth1x=temp3 : _mouth1y=temp4
+   if !temp6 then _mouth0x=temp3 : _mouth0y=temp4
+   if temp6 then _mouth1x=temp3 : _mouth1y=temp4
    return
 __skip_bocche
 
@@ -455,7 +487,7 @@ end
    ; ---- 2 ----
    if !pfscore1 then goto __decrease_health_bar
    ; ---- 3 ----
-   if !pfscore2 || _level > 5 then goto __game_start
+   if !pfscore2 then goto __game_start
 
    ; direzione del biscotto = direzione della levetta, anche se davanti
    ; c'e' un ostacolo. Prima veniva azzerata e reimpostata solo dal
@@ -517,7 +549,8 @@ __Skip_Fire
    if !pfread(temp5,temp6) then goto __skip_missile
 
    ; il muro spingibile non si distrugge: ferma solo il cioccolatino
-   if _level > 4 && temp5 = _pushCol && temp6 > 7 then goto __delete_missile
+   if temp6 > 7 then if temp5 = _pushCol || temp5 = _pushCol2 then goto __delete_missile
+   if temp6 > 7 && temp5 = _pushCol3 then goto __delete_missile
 
    ; --- regola semplificata: solo la riga "in cima" di ogni gruppo è
    ; distruttibile (righe 0 e 2 sopra il piano, 6 e 8 sotto) ---
@@ -621,10 +654,13 @@ __skip_down
    temp5 = (player0y-1)/8 : temp6 = (player0x-18)/4
    temp3 = (player0y-4)/8
 
-   ; MURO SPINGIBILE (livello 5): il biscotto lo spinge verso sinistra
-   if _level < 5 then goto __no_push_left
-   if temp6 <> _pushCol then goto __no_push_left
+   ; MURI SPINGIBILI: il biscotto li spinge verso sinistra
    if temp5 < 8 then goto __no_push_left
+   temp2 = 255
+   if temp6 = _pushCol then temp2 = 0
+   if temp6 = _pushCol2 then temp2 = 1
+   if temp6 = _pushCol3 then temp2 = 2
+   if temp2 = 255 then goto __no_push_left
    temp4 = 255 : gosub __push_wall bank2
    goto __skip_left
 __no_push_left
@@ -642,10 +678,13 @@ __skip_left
    temp5 = (player0y-1)/8 : temp6 = (player0x-9)/4
    temp3 = (player0y-4)/8
 
-   ; MURO SPINGIBILE (livello 5): il biscotto lo spinge verso destra
-   if _level < 5 then goto __no_push_right
-   if temp6 <> _pushCol then goto __no_push_right
+   ; MURI SPINGIBILI: il biscotto li spinge verso destra
    if temp5 < 8 then goto __no_push_right
+   temp2 = 255
+   if temp6 = _pushCol then temp2 = 0
+   if temp6 = _pushCol2 then temp2 = 1
+   if temp6 = _pushCol3 then temp2 = 2
+   if temp2 = 255 then goto __no_push_right
    temp4 = 1 : gosub __push_wall bank2
    goto __skip_right
 __no_push_right
@@ -697,7 +736,7 @@ __destroy_mouth
    ; la collisione si riferisce alla bocca disegnata nel frame precedente:
    ; con due bocche e' l'altra rispetto a _mouthIndex
    if _level > 3 then _mouthIndex = _mouthIndex ^ 1
-   gosub __reset_mouth_pos
+   gosub __kill_mouth
    goto __done
 
 __decrease_health_bar
@@ -707,9 +746,10 @@ __decrease_health_bar
   if !pfscore2 then goto __game_start
   goto __done
 
-__reset_mouth_pos
-   if !_mouthIndex then _mouth0x=20 : _mouth0y=8
-   if _mouthIndex then _mouth1x=140 : _mouth1y=90
+   ; la bocca _mouthIndex sparisce e ricomparira' dopo _Mouth_Respawn frame
+__kill_mouth
+   if !_mouthIndex then _mouth0wait = _Mouth_Respawn : _mouth0y = 200
+   if _mouthIndex then _mouth1wait = _Mouth_Respawn : _mouth1y = 200
    return
 
 __decrease_timer_bar
@@ -718,9 +758,8 @@ __decrease_timer_bar
 
 __change_level
    _level=_level+1
-   if _speed<2 then goto __skip_to_change
-   _speed=_speed-2
-   if !_speed then _speed = 1
+   ; dopo l'ultimo livello si riparte dal primo, un giro piu' veloce
+   if _level > _Levels then _level = 1 : _lap = _lap + 1
 
 __skip_to_change
    pfscorecolor = $08
@@ -734,15 +773,22 @@ __skip_to_change
    _b7_gameMissile0Moving{7}=0
    _choco_count=0
    _choco_bits=0 : _prevSugarBit=0 : _hasKey=0
-   _pushCol=_Push_Start
-   _mouth0x=20 : _mouth0y=8 : _mouth1x=140 : _mouth1y=90
-   ; ogni livello parte con la luce accesa, tranne il 5 che parte al buio
+   ; ogni livello parte con la luce accesa, tranne l'ultimo che parte al buio
    _b4_enableLight{4}=1
-   if _level=5 then _b4_enableLight{4}=0
+   if _level=_Levels then _b4_enableLight{4}=0
    _seconds_counter = 0
+   ; velocita' delle bocche: frame per passo dalla tabella, -2 per ogni
+   ; giro gia' completato (minimo 2)
+   temp1 = mouthspeed[_level]
+   temp2 = _lap * 2
+   temp3 = temp1 - 2
+   _speed = 2
+   if temp2 < temp3 then _speed = temp1 - temp2
    pfclear
-   ; oltre l'ultimo livello non c'e' niente da caricare (si torna al titolo)
-   if _level < 6 then gosub __load_level bank2
+   gosub __load_level bank2
+   ; le variabili usate dal caricamento tornano a fare da contatori
+   _mouth0x=20 : _mouth0y=8 : _mouth1x=140 : _mouth1y=90
+   _mouth0wait = 0 : _mouth1wait = 0 : _mouthTick = 0
 
 __done
 
@@ -757,6 +803,12 @@ __done
    ;*************************************************************************************************************************
    data mouthcolors
    $48, $6A
+end
+
+   ; frame tra un passo e l'altro delle bocche, per livello (il primo
+   ; valore non si usa: i livelli partono da 1)
+   data mouthspeed
+   0, 12, 10, 9, 8, 8, 7
 end
 
    ;*************************************************************************************************************************
@@ -781,7 +833,8 @@ end
    49, 17, 51, 19, 52, 20, 39, 22,
    33, 25, 42, 18, 53, 21, 62, 14,
    56, 8, 35, 27, 37, 21, 55, 14,
-   49, 9, 34, 10, 53, 29, 54, 23,
+   33, 9, 34, 10, 37, 29, 46, 22,
+   40, 16, 43, 11, 52, 13, 54, 31,
 end
 
    data jingle
@@ -879,10 +932,25 @@ __skip_tavoli
    if !_playfield_up && _current_bit_object = 16 then _playfield_section = 3 : _playfield_up = 6 : _playfield_down = 8
    if _current_bit_object then goto __loop_objects
 
-   ; --- muro spingibile (livello 5): poggia sul pavimento, righe 8-10 ---
-   if _level > 4 then pfvline _pushCol 8 10 on
-
-   return otherbank
+   ; --- MURI SPINGIBILI (colonna 1 di objects, sezioni basse b4-b7) ---
+   ; un muro per bit acceso, nella colonna sezione+2 (5, 12, 19, 26),
+   ; poggiato sul pavimento (righe 8-10). Al massimo 3 muri.
+   _pushCol = 255 : _pushCol2 = 255 : _pushCol3 = 255
+   temp2 = _current_object_level + 1
+   temp4 = objects[temp2]
+   temp4 = temp4 / 16
+   temp5 = 5
+__wall_loop
+   if !temp4 then return otherbank
+   if !(temp4 & 1) then goto __wall_next
+   pfvline temp5 8 10 on
+   if _pushCol = 255 then _pushCol = temp5 : goto __wall_next
+   if _pushCol2 = 255 then _pushCol2 = temp5 : goto __wall_next
+   _pushCol3 = temp5
+__wall_next
+   temp4 = temp4 / 2
+   temp5 = temp5 + 7
+   goto __wall_loop
 
    ;*************************************************************************************************************************
    ; GOCCE (colonna 3 di "objects") - chiamata ad ogni frame
@@ -915,25 +983,62 @@ __drop_next
    goto __drop_loop
 
    ;*************************************************************************************************************************
-   ; MURO SPINGIBILE (livello 5)
+   ; MURI SPINGIBILI
    ;_________________________________________________________________________________________________________________________
-   ; temp4 = direzione (1 = destra, 255 = sinistra)
-   ; Il muro (colonna _pushCol, righe 8-10) si sposta di una colonna ogni
-   ; 8 frame mentre il biscotto lo spinge, se la colonna successiva e'
-   ; libera e resta nella corsia _Push_Min.._Push_Max. Spingere non
-   ; attiva lo slow motion.
+   ; temp2 = quale muro (0, 1, 2)   temp4 = direzione (1 = destra, 255 = sinistra)
+   ; Il muro (righe 8-10) si sposta di una colonna ogni 8 frame mentre il
+   ; biscotto lo spinge, se la colonna successiva e' libera e dentro lo
+   ; schermo. Spingere non attiva lo slow motion.
+   ; Se nella nuova colonna c'e' una bocca, il muro la schiaccia: +10,
+   ; conta come bocca colpita e la bocca ricompare dopo un po'.
+   ; (pfvline/pfread usano temp1-temp3: l'indice del muro va in temp6,
+   ; la vecchia colonna in temp4)
    ;*************************************************************************************************************************
 __push_wall
    if _frame_counter & 7 then return otherbank
-   temp5 = _pushCol + temp4
-   if temp5 < _Push_Min || temp5 > _Push_Max then return otherbank
+   temp6 = temp2
+   temp1 = _pushCol
+   if temp6 = 1 then temp1 = _pushCol2
+   if temp6 = 2 then temp1 = _pushCol3
+   temp5 = temp1 + temp4
+   if temp5 > 31 then return otherbank
+   ; pfread/pfvline usano temp1-temp3: la vecchia colonna va in temp4
+   temp4 = temp1
    if pfread(temp5, 8) then return otherbank
    if pfread(temp5, 9) then return otherbank
    if pfread(temp5, 10) then return otherbank
-   pfvline _pushCol 8 10 off
-   _pushCol = temp5
-   pfvline _pushCol 8 10 on
+   pfvline temp4 8 10 off
+   pfvline temp5 8 10 on
+   if temp6 = 0 then _pushCol = temp5
+   if temp6 = 1 then _pushCol2 = temp5
+   if temp6 = 2 then _pushCol3 = temp5
    AUDV1 = 6 : AUDF1 = 28
+
+   ; --- bocche schiacciate dal muro ---
+   ; il muro occupa i pixel x da temp4 a temp4+3, righe 8-10 (y >= 65)
+   temp4 = temp5 * 4
+   temp4 = temp4 + 17
+   ; larghezza della bocca: 8 pixel, 16 dal livello 4 (NUSIZ1 doppio)
+   temp3 = 7
+   if _level > 3 then temp3 = 15
+   if _mouth0wait then goto __crush_mouth1
+   if _mouth0y < 65 then goto __crush_mouth1
+   temp2 = temp4 + 3
+   if _mouth0x > temp2 then goto __crush_mouth1
+   temp2 = _mouth0x + temp3
+   if temp2 < temp4 then goto __crush_mouth1
+   _mouth0wait = _Mouth_Respawn : _mouth0y = 200
+   score = score + 10 : _b5_enablePalyer1{5} = 0 : AUDV1 = 12 : AUDF1 = 4
+__crush_mouth1
+   if _level < 4 then return otherbank
+   if _mouth1wait then return otherbank
+   if _mouth1y < 65 then return otherbank
+   temp2 = temp4 + 3
+   if _mouth1x > temp2 then return otherbank
+   temp2 = _mouth1x + temp3
+   if temp2 < temp4 then return otherbank
+   _mouth1wait = _Mouth_Respawn : _mouth1y = 200
+   score = score + 10 : _b5_enablePalyer1{5} = 0 : AUDV1 = 12 : AUDF1 = 4
    return otherbank
 
    ;*************************************************************************************************************************
@@ -943,14 +1048,15 @@ __push_wall
    ;----|----|----|---
    ; b4 | b5 | b6 | b7
    ;_________________________________________________________________________________________________________________________
-   ;0.TAZZE 1.(inutilizzato, ex-COLTELLI) 2.CIOCCOLATO 3.GOCCE 4.LAMPADE 5.TAVOLI+SEDIA 6.PIANO 7.ballx
-   ; LIVELLI (5)
+   ;0.TAZZE 1.MURI SPINGIBILI (ex-COLTELLI, solo b4-b7) 2.CIOCCOLATO 3.GOCCE 4.LAMPADE 5.TAVOLI+SEDIA 6.PIANO 7.ballx
+   ; LIVELLI (6)
    ; Livello 1: lampade basse in b5 e b7 (appese al piano).
    ; Livello 2: una lampada bassa in b7; nelle sezioni con le tazze una
    ; lampada chiuderebbe la colonna dal piano al pavimento e taglierebbe
    ; in due la parte bassa (in b4 chiuderebbe il biscotto alla partenza).
-   ; Livello 5: un solo tavolo in basso (sezione b4) per lasciare la
-   ; corsia libera (colonne 8-16) al muro spingibile.
+   ; Livello 5: solo muri spingibili (3, nelle sezioni b5, b6, b7).
+   ; Livello 6: un solo tavolo in basso (sezione b4) per lasciare la
+   ; corsia libera (colonne 8-16) al muro spingibile in b5.
 
    data objects
 
@@ -958,7 +1064,8 @@ __push_wall
    %01111111, %00000000, %00000000, %00000000, %10000000, %00000000, %00101011, 136,
    %00000000, %00000000, %00110111, %00000000, %00000000, %00000000, %00001011, 18,
    %00000000, %00000000, %10101010, %01010101, %00000000, %00000000, %00101011, 136,
-   %11000000, %00000000, %00000011, %00001100, %00010000, %00010000, %00101011, 18,
+   %00000000, %11100000, %00000000, %00000000, %00000000, %00000000, %00011011, 136,
+   %11000000, %00100000, %00000011, %00001100, %00010000, %00010000, %00101011, 18,
 end
 
    ;*************************************************************************************************************************

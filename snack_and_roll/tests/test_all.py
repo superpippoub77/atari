@@ -27,7 +27,8 @@ SUGAR = [
     49, 17, 51, 19, 52, 20, 39, 22,
     33, 25, 42, 18, 53, 21, 62, 14,
     56, 8, 35, 27, 37, 21, 55, 14,
-    49, 9, 34, 10, 53, 29, 54, 23,
+    33, 9, 34, 10, 37, 29, 46, 22,
+    40, 16, 43, 11, 52, 13, 54, 31,
 ]
 
 
@@ -40,6 +41,15 @@ def check(level, name, ok, detail=""):
 # ---------------------------------------------------------------------
 # modello: drop e muro come ostacoli, movimento identico al BAS
 # ---------------------------------------------------------------------
+MOUTH_SPEED = [12, 10, 9, 8, 8, 7]   # BAS: data mouthspeed (frame per passo)
+LEVELS = len(OBJECTS)
+
+
+def walls(ram):
+    """Colonne dei muri spingibili presenti (255 = nessuno)."""
+    return [c for c in (ram.v("pushCol"), ram.v("pushCol2"), ram.v("pushCol3")) if c != 255]
+
+
 def drop_cells(level):
     cells = set()
     bits = OBJECTS[level - 1][3]
@@ -57,8 +67,7 @@ class Grid:
         self.level = level
         self.cells = {(c, r) for r in range(12) for c in range(32) if ram.pf(c, r)}
         self.cells |= drop_cells(level)
-        if level >= 5:
-            pc = ram.v("pushCol")
+        for pc in walls(ram):
             self.cells |= {(pc, 8), (pc, 9), (pc, 10)}
 
     def pf(self, c, r):
@@ -245,7 +254,7 @@ def shoot_pixel(s, level, target):
     """Va in una posizione da cui il cioccolatino colpisce target e spara."""
     r = s.save()
     g = Grid(r, level)
-    push = r.v("pushCol") if level >= 5 else None
+    push = walls(r) or None
     start = (r[PLAYER0X], r[PLAYER0Y])
     steps = {"up": (0, -1), "down": (0, 1), "left": (-1, 0), "right": (1, 0)}
     keys = {"up": "Up", "down": "Down", "left": "Left", "right": "Right"}
@@ -327,7 +336,7 @@ def open_way(s, level, goals, max_shots=30):
         start = (r[PLAYER0X], r[PLAYER0Y])
         if g.path(start, goals) is not None:
             return True, shots
-        push = r.v("pushCol") if level >= 5 else None
+        push = walls(r) or None
         final, destroyed, _ = destroy_closure(g.cells, level, start=start, push_col=push)
         destroyed -= drop_cells(level)
         fpath = cheapest_path(model.Grid(final), start, goals, g.cells & destroyed)
@@ -449,8 +458,22 @@ def mouth_phase(s, level):
     check(level, "cioccolatino colpisce la bocca: +10 (una volta sola) e bocca colpita",
           r.flag(5) == 0 and r.score() == score0 + 10,
           f"flag5={r.flag(5)} score {score0}->{r.score()} tentativi={attempts}")
-    check(level, "la bocca colpita torna nel suo angolo", (r.v("mouth0x"), r.v("mouth0y")) == (20, 8) or
-          (r.v("mouth1x"), r.v("mouth1y")) == (140, 90))
+    dead = [i for i in (0, 1) if r.v(f"mouth{i}wait") > 0]
+    check(level, "la bocca colpita sparisce (attesa prima di ricomparire)",
+          len(dead) == 1 and r.v(f"mouth{dead[0]}y") == 200,
+          f"attese={r.v('mouth0wait')},{r.v('mouth1wait')}")
+    if dead:
+        i = dead[0]
+        t0 = time.time()
+        while time.time() - t0 < 9 and r.v(f"mouth{i}wait") > 0:
+            s.wait(0.25)
+            r = s.save()
+        elapsed = time.time() - t0
+        corner = (20, 8) if i == 0 else (140, 90)
+        check(level, "dopo circa 4 secondi la bocca ricompare nel suo angolo",
+              r.v(f"mouth{i}wait") == 0 and 2.5 <= elapsed <= 7 and
+              abs(r.v(f"mouth{i}x") - corner[0]) <= 3 and abs(r.v(f"mouth{i}y") - corner[1]) <= 3,
+              f"dopo {elapsed:.1f} s in ({r.v(f'mouth{i}x')},{r.v(f'mouth{i}y')})")
     s.wait(0.3)
     r = s.save()
     exp_bx = OBJECTS[level - 1][7]
@@ -460,7 +483,8 @@ def mouth_phase(s, level):
 
 def bag_phase(s, level):
     r = s.save()
-    if r.v("level") == level + 1 or (level == 5 and r.flag(0) == 0):
+    nxt = level % LEVELS + 1
+    if r.v("level") == nxt:
         # il biscotto e' gia' passato sul sacchetto nella fase precedente
         check(level, "sacchetto raggiungibile", True, "preso durante la fase precedente")
         check(level, "toccando il sacchetto si passa al livello successivo", True, f"level={r.v('level')}")
@@ -480,54 +504,82 @@ def bag_phase(s, level):
         # avvicinamento fine finche' non tocca il sacchetto
         s.hold(["Up"], 0.04)
         r = s.save()
-    check(level, "toccando il sacchetto si passa al livello successivo", r.v("level") == level + 1,
+    check(level, "toccando il sacchetto si passa al livello successivo", r.v("level") == nxt,
           f"level={r.v('level')}")
-    if level < 5:
-        check(level + 1, "partenza dal punto (10,64) con 4 vite e tempo pieno",
+    if True:
+        check(nxt, "partenza dal punto (10,64) con 4 vite e tempo pieno",
               abs(r[PLAYER0X] - 10) <= 16 and abs(r[PLAYER0Y] - 64) <= 16 and r[PFSCORE2] == 0xAA and r[PFSCORE1] == 0xFF,
               f"p0=({r[PLAYER0X]},{r[PLAYER0Y]}) vite={r[PFSCORE2]:08b} tempo={r[PFSCORE1]:08b}")
     return r
 
 
-def push_phase(s):
-    level = 5
+def push_phase(s, level):
     r = s.save()
-    pc = r.v("pushCol")
-    check(level, "muro spingibile disegnato (colonna 12, righe 8-10)",
-          pc == 12 and all(r.pf(12, rr) for rr in (8, 9, 10)), f"pushCol={pc}")
-    # biscotto a sinistra del muro, sul pavimento, poi Destra tenuto premuto
-    s.poke({PLAYER0X: 4 * pc + 9 - 3, PLAYER0Y: 84, V["hitCooldown"]: 250})
-    s.hold(["Right"], 3.0)
-    r = s.save()
-    pc2 = r.v("pushCol")
-    ok_cols = all(r.pf(pc2, rr) for rr in (8, 9, 10)) and not any(r.pf(pc, rr) for rr in (8, 9, 10))
-    check(level, "spingendo a destra il muro si sposta", pc2 > pc and ok_cols, f"pushCol {pc}->{pc2}")
-    check(level, "spingere non attiva lo slow motion", r.flag(6) == 0)
-    s.hold(["Right"], 3.0)
-    r = s.save()
-    check(level, "il muro si ferma a fine corsia (colonna 16, prima della tazza)", r.v("pushCol") == 16,
-          f"pushCol={r.v('pushCol')}")
-    s.shot(f"{OUT}/atari_L5_muro_destra.png")
-    pc = r.v("pushCol")
-    s.poke({PLAYER0X: 4 * pc + 18 + 2, PLAYER0Y: 84, V["hitCooldown"]: 250})
-    s.hold(["Left"], 6.0)
-    r = s.save()
-    check(level, "spingendo a sinistra torna indietro fino alla colonna 8", r.v("pushCol") == 8,
-          f"pushCol={r.v('pushCol')}")
-    rows = r.pf_rows()
-    count = sum(rows[rr][c] == "X" for rr in (8, 9, 10) for c in range(8, 17))
-    check(level, "nessun pixel residuo nella corsia (solo il muro)", count == 3, f"pixel={count}")
-    s.shot(f"{OUT}/atari_L5_muro_sinistra.png")
-    # il cioccolatino non distrugge il muro
-    pc = r.v("pushCol")
-    s.poke({PLAYER0X: 4 * pc + 18 + 14, PLAYER0Y: 84, V["hitCooldown"]: 250})
-    s.hold(["Left"], 0.06)
-    s.tap("space", 0.1)
+    cols = walls(r)
+    exp = model.wall_cols(level)
+    check(level, f"muri spingibili disegnati nelle colonne {exp} (righe 8-10)",
+          cols == exp and all(r.pf(c, rr) for c in cols for rr in (8, 9, 10)), f"muri={cols}")
+    s.shot(f"{OUT}/atari_L{level}_muri.png")
+    names = ("pushCol", "pushCol2", "pushCol3")
+    for k, c in enumerate(cols):
+        # biscotto a sinistra del muro, sul pavimento, Destra tenuto premuto
+        s.poke({PLAYER0X: 4 * c + 9 - 3, PLAYER0Y: 84, V["hitCooldown"]: 250})
+        s.hold(["Right"], 1.4)
+        r = s.save()
+        c2 = r.v(names[k])
+        ok_cols = all(r.pf(c2, rr) for rr in (8, 9, 10)) and not any(r.pf(c, rr) for rr in (8, 9, 10))
+        check(level, f"muro {k + 1}: spingendo a destra si sposta", c2 > c and ok_cols, f"colonna {c}->{c2}")
+        check(level, f"muro {k + 1}: spingere non attiva lo slow motion", r.flag(6) == 0)
+        s.poke({PLAYER0X: 4 * c2 + 18 + 2, PLAYER0Y: 84, V["hitCooldown"]: 250})
+        s.hold(["Left"], 1.4)
+        r = s.save()
+        c3 = r.v(names[k])
+        check(level, f"muro {k + 1}: spingendo a sinistra torna indietro", c3 < c2, f"colonna {c2}->{c3}")
+    if level == 6:
+        # corsia tra la sedia (colonna 7) e la tazza (colonna 17)
+        c = r.v("pushCol")
+        s.poke({PLAYER0X: 4 * c + 9 - 3, PLAYER0Y: 84, V["hitCooldown"]: 250})
+        s.hold(["Right"], 5.0)
+        r = s.save()
+        check(level, "il muro si ferma a fine corsia (colonna 16, prima della tazza)", r.v("pushCol") == 16,
+              f"pushCol={r.v('pushCol')}")
+        s.poke({PLAYER0X: 4 * 16 + 18 + 2, PLAYER0Y: 84, V["hitCooldown"]: 250})
+        s.hold(["Left"], 6.0)
+        r = s.save()
+        check(level, "spingendo a sinistra si ferma alla colonna 8 (sedia)", r.v("pushCol") == 8,
+              f"pushCol={r.v('pushCol')}")
+        rows = r.pf_rows()
+        count = sum(rows[rr][c] == "X" for rr in (8, 9, 10) for c in range(8, 17))
+        check(level, "nessun pixel residuo nella corsia (solo il muro)", count == 3, f"pixel={count}")
+    # il cioccolatino non distrugge i muri
+    c = walls(r)[0]
+    s.poke({PLAYER0X: 4 * c + 18 + 14, PLAYER0Y: 84, V["hitCooldown"]: 250,
+            V["flags"]: r.v("flags") & ~0xC0})
+    s.down("Left", "space")
+    s.wait(0.08)
+    s.up("Left", "space")
     s.wait(0.8)
     r = s.save()
-    check(level, "il cioccolatino non distrugge il muro", all(r.pf(pc, rr) for rr in (8, 9, 10)))
-    # il biscotto torna al punto di partenza per il resto del livello
-    s.poke({PLAYER0X: 10, PLAYER0Y: 64})
+    check(level, "il cioccolatino non distrugge il muro", all(r.pf(c, rr) for rr in (8, 9, 10)))
+    # --- il muro schiaccia la bocca ---
+    r = s.save()
+    c = walls(r)[0]
+    score0 = r.score()
+    # bocca 0 subito a destra del muro, sul pavimento (ferma per _hitCooldown)
+    s.poke({V["mouth0x"]: 4 * (c + 1) + 17, V["mouth0y"]: 84, V["mouth1x"]: 140, V["mouth1y"]: 20,
+            V["mouth0wait"]: 0, V["mouth1wait"]: 0, V["flags"]: (r.v("flags") | 0x20) & ~0x40,
+            PLAYER0X: 4 * c + 9 - 3, PLAYER0Y: 84, V["hitCooldown"]: 250})
+    s.hold(["Right"], 0.6)
+    r = s.save()
+    check(level, "spingendo il muro sulla bocca la si uccide (+10, conta come bocca colpita)",
+          r.v("mouth0wait") > 0 and r.v("mouth0y") == 200 and r.score() == score0 + 10 and r.flag(5) == 0,
+          f"attesa={r.v('mouth0wait')} y={r.v('mouth0y')} score {score0}->{r.score()} flag5={r.flag(5)}")
+    s.shot(f"{OUT}/atari_L{level}_bocca_schiacciata.png")
+    # si riparte puliti: bocche negli angoli, bocca non ancora colpita
+    r = s.save()
+    s.poke({V["mouth0wait"]: 0, V["mouth1wait"]: 0, V["mouth0x"]: 20, V["mouth0y"]: 8,
+            V["mouth1x"]: 140, V["mouth1y"]: 90, V["flags"]: r.v("flags") | 0x20,
+            PLAYER0X: 10, PLAYER0Y: 64, V["hitCooldown"]: 250})
 
 
 def light_phase(s, level):
@@ -608,7 +660,8 @@ def mouth_pass_phase(s, level):
     lives = r[PFSCORE2]
     s.poke({V["mouth0x"]: mx, V["mouth0y"]: y, V["mouth1x"]: mx, V["mouth1y"]: y,
             PLAYER0X: px, PLAYER0Y: y, V["hitCooldown"]: 0})
-    s.wait(4.0 if level < 3 else 2.5)
+    # attesa sufficiente alla velocita' del livello (frame per passo)
+    s.wait(min(8.0, 1.0 + 30 * r.v("speed") / 50.0))
     r = s.save()
     m = max(r.v("mouth0x"), r.v("mouth1x"))
     check(level, f"la bocca passa sopra all'oggetto in ({c},{row})", m >= 4 * c + 17 + 2,
@@ -625,35 +678,39 @@ def mouth_pass_phase(s, level):
 def play_level(s, level, extra=True):
     r = s.save()
     check(level, "livello caricato", r.v("level") == level and r.flag(0) == 1, f"level={r.v('level')}")
-    check(level, "_speed corretto", r.v("speed") == [8, 6, 4, 2, 1][level - 1], f"speed={r.v('speed')}")
+    exp_speed = MOUTH_SPEED[level - 1] - 2 * r.v("lap")
+    if exp_speed < 2 or 2 * r.v("lap") >= MOUTH_SPEED[level - 1] - 2:
+        exp_speed = 2
+    check(level, "velocita' delle bocche (frame per passo)", r.v("speed") == exp_speed,
+          f"speed={r.v('speed')} atteso={exp_speed} giro={r.v('lap')}")
     if level == 1:
         check(level, "partenza dal punto (10,64) con 4 vite e tempo pieno",
               (r[PLAYER0X], r[PLAYER0Y]) == (10, 64) and r[PFSCORE2] == 0xAA and r[PFSCORE1] == 0xFF)
-    check(level, "luce: spenta solo al livello 5", r.flag(4) == (0 if level == 5 else 1))
+    check(level, f"luce: spenta solo al livello {LEVELS}", r.flag(4) == (0 if level == LEVELS else 1))
     static_checks(s, r, level)
     s.shot(f"{OUT}/atari_L{level}.png")
     s.wait(0.5)
     static_checks(s, s.save(), level)  # anche dopo che le gocce si sono mosse
     if extra:
         mouth_pass_phase(s, level)
-        if level == 5:
-            push_phase(s)
+        if model.wall_cols(level):
+            push_phase(s, level)
         life_phase(s, level)
     sugar_phase(s, level)
     mouth_phase(s, level)
-    if extra and level != 5:
+    if extra and level != LEVELS:
         light_phase(s, level)
     return bag_phase(s, level)
 
 
 def main():
-    # --- partita completa dal livello 1 al 5 ---
+    # --- partita completa dal livello 1 all'ultimo, poi secondo giro ---
     s = Stella(ROM, "test")
     r = s.save()
     check(0, "schermata del titolo", r.flag(0) == 0)
     s.shot(f"{OUT}/atari_titolo.png")
     r = start_level(s, 1)
-    for level in range(1, 6):
+    for level in range(1, LEVELS + 1):
         r = s.save()
         if r.v("level") != level or r.flag(0) == 0:
             print(f"     (il livello {level} viene avviato dal titolo)")
@@ -661,17 +718,17 @@ def main():
             s = Stella(ROM, "test")
             start_level(s, level)
         r = play_level(s, level, extra=True)
-        if level < 5:
-            s.wait(0.3)
-        else:
-            s.wait(1.0)
-            r = s.save()
-            check(5, "dopo il livello 5 si torna al titolo (vittoria)", r.flag(0) == 0)
+        s.wait(0.3)
+    r = s.save()
+    check(1, f"dopo il livello {LEVELS} si riparte dal livello 1 (secondo giro)",
+          r.v("level") == 1 and r.v("lap") == 1 and r.flag(0) == 1, f"level={r.v('level')} giro={r.v('lap')}")
+    check(1, "nel secondo giro le bocche sono piu' veloci", r.v("speed") == MOUTH_SPEED[0] - 2,
+          f"speed={r.v('speed')} (primo giro {MOUTH_SPEED[0]})")
     s.close()
 
     # --- selezione del livello dal titolo e game over ---
     s = Stella(ROM, "test")
-    for level in range(1, 6):
+    for level in range(1, LEVELS + 1):
         r = start_level(s, level)
         check(level, f"Select x{level - 1} + Reset parte dal livello {level}", r.v("level") == level)
         s.poke({PFSCORE2: 0x02, V["hitCooldown"]: 0, V["mouth0x"]: r[PLAYER0X], V["mouth0y"]: r[PLAYER0Y],

@@ -38,4 +38,6 @@ Dura circa 25 minuti e salva gli screenshot di ogni livello nella cartella indic
   - la luce si spegne dopo 32 secondi e si riaccende sparando sul piano di lavoro;
   - la barra del tempo, le vite e il game over;
   - la selezione del livello con Select;
-  - al livello 5, il muro spingibile: si sposta spingendolo con la levetta, si ferma a fine corsia e non si distrugge.
+  - i muri spingibili (3 al livello 5, 1 al livello 6): si spostano spingendoli con la levetta nei due sensi, si fermano a fine corsia, non si distruggono e schiacciano le bocche;
+  - una bocca uccisa (con un cioccolatino o schiacciata) sparisce e ricompare nel suo angolo dopo circa 4 secondi;
+  - dopo il livello 6 si riparte dal livello 1 con le bocche più veloci.
