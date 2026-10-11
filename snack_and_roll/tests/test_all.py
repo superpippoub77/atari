@@ -454,11 +454,21 @@ def mouth_phase(s, level):
 
 def bag_phase(s, level):
     r = s.save()
+    if r.v("level") == level + 1 or (level == 5 and r.flag(0) == 0):
+        # il biscotto e' gia' passato sul sacchetto nella fase precedente
+        check(level, "sacchetto raggiungibile", True, "preso durante la fase precedente")
+        check(level, "toccando il sacchetto si passa al livello successivo", True, f"level={r.v('level')}")
+        return r
     goals = ball_goals(r[BALLX], r[BALLY])
     g = Grid(r, level)
-    p = g.path((r[PLAYER0X], r[PLAYER0Y]), goals)
-    check(level, "sacchetto raggiungibile", p is not None)
+    # dal punto di partenza del livello e dalla posizione attuale
+    p = g.path((10, 64), goals) or g.path((r[PLAYER0X], r[PLAYER0Y]), goals)
+    check(level, "sacchetto raggiungibile", p is not None, f"p0=({r[PLAYER0X]},{r[PLAYER0Y]})")
+    if p is None:
+        print("\n".join("     " + x for x in r.pf_rows()))
     ok, r = walk_to(s, level, goals)
+    if p is None:
+        print(f"     (camminata verso il sacchetto: ok={ok} level={r.v('level')} p0=({r[PLAYER0X]},{r[PLAYER0Y]}))")
     deadline = time.time() + 6
     while time.time() < deadline and r.v("level") == level:
         # avvicinamento fine finche' non tocca il sacchetto
