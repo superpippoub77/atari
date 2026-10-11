@@ -549,8 +549,12 @@ __Skip_Fire
    if !pfread(temp5,temp6) then goto __skip_missile
 
    ; il muro spingibile non si distrugge: ferma solo il cioccolatino
-   if temp6 > 7 then if temp5 = _pushCol || temp5 = _pushCol2 then goto __delete_missile
-   if temp6 > 7 && temp5 = _pushCol3 then goto __delete_missile
+   ; (if semplici: un || dentro un if annidato non viene compilato bene)
+   if temp6 < 8 then goto __not_push_wall
+   if temp5 = _pushCol then goto __delete_missile
+   if temp5 = _pushCol2 then goto __delete_missile
+   if temp5 = _pushCol3 then goto __delete_missile
+__not_push_wall
 
    ; --- regola semplificata: solo la riga "in cima" di ogni gruppo è
    ; distruttibile (righe 0 e 2 sopra il piano, 6 e 8 sotto) ---

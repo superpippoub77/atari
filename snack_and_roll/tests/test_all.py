@@ -436,7 +436,7 @@ def mouth_phase(s, level):
                 q.append(n)
     if not check(level, "trovata una linea di tiro libera", best is not None):
         return
-    ok, r = walk_to(s, level, {best})
+    ok, r = walk_to(s, level, {(best[0] + dx, best[1] + dy) for dx in (-1, 0, 1) for dy in (-1, 0, 1)})
     check(level, f"raggiunta la posizione di tiro {best}", ok, f"p0=({r[PLAYER0X]},{r[PLAYER0Y]})")
     attempts = 0
     for attempts in range(1, 4):
@@ -521,7 +521,33 @@ def push_phase(s, level):
           cols == exp and all(r.pf(c, rr) for c in cols for rr in (8, 9, 10)), f"muri={cols}")
     s.shot(f"{OUT}/atari_L{level}_muri.png")
     names = ("pushCol", "pushCol2", "pushCol3")
-    for k, c in enumerate(cols):
+    if level == 6:
+        # corsia tra la sedia (colonna 7) e la tazza (colonna 17)
+        c = r.v("pushCol")
+        s.poke({PLAYER0X: 4 * c + 9 - 3, PLAYER0Y: 84, V["hitCooldown"]: 250})
+        s.hold(["Right"], 5.0)
+        r = s.save()
+        check(level, "spingendo a destra si sposta e si ferma a fine corsia (colonna 16, prima della tazza)",
+              r.v("pushCol") == 16, f"pushCol={r.v('pushCol')}")
+        check(level, "spingere non attiva lo slow motion", r.flag(6) == 0)
+        s.poke({PLAYER0X: 4 * 16 + 18 + 2, PLAYER0Y: 84, V["hitCooldown"]: 250})
+        s.hold(["Left"], 2.0)
+        r = s.save()
+        check(level, "spingendo a sinistra torna indietro", r.v("pushCol") < 16, f"pushCol={r.v('pushCol')}")
+        c = r.v("pushCol")
+        s.poke({PLAYER0X: 4 * c + 18 + 2, PLAYER0Y: 84, V["hitCooldown"]: 250})
+        s.hold(["Left"], 6.0)
+        r = s.save()
+        check(level, "a sinistra si ferma alla colonna 8 (sedia)", r.v("pushCol") == 8,
+              f"pushCol={r.v('pushCol')}")
+        rows = r.pf_rows()
+        count = sum(rows[rr][c] == "X" for rr in (8, 9, 10) for c in range(8, 17))
+        check(level, "nessun pixel residuo nella corsia (solo il muro)", count == 3, f"pixel={count}")
+        # muro di nuovo al centro della corsia per le prove successive
+        s.poke({PLAYER0X: 4 * 8 + 9 - 3 + 4, PLAYER0Y: 84, V["hitCooldown"]: 250})
+        s.hold(["Right"], 2.5)
+        r = s.save()
+    for k, c in enumerate(cols if level != 6 else []):
         # biscotto a sinistra del muro, sul pavimento, Destra tenuto premuto
         s.poke({PLAYER0X: 4 * c + 9 - 3, PLAYER0Y: 84, V["hitCooldown"]: 250})
         s.hold(["Right"], 1.4)
@@ -535,22 +561,6 @@ def push_phase(s, level):
         r = s.save()
         c3 = r.v(names[k])
         check(level, f"muro {k + 1}: spingendo a sinistra torna indietro", c3 < c2, f"colonna {c2}->{c3}")
-    if level == 6:
-        # corsia tra la sedia (colonna 7) e la tazza (colonna 17)
-        c = r.v("pushCol")
-        s.poke({PLAYER0X: 4 * c + 9 - 3, PLAYER0Y: 84, V["hitCooldown"]: 250})
-        s.hold(["Right"], 5.0)
-        r = s.save()
-        check(level, "il muro si ferma a fine corsia (colonna 16, prima della tazza)", r.v("pushCol") == 16,
-              f"pushCol={r.v('pushCol')}")
-        s.poke({PLAYER0X: 4 * 16 + 18 + 2, PLAYER0Y: 84, V["hitCooldown"]: 250})
-        s.hold(["Left"], 6.0)
-        r = s.save()
-        check(level, "spingendo a sinistra si ferma alla colonna 8 (sedia)", r.v("pushCol") == 8,
-              f"pushCol={r.v('pushCol')}")
-        rows = r.pf_rows()
-        count = sum(rows[rr][c] == "X" for rr in (8, 9, 10) for c in range(8, 17))
-        check(level, "nessun pixel residuo nella corsia (solo il muro)", count == 3, f"pixel={count}")
     # il cioccolatino non distrugge i muri
     c = walls(r)[0]
     s.poke({PLAYER0X: 4 * c + 18 + 14, PLAYER0Y: 84, V["hitCooldown"]: 250,
@@ -565,11 +575,12 @@ def push_phase(s, level):
     r = s.save()
     c = walls(r)[0]
     score0 = r.score()
-    # bocca 0 subito a destra del muro, sul pavimento (ferma per _hitCooldown)
-    s.poke({V["mouth0x"]: 4 * (c + 1) + 17, V["mouth0y"]: 84, V["mouth1x"]: 140, V["mouth1y"]: 20,
+    # bocca 0 subito a sinistra del muro, sul pavimento (ferma per _hitCooldown);
+    # il biscotto spinge il muro verso sinistra, sopra la bocca
+    s.poke({V["mouth0x"]: 4 * (c - 1) + 17 - 8, V["mouth0y"]: 84, V["mouth1x"]: 140, V["mouth1y"]: 20,
             V["mouth0wait"]: 0, V["mouth1wait"]: 0, V["flags"]: (r.v("flags") | 0x20) & ~0x40,
-            PLAYER0X: 4 * c + 9 - 3, PLAYER0Y: 84, V["hitCooldown"]: 250})
-    s.hold(["Right"], 0.6)
+            PLAYER0X: 4 * c + 18 + 2, PLAYER0Y: 84, V["hitCooldown"]: 250})
+    s.hold(["Left"], 0.6)
     r = s.save()
     check(level, "spingendo il muro sulla bocca la si uccide (+10, conta come bocca colpita)",
           r.v("mouth0wait") > 0 and r.v("mouth0y") == 200 and r.score() == score0 + 10 and r.flag(5) == 0,
