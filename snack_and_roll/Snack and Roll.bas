@@ -29,7 +29,9 @@
 
    const _P0_color = $2A ;Giallo (hue2 = giallo in PAL)
    const _P1_color = $48 ;Rosso (hue4 in PAL, luminosità media)
-   const frame_limit = 54
+   ; un "secondo" di gioco = 48 frame (0,96 s a 50 Hz): 48 si divide per 8,
+   ; 6, 4... e la musica resta a tempo (con 55 frame sgarrava ogni secondo)
+   const frame_limit = 47
 
    ; numero di livelli: dopo l'ultimo si riparte dal primo con le bocche
    ; piu' veloci (un "giro" in piu')
@@ -125,19 +127,23 @@
    dim _lap = y
 
    dim _music_index = m
-   dim _sugarIndex = i
+   ; effetti sonori (canale 0): effetto in corso, posizione, durata nota
+   dim _sfxId = i
+   dim _sfxPos = q
+   dim _sfxDur = z
    dim _mouthIndex = a
    dim _mouth0x = f
    dim _mouth0y = h
    dim _mouth1x = l
    dim _mouth1y = o
-   dim _prevSugarBit = q
    dim _attractTimer = s
    dim _pushCol = s
    dim _ballx = u
    dim _attractDir = y
    dim _hitCooldown = v
-   dim _hasKey = z
+   ; chiave (zuccherino 1) e stato dello slow motion nel frame precedente
+   dim _b2_hasKey = k
+   dim _b3_prevSlow = k
 __inizialize
    ;*************************************************************************************************************************
    ; INIZIALIZZAZIONE
@@ -221,6 +227,8 @@ __game_start
    if !_b0_enableStart{0} then goto __skip_gameover_clear
    _b0_enableStart{0} = 0
    missile1y = 200 : _choco_count = 0 : bally = 200 : missile0y = 200
+   ; silenzio sugli effetti, la musica del titolo riparte da capo
+   _sfxId = 0 : AUDV0 = 0 : _music_index = 0
    goto __draw_title
 __skip_gameover_clear
    _b0_enableStart{0} = 0
@@ -240,16 +248,36 @@ __main_loop
    if _frame_counter > frame_limit then _frame_counter = 0 : _seconds_counter = _seconds_counter + 1
 
    ;F2 (reset) inizia il gioco
-   if switchreset && !_b0_enableStart{0} then _b0_enableStart{0} = 1 : _level = _choco_count+1 : _lap = 0 : score = 0 : goto __skip_to_change
+   if switchreset && !_b0_enableStart{0} then _b0_enableStart{0} = 1 : _level = _choco_count+1 : _lap = 0 : score = 0 : _music_index = 0 : goto __skip_to_change
 
    ;!!!!!!!!!!!!!!!!!!! START !!!!!!!!!!!!!!!!!!!
    ;*************************************************************************************************************************
    ; MUSICA DI SOTTOFONDO
    ;_________________________________________________________________________________________________________________________
-   ; le tabelle hanno 20 note (indici 0-19)
-   if _music_index > 19 then _music_index = 0
-   if !_b0_enableStart{0} && !(_frame_counter&15) then AUDF1 = jingle[_music_index] : AUDV1 = 2: _music_index = _music_index + 1
-   if _b0_enableStart{0} && !(_frame_counter&3) then AUDF1 = melody[_music_index] : AUDV1 = 2 : _music_index = _music_index + 1
+   ; Canale 1. Ogni passo della tabella: 0 = la nota continua,
+   ; 1 = pausa, altro = nuova nota (valore AUDF).
+   ; Titolo: tema "avventura" stile Indiana Jones (AUDC 4), un passo ogni
+   ; 6 frame (una semicroma). In gioco: arpeggio leggero (AUDC 12, volume
+   ; basso), un passo ogni 8 frame.
+   if _b0_enableStart{0} then goto __game_music
+   _mouthTick = _mouthTick + 1
+   if _mouthTick < 6 then goto __music_done
+   _mouthTick = 0
+   temp1 = titlemusic[_music_index]
+   _music_index = _music_index + 1
+   if _music_index >= 92 then _music_index = 0
+   AUDC1 = 4 : temp2 = 5
+   goto __music_note
+__game_music
+   if _frame_counter & 7 then goto __music_done
+   temp1 = gamemusic[_music_index]
+   _music_index = (_music_index + 1) & 31
+   AUDC1 = 12 : temp2 = 2
+__music_note
+   if !temp1 then goto __music_done
+   if temp1 = 1 then AUDV1 = 0 : goto __music_done
+   AUDF1 = temp1 : AUDV1 = temp2
+__music_done
 
    ;Se il gioco non è ancora iniziato skippa tutto
    if !_b0_enableStart{0} then goto __attract_mode
@@ -357,35 +385,44 @@ __skip_bocche
    ; Le collisioni si leggono dopo drawscreen, quindi si riferiscono allo
    ; zuccherino disegnato nel frame appena mostrato (_prevSugarBit).
    ;*************************************************************************************************************************
+   ; bit dello zuccherino mostrato = il primo bit a 0 di _choco_bits
+   temp2 = _choco_bits ^ 255
+   temp3 = _choco_bits + 1
+   temp2 = temp2 & temp3
+   if !temp2 then goto __no_sugar_hit
    if !collision(player0, missile1) then goto __no_sugar_hit
-   if _choco_bits & _prevSugarBit then goto __no_sugar_hit
-   _choco_bits = _choco_bits | _prevSugarBit : _choco_count=_choco_count+1 : score=score+50 : callmacro sound 12 4 2
-   if _prevSugarBit=1 then _hitCooldown=120
-   if _prevSugarBit=2 then _hasKey=1
+   _choco_bits = _choco_bits | temp2 : _choco_count=_choco_count+1 : score=score+50
+   if temp2 = 2 then _b2_hasKey{2} = 1
+   if temp2 = 1 then goto __golden_sugar
+   callmacro sfx 5
+   goto __no_sugar_hit
+__golden_sugar
+   ; super potere: bocche congelate e biscotto invulnerabile
+   _hitCooldown = 120
+   callmacro sfx 7
 __no_sugar_hit
 
-   ; cerca il primo zuccherino non ancora raccolto
-   _sugarIndex = 0 : temp2 = 1
+   ; cerca il primo zuccherino non ancora raccolto (indice in temp4)
+   temp4 = 0 : temp2 = 1
 __find_sugar
    if !(_choco_bits & temp2) then goto __sugar_index_ok
-   _sugarIndex = _sugarIndex + 1 : temp2 = temp2 * 2
-   if _sugarIndex < 8 then goto __find_sugar
-   missile1y = 200 : _prevSugarBit = 0
+   temp4 = temp4 + 1 : temp2 = temp2 * 2
+   if temp4 < 8 then goto __find_sugar
+   missile1y = 200
    goto __skip_all_sugar
 
 __sugar_index_ok
    temp1 = (_level-1)*8
-   temp3 = temp1 + _sugarIndex
+   temp3 = temp1 + temp4
    temp3 = sugar[temp3]
    ; colonna: x = col*16+22 -> colonne del playfield 1,5,9,...,29
    ; riga: 0-3 -> righe 0-3 (sopra il piano), 4-7 -> righe 6-9 (sotto)
    missile1x = (temp3&7)*16+22
-   temp4 = temp3/8
-   missile1y = temp4*8+4
-   if temp4 > 3 then missile1y = missile1y + 16
-   _prevSugarBit = temp2
+   temp5 = temp3/8
+   missile1y = temp5*8+4
+   if temp5 > 3 then missile1y = missile1y + 16
    ; lo zuccherino 0 (dorato) e' giallo, gli altri prendono il colore della bocca
-   if !_sugarIndex then COLUP1 = $1E
+   if !temp4 then COLUP1 = $1E
 
 __skip_all_sugar
 
@@ -393,6 +430,7 @@ __skip_all_sugar
    ; GOCCE (playfield dinamico, banco 2)
    ;*************************************************************************************************************************
    gosub __update_drops bank2
+   gosub __play_sfx bank2
 
    ;*************************************************************************************************************************
    ; LUCE (PLAYFIELD)
@@ -453,7 +491,7 @@ end
    ; _ballx viene letto dalla colonna 7 di "objects" al caricamento del livello
    ;*************************************************************************************************************************
    temp4 = 1
-   if _level > 3 && !_hasKey then temp4 = 0
+   if _level > 3 && !_b2_hasKey{2} then temp4 = 0
    if _choco_count = 8 && !_b5_enablePalyer1{5} && temp4 then ballx = _ballx : bally = 28
 
    ;*************************************************************************************************************************
@@ -508,7 +546,7 @@ __Skip_Joystick_Precheck
    if _b7_gameMissile0Moving{7} || _b6_enableSlowMotion{6} then goto __Skip_Fire
 
    _b7_gameMissile0Moving{7} = 1
-   callmacro sound 12 4 10
+   callmacro sfx 1
 
    ; Direzione iniziale del missile esattamente uguale a a quella del giocatore
    _Bit4_M0_Dir_Up{4} = _Bit0_P0_Dir_Up{0}
@@ -565,6 +603,7 @@ __not_push_wall
 
    ; colpisce il playfield
    pfpixel temp5 temp6 off : score = score + 1
+   callmacro sfx 4
 
 __delete_missile
 
@@ -702,6 +741,16 @@ __no_push_right
    player0x = player0x + 1 :  _Bit3_P0_Dir_Right{3} = 1
 __skip_right
 
+   ; scossa / scivolata: suono quando inizia il rallentamento
+   if _b6_enableSlowMotion{6} then goto __slow_on
+   _b3_prevSlow{3} = 0
+   goto __slow_sound_done
+__slow_on
+   if _b3_prevSlow{3} then goto __slow_sound_done
+   _b3_prevSlow{3} = 1
+   callmacro sfx 3
+__slow_sound_done
+
 __game_collision
    ;*************************************************************************************************************************
    ; COLLISIONI
@@ -734,7 +783,7 @@ __game_collision
 __destroy_mouth
    score = score + 10
    _b5_enablePalyer1{5} = 0
-   AUDV1=10
+   callmacro sfx 6
    ; il cioccolatino sparisce (prima continuava e poteva colpire due volte)
    _b7_gameMissile0Moving{7} = 0 : missile0y = 200
    ; la collisione si riferisce alla bocca disegnata nel frame precedente:
@@ -761,6 +810,7 @@ __decrease_timer_bar
    goto __done
 
 __change_level
+   callmacro sfx 8
    _level=_level+1
    ; dopo l'ultimo livello si riparte dal primo, un giro piu' veloce
    if _level > _Levels then _level = 1 : _lap = _lap + 1
@@ -776,7 +826,7 @@ __skip_to_change
    _b5_enablePalyer1{5}=1
    _b7_gameMissile0Moving{7}=0
    _choco_count=0
-   _choco_bits=0 : _prevSugarBit=0 : _hasKey=0
+   _choco_bits=0 : _b2_hasKey{2}=0
    ; ogni livello parte con la luce accesa, tranne l'ultimo che parte al buio
    _b4_enableLight{4}=1
    if _level=_Levels then _b4_enableLight{4}=0
@@ -841,16 +891,30 @@ end
    40, 16, 43, 11, 52, 13, 54, 31,
 end
 
-   data jingle
-   30, 28, 26, 24, 22, 20, 18, 16, 18, 20, 22, 24, 26, 28, 30, 28, 26, 24, 22, 20
-end
-   data melody
-   16, 18, 16, 20, 18, 20, 22, 20, 18, 16, 18, 20, 22, 20, 18, 16, 18, 16, 20, 22
+   ; tema del titolo (semicrome, AUDC 4): Mi Fa Sol Do... Re Mi Fa...
+   ; Sol La Si Fa... La Si Do Re Mi...   (Mi5=23 Fa5=21 Sol5=19 La5=17
+   ; Si5=15 Do6=14 Re5=26 Re6=12 Mi6=11 Fa6=10; 0 = continua, 1 = pausa)
+   data titlemusic
+   23, 0, 0, 21, 19, 0, 0, 0, 14, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1,
+   26, 0, 0, 23, 21, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1,
+   19, 0, 0, 17, 15, 0, 0, 0, 10, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1,
+   17, 0, 0, 15, 14, 0, 0, 0, 12, 0, 0, 0, 11, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1,
+   1, 1, 1, 1, 1, 1, 1, 1
 end
 
-   macro sound
-   AUDV1 = {1}
-   AUDF1 = {3}
+   ; musica di sottofondo in gioco (AUDC 12, volume basso): arpeggi di
+   ; Do, La minore, Fa e Sol, una nota ogni due passi
+   ; (Do4=19 Mi4=15 Sol4=12 La3=23 Fa3=29 Sol3=25 Si3=20 Re4=17)
+   data gamemusic
+   19, 1, 15, 1, 12, 1, 15, 1,
+   23, 1, 19, 1, 15, 1, 19, 1,
+   29, 1, 23, 1, 19, 1, 23, 1,
+   25, 1, 20, 1, 17, 1, 20, 1
+end
+
+   ; avvia un effetto sonoro se non ne sta suonando uno piu' importante
+   macro sfx
+   if _sfxId <= {1} then _sfxId = {1} : _sfxPos = 0 : _sfxDur = 0
 end
 
    ;#########################################################################################################################
@@ -1016,7 +1080,7 @@ __push_wall
    if temp6 = 0 then _pushCol = temp5
    if temp6 = 1 then _pushCol2 = temp5
    if temp6 = 2 then _pushCol3 = temp5
-   AUDV1 = 6 : AUDF1 = 28
+   callmacro sfx 2
 
    ; --- bocche schiacciate dal muro ---
    ; il muro occupa i pixel x da temp4 a temp4+3, righe 8-10 (y >= 65)
@@ -1032,7 +1096,8 @@ __push_wall
    temp2 = _mouth0x + temp3
    if temp2 < temp4 then goto __crush_mouth1
    _mouth0wait = _Mouth_Respawn : _mouth0y = 200
-   score = score + 10 : _b5_enablePalyer1{5} = 0 : AUDV1 = 12 : AUDF1 = 4
+   score = score + 10 : _b5_enablePalyer1{5} = 0
+   callmacro sfx 6
 __crush_mouth1
    if _level < 4 then return otherbank
    if _mouth1wait then return otherbank
@@ -1042,8 +1107,153 @@ __crush_mouth1
    temp2 = _mouth1x + temp3
    if temp2 < temp4 then return otherbank
    _mouth1wait = _Mouth_Respawn : _mouth1y = 200
-   score = score + 10 : _b5_enablePalyer1{5} = 0 : AUDV1 = 12 : AUDF1 = 4
+   score = score + 10 : _b5_enablePalyer1{5} = 0
+   callmacro sfx 6
    return otherbank
+
+   ;*************************************************************************************************************************
+   ; EFFETTI SONORI (canale 0) - presi dal bbsoundtest di batari Basic
+   ;_________________________________________________________________________________________________________________________
+   ; _sfxId = effetto in corso (0 = nessuno), _sfxPos = posizione nella
+   ; tabella, _sfxDur = frame che mancano alla nota successiva.
+   ; Ogni nota: (volume*16 + AUDC), AUDF, durata. 255 = fine effetto.
+   ; Generato da snack_and_roll/tests/sfx_from_soundtest.py
+   ;  1 = pewpew       sparo
+   ;  2 = dragit       muro spinto
+   ;  3 = electrobump  scossa / scivolata (inizio rallentamento)
+   ;  4 = poof1        blocco abbattuto
+   ;  5 = gotthecoin   zuccherino preso
+   ;  6 = explosion    bocca uccisa
+   ;  7 = powerup      super potere (zuccherino dorato)
+   ;  8 = oneup        cambio livello
+   ;*************************************************************************************************************************
+__play_sfx
+   if !_sfxId then return otherbank
+   if _sfxDur then _sfxDur = _sfxDur - 1 : return otherbank
+   temp6 = _sfxPos
+   on _sfxId goto __sfx_none __sfx_shot __sfx_push __sfx_slow __sfx_block __sfx_sugar __sfx_mouth __sfx_power __sfx_level
+__sfx_none
+   return otherbank
+__sfx_shot
+   temp1 = sfx_shot[temp6] : temp6 = temp6 + 1
+   temp2 = sfx_shot[temp6] : temp6 = temp6 + 1
+   temp3 = sfx_shot[temp6]
+   goto __sfx_note
+__sfx_push
+   temp1 = sfx_push[temp6] : temp6 = temp6 + 1
+   temp2 = sfx_push[temp6] : temp6 = temp6 + 1
+   temp3 = sfx_push[temp6]
+   goto __sfx_note
+__sfx_slow
+   temp1 = sfx_slow[temp6] : temp6 = temp6 + 1
+   temp2 = sfx_slow[temp6] : temp6 = temp6 + 1
+   temp3 = sfx_slow[temp6]
+   goto __sfx_note
+__sfx_block
+   temp1 = sfx_block[temp6] : temp6 = temp6 + 1
+   temp2 = sfx_block[temp6] : temp6 = temp6 + 1
+   temp3 = sfx_block[temp6]
+   goto __sfx_note
+__sfx_sugar
+   temp1 = sfx_sugar[temp6] : temp6 = temp6 + 1
+   temp2 = sfx_sugar[temp6] : temp6 = temp6 + 1
+   temp3 = sfx_sugar[temp6]
+   goto __sfx_note
+__sfx_mouth
+   temp1 = sfx_mouth[temp6] : temp6 = temp6 + 1
+   temp2 = sfx_mouth[temp6] : temp6 = temp6 + 1
+   temp3 = sfx_mouth[temp6]
+   goto __sfx_note
+__sfx_power
+   temp1 = sfx_power[temp6] : temp6 = temp6 + 1
+   temp2 = sfx_power[temp6] : temp6 = temp6 + 1
+   temp3 = sfx_power[temp6]
+   goto __sfx_note
+__sfx_level
+   temp1 = sfx_level[temp6] : temp6 = temp6 + 1
+   temp2 = sfx_level[temp6] : temp6 = temp6 + 1
+   temp3 = sfx_level[temp6]
+   goto __sfx_note
+__sfx_note
+   if temp1 = 255 then _sfxId = 0 : AUDV0 = 0 : return otherbank
+   AUDV0 = temp1 / 16 : AUDC0 = temp1 & 15 : AUDF0 = temp2
+   _sfxDur = temp3 - 1
+   _sfxPos = _sfxPos + 3
+   return otherbank
+
+   ; pewpew (20 note) - sparo
+   data sfx_shot
+   244, 28, 1, 244, 28, 1, 180, 9, 1, 172, 3, 1, 236, 4, 1, 196, 18, 1
+   244, 25, 1, 244, 28, 1, 84, 7, 1, 84, 9, 1, 100, 13, 1, 84, 12, 1
+   100, 24, 1, 84, 28, 1, 52, 30, 1, 52, 7, 1, 52, 9, 1, 36, 12, 1
+   44, 4, 1, 28, 6, 1, 255
+end
+
+   ; dragit (10 note) - muro spinto
+   data sfx_push
+   39, 28, 1, 103, 2, 1, 152, 30, 1, 152, 17, 1, 152, 30, 1, 103, 17, 1
+   152, 30, 1, 103, 17, 1, 55, 14, 1, 39, 6, 1, 255
+end
+
+   ; electrobump (9 note) - scossa / scivolata (inizio rallentamento)
+   data sfx_slow
+   168, 8, 2, 172, 8, 2, 166, 8, 2, 174, 8, 2, 134, 8, 2, 134, 8, 2
+   110, 8, 2, 70, 8, 2, 38, 8, 2, 255
+end
+
+   ; poof1 (12 note) - blocco abbattuto
+   data sfx_block
+   72, 7, 1, 104, 7, 1, 136, 7, 1, 136, 9, 1, 168, 12, 1, 168, 9, 1
+   168, 12, 1, 168, 9, 1, 136, 13, 1, 104, 14, 1, 72, 9, 1, 40, 9, 1
+   255
+end
+
+   ; gotthecoin (23 note) - zuccherino preso
+   data sfx_sugar
+   252, 4, 1, 252, 4, 1, 228, 10, 1, 244, 10, 1, 244, 10, 1, 212, 10, 1
+   148, 10, 1, 148, 10, 1, 132, 10, 1, 116, 10, 1, 100, 10, 1, 84, 10, 1
+   52, 10, 1, 116, 10, 1, 148, 10, 1, 52, 10, 1, 20, 10, 1, 20, 10, 1
+   20, 10, 1, 4, 10, 1, 20, 10, 1, 20, 10, 1, 20, 10, 1, 255
+end
+
+   ; explosion (46 note) - bocca uccisa
+   data sfx_mouth
+   40, 1, 1, 92, 11, 1, 134, 4, 1, 254, 3, 1, 246, 9, 1, 246, 13, 1
+   254, 4, 1, 134, 15, 1, 70, 9, 1, 49, 22, 1, 70, 12, 1, 86, 9, 1
+   54, 10, 1, 86, 9, 1, 134, 13, 1, 70, 9, 1, 110, 4, 1, 86, 15, 1
+   118, 15, 1, 126, 4, 1, 102, 8, 1, 142, 3, 1, 102, 15, 1, 86, 9, 1
+   86, 6, 1, 94, 3, 1, 102, 14, 1, 94, 2, 1, 54, 15, 1, 102, 14, 1
+   86, 9, 1, 86, 12, 1, 54, 15, 1, 142, 4, 1, 54, 12, 1, 54, 15, 1
+   102, 12, 1, 70, 15, 1, 86, 15, 1, 54, 15, 1, 70, 10, 1, 54, 15, 1
+   54, 8, 1, 54, 12, 1, 54, 14, 1, 54, 8, 1, 255
+end
+
+   ; powerup (53 note) - super potere (zuccherino dorato)
+   data sfx_power
+   246, 30, 1, 244, 28, 1, 252, 12, 1, 252, 12, 1, 252, 12, 1, 244, 28, 1
+   164, 27, 1, 148, 22, 1, 116, 18, 1, 228, 18, 1, 132, 18, 1, 52, 13, 1
+   132, 18, 1, 244, 18, 1, 252, 11, 1, 252, 11, 1, 204, 11, 1, 100, 28, 1
+   196, 28, 1, 252, 7, 1, 156, 7, 1, 172, 5, 1, 116, 24, 1, 252, 7, 1
+   172, 7, 1, 204, 5, 1, 92, 5, 1, 54, 30, 1, 76, 3, 1, 76, 3, 1
+   76, 3, 1, 140, 2, 1, 76, 3, 1, 38, 30, 1, 236, 10, 1, 252, 10, 1
+   212, 30, 1, 132, 25, 1, 180, 21, 1, 244, 21, 1, 132, 21, 1, 116, 15, 1
+   116, 21, 1, 196, 21, 1, 124, 6, 1, 36, 15, 1, 70, 0, 1, 12, 1, 1
+   68, 10, 1, 132, 10, 1, 52, 10, 1, 52, 7, 1, 52, 10, 1, 255
+end
+
+   ; oneup (50 note) - cambio livello
+   data sfx_level
+   244, 22, 1, 244, 22, 1, 132, 22, 1, 68, 19, 1, 36, 19, 1, 22, 18, 1
+   22, 18, 1, 244, 18, 1, 244, 18, 1, 132, 18, 1, 68, 17, 1, 36, 16, 1
+   20, 16, 1, 20, 16, 1, 132, 10, 1, 132, 10, 1, 6, 30, 1, 6, 30, 1
+   6, 30, 1, 6, 30, 1, 132, 13, 1, 132, 13, 1, 132, 13, 1, 100, 13, 1
+   6, 30, 1, 6, 30, 1, 6, 30, 1, 132, 12, 1, 68, 12, 1, 6, 30, 1
+   6, 30, 1, 6, 30, 1, 6, 30, 1, 100, 9, 1, 36, 1, 1, 68, 9, 1
+   36, 9, 1, 68, 9, 1, 68, 9, 1, 36, 1, 1, 68, 9, 1, 4, 1, 1
+   68, 9, 1, 36, 1, 1, 68, 9, 1, 36, 9, 1, 36, 9, 1, 68, 9, 1
+   36, 1, 1, 20, 1, 1, 255
+end
+
 
    ;*************************************************************************************************************************
    ; SUDDIVISIONE DEL PLAYFIELD (griglia 4x2, 8 sezioni)
