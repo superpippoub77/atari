@@ -397,7 +397,13 @@ def sugar_phase(s, level):
     check(level, "8 zuccherini, nessuno contato due volte", r.v("choco_count") == 8 and r.v("choco_bits") == 0xFF,
           f"count={r.v('choco_count')}")
     check(level, "dopo l'ultimo non compare piu' nulla", r[MISSILE1Y] == 200)
-    check(level, "il sacchetto non appare prima di colpire la bocca", r[BALLY] != 28)
+    if r.flag(5) == 1:
+        check(level, "il sacchetto non appare prima di colpire la bocca", r[BALLY] != 28)
+    else:
+        # un cioccolatino sparato agli oggetti ha gia' colpito una bocca:
+        # in quel caso il sacchetto deve essere comparso
+        check(level, "bocca gia' colpita da un colpo precedente: il sacchetto e' comparso",
+              r[BALLY] == 28, f"score={r.score()}")
 
 
 def mouth_phase(s, level):
