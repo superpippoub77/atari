@@ -22,6 +22,33 @@ SOUNDS = [
 ]
 
 
+# effetti lunghi dimezzati per risparmiare ROM: si tiene una nota su due e
+# la sua durata diventa la somma delle due (stesso andamento, meta' byte)
+HALVE = {"explosion", "powerup", "oneup"}
+
+
+def halve(notes):
+    out = []
+    for i in range(0, len(notes), 2):
+        vol, ctrl, freq, dur = notes[i]
+        if i + 1 < len(notes):
+            dur += notes[i + 1][3]
+        out.append((vol, ctrl, freq, dur))
+    return out
+
+
+def merge(notes):
+    """Note consecutive uguali (stesso volume, timbro e nota) diventano una
+    sola nota piu' lunga: il suono non cambia e si risparmiano byte."""
+    out = []
+    for vol, ctrl, freq, dur in notes:
+        if out and out[-1][:3] == (vol, ctrl, freq) and out[-1][3] + dur < 256:
+            out[-1] = (vol, ctrl, freq, out[-1][3] + dur)
+        else:
+            out.append((vol, ctrl, freq, dur))
+    return out
+
+
 def parse(path):
     src = open(path).read()
     out = {}
@@ -74,6 +101,9 @@ def main():
     total = 0
     for sid, key, src, desc in SOUNDS:
         notes = snd[src]
+        if src in HALVE:
+            notes = halve(notes)
+        notes = merge(notes)
         data = []
         for vol, ctrl, freq, dur in notes:
             b = (vol & 15) * 16 + (ctrl & 15)

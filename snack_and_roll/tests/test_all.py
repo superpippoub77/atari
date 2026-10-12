@@ -514,7 +514,7 @@ def mouth_phase(s, level):
 
 def bag_phase(s, level):
     r = s.save()
-    nxt = level % LEVELS + 1
+    nxt = level + 1     # dopo l'ultimo livello c'e' la Bocca Gigante (BOSS)
     if r.v("level") == nxt:
         # il biscotto e' gia' passato sul sacchetto nella fase precedente
         check(level, "sacchetto raggiungibile", True, "preso durante la fase precedente")
@@ -785,6 +785,83 @@ def play_level(s, level, extra=True):
     return bag_phase(s, level)
 
 
+BOSS = 7          # BAS: const _Boss (livello segreto della Bocca Gigante)
+BOSS_BALLX = 136  # BAS: ultima riga di data objects
+
+
+def boss_phase(s):
+    """Livello segreto: la Bocca Gigante. Sputa, fa male, si batte con 8 colpi."""
+    r = s.save()
+    check(BOSS, f"dopo il livello {LEVELS} arriva la Bocca Gigante (livello {BOSS})",
+          r.v("level") == BOSS and r.flag(0) == 1, f"level={r.v('level')}")
+    check(BOSS, "niente zuccherini, chiave gia' presa, luce accesa",
+          r.v("choco_bits") == 0xFF and r.flag(2) == 1 and r.flag(4) == 1 and r[MISSILE1Y] in (200, r.v("mouth1y")),
+          f"bits={r.v('choco_bits'):08b} flags={r.v('flags'):08b}")
+    print("\n".join("     " + x for x in r.pf_rows()))
+    check(BOSS, "barra dell'energia piena (8 pixel sul pavimento)", all(r.pf(c, 10) for c in range(12, 20)))
+    s.shot(f"{OUT}/atari_boss.png")
+
+    # sputa: lo sputo (missile1) parte dalla bocca
+    s.poke({V["hitCooldown"]: 250, PFSCORE1: 0xFF, PLAYER0X: 110, PLAYER0Y: 84,
+            V["mouth0x"]: 100, V["mouth0y"]: 40})
+    seen = False
+    t0 = time.time()
+    while time.time() - t0 < 3 and not seen:
+        r = s.save()
+        seen = r.v("mouth1y") < 200 and r[MISSILE1Y] == r.v("mouth1y")
+        s.wait(0.05)
+    check(BOSS, "la Bocca Gigante sputa", seen, f"sputo=({r.v('mouth1x')},{r.v('mouth1y')})")
+    s.shot(f"{OUT}/atari_boss_sputo.png")
+
+    # lo sputo fa perdere una vita
+    s.poke({V["hitCooldown"]: 0, PFSCORE2: 0xAA, PLAYER0X: 110, PLAYER0Y: 84,
+            V["mouth0x"]: 20, V["mouth0y"]: 8, V["mouth1x"]: 112, V["mouth1y"]: 76})
+    s.wait(0.4)
+    r = s.save()
+    check(BOSS, "lo sputo colpisce il biscotto: si perde una vita", r[PFSCORE2] == 0x2A,
+          f"vite={r[PFSCORE2]:08b}")
+
+    # 8 colpi di cioccolatino
+    score0 = r.score()
+    hits_ok = True
+    for k in range(1, 9):
+        got = False
+        for _ in range(4):
+            r = s.save()
+            s.poke({V["hitCooldown"]: 250, PFSCORE1: 0xFF, PFSCORE2: 0xAA, V["mouth0x"]: 100, V["mouth0y"]: 60,
+                    V["mouth1y"]: 200, PLAYER0X: 110, PLAYER0Y: 84, V["flags"]: r.v("flags") & ~0xC0})
+            s.down("Up", "space")
+            s.wait(0.06)
+            s.up("Up", "space")
+            heard = sfx_seen(s, 0.6)
+            r = s.save()
+            if r.v("choco_count") == k:
+                got = True
+                break
+        hits_ok &= got
+        if not got:
+            print(f"     (colpo {k} non andato a segno: count={r.v('choco_count')})")
+            break
+        if k < 8:
+            hits_ok &= (not r.pf(20 - k, 10)) and bool(r.pf(19 - k, 10))
+    check(BOSS, "8 colpi di cioccolatino: la barra dell'energia si svuota", hits_ok and not any(r.pf(c, 10) for c in range(12, 20)),
+          f"colpi={r.v('choco_count')}")
+    check(BOSS, "sconfitta: suono del super potere e +50 a colpo, +500 alla fine",
+          SFX["potere"] in heard and r.score() == score0 + 7 * 50 + 550,
+          f"effetti={sorted(heard)} punti {score0}->{r.score()}")
+    s.wait(0.3)
+    r = s.save()
+    check(BOSS, "la bocca sparisce e compare il sacchetto",
+          r.v("mouth0y") == 200 and r[BALLY] == 28 and r[BALLX] == BOSS_BALLX,
+          f"bocca y={r.v('mouth0y')} sacchetto=({r[BALLX]},{r[BALLY]})")
+    s.shot(f"{OUT}/atari_boss_sconfitta.png")
+    s.poke({PLAYER0X: BOSS_BALLX - 4, PLAYER0Y: 30, V["hitCooldown"]: 250})
+    t0 = time.time()
+    while time.time() - t0 < 4 and r.v("level") == BOSS:
+        s.wait(0.2)
+        r = s.save()
+
+
 def main():
     # --- partita completa dal livello 1 all'ultimo, poi secondo giro ---
     s = Stella(ROM, "test")
@@ -801,8 +878,9 @@ def main():
             start_level(s, level)
         r = play_level(s, level, extra=True)
         s.wait(0.3)
+    boss_phase(s)
     r = s.save()
-    check(1, f"dopo il livello {LEVELS} si riparte dal livello 1 (secondo giro)",
+    check(1, f"dopo la Bocca Gigante si riparte dal livello 1 (secondo giro)",
           r.v("level") == 1 and r.v("lap") == 1 and r.flag(0) == 1, f"level={r.v('level')} giro={r.v('lap')}")
     check(1, "nel secondo giro le bocche sono piu' veloci", r.v("speed") == MOUTH_SPEED[0] - 2,
           f"speed={r.v('speed')} (primo giro {MOUTH_SPEED[0]})")
@@ -819,6 +897,8 @@ def main():
         r = s.save()
         check(level, "ultima vita persa: game over e ritorno al titolo", r.flag(0) == 0)
         s.wait(0.3)
+    r = start_level(s, LEVELS + 1)
+    check(1, "il livello segreto non si sceglie con Select (dopo il 6 torna l'1)", r.v("level") == 1)
     s.close()
 
     fails = [x for x in RESULTS if not x[2]]

@@ -27,9 +27,9 @@ Dura circa 25 minuti e salva gli screenshot di ogni livello nella cartella indic
 - `model.py` è un modello Python del caricamento dei livelli e delle regole di movimento del BAS.
   Serve a calcolare i percorsi e a verificare che ogni zuccherino e ogni sacchetto sia raggiungibile.
 - `sugar_layout.py` calcola e verifica la disposizione degli zuccherini (`data sugar`). Simula i colpi di cioccolatino per sapere quali oggetti il giocatore riesce davvero a bucare. Poi sceglie uno zuccherino per sezione: fuori dagli oggetti indistruttibili, oppure dentro la riga distruttibile di una tazza o di un muro di cioccolato. Da lanciare con `python3 sugar_layout.py`; stampa le mappe e la tabella per il BAS.
-- `sfx_from_soundtest.py` estrae gli effetti scelti dal *bbsoundtest* di batari Basic e genera il lettore di effetti del banco 2 (`python3 sfx_from_soundtest.py bbsoundtest.bas`).
+- `sfx_from_soundtest.py` estrae gli effetti scelti dal *bbsoundtest* di batari Basic e genera il lettore di effetti del banco 2 (`python3 sfx_from_soundtest.py bbsoundtest.bas`). Per risparmiare ROM unisce le note consecutive uguali (senza cambiare il suono) e dimezza i tre effetti più lunghi (esplosione, super potere, cambio livello).
 - `test_features.py` (circa 1 minuto) prova le novità di giocabilità: fuga finale (bocche e musica al doppio), tempo in scadenza (musica veloce, barra rossa), bonus tempo a fine livello, fine del super potere e combo "partita perfetta" (zuccherino doppio senza vite perse). Si lancia come `test_all.py`.
-- `test_all.py` gioca una partita completa sui 6 livelli, fino all'inizio del secondo giro. Per ogni livello controlla:
+- `test_all.py` gioca una partita completa sui 6 livelli e sul livello segreto della Bocca Gigante, fino all'inizio del secondo giro. Per ogni livello controlla:
   - nessun oggetto sospeso nel vuoto: tutto poggia sul piano di lavoro o sul pavimento, oppure è appeso al soffitto o al piano;
   - le gocce: un solo pixel che scende, senza residui;
   - gli zuccherini: uno per sezione, compaiono uno alla volta e restano fermi, ognuno è fuori dagli oggetti indistruttibili o dentro uno distruttibile; tutti si raccolgono (il test buca gli oggetti a colpi di cioccolatino quando serve); nessuno viene contato due volte;
@@ -43,4 +43,5 @@ Dura circa 25 minuti e salva gli screenshot di ogni livello nella cartella indic
   - la selezione del livello con Select;
   - i muri spingibili (3 al livello 5, 1 al livello 6): si spostano spingendoli con la levetta nei due sensi, si fermano a fine corsia, non si distruggono e schiacciano le bocche;
   - una bocca uccisa (con un cioccolatino o schiacciata) sparisce e ricompare nel suo angolo dopo circa 4 secondi;
-  - dopo il livello 6 si riparte dal livello 1 con le bocche più veloci.
+  - dopo il livello 6 arriva la Bocca Gigante: sputa, lo sputo toglie una vita, 8 colpi svuotano la barra dell'energia, alla sconfitta compare il sacchetto (+50 a colpo, +500 alla fine); non si sceglie con Select;
+  - dopo la Bocca Gigante si riparte dal livello 1 con le bocche più veloci.

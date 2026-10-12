@@ -14,7 +14,7 @@
 > 🔧 **Versione Atari aggiornata**
 > - Gli zuccherini compaiono uno alla volta, fermi, senza sfarfallio.
 > - Gli oggetti della parte alta poggiano sempre sul piano di lavoro; lampade, gocce e cioccolato della parte bassa sono appesi al piano.
-> - **6 livelli**: il nuovo livello 5 ha solo 3 muri mobili, il vecchio livello 5 diventa il 6. Dopo l'ultimo livello si riparte dal primo con le bocche più veloci (un giro in più), finché ci sono vite.
+> - **6 livelli**: il nuovo livello 5 ha solo 3 muri mobili, il vecchio livello 5 diventa il 6. Dopo il livello 6 c'è il **livello segreto della Bocca Gigante** (vedi sotto), poi si riparte dal primo con le bocche più veloci (un giro in più), finché ci sono vite.
 > - I muri mobili si spostano quando il biscotto li spinge e **schiacciano le bocche** (+10, conta come bocca colpita).
 > - Bocche più lente, che passano sopra a qualsiasi oggetto. Una bocca uccisa ricompare nel suo angolo dopo circa 4 secondi.
 > - Schermata iniziale: il biscotto, inseguito dalla bocca, scorre in continuo entrando sempre da destra.
@@ -28,6 +28,7 @@
 >   - *fine super potere*: nell'ultimo secondo il biscotto lampeggia più veloce e tre bip avvisano che sta finendo;
 >   - *combo partita perfetta*: finché nel livello non perdi una vita ogni zuccherino vale doppio (100 punti invece di 50);
 >   - lo zuccherino dorato (super potere) è giallo, lo zuccherino chiave è azzurro.
+> - **Livello segreto: la Bocca Gigante** (boss, dopo il livello 6). Una bocca enorme con i denti insegue il biscotto e gli sputa contro: lo sputo toglie una vita. Si batte con 8 colpi di cioccolatino; la barra dell'energia sul pavimento si svuota a ogni colpo. Ogni colpo la respinge nell'angolo opposto e la rende più veloce; dopo il quarto colpo sputa tre volte al secondo, dopo il quinto lampeggia. Ogni colpo vale 50 punti, la vittoria 500 in più, poi compare il sacchetto. Non si sceglie con Select.
 > - Altre correzioni: un colpo alla bocca vale +10 una volta sola; la luce si spegne a 32 secondi ma si può riaccendere subito, e ogni nuovo livello parte con la luce accesa (tranne il 5).
 > - La ROM viene provata in automatico nell'emulatore Stella: [`snack_and_roll/tests`](snack_and_roll/tests/README.md).
 
@@ -123,6 +124,7 @@ Nella versione Atari aggiornata:
 - zuccherino: 50 punti, **100** se nel livello non hai ancora perso una vita (combo "partita perfetta");
 - bocca colpita o schiacciata da un muro: 10 punti;
 - bonus tempo a fine livello: 20 punti per ogni segmento rimasto della barra del tempo.
+- Bocca Gigante: 50 punti per ogni colpo, 500 in più quando è sconfitta.
 
 ---
 
