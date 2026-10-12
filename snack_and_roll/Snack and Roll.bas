@@ -36,6 +36,9 @@
    ; numero di livelli: dopo l'ultimo si riparte dal primo con le bocche
    ; piu' veloci (un "giro" in piu')
    const _Levels = 6
+   ; livello segreto: la Bocca Gigante (boss) dopo il livello 6, poi si
+   ; riparte dal livello 1. Non si sceglie con Select.
+   const _Boss = 7
    ; frame di attesa prima che una bocca uccisa ricompaia (circa 4 secondi)
    const _Mouth_Respawn = 200
 
@@ -228,7 +231,7 @@ __game_start
    _b0_enableStart{0} = 0
    missile1y = 200 : _choco_count = 0 : bally = 200 : missile0y = 200
    ; silenzio sugli effetti, la musica del titolo riparte da capo
-   _sfxId = 0 : AUDV0 = 0 : _music_index = 0
+   _sfxId = 0 : AUDV0 = 0 : _music_index = 0 : NUSIZ1 = 0
    goto __draw_title
 __skip_gameover_clear
    _b0_enableStart{0} = 0
@@ -328,7 +331,7 @@ __skip_attract
    ; angolo dopo _Mouth_Respawn frame.
    ;*************************************************************************************************************************
    temp1 = 1
-   if _level > 3 then temp1 = 2
+   if _level > 3 && _level < _Boss then temp1 = 2
 
    if _hitCooldown then _hitCooldown = _hitCooldown - 1
 
@@ -530,6 +533,8 @@ end
    ; ---- 9 ----
    NUSIZ1=$00
    if _level> 3 then NUSIZ1=$05
+   ; Bocca Gigante: player1 largo 4 volte, sputo (missile1) largo 4
+   if _level = _Boss then NUSIZ1=$27
 
    ; ---- 4 ----
    ; ultimi 2 segmenti di tempo: la barra lampeggia in rosso
@@ -668,6 +673,8 @@ end
 
 __skip_animation_player0
 
+   ; la Bocca Gigante ha la sua grafica (banco 2)
+   if _level = _Boss && _b0_enableStart{0} then goto __skip_animation_player1
    if !(_frame_counter & 7) then player1:
    %01111110
    %10000001
@@ -681,6 +688,7 @@ end
    %11111111
    %01100110
 end
+__skip_animation_player1
    if !_b0_enableStart{0} then goto __done
 
    ;*************************************************************************************************************************
@@ -818,6 +826,7 @@ __destroy_mouth
    callmacro sfx 6
    ; il cioccolatino sparisce (prima continuava e poteva colpire due volte)
    _b7_gameMissile0Moving{7} = 0 : missile0y = 200
+   if _level = _Boss then gosub __boss_hit bank2 : goto __done
    ; la collisione si riferisce alla bocca disegnata nel frame precedente:
    ; con due bocche e' l'altra rispetto a _mouthIndex
    if _level > 3 then _mouthIndex = _mouthIndex ^ 1
@@ -842,26 +851,14 @@ __decrease_timer_bar
    goto __done
 
 __change_level
-   ; bonus tempo: ogni segmento rimasto della barra vale 20 punti, contati
-   ; uno alla volta con un tic
-__time_bonus
-   if !pfscore1 then goto __bonus_done
-   pfscore1 = pfscore1 * 2 : score = score + 20
-   AUDC0 = 4 : AUDF0 = 8 : AUDV0 = 8
-   ; contatore: _mouthTick (drawscreen sovrascrive le variabili temp)
-   _mouthTick = 6
-__bonus_wait
-   drawscreen
-   if _mouthTick = 3 then AUDV0 = 0
-   _mouthTick = _mouthTick - 1
-   if _mouthTick then goto __bonus_wait
-   goto __time_bonus
-__bonus_done
+   ; bonus tempo (banco 2)
+   gosub __time_bonus bank2
    _sfxId = 0
    callmacro sfx 8
    _level=_level+1
-   ; dopo l'ultimo livello si riparte dal primo, un giro piu' veloce
-   if _level > _Levels then _level = 1 : _lap = _lap + 1
+   ; dopo l'ultimo livello c'e' la Bocca Gigante, poi si riparte dal
+   ; primo livello, un giro piu' veloce
+   if _level > _Boss then _level = 1 : _lap = _lap + 1
 
 __skip_to_change
    pfscorecolor = $08
@@ -910,7 +907,7 @@ end
    ; frame tra un passo e l'altro delle bocche, per livello (il primo
    ; valore non si usa: i livelli partono da 1)
    data mouthspeed
-   0, 12, 10, 9, 8, 8, 7
+   0, 12, 10, 9, 8, 8, 7, 10
 end
 
    ;*************************************************************************************************************************
@@ -972,6 +969,22 @@ end
    ;#########################################################################################################################
    bank 2
 
+   ; grafica della Bocca Gigante: 8 righe con due file di denti. Sta
+   ; all'inizio del banco perche' i dati della grafica non devono
+   ; attraversare un confine di pagina (altrove si sprecano byte)
+__boss_gfx
+   player1:
+   %00111100
+   %01111110
+   %11111111
+   %10100101
+   %10000001
+   %10100101
+   %11111111
+   %01111110
+end
+   return
+
    ;*************************************************************************************************************************
    ; PLAYFIELD DEL LIVELLO (eseguito una volta all'inizio del livello)
    ;_________________________________________________________________________________________________________________________
@@ -989,6 +1002,7 @@ end
    ;    le lampade e le gocce della parte alta sono appese al soffitto.
    ;*************************************************************************************************************************
 __load_level
+   missile1height = 1
    _current_object_level = _level - 1
    _current_object_level = _current_object_level * 8
    temp2 = _current_object_level + 7 : _ballx = objects[temp2]
@@ -1048,6 +1062,13 @@ __skip_tavoli
    if !_playfield_up && _current_bit_object = 16 then _playfield_section = 3 : _playfield_up = 6 : _playfield_down = 8
    if _current_bit_object then goto __loop_objects
 
+   ; --- BOCCA GIGANTE: niente zuccherini (la chiave c'e' gia'), lo sputo
+   ; e' alto 4 righe, barra dell'energia (8 pixel) sul pavimento ---
+   if _level <> _Boss then goto __no_boss_setup
+   _choco_bits = 255 : _b2_hasKey{2} = 1 : missile1height = 4
+   pfhline 12 10 19 on
+__no_boss_setup
+
    ; --- MURI SPINGIBILI (colonna 1 di objects, sezioni basse b4-b7) ---
    ; un muro per bit acceso, nella colonna sezione+2 (5, 12, 19, 26),
    ; poggiato sul pavimento (righe 8-10). Al massimo 3 muri.
@@ -1076,6 +1097,7 @@ __wall_next
    ; Sopra: righe 0-3 (appese al soffitto). Sotto: righe 6-9 (appese al piano).
    ;*************************************************************************************************************************
 __update_drops
+   if _level = _Boss then goto __boss
    if _frame_counter & 7 then return otherbank
    temp2 = _level - 1
    temp2 = temp2 * 8
@@ -1097,6 +1119,92 @@ __drop_next
    temp5 = temp5 + 7
    if temp5 = 31 then temp5 = 3 : temp6 = 6
    goto __drop_loop
+
+   ;*************************************************************************************************************************
+   ; BOCCA GIGANTE (livello segreto, boss) - chiamata ad ogni frame
+   ;_________________________________________________________________________________________________________________________
+   ; La bocca 0, larga 4 volte, insegue il biscotto e gli sputa contro
+   ; (missile1, posizione in _mouth1x/_mouth1y, 200 = nessuno sputo: la
+   ; seconda bocca nel livello del boss non c'e'). Ogni colpo di
+   ; cioccolatino (_choco_count = colpi subiti) spegne un pixel della
+   ; barra dell'energia, la respinge nell'angolo opposto e la rende piu'
+   ; veloce e piu' cattiva. All'ottavo colpo e' sconfitta: +500 punti e
+   ; compare il sacchetto.
+   ;*************************************************************************************************************************
+__boss
+   if _choco_count < 8 then goto __boss_alive
+   _mouth0wait = 250 : _mouth0y = 200 : missile1y = 200
+   return otherbank
+__boss_alive
+   gosub __boss_gfx
+__boss_closed
+   player1:
+   %00111100
+   %01111110
+   %11111111
+   %11111111
+   %10111101
+   %11111111
+   %11111111
+   %01111110
+end
+__boss_gfx_done
+   ; quasi sconfitta (5 colpi o piu'): lampeggia
+   temp1 = _frame_counter & 4
+   if temp1 && _choco_count > 4 then COLUP1 = $0E
+   ; frame per passo: 10 all'inizio, 3 al settimo colpo
+   _speed = 10 - _choco_count
+   if _mouth0x > 120 then _mouth0x = 120
+   if _mouth1y < 200 then goto __spit_move
+   ; uno sputo al secondo, tre al secondo dopo il quarto colpo
+   temp1 = _frame_counter
+   if _choco_count > 3 then temp1 = _frame_counter & 15
+   if temp1 then goto __spit_show
+   _mouth1x = _mouth0x + 14
+   _mouth1y = _mouth0y + 2
+   if player0y < _mouth0y then _mouth1y = _mouth0y - 10
+   callmacro sfx 1
+__spit_move
+   ; lo sputo si allontana dalla bocca, verso l'alto o verso il basso
+   if _mouth1y > _mouth0y then _mouth1y = _mouth1y + 2 else _mouth1y = _mouth1y - 2
+   if _mouth1y > 92 then _mouth1y = 200
+   if !collision(player0, missile1) then goto __spit_show
+   _mouth1y = 200
+   if _hitCooldown then goto __spit_show
+   pfscore2 = pfscore2 / 4 : pfscore1 = 255 : _hitCooldown = 90
+__spit_show
+   missile1x = _mouth1x : missile1y = _mouth1y
+   return otherbank
+
+   ; colpo di cioccolatino alla Bocca Gigante
+__boss_hit
+   _choco_count = _choco_count + 1 : score = score + 40
+   temp5 = 20 - _choco_count
+   pfpixel temp5 10 off
+   _mouth1y = 200 : _mouth0y = 8 : _mouth0x = 120
+   if player0x > 70 then _mouth0x = 20
+   if _choco_count < 8 then return otherbank
+   _b5_enablePalyer1{5} = 0 : score = score + 500
+   callmacro sfx 7
+   return otherbank
+
+   ;*************************************************************************************************************************
+   ; BONUS TEMPO (chiamato da __change_level)
+   ;*************************************************************************************************************************
+   ; bonus tempo: ogni segmento rimasto della barra vale 20 punti, contati
+   ; uno alla volta con un tic
+__time_bonus
+   if !pfscore1 then return otherbank
+   pfscore1 = pfscore1 * 2 : score = score + 20
+   AUDC0 = 4 : AUDF0 = 8 : AUDV0 = 8
+   ; contatore: _mouthTick (drawscreen sovrascrive le variabili temp)
+   _mouthTick = 6
+__bonus_wait
+   drawscreen
+   if _mouthTick = 3 then AUDV0 = 0
+   _mouthTick = _mouthTick - 1
+   if _mouthTick then goto __bonus_wait
+   goto __time_bonus
 
    ;*************************************************************************************************************************
    ; MURI SPINGIBILI
@@ -1229,12 +1337,12 @@ __sfx_note
    _sfxPos = _sfxPos + 3
    return otherbank
 
-   ; pewpew (20 note) - sparo
+   ; pewpew (19 note) - sparo
    data sfx_shot
-   244, 28, 1, 244, 28, 1, 180, 9, 1, 172, 3, 1, 236, 4, 1, 196, 18, 1
-   244, 25, 1, 244, 28, 1, 84, 7, 1, 84, 9, 1, 100, 13, 1, 84, 12, 1
-   100, 24, 1, 84, 28, 1, 52, 30, 1, 52, 7, 1, 52, 9, 1, 36, 12, 1
-   44, 4, 1, 28, 6, 1, 255
+   244, 28, 2, 180, 9, 1, 172, 3, 1, 236, 4, 1, 196, 18, 1, 244, 25, 1
+   244, 28, 1, 84, 7, 1, 84, 9, 1, 100, 13, 1, 84, 12, 1, 100, 24, 1
+   84, 28, 1, 52, 30, 1, 52, 7, 1, 52, 9, 1, 36, 12, 1, 44, 4, 1
+   28, 6, 1, 255
 end
 
    ; dragit (10 note) - muro spinto
@@ -1243,10 +1351,10 @@ end
    152, 30, 1, 103, 17, 1, 55, 14, 1, 39, 6, 1, 255
 end
 
-   ; electrobump (9 note) - scossa / scivolata (inizio rallentamento)
+   ; electrobump (8 note) - scossa / scivolata (inizio rallentamento)
    data sfx_slow
-   168, 8, 2, 172, 8, 2, 166, 8, 2, 174, 8, 2, 134, 8, 2, 134, 8, 2
-   110, 8, 2, 70, 8, 2, 38, 8, 2, 255
+   168, 8, 2, 172, 8, 2, 166, 8, 2, 174, 8, 2, 134, 8, 4, 110, 8, 2
+   70, 8, 2, 38, 8, 2, 255
 end
 
    ; poof1 (12 note) - blocco abbattuto
@@ -1256,51 +1364,37 @@ end
    255
 end
 
-   ; gotthecoin (23 note) - zuccherino preso
+   ; gotthecoin (16 note) - zuccherino preso
    data sfx_sugar
-   252, 4, 1, 252, 4, 1, 228, 10, 1, 244, 10, 1, 244, 10, 1, 212, 10, 1
-   148, 10, 1, 148, 10, 1, 132, 10, 1, 116, 10, 1, 100, 10, 1, 84, 10, 1
-   52, 10, 1, 116, 10, 1, 148, 10, 1, 52, 10, 1, 20, 10, 1, 20, 10, 1
-   20, 10, 1, 4, 10, 1, 20, 10, 1, 20, 10, 1, 20, 10, 1, 255
+   252, 4, 2, 228, 10, 1, 244, 10, 2, 212, 10, 1, 148, 10, 2, 132, 10, 1
+   116, 10, 1, 100, 10, 1, 84, 10, 1, 52, 10, 1, 116, 10, 1, 148, 10, 1
+   52, 10, 1, 20, 10, 3, 4, 10, 1, 20, 10, 3, 255
 end
 
-   ; explosion (46 note) - bocca uccisa
+   ; explosion (23 note) - bocca uccisa
    data sfx_mouth
-   40, 1, 1, 92, 11, 1, 134, 4, 1, 254, 3, 1, 246, 9, 1, 246, 13, 1
-   254, 4, 1, 134, 15, 1, 70, 9, 1, 49, 22, 1, 70, 12, 1, 86, 9, 1
-   54, 10, 1, 86, 9, 1, 134, 13, 1, 70, 9, 1, 110, 4, 1, 86, 15, 1
-   118, 15, 1, 126, 4, 1, 102, 8, 1, 142, 3, 1, 102, 15, 1, 86, 9, 1
-   86, 6, 1, 94, 3, 1, 102, 14, 1, 94, 2, 1, 54, 15, 1, 102, 14, 1
-   86, 9, 1, 86, 12, 1, 54, 15, 1, 142, 4, 1, 54, 12, 1, 54, 15, 1
-   102, 12, 1, 70, 15, 1, 86, 15, 1, 54, 15, 1, 70, 10, 1, 54, 15, 1
-   54, 8, 1, 54, 12, 1, 54, 14, 1, 54, 8, 1, 255
+   40, 1, 2, 134, 4, 2, 246, 9, 2, 254, 4, 2, 70, 9, 2, 70, 12, 2
+   54, 10, 2, 134, 13, 2, 110, 4, 2, 118, 15, 2, 102, 8, 2, 102, 15, 2
+   86, 6, 2, 102, 14, 2, 54, 15, 2, 86, 9, 2, 54, 15, 2, 54, 12, 2
+   102, 12, 2, 86, 15, 2, 70, 10, 2, 54, 8, 2, 54, 14, 2, 255
 end
 
-   ; powerup (53 note) - super potere (zuccherino dorato)
+   ; powerup (22 note) - super potere (zuccherino dorato)
    data sfx_power
-   246, 30, 1, 244, 28, 1, 252, 12, 1, 252, 12, 1, 252, 12, 1, 244, 28, 1
-   164, 27, 1, 148, 22, 1, 116, 18, 1, 228, 18, 1, 132, 18, 1, 52, 13, 1
-   132, 18, 1, 244, 18, 1, 252, 11, 1, 252, 11, 1, 204, 11, 1, 100, 28, 1
-   196, 28, 1, 252, 7, 1, 156, 7, 1, 172, 5, 1, 116, 24, 1, 252, 7, 1
-   172, 7, 1, 204, 5, 1, 92, 5, 1, 54, 30, 1, 76, 3, 1, 76, 3, 1
-   76, 3, 1, 140, 2, 1, 76, 3, 1, 38, 30, 1, 236, 10, 1, 252, 10, 1
-   212, 30, 1, 132, 25, 1, 180, 21, 1, 244, 21, 1, 132, 21, 1, 116, 15, 1
-   116, 21, 1, 196, 21, 1, 124, 6, 1, 36, 15, 1, 70, 0, 1, 12, 1, 1
-   68, 10, 1, 132, 10, 1, 52, 10, 1, 52, 7, 1, 52, 10, 1, 255
+   246, 30, 2, 252, 12, 4, 164, 27, 2, 116, 18, 2, 132, 18, 4, 252, 11, 2
+   204, 11, 2, 196, 28, 2, 156, 7, 2, 116, 24, 2, 172, 7, 2, 92, 5, 2
+   76, 3, 6, 236, 10, 2, 212, 30, 2, 180, 21, 2, 132, 21, 2, 116, 21, 2
+   124, 6, 2, 70, 0, 2, 68, 10, 2, 52, 10, 3, 255
 end
 
-   ; oneup (50 note) - cambio livello
+   ; oneup (18 note) - cambio livello
    data sfx_level
-   244, 22, 1, 244, 22, 1, 132, 22, 1, 68, 19, 1, 36, 19, 1, 22, 18, 1
-   22, 18, 1, 244, 18, 1, 244, 18, 1, 132, 18, 1, 68, 17, 1, 36, 16, 1
-   20, 16, 1, 20, 16, 1, 132, 10, 1, 132, 10, 1, 6, 30, 1, 6, 30, 1
-   6, 30, 1, 6, 30, 1, 132, 13, 1, 132, 13, 1, 132, 13, 1, 100, 13, 1
-   6, 30, 1, 6, 30, 1, 6, 30, 1, 132, 12, 1, 68, 12, 1, 6, 30, 1
-   6, 30, 1, 6, 30, 1, 6, 30, 1, 100, 9, 1, 36, 1, 1, 68, 9, 1
-   36, 9, 1, 68, 9, 1, 68, 9, 1, 36, 1, 1, 68, 9, 1, 4, 1, 1
-   68, 9, 1, 36, 1, 1, 68, 9, 1, 36, 9, 1, 36, 9, 1, 68, 9, 1
-   36, 1, 1, 20, 1, 1, 255
+   244, 22, 2, 132, 22, 2, 36, 19, 2, 22, 18, 2, 244, 18, 2, 68, 17, 2
+   20, 16, 2, 132, 10, 2, 6, 30, 4, 132, 13, 4, 6, 30, 4, 68, 12, 2
+   6, 30, 4, 36, 1, 2, 36, 9, 2, 68, 9, 8, 36, 9, 2, 36, 1, 2
+   255
 end
+
 
 
    ;*************************************************************************************************************************
@@ -1311,7 +1405,7 @@ end
    ; b4 | b5 | b6 | b7
    ;_________________________________________________________________________________________________________________________
    ;0.TAZZE 1.MURI SPINGIBILI (ex-COLTELLI, solo b4-b7) 2.CIOCCOLATO 3.GOCCE 4.LAMPADE 5.TAVOLI+SEDIA 6.PIANO 7.ballx
-   ; LIVELLI (6)
+   ; LIVELLI (6 + il livello segreto della Bocca Gigante)
    ; Livello 1: lampade basse in b5 e b7 (appese al piano).
    ; Livello 2: una lampada bassa in b7; nelle sezioni con le tazze una
    ; lampada chiuderebbe la colonna dal piano al pavimento e taglierebbe
@@ -1319,6 +1413,7 @@ end
    ; Livello 5: solo muri spingibili (3, nelle sezioni b5, b6, b7).
    ; Livello 6: un solo tavolo in basso (sezione b4) per lasciare la
    ; corsia libera (colonne 8-16) al muro spingibile in b5.
+   ; Livello 7 (Bocca Gigante): arena vuota, il piano ha tre passaggi.
 
    data objects
 
@@ -1328,6 +1423,7 @@ end
    %00000000, %00000000, %10101010, %01010101, %00000000, %00000000, %00101011, 136,
    %00000000, %11100000, %00000000, %00000000, %00000000, %00000000, %00011011, 136,
    %11000000, %00100000, %00000011, %00001100, %00010000, %00010000, %00101011, 18,
+   %00000000, %00000000, %00000000, %00000000, %00000000, %00000000, %01010101, 136,
 end
 
    ;*************************************************************************************************************************
