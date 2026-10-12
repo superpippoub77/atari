@@ -258,7 +258,10 @@ __main_loop
    ; 1 = pausa, altro = nuova nota (valore AUDF).
    ; Titolo: tema "avventura" stile Indiana Jones (AUDC 4), un passo ogni
    ; 6 frame (una semicroma). In gioco: arpeggio leggero (AUDC 12, volume
-   ; basso), un passo ogni 8 frame.
+   ; basso), un passo ogni 8 frame. Quando il tempo sta per finire
+   ; (ultimi 2 segmenti) o durante la fuga finale (sacchetto visibile)
+   ; la musica raddoppia il ritmo e alza il volume; col tempo in
+   ; scadenza si sente anche un battito del cuore (tum-tum) ogni secondo.
    if _b0_enableStart{0} then goto __game_music
    _mouthTick = _mouthTick + 1
    if _mouthTick < 6 then goto __music_done
@@ -269,10 +272,19 @@ __main_loop
    AUDC1 = 4 : temp2 = 5
    goto __music_note
 __game_music
-   if _frame_counter & 7 then goto __music_done
+   temp3 = 7
+   if pfscore1 < 224 then temp3 = 3
+   if bally < 200 then temp3 = 3
+   temp4 = _frame_counter & temp3
+   if temp4 then goto __music_done
    temp1 = gamemusic[_music_index]
    _music_index = (_music_index + 1) & 31
    AUDC1 = 12 : temp2 = 2
+   if temp3 = 3 then temp2 = 4
+   if pfscore1 >= 224 then goto __music_note
+   ; battito del cuore: due colpi bassi a inizio secondo
+   if _frame_counter = 0 then AUDC1 = 6 : temp1 = 24 : temp2 = 10
+   if _frame_counter = 8 then AUDC1 = 6 : temp1 = 26 : temp2 = 7
 __music_note
    if !temp1 then goto __music_done
    if temp1 = 1 then AUDV1 = 0 : goto __music_done
@@ -336,7 +348,10 @@ __mouth1_alive
    ; passo delle bocche (tutte insieme) ogni _speed frame
    if _hitCooldown then goto __mouth_still
    _mouthTick = _mouthTick + 1
-   if _mouthTick < _speed then goto __mouth_still
+   ; fuga finale: con il sacchetto visibile le bocche vanno al doppio
+   temp2 = _speed
+   if bally < 200 then temp2 = _speed / 2
+   if _mouthTick < temp2 then goto __mouth_still
    _mouthTick = 0
    temp6 = 0
    if !_mouth0wait then gosub __move_mouth
@@ -421,8 +436,10 @@ __sugar_index_ok
    temp5 = temp3/8
    missile1y = temp5*8+4
    if temp5 > 3 then missile1y = missile1y + 16
-   ; lo zuccherino 0 (dorato) e' giallo, gli altri prendono il colore della bocca
-   if !temp4 then COLUP1 = $1E
+   ; lo zuccherino 0 (dorato) e' giallo, l'1 (chiave) e' azzurro, gli
+   ; altri prendono il colore della bocca
+   if !temp4 then COLUP1 = $2E
+   if temp4 = 1 then COLUP1 = $9C
 
 __skip_all_sugar
 
@@ -512,14 +529,26 @@ end
    if _level> 3 then NUSIZ1=$05
 
    ; ---- 4 ----
-   if _frame_counter=frame_limit && pfscore1 <=8 then pfscorecolor = rand&2
+   ; ultimi 2 segmenti di tempo: la barra lampeggia in rosso
+   pfscorecolor = $08
+   if pfscore1 < 224 && _frame_counter < 24 then pfscorecolor = $64
    ; ---- 5 ----
    if !(_seconds_counter&7) then _b6_enableSlowMotion{6} = 0
    ; ---- 6 ----
    if !_b4_enableLight{4} then COLUP1 = $0
    ; ---- 7 ----
    if _b6_enableSlowMotion{6} then COLUP0 = $20 else COLUP0 = _P0_color
-   if _hitCooldown && _frame_counter&4 then COLUP0 = $00
+   ; super potere / invulnerabilita': il biscotto lampeggia, piu' veloce
+   ; nell'ultimo secondo, con tre bip di avviso prima della fine
+   temp1 = 4
+   if _hitCooldown < 48 then temp1 = 2
+   temp2 = _frame_counter & temp1
+   if _hitCooldown && temp2 then COLUP0 = $00
+   if _hitCooldown >= 48 || _sfxId then goto __no_power_warn
+   temp1 = _hitCooldown & 15
+   if temp1 = 8 then AUDC0 = 4 : AUDF0 = 6 : AUDV0 = 8
+   if temp1 = 4 then AUDV0 = 0
+__no_power_warn
    ; ---- 1 ----
    if !_frame_counter && !(_seconds_counter & 15) then goto __decrease_timer_bar
    ; ---- 2 ----
@@ -810,6 +839,22 @@ __decrease_timer_bar
    goto __done
 
 __change_level
+   ; bonus tempo: ogni segmento rimasto della barra vale 20 punti, contati
+   ; uno alla volta con un tic
+__time_bonus
+   if !pfscore1 then goto __bonus_done
+   pfscore1 = pfscore1 * 2 : score = score + 20
+   AUDC0 = 4 : AUDF0 = 8 : AUDV0 = 8
+   ; contatore: _mouthTick (drawscreen sovrascrive le variabili temp)
+   _mouthTick = 6
+__bonus_wait
+   drawscreen
+   if _mouthTick = 3 then AUDV0 = 0
+   _mouthTick = _mouthTick - 1
+   if _mouthTick then goto __bonus_wait
+   goto __time_bonus
+__bonus_done
+   _sfxId = 0
    callmacro sfx 8
    _level=_level+1
    ; dopo l'ultimo livello si riparte dal primo, un giro piu' veloce
