@@ -41,7 +41,8 @@ Dura circa 25 minuti e salva gli screenshot di ogni livello nella cartella indic
   - la luce si spegne dopo 32 secondi e si riaccende sparando sul piano di lavoro;
   - la barra del tempo, le vite e il game over;
   - la selezione del livello con Select;
-  - i muri spingibili (3 al livello 5, 1 al livello 6): si spostano spingendoli con la levetta nei due sensi, si fermano a fine corsia, non si distruggono e schiacciano le bocche;
+  - i muri spingibili (3 al livello 5, 1 al livello 6): si spostano spingendoli con la levetta nei due sensi, si fermano a fine corsia, non si distruggono e schiacciano le bocche; alla fine tornano al loro posto;
+  - livello 5: gli zuccherini delle stanze chiuse non si raggiungono senza spingere un muro; il test trova la spinta giusta (`model.single_pushes`) e la esegue con la levetta;
   - una bocca uccisa (con un cioccolatino o schiacciata) sparisce e ricompare nel suo angolo dopo circa 4 secondi;
   - dopo il livello 6 arriva la Bocca Gigante: sputa, lo sputo toglie una vita, 8 colpi svuotano la barra dell'energia, alla sconfitta compare il sacchetto (+50 a colpo, +500 alla fine); non si sceglie con Select;
   - dopo la Bocca Gigante si riparte dal livello 1 con le bocche più veloci.

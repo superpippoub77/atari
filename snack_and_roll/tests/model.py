@@ -6,7 +6,7 @@ OBJECTS = [
     [0b01111111, 0b00000000, 0b00000000, 0b00000000, 0b10000000, 0b00000000, 0b00101011, 136],
     [0b00000000, 0b00000000, 0b00110111, 0b00000000, 0b00000000, 0b00000000, 0b00001011, 18],
     [0b00000000, 0b00000000, 0b10101010, 0b01010101, 0b00000000, 0b00000000, 0b00101011, 136],
-    [0b00000000, 0b11100000, 0b00000000, 0b00000000, 0b00000000, 0b00000000, 0b00011011, 136],
+    [0b00000000, 0b11100000, 0b00000000, 0b00001010, 0b11100000, 0b00000000, 0b01111110, 136],
     [0b11000000, 0b00100000, 0b00000011, 0b00001100, 0b00010000, 0b00010000, 0b00101011, 18],
 ]
 LEVELS = len(OBJECTS)
@@ -75,9 +75,9 @@ def build(level, objects=OBJECTS):
 
 
 def wall_cols(level, objects=OBJECTS):
-    """Muri spingibili: colonna 1 di objects, bit 4-7 -> colonne 5, 12, 19, 26."""
+    """Muri spingibili: colonna 1 di objects, bit 4-7 -> colonne 4, 11, 18, 25."""
     bits = objects[level - 1][1] >> 4
-    return [3 + 7 * k + 2 for k in range(4) if bits & (1 << k)][:3]
+    return [3 + 7 * k + 1 for k in range(4) if bits & (1 << k)][:3]
 
 
 def drop_cells(level, objects=OBJECTS):
@@ -222,7 +222,7 @@ def missile_hit(grid, px, py, d, level=1, push_col=None):
             return "light"
         if not hit:
             continue
-        if push_col is not None and t6 > 7 and t5 in (push_col if isinstance(push_col, (list, set, tuple)) else [push_col]):
+        if push_col is not None and t6 > 5 and t5 in (push_col if isinstance(push_col, (list, set, tuple)) else [push_col]):
             return None
         if t6 in DESTRUCTIBLE_ROWS:
             return (t5, t6)
@@ -265,3 +265,46 @@ def lamp_cells(level, objects=OBJECTS):
             up = 0 if i < 4 else 6
             cells |= {(s, up), (s + 1, up), (s + 2, up), (s + 1, up + 1)}
     return cells
+
+
+# --- muri spingibili: zone raggiungibili spingendo un muro ----------------
+def can_push(cells_reach, col, d):
+    """Il biscotto, in una posizione raggiungibile, spinge il muro della
+    colonna col nella direzione d (1 destra, -1 sinistra) come nel BAS:
+    parte bassa del biscotto nelle righe 8-10 e colonna davanti = muro.
+    Per seguire il muro oltre la sua vecchia colonna il biscotto deve
+    stare tutto sotto la riga 7 (sopra il muro puo' esserci una lampada)."""
+    if d == 1:
+        return {(x, y) for x, y in cells_reach if (y - 4) // 8 >= 8 and ((x - 9) & 255) // 4 == col}
+    return {(x, y) for x, y in cells_reach if (y - 4) // 8 >= 8 and ((x - 18) & 255) // 4 == col and x > 10}
+
+
+def single_pushes(static, walls_now, reach, max_cols=8):
+    """Tutti gli stati raggiungibili con UNA spinta di un muro (di 1..max_cols
+    colonne). static = celle senza i muri. Ritorna [(muro, d, n, muri_nuovi)]."""
+    out = []
+    for i, c in enumerate(walls_now):
+        for d in (1, -1):
+            if not can_push(reach, c, d):
+                continue
+            others = {(w, rr) for j, w in enumerate(walls_now) if j != i for rr in (8, 9, 10)}
+            for n in range(1, max_cols + 1):
+                dest = c + d * n
+                if not 0 <= dest <= 31 or any((dest, rr) in static or (dest, rr) in others for rr in (8, 9, 10)):
+                    break
+                new = list(walls_now)
+                new[i] = dest
+                out.append((i, d, n, tuple(new)))
+    return out
+
+
+def push_reach(level, objects=OBJECTS, extra=()):
+    """Raggiungibile senza spingere e con una spinta di un muro."""
+    walls_now = tuple(wall_cols(level, objects))
+    cells = build(level, objects) | drop_cells(level, objects) | set(extra)
+    static = cells - {(c, r) for c in walls_now for r in (8, 9, 10)}
+    reach0 = Grid(cells).reachable()
+    union = set(reach0)
+    for _, _, _, ws in single_pushes(static, walls_now, reach0):
+        union |= Grid(static | {(c, r) for c in ws for r in (8, 9, 10)}).reachable()
+    return reach0, union

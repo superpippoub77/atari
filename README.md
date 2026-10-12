@@ -14,8 +14,9 @@
 > 🔧 **Versione Atari aggiornata**
 > - Gli zuccherini compaiono uno alla volta, fermi, senza sfarfallio.
 > - Gli oggetti della parte alta poggiano sempre sul piano di lavoro; lampade, gocce e cioccolato della parte bassa sono appesi al piano.
-> - **6 livelli**: il nuovo livello 5 ha solo 3 muri mobili, il vecchio livello 5 diventa il 6. Dopo il livello 6 c'è il **livello segreto della Bocca Gigante** (vedi sotto), poi si riparte dal primo con le bocche più veloci (un giro in più), finché ci sono vite.
+> - **6 livelli**: il nuovo livello 5 è il livello dei muri mobili, il vecchio livello 5 diventa il 6. Dopo il livello 6 c'è il **livello segreto della Bocca Gigante** (vedi sotto), poi si riparte dal primo con le bocche più veloci (un giro in più), finché ci sono vite.
 > - I muri mobili si spostano quando il biscotto li spinge e **schiacciano le bocche** (+10, conta come bocca colpita).
+> - **Livello 5, il rompicapo dei muri**: ogni muro sta sotto una lampada appesa al piano e insieme chiudono la colonna. Sotto il piano ci sono tre stanze; in due si entra solo spingendo un muro (sparando non si passa: la lampada sopra il muro non si rompe). Nella prima si entra spingendo il primo muro; nella seconda o dalla stanza di destra spingendo il terzo muro, oppure spingendo il primo muro di 3-4 colonne, scavalcandolo e spingendo il secondo. Se si spinge il muro troppo in là una strada si chiude, ma resta sempre l'altra.
 > - Bocche più lente, che passano sopra a qualsiasi oggetto. Una bocca uccisa ricompare nel suo angolo dopo circa 4 secondi.
 > - Schermata iniziale: il biscotto, inseguito dalla bocca, scorre in continuo entrando sempre da destra.
 > - **Audio**: tema iniziale stile Indiana Jones, musica leggera di sottofondo ed effetti presi dal *bbsoundtest* di batari Basic (sparo, zuccherino, blocco abbattuto, bocca uccisa, super potere, scossa, cambio livello, muro spinto).

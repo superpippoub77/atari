@@ -27,7 +27,7 @@ SUGAR = [
     49, 17, 51, 19, 52, 20, 39, 22,
     33, 25, 42, 18, 53, 21, 62, 14,
     56, 8, 35, 27, 37, 21, 55, 14,
-    33, 9, 34, 10, 37, 29, 46, 22,
+    33, 9, 43, 11, 37, 29, 47, 23,
     40, 16, 43, 11, 52, 13, 54, 31,
 ]
 
@@ -59,6 +59,22 @@ def sfx_seen(s, seconds, first=None):
     seen.discard(0)
     return seen
 LEVELS = len(OBJECTS)
+
+
+def _push_sugars():
+    out = {}
+    for lv in range(1, LEVELS + 1):
+        if not model.wall_cols(lv):
+            continue
+        reach0, union = model.push_reach(lv)
+        vs = {v for v in SUGAR[(lv - 1) * 8:lv * 8]
+              if not model.sugar_reachable(v, reach0) and model.sugar_reachable(v, union)}
+        if vs:
+            out[lv] = vs
+    return out
+
+
+PUSH_SUGARS = _push_sugars()   # {livello: zuccherini raggiungibili solo spingendo un muro}
 
 
 def walls(ram):
@@ -383,6 +399,64 @@ def open_way(s, level, goals, max_shots=30):
     return False, shots
 
 
+WALL_NAMES = ("pushCol", "pushCol2", "pushCol3")
+
+
+def move_wall(s, k, target, max_time=25.0):
+    """Riporta il muro k nella colonna target spingendolo (il biscotto viene
+    messo dal lato giusto del muro, sul pavimento)."""
+    t0 = time.time()
+    while time.time() - t0 < max_time:
+        r = s.save()
+        c = r.v(WALL_NAMES[k])
+        if c == target:
+            return True
+        if c < target:
+            s.poke({PLAYER0X: 4 * c + 9 - 3, PLAYER0Y: 84, V["hitCooldown"]: 250})
+            s.hold(["Right"], 0.14)   # al massimo una colonna (un passo ogni 8 frame)
+        else:
+            s.poke({PLAYER0X: 4 * c + 18 + 2, PLAYER0Y: 84, V["hitCooldown"]: 250})
+            s.hold(["Left"], 0.14)
+    return False
+
+
+def push_open(s, level, goals, attempts=4):
+    """Se lo zuccherino non si raggiunge, cerca UNA spinta di un muro che
+    apra la strada (come farebbe il giocatore) e la esegue con i tasti.
+    Dopo ogni spinta ricontrolla e, se serve, ripianifica."""
+    how = None
+    for _ in range(attempts):
+        r = s.save()
+        g = Grid(r, level)
+        start = (r[PLAYER0X], r[PLAYER0Y])
+        if g.path(start, goals) is not None:
+            return how is not None, how
+        idx = [i for i, n in enumerate(WALL_NAMES) if r.v(n) != 255]
+        ws = tuple(r.v(WALL_NAMES[i]) for i in idx)
+        static = g.cells - {(c, rr) for c in ws for rr in (8, 9, 10)}
+        reach = model.Grid(g.cells).reachable(start)
+        plan = None
+        for wi, d, n, new in model.single_pushes(static, ws, reach):
+            if model.Grid(static | {(c, rr) for c in new for rr in (8, 9, 10)}).path(start, goals) is not None:
+                plan = (wi, d, n, new)
+                break
+        if plan is None:
+            return False, how
+        wi, d, n, new = plan
+        how = (idx[wi] + 1, "destra" if d == 1 else "sinistra", n)
+        walk_to(s, level, model.can_push(reach, ws[wi], d))
+        name, target = WALL_NAMES[idx[wi]], new[wi]
+        key = "Right" if d == 1 else "Left"
+        t0 = time.time()
+        while time.time() - t0 < 8:
+            r = s.save()
+            if (r.v(name) - target) * d >= 0:
+                break
+            s.hold([key], 0.05)
+    r = s.save()
+    return Grid(r, level).path((r[PLAYER0X], r[PLAYER0Y]), goals) is not None and how is not None, how
+
+
 def sugar_phase(s, level):
     s.poke({V["hitCooldown"]: 250})
     r0 = s.save()
@@ -410,6 +484,13 @@ def sugar_phase(s, level):
         check(level, f"zuccherino {k}: " + ("dentro un oggetto distruttibile" if inside else "fuori dagli oggetti"),
               ok_place, f"cella pf ({col},{row})")
         goals = sugar_goals(ex, ey)
+        if level in PUSH_SUGARS and v in PUSH_SUGARS[level]:
+            rr = s.save()
+            blocked = Grid(rr, level).path((rr[PLAYER0X], rr[PLAYER0Y]), goals) is None
+            check(level, f"zuccherino {k}: senza spingere un muro non si raggiunge", blocked)
+            okp, how = push_open(s, level, goals)
+            check(level, f"zuccherino {k}: raggiunto spingendo un muro", okp and how is not None,
+                  f"muro {how[0]} a {how[1]} di {how[2]} colonne" if how else "nessuna spinta utile")
         opened, shots = open_way(s, level, goals)
         check(level, f"zuccherino {k}: raggiungibile" + (f" (bucati {shots} blocchi)" if shots else ""), opened)
         if not opened:
@@ -467,6 +548,23 @@ def mouth_phase(s, level):
         return
     ok, r = walk_to(s, level, {(best[0] + dx, best[1] + dy) for dx in (-1, 0, 1) for dy in (-1, 0, 1)})
     check(level, f"raggiunta la posizione di tiro {best}", ok, f"p0=({r[PLAYER0X]},{r[PLAYER0Y]})")
+    # suono dello sparo: un colpo a vuoto, con le bocche lontane (se il
+    # colpo prende subito la bocca, il suono della bocca uccisa, piu'
+    # importante, copre lo sparo prima che lo si possa leggere)
+    r = s.save()
+    x, y = r[PLAYER0X], r[PLAYER0Y]
+    far = y - 30 if y > 40 else y + 30
+    s.poke({V["flags"]: r.v("flags") & ~0xC0, V["mouth0x"]: x + 26, V["mouth0y"]: far,
+            V["mouth1x"]: x + 26, V["mouth1y"]: far, V["hitCooldown"]: 200})
+    s.down("Right")
+    s.down("space")
+    shot_heard = sfx_seen(s, 0.12)
+    s.up("space")
+    s.up("Right")
+    s.wait(1.2)
+    # il biscotto torna nella posizione di tiro
+    r = s.save()
+    s.poke({PLAYER0X: x, PLAYER0Y: y, V["flags"]: r.v("flags") & ~0xC0, V["hitCooldown"]: 200})
     attempts = 0
     for attempts in range(1, 4):
         s.hold(["Right"], 0.06)
@@ -478,14 +576,18 @@ def mouth_phase(s, level):
                 V["mouth1x"]: x + 26, V["mouth1y"]: y, V["hitCooldown"]: 200})
         # destra e fuoco premuti insieme, come un giocatore vero
         s.down("Right")
-        s.tap("space", 0.12)
+        s.down("space")
+        # si ascolta gia' mentre i tasti sono premuti: se il biscotto tocca un
+        # oggetto la scossa (priorita' piu' alta) copre subito lo sparo
+        heard = sfx_seen(s, 0.12)
+        s.up("space")
         s.up("Right")
-        heard = sfx_seen(s, 0.8)
+        heard |= sfx_seen(s, 0.7)
         r = s.save()
         if r.flag(5) == 0:
             break
-    check(level, "suoni: sparo e bocca uccisa", SFX["bocca"] in heard and SFX["sparo"] in heard,
-          f"effetti sentiti={sorted(heard)}")
+    check(level, "suoni: sparo e bocca uccisa", SFX["bocca"] in heard and SFX["sparo"] in shot_heard | heard,
+          f"effetti sentiti={sorted(shot_heard)} poi {sorted(heard)}")
     check(level, "cioccolatino colpisce la bocca: +10 (una volta sola) e bocca colpita",
           r.flag(5) == 0 and r.score() == score0 + 10,
           f"flag5={r.flag(5)} score {score0}->{r.score()} tentativi={attempts}")
@@ -536,6 +638,13 @@ def bag_phase(s, level):
         # e' uscito dalla zona del sacchetto si ricalcola il percorso.
         # Toccato il sacchetto, il bonus tempo dura fino a circa 1 secondo.
         if (r[PLAYER0X], r[PLAYER0Y]) not in goals and r[BALLY] == 28:
+            # se il bonus tempo sta contando (barra che cala) il sacchetto
+            # e' gia' stato toccato: non si cammina piu'
+            s.wait(0.3)
+            r2 = s.save()
+            if r2.v("level") != level or r2[PFSCORE1] != r[PFSCORE1]:
+                r = r2
+                continue
             ok, r = walk_to(s, level, goals, 10.0)
             continue
         s.hold(["Up"], 0.04)
@@ -627,6 +736,10 @@ def push_phase(s, level):
           r.v("mouth0wait") > 0 and r.v("mouth0y") == 200 and r.score() == score0 + 10 and r.flag(5) == 0,
           f"attesa={r.v('mouth0wait')} y={r.v('mouth0y')} score {score0}->{r.score()} flag5={r.flag(5)}")
     s.shot(f"{OUT}/atari_L{level}_bocca_schiacciata.png")
+    # i muri tornano nelle colonne di partenza (lo schema degli zuccherini
+    # e' pensato con i muri al loro posto)
+    back = all(move_wall(s, k, c) for k, c in enumerate(exp))
+    check(level, "i muri tornano nelle colonne di partenza", back, str(walls(s.save())))
     # si riparte puliti: bocche negli angoli, bocca non ancora colpita
     r = s.save()
     s.poke({V["mouth0wait"]: 0, V["mouth1wait"]: 0, V["mouth0x"]: 20, V["mouth0y"]: 8,
