@@ -530,9 +530,14 @@ def bag_phase(s, level):
     ok, r = walk_to(s, level, goals)
     if p is None:
         print(f"     (camminata verso il sacchetto: ok={ok} level={r.v('level')} p0=({r[PLAYER0X]},{r[PLAYER0Y]}))")
-    deadline = time.time() + 6
+    deadline = time.time() + 30
     while time.time() < deadline and r.v("level") == level:
-        # avvicinamento fine finche' non tocca il sacchetto
+        # avvicinamento fine finche' non tocca il sacchetto; se il biscotto
+        # e' uscito dalla zona del sacchetto si ricalcola il percorso.
+        # Toccato il sacchetto, il bonus tempo dura fino a circa 1 secondo.
+        if (r[PLAYER0X], r[PLAYER0Y]) not in goals and r[BALLY] == 28:
+            ok, r = walk_to(s, level, goals, 10.0)
+            continue
         s.hold(["Up"], 0.04)
         r = s.save()
     check(level, "toccando il sacchetto si passa al livello successivo", r.v("level") == nxt,

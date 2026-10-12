@@ -21,6 +21,12 @@
 > - **Audio**: tema iniziale stile Indiana Jones, musica leggera di sottofondo ed effetti presi dal *bbsoundtest* di batari Basic (sparo, zuccherino, blocco abbattuto, bocca uccisa, super potere, scossa, cambio livello, muro spinto).
 > - Zuccherini ben distribuiti: uno per ognuna delle 8 sezioni, su tutta la larghezza dello schermo, sopra e sotto il piano. Ognuno è fuori dagli oggetti indistruttibili oppure dentro una tazza o un muro di cioccolato, da bucare a colpi di cioccolatino.
 > - Si può sparare tenendo premuta una direzione.
+> - **Più suspense**:
+>   - *fuga finale*: quando compare il sacchetto le bocche vanno al doppio della velocità e la musica raddoppia il ritmo;
+>   - *tempo in scadenza*: negli ultimi 2 segmenti la barra del tempo lampeggia in rosso, la musica accelera e si sente un battito del cuore;
+>   - *bonus tempo*: a fine livello ogni segmento di tempo rimasto vale 20 punti, contati uno alla volta;
+>   - *fine super potere*: nell'ultimo secondo il biscotto lampeggia più veloce e tre bip avvisano che sta finendo;
+>   - lo zuccherino dorato (super potere) è giallo, lo zuccherino chiave è azzurro.
 > - Altre correzioni: un colpo alla bocca vale +10 una volta sola; la luce si spegne a 32 secondi ma si può riaccendere subito, e ogni nuovo livello parte con la luce accesa (tranne il 5).
 > - La ROM viene provata in automatico nell'emulatore Stella: [`snack_and_roll/tests`](snack_and_roll/tests/README.md).
 
@@ -79,7 +85,8 @@ Durante lo slow motion:
 - Il livello deve essere completato prima che la barra del tempo (sinistra) si esaurisca.  
 - Ogni 16 secondi, si riduce una tacca di tempo.  
 - Se la barra del tempo termina, perdi una vita (barra destra).  
-- Quando il tempo è agli sgoccioli, la barra inizia a lampeggiare.
+- Quando il tempo è agli sgoccioli (ultimi 2 segmenti), la barra lampeggia in rosso, la musica accelera e si sente un battito del cuore.  
+- A fine livello ogni segmento di tempo rimasto vale 20 punti di bonus.
 
 ### 💡 Gestione della luce  
 Dopo 32 secondi, la luce si spegne automaticamente:  

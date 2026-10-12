@@ -74,12 +74,23 @@ class Stella:
         self.name = "snr_test"
         self.state = f"{self.home}/.config/stella/state/{self.name}.st0"
         self.ram_off = None
-        env = dict(os.environ, HOME=self.home)
+        self.env = dict(os.environ, HOME=self.home)
+        # al primo avvio con una configurazione nuova Stella a volte non
+        # risponde ai tasti: in quel caso si riavvia (fino a 3 tentativi)
+        for attempt in range(3):
+            if self._start(rom):
+                break
+            self.close()
+        else:
+            raise RuntimeError("Stella non risponde")
+        time.sleep(0.5)
+
+    def _start(self, rom):
         self.p = subprocess.Popen(
             ["stella", "-fullscreen", "0", "-tia.zoom", "2", "-sound", "0", "-uimessages", "0", rom],
-            env=env, stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
+            env=self.env, stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
         # aspetta che la finestra esista e che F9 produca davvero uno stato
-        for _ in range(120):
+        for _ in range(60):
             time.sleep(0.5)
             wid = subprocess.run(["xdotool", "search", "--pid", str(self.p.pid)],
                                  capture_output=True, text=True).stdout.split()
@@ -89,10 +100,8 @@ class Stella:
             self.tap("F9", 0.05)
             time.sleep(0.4)
             if os.path.exists(self.state):
-                break
-        else:
-            raise RuntimeError("Stella non risponde")
-        time.sleep(0.5)
+                return True
+        return False
 
     # --- input ---
     def down(self, *keys):

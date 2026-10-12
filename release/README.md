@@ -24,7 +24,7 @@ Tutte le versioni del gioco, pronte da usare.
 
 | Versione | Come è stata provata |
 |---|---|
-| Atari 2600 | Emulatore Stella: partita completa dal livello 1 alla vittoria giocata in automatico con i tasti. Sono 315 controlli su zuccherini, bocche, sacchetto, appoggi degli oggetti, luce, tempo, vite e muro spingibile ([`snack_and_roll/tests`](../snack_and_roll/tests/README.md)) |
+| Atari 2600 | Emulatore Stella: partita completa dal livello 1 alla vittoria giocata in automatico con i tasti. Sono 508 controlli su zuccherini, bocche, sacchetto, appoggi degli oggetti, luce, tempo, vite, muri spingibili e suoni, più un test delle novità di giocabilità (fuga finale, tempo in scadenza, bonus tempo, fine del super potere) ([`snack_and_roll/tests`](../snack_and_roll/tests/README.md)) |
 | Windows | Wine 9 su Linux: avvio, titolo, partita |
 | Linux | Avvio diretto del binario esportato |
 | Browser | Chromium: caricamento, titolo, partita, nessun errore in console |
