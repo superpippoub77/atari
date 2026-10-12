@@ -1,5 +1,5 @@
 """Test rapido delle novita' di giocabilita' (fuga finale, tempo in scadenza,
-bonus tempo, avviso di fine super potere, colore dello zuccherino chiave).
+bonus tempo, avviso di fine super potere, combo "partita perfetta").
 
 Uso:
   xvfb-run -a -s "-screen 0 800x600x24" python3 test_features.py . "../bin/Snack and Roll.bas.bin" /tmp/screenshot
@@ -100,6 +100,17 @@ try:
     check("bonus tempo: 8 segmenti x 20 = 160 punti, poi livello 2",
           r.v("level") == 2 and r.score() == 160 and r[PFSCORE1] == 0xFF,
           f"livello={r.v('level')} punti={r.score()} barra={r[PFSCORE1]:08b}")
+
+    # --- combo "partita perfetta": zuccherino doppio senza vite perse ---
+    from model import sugar_xy
+    mx, my = sugar_xy(51)      # livello 2, terzo zuccherino (data sugar)
+    for lives, exp in ((0xAA, 100), (0x2A, 50)):
+        s.poke({SCORE: 0, SCORE + 1: 0, SCORE + 2: 0, PFSCORE2: lives, V["hitCooldown"]: 250,
+                V["choco_bits"]: 3, V["choco_count"]: 2, PLAYER0X: mx - 4, PLAYER0Y: my + 2})
+        s.wait(0.3)
+        r = s.save()
+        check(f"zuccherino con vite {lives:08b}: {exp} punti", r.score() == exp and r.v("choco_bits") == 7,
+              f"punti={r.score()} bits={r.v('choco_bits'):08b}")
 
     # --- zuccherini: dorato giallo, chiave azzurra ---
     s.poke({V["hitCooldown"]: 250, V["choco_bits"]: 0, PLAYER0X: 140, PLAYER0Y: 84})
