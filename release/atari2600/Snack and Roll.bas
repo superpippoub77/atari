@@ -623,9 +623,11 @@ __Skip_Fire
    ;non colpisce nulla
    if !pfread(temp5,temp6) then goto __skip_missile
 
-   ; il muro spingibile non si distrugge: ferma solo il cioccolatino
+   ; il muro spingibile non si distrugge: ferma solo il cioccolatino.
+   ; Vale dalla riga 6 in giu': anche la lampada appesa sopra il muro e'
+   ; protetta, cosi' non si scavalca il muro sparando (livello 5)
    ; (if semplici: un || dentro un if annidato non viene compilato bene)
-   if temp6 < 8 then goto __not_push_wall
+   if temp6 < 6 then goto __not_push_wall
    if temp5 = _pushCol then goto __delete_missile
    if temp5 = _pushCol2 then goto __delete_missile
    if temp5 = _pushCol3 then goto __delete_missile
@@ -932,7 +934,7 @@ end
    49, 17, 51, 19, 52, 20, 39, 22,
    33, 25, 42, 18, 53, 21, 62, 14,
    56, 8, 35, 27, 37, 21, 55, 14,
-   33, 9, 34, 10, 37, 29, 46, 22,
+   33, 9, 43, 11, 37, 29, 47, 23,
    40, 16, 43, 11, 52, 13, 54, 31,
 end
 
@@ -1070,13 +1072,16 @@ __skip_tavoli
 __no_boss_setup
 
    ; --- MURI SPINGIBILI (colonna 1 di objects, sezioni basse b4-b7) ---
-   ; un muro per bit acceso, nella colonna sezione+2 (5, 12, 19, 26),
-   ; poggiato sul pavimento (righe 8-10). Al massimo 3 muri.
+   ; un muro per bit acceso, nella colonna sezione+1 (4, 11, 18, 25),
+   ; poggiato sul pavimento (righe 8-10). Al massimo 3 muri. Una lampada
+   ; bassa nella stessa sezione pende proprio sopra il muro (colonna
+   ; sezione+1, righe 6-7): insieme chiudono la colonna dal piano al
+   ; pavimento e per passare bisogna spingere il muro.
    _pushCol = 255 : _pushCol2 = 255 : _pushCol3 = 255
    temp2 = _current_object_level + 1
    temp4 = objects[temp2]
    temp4 = temp4 / 16
-   temp5 = 5
+   temp5 = 4
 __wall_loop
    if !temp4 then return otherbank
    if !(temp4 & 1) then goto __wall_next
@@ -1410,7 +1415,12 @@ end
    ; Livello 2: una lampada bassa in b7; nelle sezioni con le tazze una
    ; lampada chiuderebbe la colonna dal piano al pavimento e taglierebbe
    ; in due la parte bassa (in b4 chiuderebbe il biscotto alla partenza).
-   ; Livello 5: solo muri spingibili (3, nelle sezioni b5, b6, b7).
+   ; Livello 5: tre muri spingibili sotto tre lampade basse (b5, b6, b7):
+   ; formano tre stanze sotto il piano. Nella stanza A (colonne 12-17)
+   ; si entra solo spingendo il primo muro; nella B (19-24) spingendo il
+   ; terzo muro dalla stanza C (aperta in alto a destra), oppure spingendo
+   ; il primo muro di 3-4 colonne, scavalcandolo e spingendo il secondo.
+   ; Gocce nella parte alta (b1, b3).
    ; Livello 6: un solo tavolo in basso (sezione b4) per lasciare la
    ; corsia libera (colonne 8-16) al muro spingibile in b5.
    ; Livello 7 (Bocca Gigante): arena vuota, il piano ha tre passaggi.
@@ -1421,7 +1431,7 @@ end
    %01111111, %00000000, %00000000, %00000000, %10000000, %00000000, %00101011, 136,
    %00000000, %00000000, %00110111, %00000000, %00000000, %00000000, %00001011, 18,
    %00000000, %00000000, %10101010, %01010101, %00000000, %00000000, %00101011, 136,
-   %00000000, %11100000, %00000000, %00000000, %00000000, %00000000, %00011011, 136,
+   %00000000, %11100000, %00000000, %00001010, %11100000, %00000000, %01111110, 136,
    %11000000, %00100000, %00000011, %00001100, %00010000, %00010000, %00101011, 18,
    %00000000, %00000000, %00000000, %00000000, %00000000, %00000000, %01010101, 136,
 end

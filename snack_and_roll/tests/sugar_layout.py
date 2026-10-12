@@ -98,6 +98,27 @@ def choose(level, info, base):
     return picks
 
 
+# livelli con la disposizione decisa a mano (verificata qui sotto):
+# livello 5 = muri mobili. Gli zuccherini delle stanze A (b5) e B (b6)
+# si prendono solo spingendo un muro.
+FIXED = {5: [33, 9, 43, 11, 37, 29, 47, 23]}
+
+
+def check_fixed(level, seq, objects=OBJECTS):
+    base = build(level, objects)
+    lamps = lamp_cells(level, objects)
+    reach0, union = model.push_reach(level, objects)
+    info = {}
+    for v in seq:
+        cell = sugar_cell(v)
+        if cell in base or cell in lamps:
+            raise RuntimeError(f"L{level}: zuccherino {v} dentro un oggetto")
+        if not sugar_reachable(v, union):
+            raise RuntimeError(f"L{level}: zuccherino {v} irraggiungibile anche spingendo i muri")
+        info[v] = "free" if sugar_reachable(v, reach0) else "push"
+    return info
+
+
 # ordine di comparsa: si parte in basso a sinistra (vicino al biscotto) e
 # si attraversa lo schermo alternando sotto/sopra
 ORDER = [4, 0, 5, 1, 6, 2, 7, 3]
@@ -107,8 +128,13 @@ def layout(objects=OBJECTS, verbose=True):
     table = []
     for level in range(1, LEVELS + 1):
         base, destroyed, reach, info = analyse(level, objects)
-        picks = choose(level, info, base)
-        seq = [picks[sec] for sec in ORDER]
+        if level in FIXED:
+            seq = FIXED[level]
+            info = check_fixed(level, seq, objects)
+            assert sorted(section_of(v) for v in seq) == list(range(8)), f"L{level}: una per sezione"
+        else:
+            picks = choose(level, info, base)
+            seq = [picks[sec] for sec in ORDER]
         table.append(seq)
         if verbose:
             grid = [list(r) for r in rows(base)]
@@ -118,7 +144,8 @@ def layout(objects=OBJECTS, verbose=True):
             for i, v in enumerate(seq):
                 c, r = sugar_cell(v)
                 grid[r][c] = str(i)
-            print(f"\nLivello {level}  (X oggetto, o distruttibile, 0-7 zuccherini in ordine di comparsa)")
+            print(f"\nLivello {level}  (X oggetto, o distruttibile, 0-7 zuccherini in ordine di comparsa;"
+                  " push = solo spingendo un muro)")
             print("   " + "".join(str(c % 10) for c in range(32)))
             for r, line in enumerate(grid):
                 print(f"{r:2d} " + "".join(line))
