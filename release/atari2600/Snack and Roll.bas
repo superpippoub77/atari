@@ -407,6 +407,9 @@ __skip_bocche
    if !temp2 then goto __no_sugar_hit
    if !collision(player0, missile1) then goto __no_sugar_hit
    _choco_bits = _choco_bits | temp2 : _choco_count=_choco_count+1 : score=score+50
+   ; combo "partita perfetta": se nel livello non hai ancora perso una
+   ; vita (barra delle vite ancora piena) lo zuccherino vale doppio
+   if pfscore2 = %10101010 then score = score + 50
    if temp2 = 2 then _b2_hasKey{2} = 1
    if temp2 = 1 then goto __golden_sugar
    callmacro sfx 5

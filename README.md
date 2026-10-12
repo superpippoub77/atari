@@ -26,6 +26,7 @@
 >   - *tempo in scadenza*: negli ultimi 2 segmenti la barra del tempo lampeggia in rosso, la musica accelera e si sente un battito del cuore;
 >   - *bonus tempo*: a fine livello ogni segmento di tempo rimasto vale 20 punti, contati uno alla volta;
 >   - *fine super potere*: nell'ultimo secondo il biscotto lampeggia più veloce e tre bip avvisano che sta finendo;
+>   - *combo partita perfetta*: finché nel livello non perdi una vita ogni zuccherino vale doppio (100 punti invece di 50);
 >   - lo zuccherino dorato (super potere) è giallo, lo zuccherino chiave è azzurro.
 > - Altre correzioni: un colpo alla bocca vale +10 una volta sola; la luce si spegne a 32 secondi ma si può riaccendere subito, e ogni nuovo livello parte con la luce accesa (tranne il 5).
 > - La ROM viene provata in automatico nell'emulatore Stella: [`snack_and_roll/tests`](snack_and_roll/tests/README.md).
@@ -117,6 +118,11 @@ La sua velocità aumenta con i livelli (es. aggiornamento iniziale ogni 8 second
 Il punteggio al centro dello schermo è composto da due parti:  
 - Parte sinistra: punteggio totale.  
 - Ultime 2 cifre a destra: numero massimo di cioccolatini/munizioni disponibili per essere sparati.
+
+Nella versione Atari aggiornata:
+- zuccherino: 50 punti, **100** se nel livello non hai ancora perso una vita (combo "partita perfetta");
+- bocca colpita o schiacciata da un muro: 10 punti;
+- bonus tempo a fine livello: 20 punti per ogni segmento rimasto della barra del tempo.
 
 ---
 
