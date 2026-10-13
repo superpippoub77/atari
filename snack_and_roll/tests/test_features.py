@@ -48,7 +48,7 @@ def mouth_rate(s, seconds=1.5):
 s = Stella(ROM, "feat")
 try:
     s.tap("F2", 0.3)          # reset: parte il livello 1
-    s.wait(1.5)
+    s.wait(1.5 + CARD)
     r = s.save()
     check("partita iniziata al livello 1", r.v("level") == 1 and r.flag(0) == 1, f"level={r.v('level')}")
 
@@ -92,7 +92,7 @@ try:
             PLAYER0X: 14, PLAYER0Y: 30})
     s.wait(0.3)
     mid = s.save()
-    s.wait(2.0)
+    s.wait(2.0 + CARD)
     r = s.save()
     check("bonus tempo: la barra si svuota un segmento alla volta",
           mid.v("level") == 1 and mid[PFSCORE1] not in (0, 0xFF) and 0 < mid.score() < 160,
@@ -132,7 +132,7 @@ try:
         s.poke({PFSCORE1: 0xFF, SCORE: 0, SCORE + 1: 0, SCORE + 2: 0, V["hitCooldown"]: 250,
                 V["choco_bits"]: 0xFF, V["choco_count"]: 8, BALLY: 28, BALLX: ballx,
                 PLAYER0X: ballx - 4, PLAYER0Y: 30})
-        s.wait(2.5)
+        s.wait(2.5 + CARD)
         return s.save()
     s.tap("F5", 0.2)
     s.tap("F7", 0.2)

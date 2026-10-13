@@ -10,6 +10,14 @@
 > 📦 **Download** (Atari 2600 `.bin`, Windows, Linux, Android, Browser): cartella [`release/`](release/README.md).
 
 > 🛡️ **Nuovo gioco:** [*Circular Defense*](circular_defense/README.md) per Atari 2600. Difendi 6 città con il paddle (o col joystick) in 8 livelli.
+>
+> 🍪 **Versione 16K:** [`Snack and Roll 16K.bas`](snack_and_roll/Snack%20and%20Roll%2016K.bas), cartuccia da 16K con bankswitching F6, stessa partita della 8K con una grafica più ricca:
+> - titolo ad alta risoluzione: logo *SNACK 'N' ROLL* sfumato (le due L si piegano come alberi), scritta del livello scelto, biscotto con le gocce di cioccolato che gira, pavimento a scacchi;
+> - cartello di inizio livello con il numero grande e il nome dello schema, e la sua fanfara;
+> - schermate di **GAME OVER** (con il biscotto morsicato) e di vittoria sulla Bocca Gigante (*HAI VINTO! BRAVO*);
+> - in gioco, una parete colorata diversa per ogni livello, il piano di lavoro chiaro e il punteggio ben leggibile.
+>
+> Le scritte e i disegni ad alta risoluzione usano la tecnica dello "sprite a 48 pixel", con una routine in assembly generata da [`snack_and_roll/tools/gen_hires.py`](snack_and_roll/tools/gen_hires.py).
 
 ---
 

@@ -11,6 +11,12 @@ import time
 # cartella di lavoro di Stella (configurazione e stati salvati)
 SP = os.environ.get("SNR_STELLA_HOME", os.path.join(tempfile.gettempdir(), "snr_stella"))
 
+# versione 16K: secondi dei cartelli ad alta risoluzione che fermano il gioco
+# (inizio livello, GAME OVER, vittoria); 0 per la versione 8K
+CARD = float(os.environ.get("SNR_CARD", "0"))
+OVER = float(os.environ.get("SNR_OVER", "0"))
+SIXTEEN = CARD > 0
+
 # indirizzi RAM (dal file .sym di batari Basic)
 A = {c: 0xD4 + i for i, c in enumerate("abcdefghijklmnopqrstuvwxyz")}
 PLAYER0X, PLAYER1X, MISSILE0X, MISSILE1X, BALLX = 0x80, 0x81, 0x82, 0x83, 0x84
