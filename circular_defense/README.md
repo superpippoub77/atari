@@ -1,9 +1,8 @@
 # Circular Defense – Atari 2600
 
-Un cannone al centro dello schermo spara verso la città: 12 blocchi disposti su un anello.
-Il difensore gira da solo attorno al cannone e ferma i proiettili. Tu decidi solo la velocità dell'orbita.
+Al centro dello schermo un cannone spara contro 6 città disposte in cerchio. Il tuo difensore gira attorno al cannone e para i colpi. Si muove solo quando lo muovi tu: col **paddle** o col joystick.
 
-Ispirato al prototipo HTML *Circular Defense* e riscritto in batari Basic per Atari 2600 (PAL, cartuccia 4K).
+Ispirato al prototipo HTML *Circular Defense*, riscritto in batari Basic per Atari 2600: PAL, cartuccia 8K con bankswitching F8, senza RAM aggiuntiva.
 
 ![Schermate](screenshots/tavola.png)
 
@@ -11,37 +10,60 @@ Ispirato al prototipo HTML *Circular Defense* e riscritto in batari Basic per At
 
 | Comando | Effetto |
 | --- | --- |
-| Levetta a destra | Il difensore gira più veloce |
-| Levetta a sinistra | Il difensore gira all'indietro |
-| Fuoco | Freno: il difensore rallenta |
-| Fuoco o Game Reset | Inizia una partita (dalla schermata di attesa o dopo il game over) |
-| Levetta di difficoltà sinistra in A | Proiettili più veloci |
-| Levetta di difficoltà destra in A | Il cannone parte più rapido |
+| **Paddle** (predefinito) | Il difensore va all'angolo della manopola: tutta la corsa del paddle corrisponde a un giro completo. Pulsante: inizia la partita. |
+| **Joystick** | Destra = senso orario, sinistra = senso antiorario; col fuoco premuto gira al doppio. Fuoco: inizia la partita. |
+| Game Select (fuori partita) | Cambia controller. La barra in basso a destra è accesa quando è scelto il paddle. |
+| Game Reset | Inizia la partita. |
+| Levetta di difficoltà sinistra in A | Colpi più veloci. |
+| Levetta di difficoltà destra in A | Il cannone spara più spesso. |
+
+Il paddle va nella porta sinistra (il primo paddle della coppia).
 
 ## Regole
 
-- Ogni proiettile fermato dal difensore vale 1 punto.
-- Ogni 10 proiettili fermati si passa all'ondata successiva. I proiettili sono più veloci e il cannone spara sempre più spesso. La barra gialla in basso a sinistra conta le ondate.
-- Un proiettile che arriva all'anello distrugge il blocco verso cui era diretto. Se quel blocco è già caduto, distrugge il più vicino ancora in piedi.
-- Distrutti tutti i blocchi, la città lampeggia in rosso e suona la sirena: game over.
-- La canna del cannone punta verso l'ultimo blocco preso di mira. Nella schermata di attesa segue il difensore.
+- **Le città.** Ognuna ha una torre, una fila di palazzi e la base: 8 pezzetti. Ogni colpo non parato toglie un pezzetto alla città colpita, sempre dall'alto. Quando una città non ha più pezzetti è distrutta, e i colpi diretti lì cadono sulla città più vicina ancora in piedi.
+- **I livelli.** Sono 8. In ognuno devi parare un certo numero di colpi. La barra gialla in basso a sinistra conta i livelli.
+- **Fine livello.** Ricevi 5 punti per ogni pezzetto di città rimasto, contati uno alla volta. Le città danneggiate non si ricostruiscono.
+- **Fine partita.** Dopo l'8° livello compare **VITTORIA** (+500 punti, con la fanfara). Se cadono tutte le città compare **GAME OVER**. Col pulsante si torna al titolo.
+
+| Livello | Colpi da parare | Colpi insieme | Velocità | Sorprese |
+| --- | --- | --- | --- | --- |
+| 1 | 8 | 1 | lenta | – |
+| 2 | 10 | 2 | | – |
+| 3 | 12 | 2 | | – |
+| 4 | 12 | 2 | | colpi deviati |
+| 5 | 14 | 2 | | – |
+| 6 | 14 | 2 | | buio |
+| 7 | 16 | 2 | | colpi deviati |
+| 8 | 20 | 2 | massima | colpi deviati + buio |
+
+- **Colpi deviati.** A metà strada, proprio dove passa il difensore, metà dei colpi cambia bersaglio e va sulla città vicina.
+- **Buio.** I colpi si vedono solo un fotogramma su quattro.
+
+| Azione | Punti |
+| --- | --- |
+| Colpo parato | 10 |
+| Pezzetto di città rimasto a fine livello | 5 |
+| Vittoria | 500 |
 
 ## File
 
 | File | Contenuto |
 | --- | --- |
 | `Circular Defense.bas` | Sorgente batari Basic |
-| `bin/Circular Defense.bas.bin` | ROM da 4K (PAL), da aprire con Stella o da caricare su una cartuccia |
-| `tools/gen_tables.py` | Genera le tabelle: anello della città, orbita del difensore, velocità dei proiettili |
-| `tools/gen_sprites.py` | Genera le grafiche: torretta del cannone in 8 direzioni e difensore |
-| `tests/test_game.py` | Test nell'emulatore Stella (17 controlli) |
+| `bin/Circular Defense.bas.bin` | ROM da 8K (PAL), da aprire con Stella o da caricare su una cartuccia |
+| `tools/gen_tables.py` | Genera città e pezzetti, traiettorie dei colpi (anche deviate), orbita del difensore, tabella del paddle |
+| `tools/gen_sprites.py` | Genera la torretta del cannone (8 direzioni) e il difensore |
+| `tools/gen_text.py` | Genera le scritte del playfield (titolo, GAME OVER, VITTORIA) con un font 3×5 |
+| `tools/update_bas.py` | Rigenera nel sorgente le parti prodotte dai tre script |
+| `tests/test_game.py` | Test nell'emulatore Stella (31 controlli, con joystick e paddle) |
 
 ## Come funziona
 
-- I proiettili hanno la posizione in virgola fissa 8.8. Vanno dal centro al blocco in 64 passi, quindi seguono una linea dritta in qualsiasi direzione. La velocità (passi per frame) cresce con l'ondata.
-- Il difensore ha 256 posizioni d'angolo, disegnate su 64 punti dell'orbita.
-- Gli urti tra difensore e proiettili sono quelli dell'hardware (registri di collisione del TIA).
-- Il cannone è disegnato a doppia larghezza. Le forme sono calcolate con le proporzioni misurate sullo schermo: un pixel è largo 4 punti, una riga è alta 3,35 punti.
+- **Paddle.** Il kernel di batari Basic li legge con le opzioni `no_blank_lines readpaddle`. La lettura usa la memoria del missile 0, quindi il secondo colpo è disegnato con la *ball*.
+- **Colpi.** La posizione è a virgola fissa 8.8 e ogni colpo fa 64 passi dal centro alla città. Un colpo deviato, al passo 32, prende una seconda velocità che lo porta sulla città vicina negli ultimi 32 passi.
+- **Parata.** Il programma confronta la posizione del colpo con quella del difensore invece di usare le collisioni del chip grafico (TIA). Così funziona anche al buio, quando il colpo non viene disegnato.
+- **Città.** I pezzetti sono pixel del playfield. Per sapere cosa resta in piedi il gioco legge il playfield (`pfread`), senza usare altra RAM.
 
 ## Test
 
@@ -49,3 +71,5 @@ Ispirato al prototipo HTML *Circular Defense* e riscritto in batari Basic per At
 cd circular_defense/tests
 xvfb-run -a -s "-screen 0 800x600x24" python3 test_game.py . "../bin/Circular Defense.bas.bin" /tmp/screenshot
 ```
+
+In Stella il joystick va forzato con `-lc JOYSTICK` e i paddle con `-lc PADDLES`. Il test lo fa da solo.

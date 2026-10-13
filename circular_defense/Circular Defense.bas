@@ -1,75 +1,86 @@
    ;*************************************************************************************************************************
-   ; CIRCULAR DEFENSE - Atari 2600 (batari Basic, PAL)
+   ; CIRCULAR DEFENSE - Atari 2600 (batari Basic, PAL, 8K F8)
    ;_________________________________________________________________________________________________________________________
-   ; Il cannone al centro spara verso la citta': 12 blocchi su un anello.
-   ; Lo scudo gira da solo attorno al cannone e ferma i proiettili.
-   ;   levetta destra   = lo scudo gira piu' veloce
-   ;   levetta sinistra = lo scudo gira all'indietro
-   ;   fuoco            = freno (lo scudo rallenta)
-   ; Ogni proiettile fermato vale 1 punto; ogni 10 si passa all'ondata
-   ; successiva (proiettili piu' veloci, cannone piu' rapido). Un
-   ; proiettile che arriva all'anello distrugge il blocco piu' vicino.
-   ; Distrutti tutti i blocchi: CITTA' DISTRUTTA (game over).
-   ; Fuoco o Reset per iniziare.
-   ; Levette di difficolta' (A = piu' difficile):
-   ;   sinistra A = proiettili piu' veloci
-   ;   destra A   = il cannone parte piu' rapido
+   ; Il cannone al centro spara contro 6 citta' disposte su un anello. Il
+   ; difensore gira attorno al cannone e para i colpi: si muove SOLO se lo
+   ; muovi tu.
+   ;   PADDLE (predefinito): il difensore va all'angolo della manopola
+   ;     (tutta la corsa del paddle = un giro); pulsante = inizio partita.
+   ;   JOYSTICK: destra/sinistra = gira in senso orario/antiorario,
+   ;     con il fuoco premuto gira al doppio; fuoco = inizio partita.
+   ;   Game Select (fuori partita) cambia controller: la barra in basso a
+   ;   destra e' accesa col paddle.
+   ; Ogni colpo non parato toglie un pezzetto della citta' colpita (prima
+   ; i palazzi, poi la base); una citta' senza pezzetti e' distrutta e i
+   ; colpi diretti li' vanno sulla citta' piu' vicina.
+   ; 8 livelli: ogni livello chiede di parare un certo numero di colpi.
+   ; Velocita' e frequenza crescono; dal livello 2 due colpi insieme, nei
+   ; livelli 4, 7, 8 colpi DEVIATI (a meta' strada cambiano bersaglio),
+   ; nei livelli 6 e 8 il BUIO (i colpi si vedono a tratti).
+   ; Fine livello: 5 punti per ogni pezzetto di citta' rimasto.
+   ; Dopo l'8 livello: VITTORIA (+500). Tutte le citta' distrutte: GAME OVER.
+   ; Levette di difficolta' (A = piu' difficile): sinistra A = colpi piu'
+   ; veloci; destra A = il cannone spara piu' spesso.
    ;*************************************************************************************************************************
 
    set tv pal
-   set romsize 4k
+   ; paddle letti dal kernel (richiede no_blank_lines; usa la memoria del
+   ; missile0: il secondo proiettile e' la ball)
+   set kernel_options no_blank_lines readpaddle
+   set romsize 8k
    const pfscore = 1
 
-   ; centro dello schermo (coordinate dei missili) e attese del cannone
+   ; centro dello schermo (coordinate dei missili)
    const _X0 = 82
    const _Y0 = 44
-   const _Spawn_Start = 75
-   const _Spawn_Fast = 50
-   const _Spawn_Min = 30
+   const _Levels = 8
+   const _Spawn_Min = 25
 
    ;*************************************************************************************************************************
    ; VARIABILI
    ;_________________________________________________________________________________________________________________________
-   ; Proiettili: posizione 8.8 (parte intera = coordinata del missile),
-   ; direzione (blocco verso cui vanno, 0-11) e passo (0-63; 255 = libero).
-   ; Proiettile 0 = missile1 (giallo come il cannone),
-   ; proiettile 1 = missile0 (colore dello scudo).
+   ; Proiettili: posizione 8.8, velocita' (indice 0-17 nelle tabelle vx/vy:
+   ; 0-5 verso una citta', 6-17 deviati) e passo (0-63; 255 = libero).
+   ; Proiettile 0 = missile1, proiettile 1 = ball.
    ;*************************************************************************************************************************
    dim _angle = a
    dim _frame = b
-   dim _wave = c
+   dim _level = c
    dim _spawnT = d
-   dim _alive0 = e
-   dim _alive1 = f
+   dim _alive = e
+   dim _quota = f
    dim _state = g
+   ; bit 0 in partita, 1 game over, 2 ultimo colpo dal proiettile 1,
+   ; 3 vittoria, 5 controllo col paddle, 6 Select gia' premuto,
+   ; 7 pulsante gia' premuto
    dim _b0_playing = g
    dim _b1_over = g
-   ; ultimo colpo sparato dal proiettile 1 (0 = dal proiettile 0)
    dim _b2_last = g
+   dim _b3_victory = g
+   dim _b5_paddle = g
+   dim _b6_prevSel = g
    dim _b7_prevFire = g
    dim _acc = h
    dim _b0x = i.j
    dim _b0y = k.l
-   dim _b0d = m
+   dim _b0v = m
    dim _b0t = n
    dim _b1x = o.p
    dim _b1y = q.r
-   dim _b1d = s
+   dim _b1v = s
    dim _b1t = t
    dim _vel = u.v
    dim _interval = w
    dim _sfxId = x
    dim _sfxT = y
-   dim _blocked = z
+   dim _music = z
 
    scorecolor = $0E
    pfscorecolor = $2C
-   missile0height = 4
    missile1height = 4
-
-   gosub __draw_city
+   _state = %00100000
    _b0t = 255 : _b1t = 255
-   _wave = 1
+   gosub __draw_title bank2
 
    ;*************************************************************************************************************************
    ; CICLO PRINCIPALE
@@ -77,51 +88,85 @@
 __main
    _frame = _frame + 1
 
-   ; colori: la citta' lampeggia in rosso dopo il game over
+   ; colori del playfield: titolo che pulsa, citta' azzurre, game over
+   ; rosso, vittoria dorata
+   temp1 = _frame / 8
+   temp1 = temp1 & 6
    COLUPF = $9C
-   temp1 = _frame & 16
-   if _b1_over{1} && temp1 then COLUPF = $46
-   ; il difensore pulsa
+   if !_state{0} then COLUPF = $26 + temp1
+   if _b1_over{1} then COLUPF = $44 + temp1
+   if _b3_victory{3} then COLUPF = $28 + temp1
+   ; il difensore pulsa; il cannone e' oro, rosso appena spara
    temp1 = _frame / 4
    temp1 = temp1 & 6
    COLUP0 = $56 + temp1
-   COLUP1 = $2E
-   ; il cannone lampeggia appena spara
+   COLUP1 = $2C
    if _sfxId = 1 then COLUP1 = $46
-   ; missili larghi 4 pixel (i proiettili sono quadrati 4x4);
-   ; il cannone (player1) e' largo il doppio: 16 pixel
-   NUSIZ0 = $20 : NUSIZ1 = $25
+   ; missile1 largo 4 pixel, cannone a doppia larghezza; ball larga 4
+   ; (bit 0 = playfield riflesso, serve al kernel)
+   NUSIZ0 = 0 : NUSIZ1 = $25
+   CTRLPF = $21 : ballheight = 4
 
    ;---------------------------------------------------------------------------
-   ; FUOCO / RESET: inizio partita (fuoco premuto dopo averlo rilasciato)
+   ; PULSANTE (fuoco del joystick o pulsante del paddle sinistro, che arriva
+   ; sullo stesso filo del joystick a destra) e GAME SELECT
    ;---------------------------------------------------------------------------
-   if _b0_playing{0} then goto __no_start
+   temp1 = 0
+   if joy0fire then temp1 = 1
+   if !_b5_paddle{5} then goto __fire_read
+   temp1 = 0
+   if joy0right then temp1 = 1
+__fire_read
+   if _b0_playing{0} then goto __fire_done
    if switchreset then goto __new_game
-   if !joy0fire then _b7_prevFire{7} = 0 : goto __no_start
-   if _b7_prevFire{7} then goto __no_start
-   goto __new_game
-__no_start
-   if joy0fire then _b7_prevFire{7} = 1
+   if !temp1 then _b7_prevFire{7} = 0 : goto __select
+   if _b7_prevFire{7} then goto __select
+   ; titolo -> partita; game over / vittoria -> titolo
+   if !_state{1} && !_state{3} then goto __new_game
+   goto __to_title
+__fire_done
+__select
+   if temp1 then _b7_prevFire{7} = 1
+   if _b0_playing{0} then goto __no_select
+   if !switchselect then _b6_prevSel{6} = 0 : goto __no_select
+   if _b6_prevSel{6} then goto __no_select
+   _b6_prevSel{6} = 1
+   _state = _state ^ %00100000
+__no_select
+   pfscore2 = 0
+   if _b5_paddle{5} then pfscore2 = %11111111
 
    ;---------------------------------------------------------------------------
-   ; SCUDO: gira da solo (1,5 unita' per frame, 256 unita' = un giro)
+   ; DIFENSORE: si muove solo se lo muovi tu
    ;---------------------------------------------------------------------------
-   temp1 = 1 + (_frame & 1)
-   if !_b0_playing{0} then temp1 = _frame & 1 : goto __rotate
-   if joy0fire then temp1 = _frame & 1
-   if joy0right then temp1 = 3 + (_frame & 1)
-   if joy0left then temp1 = 254 - (_frame & 1)
-__rotate
+   if !_b5_paddle{5} then goto __joy_move
+   ; paddle (letto dal kernel durante drawscreen): posizione assoluta
+   temp1 = paddle
+   if temp1 > 79 then temp1 = 79
+   _angle = padangle[temp1]
+   goto __place
+__joy_move
+   temp1 = 0
+   if joy0right then temp1 = 3
+   if joy0left then temp1 = 253
+   if !joy0fire then goto __joy_add
+   if joy0right then temp1 = 6
+   if joy0left then temp1 = 250
+__joy_add
    _angle = _angle + temp1
+__place
    temp2 = _angle / 4
    player0x = shx[temp2] : player0y = shy[temp2]
-   player1x = _X0 - 8 : player1y = _Y0 + 10
 
-   ; direzione della canna: verso l'ultimo colpo; in attesa segue lo scudo
-   temp1 = _b0d
-   if _b2_last{2} then temp1 = _b1d
-   temp2 = dir8[temp1]
-   if !_b0_playing{0} then temp2 = _angle / 32
+   ;---------------------------------------------------------------------------
+   ; CANNONE: canna verso l'ultimo colpo (nel titolo e' nascosto)
+   ;---------------------------------------------------------------------------
+   player1x = _X0 - 8 : player1y = _Y0 + 10
+   if !_state{0} && !_state{1} then player1y = 200
+   temp1 = _b0v
+   if _b2_last{2} then temp1 = _b1v
+   temp2 = aim8[temp1]
+   ; >>> generato da tools/gen_sprites.py
    ; --- torretta del cannone: la canna punta verso l'ultimo colpo ---
    ; (generato da tools/gen_sprites.py)
    on temp2 goto __cannon0 __cannon1 __cannon2 __cannon3 __cannon4 __cannon5 __cannon6 __cannon7
@@ -351,24 +396,27 @@ __shield_b
    %00100100
 end
 __shield_done
+   ; <<< fine
 
    if !_b0_playing{0} then goto __show
 
    ;---------------------------------------------------------------------------
-   ; CANNONE: un proiettile ogni _interval frame, se c'e' un posto libero
+   ; CANNONE: un colpo ogni _interval frame, se c'e' un posto libero
+   ; (dal livello 2 due colpi insieme)
    ;---------------------------------------------------------------------------
    _spawnT = _spawnT + 1
    if _spawnT < _interval then goto __no_spawn
-   ; direzione a caso tra i 12 blocchi
    temp1 = rand
-__mod12
-   if temp1 >= 12 then temp1 = temp1 - 12 : goto __mod12
+__mod6
+   if temp1 >= 6 then temp1 = temp1 - 6 : goto __mod6
    if _b0t <> 255 then goto __try_slot1
-   _b0d = temp1 : _b0t = 0 : i = _X0 : j = 0 : k = _Y0 : l = 0 : _b2_last{2} = 0
+   _b0v = temp1 : _b0t = 0 : i = _X0 : j = 0 : k = _Y0 : l = 0 : _b2_last{2} = 0
    goto __spawned
 __try_slot1
+   temp2 = lvmax[_level]
+   if temp2 < 2 then goto __no_spawn
    if _b1t <> 255 then goto __no_spawn
-   _b1d = temp1 : _b1t = 0 : o = _X0 : p = 0 : q = _Y0 : r = 0 : _b2_last{2} = 1
+   _b1v = temp1 : _b1t = 0 : o = _X0 : p = 0 : q = _Y0 : r = 0 : _b2_last{2} = 1
 __spawned
    _spawnT = 0
    if _interval > _Spawn_Min then _interval = _interval - 1
@@ -376,205 +424,215 @@ __spawned
 __no_spawn
 
    ;---------------------------------------------------------------------------
-   ; PROIETTILI: (6 + ondata)/8 passi per frame, 2 in piu' con la levetta
-   ; sinistra in A. Un passo = 1/64 della strada dal centro all'anello.
+   ; PROIETTILI: velocita' del livello (ottavi di passo per frame), 2 in
+   ; piu' con la levetta sinistra in A. Al passo 32, nei livelli con i
+   ; colpi deviati, meta' dei colpi cambia bersaglio.
    ;---------------------------------------------------------------------------
-   temp1 = 6 + _wave
-   if temp1 > 30 then temp1 = 30
+   temp1 = lvspeed[_level]
    if !switchleftb then temp1 = temp1 + 2
    _acc = _acc + temp1
 __move_loop
    if _acc < 8 then goto __show
    _acc = _acc - 8
    if _b0t = 255 then goto __move1
-   temp1 = _b0d
+   temp1 = _b0v
    u = vxh[temp1] : v = vxl[temp1] : _b0x = _b0x + _vel
    u = vyh[temp1] : v = vyl[temp1] : _b0y = _b0y + _vel
    _b0t = _b0t + 1
+   if _b0t <> 32 then goto __b0_end
+   temp6 = _b0v
+   gosub __deviate
+   _b0v = temp6
+__b0_end
    if _b0t < 64 then goto __move1
-   _b0t = 255 : temp6 = _b0d : gosub __hit_city
+   _b0t = 255 : temp6 = tcity[_b0v] : gosub __hit_city bank2
 __move1
    if _b1t = 255 then goto __move_loop
-   temp1 = _b1d
+   temp1 = _b1v
    u = vxh[temp1] : v = vxl[temp1] : _b1x = _b1x + _vel
    u = vyh[temp1] : v = vyl[temp1] : _b1y = _b1y + _vel
    _b1t = _b1t + 1
+   if _b1t <> 32 then goto __b1_end
+   temp6 = _b1v
+   gosub __deviate
+   _b1v = temp6
+__b1_end
    if _b1t < 64 then goto __move_loop
-   _b1t = 255 : temp6 = _b1d : gosub __hit_city
+   _b1t = 255 : temp6 = tcity[_b1v] : gosub __hit_city bank2
    goto __move_loop
 
    ;---------------------------------------------------------------------------
-   ; DISEGNO E SUONI
+   ; DISEGNO, SUONI E MUSICA
    ;---------------------------------------------------------------------------
 __show
-   ; il quadrato 4x4 e' centrato sulla posizione del proiettile
    missile1x = i - 2 : missile1y = k + 2
    if _b0t = 255 then missile1y = 200
-   missile0x = o - 2 : missile0y = q + 2
-   if _b1t = 255 then missile0y = 200
+   ballx = o - 2 : bally = q + 2
+   if _b1t = 255 then bally = 200
+   ; BUIO: i colpi si vedono un frame su quattro
+   temp1 = lvflags[_level] & 2
+   if !temp1 || !_b0_playing{0} then goto __lit
+   temp1 = _frame & 3
+   if temp1 then missile1y = 200 : bally = 200
+__lit
 
-   gosub __sound
+   gosub __sound bank2
 
+   ; paddle da leggere: il primo della porta sinistra
+   currentpaddle = 0
    drawscreen
 
    ;---------------------------------------------------------------------------
-   ; SCUDO CONTRO PROIETTILI (collisioni del frame appena disegnato)
+   ; DIFENSORE CONTRO PROIETTILI: confronto delle posizioni fatto dal
+   ; programma (non con le collisioni del TIA, che vedono solo cio' che e'
+   ; disegnato: al buio i colpi sono nascosti 3 frame su 4). Parato se il
+   ; centro del colpo e' a meno di 6 pixel dal centro del difensore.
    ;---------------------------------------------------------------------------
    if !_b0_playing{0} then goto __main
-   if !collision(player0, missile1) then goto __no_block0
    if _b0t = 255 then goto __no_block0
+   temp1 = player0x + 4
+   temp1 = i - temp1
+   if temp1 > 127 then temp1 = 0 - temp1
+   if temp1 >= 6 then goto __no_block0
+   temp1 = player0y - 4
+   temp1 = k - temp1
+   if temp1 > 127 then temp1 = 0 - temp1
+   if temp1 >= 6 then goto __no_block0
    _b0t = 255 : gosub __blocked
 __no_block0
-   if !collision(player0, missile0) then goto __main
+   if !_b0_playing{0} then goto __main
    if _b1t = 255 then goto __main
+   temp1 = player0x + 4
+   temp1 = o - temp1
+   if temp1 > 127 then temp1 = 0 - temp1
+   if temp1 >= 6 then goto __main
+   temp1 = player0y - 4
+   temp1 = q - temp1
+   if temp1 > 127 then temp1 = 0 - temp1
+   if temp1 >= 6 then goto __main
    _b1t = 255 : gosub __blocked
    goto __main
 
    ;*************************************************************************************************************************
-   ; NUOVA PARTITA
+   ; COLPI DEVIATI (temp6 = velocita' attuale, 0-5): nei livelli con il
+   ; flag 1, al passo 32 un colpo su due prende la velocita' 6 + 2*d + s
+   ; e finisce sulla citta' vicina (tabella tcity)
+   ;*************************************************************************************************************************
+__deviate
+   temp1 = lvflags[_level] & 1
+   if !temp1 then return
+   temp1 = rand
+   temp2 = temp1 & 1
+   if !temp2 then return
+   temp2 = temp1 & 2
+   temp2 = temp2 / 2
+   temp6 = temp6 * 2
+   temp6 = temp6 + 6
+   temp6 = temp6 + temp2
+   return
+
+   ;*************************************************************************************************************************
+   ; COLPO PARATO: +10; finita la quota del livello si passa al successivo
+   ;*************************************************************************************************************************
+__blocked
+   score = score + 10
+   if _sfxId < 3 then _sfxId = 2 : _sfxT = 12
+   _quota = _quota - 1
+   if _quota then return
+   ; LIVELLO SUPERATO: bonus per i pezzetti rimasti, poi livello successivo
+   _b0t = 255 : _b1t = 255 : missile1y = 200 : bally = 200
+   gosub __level_bonus bank2
+   _level = _level + 1
+   if _level > _Levels then goto __victory
+   gosub __start_level
+   return
+
+__victory
+   _state = _state & %00100000
+   _state = _state | %10001000
+   score = score + 500
+   _music = 0
+   gosub __draw_victory bank2
+   return
+
+   ;*************************************************************************************************************************
+   ; NUOVA PARTITA, INIZIO LIVELLO, RITORNO AL TITOLO
    ;*************************************************************************************************************************
 __new_game
-   _state = 1 : _b7_prevFire{7} = 1
+   _state = _state & %00100000
+   _state = _state | %10000001
    score = 0
-   _wave = 1 : _blocked = 0 : _acc = 0 : _spawnT = 0
-   _interval = _Spawn_Start
-   if !switchrightb then _interval = _Spawn_Fast
-   _b0t = 255 : _b1t = 255
-   pfscore1 = %00000001
-   gosub __draw_city
-   _sfxId = 0 : _sfxT = 0
+   _level = 1
+   pfscore1 = 0
+   gosub __draw_cities bank2
+   gosub __start_level
+   goto __main
+
+__start_level
+   _quota = lvquota[_level]
+   _interval = lvint[_level]
+   if !switchrightb then _interval = _interval - 15
+   _spawnT = 0 : _acc = 0 : _b0t = 255 : _b1t = 255
+   ; barra dei livelli: un segmento in piu'
+   pfscore1 = pfscore1 * 2
+   pfscore1 = pfscore1 | 1
+   _sfxId = 5 : _sfxT = 30
+   return
+
+__to_title
+   _state = _state & %00100000
+   _state = _state | %10000000
+   _b0t = 255 : _b1t = 255 : _music = 0
+   gosub __draw_title bank2
    goto __main
 
    ;*************************************************************************************************************************
-   ; PROIETTILE FERMATO DALLO SCUDO: +1 punto, ogni 10 un'ondata in piu'
+   ; LIVELLI (indice 1-8; lo 0 non si usa)
+   ;_________________________________________________________________________________________________________________________
+   ; lvspeed = ottavi di passo per frame (64 passi dal centro alla citta')
+   ; lvint   = frame tra un colpo e l'altro all'inizio del livello
+   ; lvmax   = colpi in volo insieme
+   ; lvflags = bit 0 colpi deviati, bit 1 buio
+   ; lvquota = colpi da parare per superare il livello
    ;*************************************************************************************************************************
-__blocked
-   score = score + 1
-   _blocked = _blocked + 1
-   if _blocked < 10 then goto __blocked_snd
-   _blocked = 0 : _wave = _wave + 1
-   ; barra delle ondate: un segmento in piu' (fino a 8)
-   pfscore1 = pfscore1 * 2 | 1
-__blocked_snd
-   if _sfxId < 3 then _sfxId = 2 : _sfxT = 8
-   return
+   data lvspeed
+   0, 6, 7, 8, 8, 10, 10, 12, 14
+end
+   data lvint
+   0, 80, 70, 65, 60, 55, 50, 45, 40
+end
+   data lvmax
+   0, 1, 2, 2, 2, 2, 2, 2, 2
+end
+   data lvflags
+   0, 0, 0, 0, 1, 0, 2, 1, 3
+end
+   data lvquota
+   0, 8, 10, 12, 12, 14, 14, 16, 20
+end
 
-   ;*************************************************************************************************************************
-   ; PROIETTILE ARRIVATO ALL'ANELLO (temp6 = direzione): distrugge il
-   ; blocco vivo piu' vicino (stesso blocco, poi +1, -1, +2, -2, ...)
-   ; (pfpixel usa temp1-temp3: qui si usano temp4-temp6)
-   ;*************************************************************************************************************************
-__hit_city
-   temp4 = 0
-__hc_loop
-   temp5 = temp6 + near[temp4]
-   if temp5 >= 12 then temp5 = temp5 - 12
-   temp1 = bitmask[temp5]
-   if temp5 >= 8 then goto __hc_hi
-   temp2 = _alive0 & temp1
-   if temp2 then _alive0 = _alive0 ^ temp1 : goto __hc_destroy
-   goto __hc_next
-__hc_hi
-   temp2 = _alive1 & temp1
-   if temp2 then _alive1 = _alive1 ^ temp1 : goto __hc_destroy
-__hc_next
-   temp4 = temp4 + 1
-   if temp4 < 12 then goto __hc_loop
-   return
-__hc_destroy
-   temp4 = blkcol[temp5] : temp6 = blkrow[temp5]
-   pfpixel temp4 temp6 off
-   temp4 = temp4 + 1
-   pfpixel temp4 temp6 off
-   if _sfxId < 4 then _sfxId = 3 : _sfxT = 18
-   if _alive0 || _alive1 then return
-   ; CITTA' DISTRUTTA
-   _state = 2 : _b7_prevFire{7} = 1
-   _b0t = 255 : _b1t = 255
-   _sfxId = 4 : _sfxT = 50
-   return
-
-   ;*************************************************************************************************************************
-   ; ANELLO DELLA CITTA': 12 blocchi di 2 pixel
-   ;*************************************************************************************************************************
-__draw_city
-   pfclear
-   _alive0 = 255 : _alive1 = 15
-   temp5 = 0
-__dc_loop
-   temp4 = blkcol[temp5] : temp6 = blkrow[temp5]
-   pfpixel temp4 temp6 on
-   temp4 = temp4 + 1
-   pfpixel temp4 temp6 on
-   temp5 = temp5 + 1
-   if temp5 < 12 then goto __dc_loop
-   return
-
-   ;*************************************************************************************************************************
-   ; EFFETTI SONORI (canale 0): 1 sparo, 2 proiettile fermato,
-   ; 3 blocco colpito, 4 citta' distrutta. _sfxT = frame che restano.
-   ;*************************************************************************************************************************
-__sound
-   if !_sfxT then AUDV0 = 0 : return
-   _sfxT = _sfxT - 1
-   on _sfxId goto __snd_none __snd_shot __snd_block __snd_city __snd_over
-__snd_none
-   AUDV0 = 0 : return
-__snd_shot
-   ; colpo secco che scende di tono
-   temp1 = _sfxT * 2
-   AUDC0 = 4 : AUDF0 = 20 - temp1 : AUDV0 = 6
-   return
-__snd_block
-   ; due note che salgono
-   AUDC0 = 4 : AUDV0 = 8 : AUDF0 = 8
-   if _sfxT > 4 then AUDF0 = 17
-   return
-__snd_city
-   ; boato che si spegne
-   AUDC0 = 8 : AUDF0 = 31 - _sfxT : AUDV0 = _sfxT / 2
-   return
-__snd_over
-   ; lunga sirena che scende
-   temp1 = _sfxT / 2
-   AUDC0 = 12 : AUDF0 = 31 - temp1 : AUDV0 = _sfxT / 4
-   return
-
-   ;*************************************************************************************************************************
-   ; TABELLE (generate da tools/gen_tables.py)
-   ;*************************************************************************************************************************
-   ; ordine di ricerca del blocco piu' vicino: 0, +1, -1, +2, -2, ...
-   data near
-   0, 1, 11, 2, 10, 3, 9, 4, 8, 5, 7, 6
-end
-   ; direzione della canna (8 disegni) per ognuna delle 12 direzioni di tiro
-   data dir8
-   0, 1, 1, 2, 3, 3, 4, 5, 5, 6, 7, 7
-end
-   data bitmask
-   1, 2, 4, 8, 16, 32, 64, 128, 1, 2, 4, 8
-end
-   ; anello della citta': 12 blocchi (2 pixel del playfield), d*30 gradi
-   data blkcol
-   29, 27, 22, 15, 8, 3, 1, 3, 8, 15, 22, 27
-end
-   data blkrow
-   5, 8, 9, 10, 9, 8, 5, 2, 1, 0, 1, 2
-end
-   ; velocita' 8.8 (complemento a due): dal centro al blocco in 64 passi
+   ; >>> generato da tools/gen_tables.py bank1
+   ; velocita' 8.8 dei proiettili: 0-5 verso la citta', 6-17 deviati
    data vxh
-   0, 0, 0, 0, 255, 255, 255, 255, 255, 0, 0, 0
+   0, 0, 255, 255, 0, 0, 255, 0, 254, 1, 255, 0, 0, 255, 1, 254, 0, 255
 end
    data vxl
-   224, 192, 112, 0, 144, 64, 32, 64, 144, 0, 112, 192
+   192, 0, 64, 64, 0, 192, 64, 192, 128, 128, 64, 192, 192, 64, 128, 128, 192, 64
 end
    data vyh
-   0, 0, 0, 0, 0, 0, 0, 255, 255, 255, 255, 255
+   0, 0, 0, 255, 255, 255, 0, 254, 0, 0, 254, 0, 255, 1, 255, 255, 1, 255
 end
    data vyl
-   0, 96, 128, 160, 128, 96, 0, 160, 128, 96, 128, 160
+   96, 128, 96, 160, 128, 160, 160, 224, 64, 64, 224, 160, 96, 32, 192, 192, 32, 96
 end
-   ; orbita dello scudo: 64 posizioni (angolo/4)
+   ; citta' colpita alla fine del volo e direzione della canna (0-7)
+   data tcity
+   0, 1, 2, 3, 4, 5, 1, 5, 2, 0, 3, 1, 4, 2, 5, 3, 0, 4
+end
+   data aim8
+   1, 2, 3, 5, 6, 7, 1, 1, 2, 2, 3, 3, 5, 5, 6, 6, 7, 7
+end
+   ; orbita del difensore: 64 posizioni (angolo/4)
    data shx
    106, 106, 105, 105, 104, 103, 101, 100, 98, 96, 94, 91, 89, 86, 83, 81,
    78, 75, 73, 70, 67, 65, 62, 60, 58, 56, 55, 53, 52, 51, 51, 50,
@@ -587,3 +645,268 @@ end
    48, 46, 44, 42, 40, 39, 37, 35, 34, 33, 31, 30, 30, 29, 28, 28,
    28, 28, 28, 29, 30, 30, 31, 33, 34, 35, 37, 39, 40, 42, 44, 46
 end
+   ; paddle (0-77) -> angolo del difensore: tutta la corsa = un giro
+   data padangle
+   0, 3, 7, 10, 13, 16, 20, 23, 26, 30, 33, 36, 39, 43, 46, 49,
+   53, 56, 59, 62, 66, 69, 72, 75, 79, 82, 85, 89, 92, 95, 98, 102,
+   105, 108, 112, 115, 118, 121, 125, 128, 131, 135, 138, 141, 144, 148, 151, 154,
+   158, 161, 164, 167, 171, 174, 177, 181, 184, 187, 190, 194, 197, 200, 203, 207,
+   210, 213, 217, 220, 223, 226, 230, 233, 236, 240, 243, 246, 249, 253, 255, 255
+end
+   ; <<< fine
+
+   bank 2
+
+   ;*************************************************************************************************************************
+   ; CITTA'
+   ;_________________________________________________________________________________________________________________________
+   ; 6 citta' di 2 righe (palazzi + base), 8 pezzetti ciascuna nelle tabelle
+   ; pcol/prow (dal piu' alto; colonna 255 = posto vuoto). _alive: un bit
+   ; per citta' ancora in piedi.
+   ; (pfpixel/pfread usano temp1-temp3: qui le coordinate passano in u e v)
+   ;*************************************************************************************************************************
+__draw_cities
+   pfclear
+   _alive = %00111111
+   temp5 = 0
+__dc_loop
+   u = pcol[temp5] : v = prow[temp5]
+   if u <> 255 then pfpixel u v on
+   temp5 = temp5 + 1
+   if temp5 < 48 then goto __dc_loop
+   return otherbank
+
+   ;-------------------------------------------------------------------------
+   ; colpo arrivato sulla citta' temp6: toglie il primo pezzetto rimasto;
+   ; se la citta' e' gia' distrutta, colpisce la piu' vicina ancora in piedi
+   ;-------------------------------------------------------------------------
+__hit_city
+   temp4 = 0
+__hc_search
+   temp5 = temp6 + near6[temp4]
+   if temp5 >= 6 then temp5 = temp5 - 6
+   temp1 = bitmask[temp5]
+   temp1 = temp1 & _alive
+   if temp1 then goto __hc_city
+   temp4 = temp4 + 1
+   if temp4 < 6 then goto __hc_search
+   return otherbank
+__hc_city
+   ; temp5 = citta', temp6 = pezzetto, temp4 = fine dei suoi pezzetti
+   temp6 = temp5 * 8
+   temp4 = temp6 + 8
+__hc_piece
+   u = pcol[temp6] : v = prow[temp6]
+   if u = 255 then goto __hc_next
+   if pfread(u, v) then goto __hc_remove
+__hc_next
+   temp6 = temp6 + 1
+   if temp6 < temp4 then goto __hc_piece
+   goto __hc_dead
+__hc_remove
+   u = pcol[temp6] : v = prow[temp6]
+   pfpixel u v off
+   if _sfxId < 4 then _sfxId = 3 : _sfxT = 18
+   ; resta qualcosa di questa citta'?
+__hc_left
+   temp6 = temp6 + 1
+   if temp6 >= temp4 then goto __hc_dead
+   u = pcol[temp6] : v = prow[temp6]
+   if u = 255 then goto __hc_left
+   if pfread(u, v) then return otherbank
+   goto __hc_left
+__hc_dead
+   temp1 = bitmask[temp5]
+   temp1 = temp1 ^ 255
+   _alive = _alive & temp1
+   if _alive then return otherbank
+   ; TUTTE LE CITTA' DISTRUTTE
+   _state = _state & %00100000
+   _state = _state | %10000010
+   _b0t = 255 : _b1t = 255
+   _sfxId = 4 : _sfxT = 63
+   goto __draw_gameover
+
+   ;-------------------------------------------------------------------------
+   ; fine livello: 5 punti per ogni pezzetto di citta' rimasto, contati uno
+   ; alla volta con un tic (drawscreen cambia le variabili temp: il
+   ; contatore e' _spawnT)
+   ;-------------------------------------------------------------------------
+__level_bonus
+   _spawnT = 0
+__lb_loop
+   u = pcol[_spawnT] : v = prow[_spawnT]
+   if u = 255 then goto __lb_next
+   if !pfread(u, v) then goto __lb_next
+   score = score + 5
+   AUDC0 = 4 : AUDF0 = 6 : AUDV0 = 8
+   _acc = 4
+__lb_wait
+   currentpaddle = 0
+   drawscreen
+   AUDV0 = 0
+   _acc = _acc - 1
+   if _acc then goto __lb_wait
+__lb_next
+   _spawnT = _spawnT + 1
+   if _spawnT < 48 then goto __lb_loop
+   _acc = 0
+   return otherbank
+
+   ;*************************************************************************************************************************
+   ; SCRITTE (generate da tools/gen_text.py)
+   ;*************************************************************************************************************************
+   ; >>> generato da tools/gen_text.py
+   ; SCRITTA DEL TITOLO
+__draw_title
+   playfield:
+   .XX.XXX.XX...XX.X.X.X....X..XX..
+   X....X..X.X.X...X.X.X...X.X.X.X.
+   X....X..XX..X...X.X.X...XXX.XX..
+   X....X..X.X.X...X.X.X...X.X.X.X.
+   .XX.XXX.X.X..XX.XXX.XXX.X.X.X.X.
+   ................................
+   ..XX..XXX.XXX.XXX.XX...XX.XXX...
+   ..X.X.X...X...X...X.X.X...X.....
+   ..X.X.XX..XX..XX..X.X..X..XX....
+   ..X.X.X...X...X...X.X...X.X.....
+   ..XX..XXX.X...XXX.X.X.XX..XXX...
+end
+   return otherbank
+
+   ; GAME OVER: tutte le citta' distrutte
+__draw_gameover
+   playfield:
+   .........XX..X..X.X.XXX.........
+   ........X...X.X.XXX.X...........
+   ........X.X.XXX.XXX.XX..........
+   ........X.X.X.X.X.X.X...........
+   .........XX.X.X.X.X.XXX.........
+   ................................
+   .........X..X.X.XXX.XX..........
+   ........X.X.X.X.X...X.X.........
+   ........X.X.X.X.XX..XX..........
+   ........X.X.X.X.X...X.X.........
+   .........X...X..XXX.X.X.........
+end
+   return otherbank
+
+   ; VITTORIA: superati tutti gli 8 livelli
+__draw_victory
+   playfield:
+   ................................
+   ................................
+   ................................
+   X.X.XXX.XXX.XXX..X..XX..XXX..X..
+   X.X..X...X...X..X.X.X.X..X..X.X.
+   X.X..X...X...X..X.X.XX...X..XXX.
+   X.X..X...X...X..X.X.X.X..X..X.X.
+   .X..XXX..X...X...X..X.X.XXX.X.X.
+   ................................
+   ................................
+   ................................
+end
+   return otherbank
+   ; <<< fine
+
+   ;*************************************************************************************************************************
+   ; EFFETTI SONORI (canale 0) e MUSICA (canale 1)
+   ;_________________________________________________________________________________________________________________________
+   ; effetti: 1 sparo, 2 colpo parato, 3 citta' colpita, 4 game over,
+   ; 5 inizio livello. _sfxT = frame che restano.
+   ; musica: tema del titolo (in loop) e fanfara della vittoria (una volta);
+   ; un passo ogni 8 frame. 0 = la nota continua, 1 = pausa, 255 = fine.
+   ;*************************************************************************************************************************
+__sound
+   gosub __music
+   if !_sfxT then AUDV0 = 0 : _sfxId = 0 : return otherbank
+   _sfxT = _sfxT - 1
+   on _sfxId goto __snd_none __snd_shot __snd_block __snd_city __snd_over __snd_level
+__snd_none
+   AUDV0 = 0 : return otherbank
+__snd_shot
+   ; colpo secco che scende di tono
+   temp1 = _sfxT * 2
+   AUDC0 = 4 : AUDF0 = 20 - temp1 : AUDV0 = 6
+   return otherbank
+__snd_block
+   ; due note che salgono
+   AUDC0 = 4 : AUDV0 = 8 : AUDF0 = 8
+   if _sfxT > 6 then AUDF0 = 17
+   return otherbank
+__snd_city
+   ; crollo: rumore che si spegne
+   AUDC0 = 8 : AUDF0 = 31 - _sfxT : AUDV0 = _sfxT / 2
+   return otherbank
+__snd_over
+   ; lunga sirena che scende
+   temp1 = _sfxT / 2
+   AUDC0 = 12 : AUDF0 = 31 - temp1 : AUDV0 = _sfxT / 4
+   return otherbank
+__snd_level
+   ; arpeggio che sale: nuovo livello
+   temp1 = _sfxT / 8
+   AUDC0 = 4 : AUDF0 = lvjingle[temp1] : AUDV0 = 7
+   return otherbank
+
+__music
+   ; titolo: tema in loop; vittoria: fanfara; in partita: niente musica
+   if _b0_playing{0} || _b1_over{1} then AUDV1 = 0 : return
+   if _frame & 7 then return
+   if _b3_victory{3} then goto __music_victory
+   temp1 = titletune[_music]
+   _music = _music + 1
+   if _music >= 64 then _music = 0
+   goto __music_note
+__music_victory
+   temp1 = victorytune[_music]
+   if temp1 = 255 then AUDV1 = 0 : return
+   _music = _music + 1
+__music_note
+   if !temp1 then return
+   if temp1 = 1 then AUDV1 = 0 : return
+   AUDC1 = 4 : AUDF1 = temp1 : AUDV1 = 5
+   return
+
+   ; arpeggio del nuovo livello (indice = frame rimasti / 8: si parte dal
+   ; piu' grave e si sale)
+   data lvjingle
+   11, 14, 19, 23
+end
+
+   ; tema del titolo (AUDC 4: Do5=29 Re5=26 Mi5=23 Fa5=21 Sol5=19 La5=17
+   ; Si5=15 Do6=14 Re6=12 Mi6=11)
+   data titletune
+   29, 0, 23, 0, 19, 0, 0, 0, 14, 0, 0, 0, 19, 0, 23, 0,
+   17, 0, 0, 0, 21, 0, 17, 0, 14, 0, 0, 0, 0, 0, 1, 1,
+   15, 0, 19, 0, 12, 0, 0, 0, 15, 0, 19, 0, 14, 0, 0, 0,
+   14, 0, 0, 0, 0, 0, 0, 0, 1, 1, 1, 1, 1, 1, 1, 1
+end
+
+   ; fanfara della vittoria
+   data victorytune
+   19, 1, 19, 1, 19, 1, 14, 0, 0, 0, 11, 0, 12, 14, 0, 0,
+   12, 0, 11, 0, 0, 0, 0, 0, 1, 255
+end
+
+   ; ordine di ricerca della citta' piu' vicina: 0, +1, -1, +2, -2, +3
+   data near6
+   0, 1, 5, 2, 4, 3
+end
+   data bitmask
+   1, 2, 4, 8, 16, 32
+end
+
+   ; >>> generato da tools/gen_tables.py bank2
+   ; pezzetti delle 6 citta' (8 per citta', dal piu' alto; 255 = vuoto)
+   data pcol
+   27, 26, 27, 29, 26, 27, 28, 29, 16, 14, 16, 17, 14, 15, 16, 17,
+   4, 2, 4, 5, 2, 3, 4, 5, 3, 2, 3, 5, 2, 3, 4, 5,
+   16, 14, 15, 17, 14, 15, 16, 17, 27, 26, 28, 29, 26, 27, 28, 29
+end
+   data prow
+   7, 8, 8, 8, 9, 9, 9, 9, 8, 9, 9, 9, 10, 10, 10, 10,
+   7, 8, 8, 8, 9, 9, 9, 9, 1, 2, 2, 2, 3, 3, 3, 3,
+   0, 1, 1, 1, 2, 2, 2, 2, 1, 2, 2, 2, 3, 3, 3, 3
+end
+   ; <<< fine
