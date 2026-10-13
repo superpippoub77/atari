@@ -37,7 +37,7 @@ titolo, livelli 1-6, Bocca Gigante (livello segreto) e una tavola riassuntiva (`
 
 | Versione | Come è stata provata |
 |---|---|
-| Atari 2600 | Emulatore Stella: partita completa dal livello 1 alla vittoria giocata in automatico con i tasti. Sono 525 controlli (più il test delle levette di difficoltà) su zuccherini, bocche, sacchetto, appoggi degli oggetti, luce, tempo, vite, muri spingibili, suoni e Bocca Gigante, più un test delle novità di giocabilità (fuga finale, tempo in scadenza, bonus tempo, fine del super potere, combo) ([`snack_and_roll/tests`](../snack_and_roll/tests/README.md)) |
+| Atari 2600 | Emulatore Stella: partita completa dal livello 1 alla vittoria giocata in automatico con i tasti. Sono 515 controlli (più il test delle levette di difficoltà) su zuccherini, bocche, sacchetto, appoggi degli oggetti, luce, tempo, vite, muri spingibili, suoni e Bocca Gigante, più un test delle novità di giocabilità (fuga finale, tempo in scadenza, bonus tempo, fine del super potere, combo) ([`snack_and_roll/tests`](../snack_and_roll/tests/README.md)) |
 | Windows | Wine 9 su Linux: avvio, titolo, partita |
 | Linux | Avvio diretto del binario esportato |
 | Browser | Chromium: caricamento, titolo, partita, nessun errore in console |

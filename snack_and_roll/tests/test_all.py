@@ -28,7 +28,7 @@ SUGAR = [
     33, 25, 42, 18, 53, 21, 62, 14,
     56, 8, 35, 27, 37, 21, 55, 14,
     33, 9, 43, 11, 37, 29, 47, 23,
-    40, 16, 43, 11, 52, 13, 54, 31,
+    32, 16, 51, 11, 61, 13, 39, 31,
 ]
 
 
@@ -83,22 +83,18 @@ def walls(ram):
 
 
 def drop_cells(level):
-    cells = set()
-    bits = OBJECTS[level - 1][3]
-    for i in range(8):
-        if bits & (1 << i):
-            col = 3 + 7 * (i % 4)
-            top = 0 if i < 4 else 6
-            for rr in range(top, top + 4):
-                cells.add((col, rr))
-    return cells
+    """celle di gocce e presse (dal modello: le presse a T hanno la testa larga)."""
+    return model.drop_cells(level)
 
 
 class Grid:
     def __init__(self, ram, level):
         self.level = level
         self.cells = {(c, r) for r in range(12) for c in range(32) if ram.pf(c, r)}
-        self.cells |= drop_cells(level)
+        # gocce: tutta la colonna e' un ostacolo; presse: conta solo la parte
+        # abbassata in questo momento (si passa quando sono su)
+        if level != model.PRESS_LEVEL:
+            self.cells |= drop_cells(level)
         for pc in walls(ram):
             self.cells |= {(pc, 8), (pc, 9), (pc, 10)}
 
@@ -182,6 +178,10 @@ WALK_SFX = set()   # effetti sonori visti durante l'ultima camminata
 
 def walk_to(s, level, goals, max_time=40.0):
     """Muove il biscotto con i tasti lungo il percorso calcolato."""
+    if level == model.PRESS_LEVEL:
+        # le presse sbarrano la strada a tratti e rallentano chi le tocca:
+        # il test non sa aspettare il momento giusto, gli serve piu' tempo
+        max_time *= 3
     WALK_SFX.clear()
     t0 = time.time()
     start_level_no = None
@@ -202,6 +202,9 @@ def walk_to(s, level, goals, max_time=40.0):
         g = Grid(r, level)
         path = g.path(pos, goals)
         if path is None:
+            if level == model.PRESS_LEVEL:
+                s.wait(0.15)       # una pressa sbarra la strada: si aspetta che risalga
+                continue
             return False, r
         # punta qualche passo avanti lungo il percorso
         k = min(len(path) - 1, 10)
@@ -269,8 +272,24 @@ def static_checks(s, r, level):
             n = sum(r.pf(col, rr) for rr in range(top, top + 4))
             if n != 1 or (top == 6 and not r.pf(col, 5)):
                 bad.append((col, top, n))
-    if bits:
+    if bits and level != model.PRESS_LEVEL:
         check(level, "gocce: un solo pixel che scende, appeso", not bad, str(bad))
+    if bits and level == model.PRESS_LEVEL:
+        # presse a T: perno continuo dall'alto (1-5 righe) e testa larga 3
+        # colonne solo in fondo al perno
+        bad = []
+        for i in range(8):
+            if bits & (1 << i):
+                col, top = 3 + 7 * (i % 4), (0 if i < 4 else 6)
+                on = [r.pf(col, rr) for rr in range(top, top + 5)]
+                n = sum(on)
+                head = top + n - 1
+                sides = [rr for rr in range(top, top + 5) if r.pf(col - 1, rr) or r.pf(col + 1, rr)]
+                ok = (1 <= n <= 5 and on == [1] * n + [0] * (5 - n) and (top == 0 or r.pf(col, 5))
+                      and sides == [head] and r.pf(col - 1, head) and r.pf(col + 1, head))
+                if not ok:
+                    bad.append((col, top, on, sides))
+        check(level, "presse a T: perno appeso al soffitto o al piano, testa larga in fondo", not bad, str(bad))
 
 
 def footprint(x, y):
@@ -368,6 +387,8 @@ def cheapest_path(fg, start, goals, breakable):
 
 def open_way(s, level, goals, max_shots=30):
     """Buca gli oggetti distruttibili che separano il biscotto dallo zuccherino."""
+    if level == model.PRESS_LEVEL:
+        return True, 0     # solo presse: niente da bucare, la strada si apre aspettando
     shots = 0
     while shots < max_shots:
         r = s.save()
@@ -526,24 +547,31 @@ def sugar_phase(s, level):
 
 
 def mouth_phase(s, level):
-    r = s.save()
-    g = Grid(r, level)
-    # cerca una posizione raggiungibile con 30 px liberi a destra sulla stessa riga
-    start = (r[PLAYER0X], r[PLAYER0Y])
+    # cerca una posizione raggiungibile con 30 px liberi a destra sulla stessa
+    # riga (22 nel livello delle presse, dove tra due presse c'e' meno
+    # spazio: si riprova finche' le presse non lasciano libera una linea)
+    span = 22 if level == model.PRESS_LEVEL else 30
     best = None
-    prev = {start: None}
-    q = deque([start])
-    while q:
-        x, y = q.popleft()
-        row = ((y - 3) & 255) // 8
-        if x < 100 and all(not g.pf(c, row) and not g.pf(c, ((y - 4) & 255) // 8)
-                           for c in range(((x - 9) & 255) // 4, ((x + 30) - 9) // 4 + 1)):
-            best = (x, y)
+    for _ in range(20 if level == model.PRESS_LEVEL else 1):
+        r = s.save()
+        g = Grid(r, level)
+        start = (r[PLAYER0X], r[PLAYER0Y])
+        prev = {start: None}
+        q = deque([start])
+        while q:
+            x, y = q.popleft()
+            row = ((y - 3) & 255) // 8
+            if x < 100 and all(not g.pf(c, row) and not g.pf(c, ((y - 4) & 255) // 8)
+                               for c in range(((x - 9) & 255) // 4, ((x + span) - 9) // 4 + 1)):
+                best = (x, y)
+                break
+            for n in g.moves(x, y):
+                if n not in prev:
+                    prev[n] = (x, y)
+                    q.append(n)
+        if best:
             break
-        for n in g.moves(x, y):
-            if n not in prev:
-                prev[n] = (x, y)
-                q.append(n)
+        s.wait(0.1)
     if not check(level, "trovata una linea di tiro libera", best is not None):
         return
     ok, r = walk_to(s, level, {(best[0] + dx, best[1] + dy) for dx in (-1, 0, 1) for dy in (-1, 0, 1)})
@@ -554,14 +582,19 @@ def mouth_phase(s, level):
     r = s.save()
     x, y = r[PLAYER0X], r[PLAYER0Y]
     far = y - 30 if y > 40 else y + 30
-    s.poke({V["flags"]: r.v("flags") & ~0xC0, V["mouth0x"]: x + 26, V["mouth0y"]: far,
-            V["mouth1x"]: x + 26, V["mouth1y"]: far, V["hitCooldown"]: 200})
-    s.down("Right")
-    s.down("space")
-    shot_heard = sfx_seen(s, 0.12)
-    s.up("space")
-    s.up("Right")
-    s.wait(1.2)
+    shot_heard = set()
+    for _ in range(3):      # (nel livello delle presse una pressa puo' rallentare il biscotto)
+        r = s.save()
+        s.poke({V["flags"]: r.v("flags") & ~0xC0, V["mouth0x"]: x + 26, V["mouth0y"]: far,
+                V["mouth1x"]: x + 26, V["mouth1y"]: far, V["hitCooldown"]: 200, PLAYER0X: x, PLAYER0Y: y})
+        s.down("Right")
+        s.down("space")
+        shot_heard |= sfx_seen(s, 0.12)
+        s.up("space")
+        s.up("Right")
+        s.wait(1.2)
+        if SFX["sparo"] in shot_heard:
+            break
     # il biscotto torna nella posizione di tiro
     r = s.save()
     s.poke({PLAYER0X: x, PLAYER0Y: y, V["flags"]: r.v("flags") & ~0xC0, V["hitCooldown"]: 200})
@@ -572,8 +605,12 @@ def mouth_phase(s, level):
         x, y = r[PLAYER0X], r[PLAYER0Y]
         score0 = r.score()
         # la bocca (ferma per _hitCooldown) viene messa davanti al biscotto, niente slow motion
-        s.poke({V["flags"]: r.v("flags") & ~0xC0, V["mouth0x"]: x + 26, V["mouth0y"]: y,
-                V["mouth1x"]: x + 26, V["mouth1y"]: y, V["hitCooldown"]: 200})
+        mx = x + (18 if level == model.PRESS_LEVEL else 26)   # tra le presse c'e' poco spazio
+        # (nel livello delle presse la seconda bocca va su un'altra riga: nello
+        # spazio stretto tra le presse il colpo le prenderebbe tutte e due)
+        my1 = (y + 30 if y < 50 else y - 30) if level == model.PRESS_LEVEL else y
+        s.poke({V["flags"]: r.v("flags") & ~0xC0, V["mouth0x"]: mx, V["mouth0y"]: y,
+                V["mouth1x"]: mx, V["mouth1y"]: my1, V["hitCooldown"]: 200})
         # destra e fuoco premuti insieme, come un giocatore vero
         s.down("Right")
         s.down("space")
@@ -605,7 +642,8 @@ def mouth_phase(s, level):
         corner = (20, 8) if i == 0 else (140, 90)
         check(level, "dopo circa 4 secondi la bocca ricompare nel suo angolo",
               r.v(f"mouth{i}wait") == 0 and 2.5 <= elapsed <= 7 and
-              abs(r.v(f"mouth{i}x") - corner[0]) <= 3 and abs(r.v(f"mouth{i}y") - corner[1]) <= 3,
+              # (tra due letture passano fino a ~0,45 s: la bocca puo' gia' aver fatto qualche passo)
+              abs(r.v(f"mouth{i}x") - corner[0]) <= 6 and abs(r.v(f"mouth{i}y") - corner[1]) <= 6,
               f"dopo {elapsed:.1f} s in ({r.v(f'mouth{i}x')},{r.v(f'mouth{i}y')})")
     s.wait(0.3)
     r = s.save()
@@ -624,6 +662,8 @@ def bag_phase(s, level):
         return r
     goals = ball_goals(r[BALLX], r[BALLY])
     g = Grid(r, level)
+    if level == model.PRESS_LEVEL:
+        g.cells -= drop_cells(level)    # le presse si attraversano aspettando
     # dal punto di partenza del livello e dalla posizione attuale
     p = g.path((10, 64), goals) or g.path((r[PLAYER0X], r[PLAYER0Y]), goals)
     check(level, "sacchetto raggiungibile", p is not None, f"p0=({r[PLAYER0X]},{r[PLAYER0Y]})")
@@ -668,33 +708,7 @@ def push_phase(s, level):
           cols == exp and all(r.pf(c, rr) for c in cols for rr in (8, 9, 10)), f"muri={cols}")
     s.shot(f"{OUT}/atari_L{level}_muri.png")
     names = ("pushCol", "pushCol2", "pushCol3")
-    if level == 6:
-        # corsia tra la sedia (colonna 7) e la tazza (colonna 17)
-        c = r.v("pushCol")
-        s.poke({PLAYER0X: 4 * c + 9 - 3, PLAYER0Y: 84, V["hitCooldown"]: 250})
-        s.hold(["Right"], 5.0)
-        r = s.save()
-        check(level, "spingendo a destra si sposta e si ferma a fine corsia (colonna 16, prima della tazza)",
-              r.v("pushCol") == 16, f"pushCol={r.v('pushCol')}")
-        check(level, "spingere non attiva lo slow motion", r.flag(6) == 0)
-        s.poke({PLAYER0X: 4 * 16 + 18 + 2, PLAYER0Y: 84, V["hitCooldown"]: 250})
-        s.hold(["Left"], 2.0)
-        r = s.save()
-        check(level, "spingendo a sinistra torna indietro", r.v("pushCol") < 16, f"pushCol={r.v('pushCol')}")
-        c = r.v("pushCol")
-        s.poke({PLAYER0X: 4 * c + 18 + 2, PLAYER0Y: 84, V["hitCooldown"]: 250})
-        s.hold(["Left"], 6.0)
-        r = s.save()
-        check(level, "a sinistra si ferma alla colonna 8 (sedia)", r.v("pushCol") == 8,
-              f"pushCol={r.v('pushCol')}")
-        rows = r.pf_rows()
-        count = sum(rows[rr][c] == "X" for rr in (8, 9, 10) for c in range(8, 17))
-        check(level, "nessun pixel residuo nella corsia (solo il muro)", count == 3, f"pixel={count}")
-        # muro di nuovo al centro della corsia per le prove successive
-        s.poke({PLAYER0X: 4 * 8 + 9 - 3 + 4, PLAYER0Y: 84, V["hitCooldown"]: 250})
-        s.hold(["Right"], 2.5)
-        r = s.save()
-    for k, c in enumerate(cols if level != 6 else []):
+    for k, c in enumerate(cols):
         # biscotto a sinistra del muro, sul pavimento, Destra tenuto premuto
         s.poke({PLAYER0X: 4 * c + 9 - 3, PLAYER0Y: 84, V["hitCooldown"]: 250})
         s.down("Right")
@@ -851,6 +865,11 @@ def mouth_pass_phase(s, level):
     y = row * 8 + 7
     mx = 4 * c + 17 - 14          # bocca a sinistra dell'oggetto
     px = mx + 44                   # biscotto a destra, stessa riga
+    if level == model.PRESS_LEVEL:
+        # biscotto 9 colonne dopo la pressa (colonne c+9..c+10): fuori dalle
+        # presse (le teste coprono c-1..c+1 ogni 7 colonne) e abbastanza
+        # lontano perche' la bocca (larga 16) superi la pressa prima di toccarlo
+        px = mx + 50
     lives = r[PFSCORE2]
     s.poke({V["mouth0x"]: mx, V["mouth0y"]: y, V["mouth1x"]: mx, V["mouth1y"]: y,
             PLAYER0X: px, PLAYER0Y: y, V["hitCooldown"]: 0})
@@ -867,6 +886,40 @@ def mouth_pass_phase(s, level):
     s.shot(f"{OUT}/atari_L{level}_bocca_passa.png")
     s.poke({PFSCORE2: lives, V["mouth0x"]: 20, V["mouth0y"]: 8, V["mouth1x"]: 140, V["mouth1y"]: 90,
             PLAYER0X: 10, PLAYER0Y: 64, V["hitCooldown"]: 250})
+
+
+def press_phase(s, level):
+    """Le presse si allungano fino in fondo e schiacciano il biscotto (una
+    vita); stando fermi accanto a un oggetto non si perde niente."""
+    r = s.save()
+    seen = set()
+    for _ in range(12):
+        r = s.save()
+        seen.add(sum(r.pf(10, rr) for rr in range(5)))
+        s.wait(0.08)
+    check(level, "la pressa (colonna 10) si allunga e si ritira: da 1 a 5 righe",
+          1 in seen and 5 in seen, f"lunghezze viste={sorted(seen)}")
+    # biscotto sotto la pressa, nella riga 4 (l'ultima che la pressa raggiunge)
+    r = s.save()
+    s.poke({PLAYER0X: 54, PLAYER0Y: 36, V["hitCooldown"]: 0, V["mouth0wait"]: 250, V["mouth1wait"]: 250,
+            PFSCORE2: 0xAA, V["flags"]: r.v("flags") & ~0x40})
+    s.wait(1.5)
+    r = s.save()
+    check(level, "la pressa che scende sul biscotto lo schiaccia: una vita in meno",
+          r[PFSCORE2] == 0x2A and r.v("hitCooldown") > 0, f"vite={r[PFSCORE2]:08b}")
+    # fermo a contatto col piano, sotto e sopra, lontano dalle presse
+    # (colonne 5-7): nessuna vita persa (toccare il playfield fermo non e'
+    # essere schiacciati)
+    for py, where in ((53, "sotto"), (39, "sopra")):
+        s.save()
+        s.poke({PLAYER0X: 40, PLAYER0Y: py, V["hitCooldown"]: 0, V["mouth0wait"]: 250, V["mouth1wait"]: 250,
+                PFSCORE2: 0xAA})
+        s.wait(1.5)
+        r = s.save()
+        check(level, f"fermo a contatto col piano ({where}): nessuna vita persa", r[PFSCORE2] == 0xAA,
+              f"vite={r[PFSCORE2]:08b} pos=({r[PLAYER0X]},{r[PLAYER0Y]})")
+    s.poke({V["mouth0wait"]: 0, V["mouth1wait"]: 0, PLAYER0X: 10, PLAYER0Y: 64, V["hitCooldown"]: 250,
+            PFSCORE2: 0xAA, PFSCORE1: 0xFF})
 
 
 def play_level(s, level, extra=True):
@@ -889,8 +942,13 @@ def play_level(s, level, extra=True):
         mouth_pass_phase(s, level)
         if model.wall_cols(level):
             push_phase(s, level)
+        if level == model.PRESS_LEVEL:
+            press_phase(s, level)
         life_phase(s, level)
-        slow_sound_phase(s, level)
+        # nel livello delle presse l'unico oggetto fisso e' il piano (con i
+        # varchi): il rallentamento si prova negli altri livelli
+        if level != model.PRESS_LEVEL:
+            slow_sound_phase(s, level)
     sugar_phase(s, level)
     mouth_phase(s, level)
     if extra and level != LEVELS:

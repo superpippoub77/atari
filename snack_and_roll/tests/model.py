@@ -7,8 +7,10 @@ OBJECTS = [
     [0b00000000, 0b00000000, 0b00110111, 0b00000000, 0b00000000, 0b00000000, 0b00001011, 18],
     [0b00000000, 0b00000000, 0b10101010, 0b01010101, 0b00000000, 0b00000000, 0b00101011, 136],
     [0b00000000, 0b11100000, 0b00000000, 0b00001010, 0b11100000, 0b00000000, 0b01111110, 136],
-    [0b11000000, 0b00100000, 0b00000011, 0b00001100, 0b00010000, 0b00010000, 0b00101011, 18],
+    [0b00000000, 0b00000000, 0b00000000, 0b11111111, 0b00000000, 0b00000000, 0b00101011, 136],
 ]
+# livello delle PRESSE (l'ultimo): la colonna 3 di objects sono presse, non gocce
+PRESS_LEVEL = 6
 LEVELS = len(OBJECTS)
 
 # collisione biscotto/zuccherino misurata in Stella (dx, dy rispetto allo zuccherino)
@@ -81,13 +83,17 @@ def wall_cols(level, objects=OBJECTS):
 
 
 def drop_cells(level, objects=OBJECTS):
+    """celle delle gocce (4 righe) o delle presse a T (livello PRESS_LEVEL:
+    perno di 5 righe e testa larga 3 colonne che puo' stare in ognuna)."""
     cells = set()
     bits = objects[level - 1][3]
+    press = level == PRESS_LEVEL
     for i in range(8):
         if bits & (1 << i):
             col = 3 + 7 * (i % 4)
             top = 0 if i < 4 else 6
-            cells |= {(col, r) for r in range(top, top + 4)}
+            cols = (col - 1, col, col + 1) if press else (col,)
+            cells |= {(c, r) for c in cols for r in range(top, top + (5 if press else 4))}
     return cells
 
 

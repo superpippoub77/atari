@@ -22,9 +22,13 @@ SOUNDS = [
 ]
 
 
-# effetti lunghi dimezzati per risparmiare ROM: si tiene una nota su due e
+# effetti dimezzati per risparmiare ROM (spazio per le presse del livello 6): si tiene una nota su due e
 # la sua durata diventa la somma delle due (stesso andamento, meta' byte)
-HALVE = {"explosion", "powerup", "oneup"}
+HALVE = {"explosion", "powerup", "oneup", "pewpew", "gotthecoin", "poof1", "dragit"}
+
+
+# effetti lunghi dimezzati due volte (spazio per le presse ridisegnate a pezzi)
+QUARTER = {"explosion", "oneup", "powerup"}
 
 
 def halve(notes):
@@ -102,6 +106,8 @@ def main():
     for sid, key, src, desc in SOUNDS:
         notes = snd[src]
         if src in HALVE:
+            notes = halve(notes)
+        if src in QUARTER:
             notes = halve(notes)
         notes = merge(notes)
         data = []

@@ -271,7 +271,7 @@ __main_loop
    _mouthTick = 0
    temp1 = titlemusic[_music_index]
    _music_index = _music_index + 1
-   if _music_index >= 92 then _music_index = 0
+   if _music_index >= 64 then _music_index = 0
    AUDC1 = 4 : temp2 = 5
    goto __music_note
 __game_music
@@ -490,15 +490,15 @@ end
    if temp1 && _level>2 then pfcolors:
    $28
    $26
-   $20
-   $22
-   $20
+   $24
+   $26
+   $24
    $02
    $28
    $26
-   $20
-   $22
-   $20
+   $24
+   $26
+   $24
 end
 
    ; Background
@@ -802,6 +802,11 @@ __game_collision
    ; Biscotto e Arrivo : cambio di livello
    ;*************************************************************************************************************************
    if !_hitCooldown && collision(player0, player1) then goto __decrease_health_bar
+   ; PRESSE (livello 6): il biscotto non entra mai da solo nel playfield,
+   ; quindi se lo tocca e' una pressa che gli e' scesa addosso
+   if _level <> _Levels || _hitCooldown then goto __no_press_hit
+   if collision(player0, playfield) then goto __decrease_health_bar
+__no_press_hit
    if collision(missile0, player1) then goto __destroy_mouth
    if collision(player0, ball) then goto __change_level
    goto __done
@@ -935,18 +940,18 @@ end
    33, 25, 42, 18, 53, 21, 62, 14,
    56, 8, 35, 27, 37, 21, 55, 14,
    33, 9, 43, 11, 37, 29, 47, 23,
-   40, 16, 43, 11, 52, 13, 54, 31,
+   32, 16, 51, 11, 61, 13, 39, 31,
 end
 
    ; tema del titolo (semicrome, AUDC 4): Mi Fa Sol Do... Re Mi Fa...
    ; Sol La Si Fa... La Si Do Re Mi...   (Mi5=23 Fa5=21 Sol5=19 La5=17
    ; Si5=15 Do6=14 Re5=26 Re6=12 Mi6=11 Fa6=10; 0 = continua, 1 = pausa)
    data titlemusic
-   23, 0, 0, 21, 19, 0, 0, 0, 14, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1,
-   26, 0, 0, 23, 21, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1,
-   19, 0, 0, 17, 15, 0, 0, 0, 10, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1,
-   17, 0, 0, 15, 14, 0, 0, 0, 12, 0, 0, 0, 11, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1,
-   1, 1, 1, 1, 1, 1, 1, 1
+   23, 0, 21, 19, 0, 0, 14, 0, 0, 0, 0, 1,
+   26, 0, 23, 21, 0, 0, 0, 0, 0, 0, 0, 1,
+   19, 0, 17, 15, 0, 0, 10, 0, 0, 0, 0, 1,
+   17, 0, 15, 14, 0, 0, 12, 0, 11, 0, 0, 0, 0, 0, 0, 1,
+   1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1
 end
 
    ; musica di sottofondo in gioco (AUDC 12, volume basso): arpeggi di
@@ -1110,7 +1115,9 @@ __wall_next
    ;*************************************************************************************************************************
 __update_drops
    if _level = _Boss then goto __boss
-   if _frame_counter & 7 then return otherbank
+   ; ogni 4 frame: le gocce cambiano posizione ogni 8 (ridisegnarle uguali
+   ; non costa nulla), le presse si aggiornano meta' per volta (sotto)
+   if _frame_counter & 3 then return otherbank
    temp2 = _level - 1
    temp2 = temp2 * 8
    temp2 = temp2 + 3
@@ -1119,6 +1126,7 @@ __update_drops
 __drop_loop
    if !temp4 then return otherbank
    if !(temp4 & 1) then goto __drop_next
+   if _level = _Levels then goto __press
    temp1 = temp6 + 3
    pfvline temp5 temp6 temp1 off
    temp1 = _frame_counter / 8
@@ -1126,6 +1134,98 @@ __drop_loop
    temp1 = temp1 & 3
    temp1 = temp1 + temp6
    pfpixel temp5 temp1 on
+   goto __drop_next
+   ; PRESSA (livello 6, al posto delle gocce): uno stantuffo a T, perno
+   ; sottile (1 colonna) con la testa larga (3 colonne) in fondo, lungo
+   ; fino a 5 righe (righe 0-4 dal soffitto, 6-10 dal piano). Ciclo di 6
+   ; passi da 8 frame (un "secondo" di gioco), sfasato per colonna:
+   ; presslen = riga della testa (dall'alto), pressold = quella del passo
+   ; prima. Si ridisegna solo cio' che cambia (8 presse ridisegnate per
+   ; intero sforerebbero il tempo del frame):
+   ;   1) via la testa vecchia, 2) perno allungato o accorciato,
+   ;   3) testa nuova.
+   ; Meta' per volta: le presse di sopra nei frame 0, 8, 16..., quelle di
+   ; sotto 4 frame dopo (8 presse insieme sforerebbero il tempo del frame).
+   ; In assembly per stare nel banco: le due righe (vecchia e nuova)
+   ; restano sullo stack. pfhline/pfvline: A = colonna, Y = riga,
+   ; temp3 = estremo finale, X = 0 accende / 1 spegne; usano temp1-temp3.
+__press
+   asm
+ lda _frame_counter
+ and #4
+ beq press_upper
+ lda temp6
+ beq press_skip
+ bne press_go
+press_upper
+ lda temp6
+ bne press_skip
+press_go
+ lda _frame_counter
+ lsr
+ lsr
+ lsr
+ sta temp1
+ lda temp5
+ and #3
+ clc
+ adc temp1
+ tax
+ lda pressold,x
+ clc
+ adc temp6
+ pha
+ lda presslen,x
+ clc
+ adc temp6
+ pha
+ tsx
+ cmp $0102,x
+ beq press_done
+ lda $0102,x
+ tay
+ ldx temp5
+ inx
+ stx temp3
+ ldx #1
+ lda temp5
+ sec
+ sbc #1
+ jsr pfhline
+ tsx
+ lda $0101,x
+ cmp $0102,x
+ bcc press_up
+ sta temp3
+ ldy temp6
+ ldx #0
+ lda temp5
+ jsr pfvline
+ jmp press_head
+press_up
+ lda $0102,x
+ sta temp3
+ ldy $0101,x
+ iny
+ ldx #1
+ lda temp5
+ jsr pfvline
+press_head
+ tsx
+ ldy $0101,x
+ ldx temp5
+ inx
+ stx temp3
+ ldx #0
+ lda temp5
+ sec
+ sbc #1
+ jsr pfhline
+press_done
+ pla
+ pla
+press_skip
+end
 __drop_next
    temp4 = temp4 / 2
    temp5 = temp5 + 7
@@ -1350,18 +1450,15 @@ __sfx_note
    _sfxPos = _sfxPos + 3
    return otherbank
 
-   ; pewpew (19 note) - sparo
+   ; pewpew (10 note) - sparo
    data sfx_shot
-   244, 28, 2, 180, 9, 1, 172, 3, 1, 236, 4, 1, 196, 18, 1, 244, 25, 1
-   244, 28, 1, 84, 7, 1, 84, 9, 1, 100, 13, 1, 84, 12, 1, 100, 24, 1
-   84, 28, 1, 52, 30, 1, 52, 7, 1, 52, 9, 1, 36, 12, 1, 44, 4, 1
-   28, 6, 1, 255
+   244, 28, 2, 180, 9, 2, 236, 4, 2, 244, 25, 2, 84, 7, 2, 100, 13, 2
+   100, 24, 2, 52, 30, 2, 52, 9, 2, 44, 4, 2, 255
 end
 
-   ; dragit (10 note) - muro spinto
+   ; dragit (3 note) - muro spinto
    data sfx_push
-   39, 28, 1, 103, 2, 1, 152, 30, 1, 152, 17, 1, 152, 30, 1, 103, 17, 1
-   152, 30, 1, 103, 17, 1, 55, 14, 1, 39, 6, 1, 255
+   39, 28, 2, 152, 30, 6, 55, 14, 2, 255
 end
 
    ; electrobump (8 note) - scossa / scivolata (inizio rallentamento)
@@ -1370,41 +1467,34 @@ end
    70, 8, 2, 38, 8, 2, 255
 end
 
-   ; poof1 (12 note) - blocco abbattuto
+   ; poof1 (5 note) - blocco abbattuto
    data sfx_block
-   72, 7, 1, 104, 7, 1, 136, 7, 1, 136, 9, 1, 168, 12, 1, 168, 9, 1
-   168, 12, 1, 168, 9, 1, 136, 13, 1, 104, 14, 1, 72, 9, 1, 40, 9, 1
-   255
+   72, 7, 2, 136, 7, 2, 168, 12, 4, 136, 13, 2, 72, 9, 2, 255
 end
 
-   ; gotthecoin (16 note) - zuccherino preso
+   ; gotthecoin (9 note) - zuccherino preso
    data sfx_sugar
-   252, 4, 2, 228, 10, 1, 244, 10, 2, 212, 10, 1, 148, 10, 2, 132, 10, 1
-   116, 10, 1, 100, 10, 1, 84, 10, 1, 52, 10, 1, 116, 10, 1, 148, 10, 1
-   52, 10, 1, 20, 10, 3, 4, 10, 1, 20, 10, 3, 255
+   252, 4, 2, 228, 10, 2, 244, 10, 2, 148, 10, 2, 132, 10, 2, 100, 10, 2
+   52, 10, 2, 148, 10, 2, 20, 10, 7, 255
 end
 
-   ; explosion (23 note) - bocca uccisa
+   ; explosion (11 note) - bocca uccisa
    data sfx_mouth
-   40, 1, 2, 134, 4, 2, 246, 9, 2, 254, 4, 2, 70, 9, 2, 70, 12, 2
-   54, 10, 2, 134, 13, 2, 110, 4, 2, 118, 15, 2, 102, 8, 2, 102, 15, 2
-   86, 6, 2, 102, 14, 2, 54, 15, 2, 86, 9, 2, 54, 15, 2, 54, 12, 2
-   102, 12, 2, 86, 15, 2, 70, 10, 2, 54, 8, 2, 54, 14, 2, 255
+   40, 1, 4, 246, 9, 4, 70, 9, 4, 54, 10, 4, 110, 4, 4, 102, 8, 4
+   86, 6, 4, 54, 15, 8, 102, 12, 4, 70, 10, 4, 54, 14, 2, 255
 end
 
-   ; powerup (22 note) - super potere (zuccherino dorato)
+   ; powerup (13 note) - super potere (zuccherino dorato)
    data sfx_power
-   246, 30, 2, 252, 12, 4, 164, 27, 2, 116, 18, 2, 132, 18, 4, 252, 11, 2
-   204, 11, 2, 196, 28, 2, 156, 7, 2, 116, 24, 2, 172, 7, 2, 92, 5, 2
-   76, 3, 6, 236, 10, 2, 212, 30, 2, 180, 21, 2, 132, 21, 2, 116, 21, 2
-   124, 6, 2, 70, 0, 2, 68, 10, 2, 52, 10, 3, 255
+   246, 30, 4, 252, 12, 4, 116, 18, 4, 132, 18, 4, 204, 11, 4, 156, 7, 4
+   172, 7, 4, 76, 3, 8, 212, 30, 4, 132, 21, 4, 124, 6, 4, 68, 10, 4
+   52, 10, 1, 255
 end
 
-   ; oneup (18 note) - cambio livello
+   ; oneup (12 note) - cambio livello
    data sfx_level
-   244, 22, 2, 132, 22, 2, 36, 19, 2, 22, 18, 2, 244, 18, 2, 68, 17, 2
-   20, 16, 2, 132, 10, 2, 6, 30, 4, 132, 13, 4, 6, 30, 4, 68, 12, 2
-   6, 30, 4, 36, 1, 2, 36, 9, 2, 68, 9, 8, 36, 9, 2, 36, 1, 2
+   244, 22, 4, 36, 19, 4, 244, 18, 4, 20, 16, 4, 6, 30, 4, 132, 13, 4
+   6, 30, 4, 68, 12, 4, 6, 30, 4, 36, 9, 4, 68, 9, 8, 36, 1, 2
    255
 end
 
@@ -1429,9 +1519,20 @@ end
    ; terzo muro dalla stanza C (aperta in alto a destra), oppure spingendo
    ; il primo muro di 3-4 colonne, scavalcandolo e spingendo il secondo.
    ; Gocce nella parte alta (b1, b3).
-   ; Livello 6: un solo tavolo in basso (sezione b4) per lasciare la
-   ; corsia libera (colonne 8-16) al muro spingibile in b5.
+   ; Livello 6 (PRESSE, parte al buio): solo presse. La colonna 3 (gocce)
+   ; diventa di presse: 4 appese al soffitto e 4 al piano (colonne 3, 10,
+   ; 17, 24) che scendono fino in fondo a ritmo, sfasate da una colonna
+   ; all'altra, e schiacciano il biscotto (una vita).
    ; Livello 7 (Bocca Gigante): arena vuota, il piano ha tre passaggi.
+
+   ; presse: su, su, scende, giu' di colpo (fino in fondo), giu', risale;
+   ; la tabella e' periodica (9 valori = 6 + 3) per lo sfasamento 0-3
+   data presslen
+   0, 0, 1, 4, 4, 2, 0, 0, 1
+end
+   data pressold
+   2, 0, 0, 1, 4, 4, 2, 0, 0
+end
 
    data objects
 
@@ -1440,7 +1541,7 @@ end
    %00000000, %00000000, %00110111, %00000000, %00000000, %00000000, %00001011, 18,
    %00000000, %00000000, %10101010, %01010101, %00000000, %00000000, %00101011, 136,
    %00000000, %11100000, %00000000, %00001010, %11100000, %00000000, %01111110, 136,
-   %11000000, %00100000, %00000011, %00001100, %00010000, %00010000, %00101011, 18,
+   %00000000, %00000000, %00000000, %11111111, %00000000, %00000000, %00101011, 136,
    %00000000, %00000000, %00000000, %00000000, %00000000, %00000000, %01010101, 136,
 end
 
