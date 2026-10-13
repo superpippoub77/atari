@@ -82,6 +82,11 @@ def walls(ram):
     return [c for c in (ram.v("pushCol"), ram.v("pushCol2"), ram.v("pushCol3")) if c != 255]
 
 
+def moving(level):
+    """livello con ostacoli che si muovono (gocce o presse)."""
+    return bool(OBJECTS[level - 1][3])
+
+
 def drop_cells(level):
     """celle di gocce e presse (dal modello: le presse a T hanno la testa larga)."""
     return model.drop_cells(level)
@@ -91,10 +96,8 @@ class Grid:
     def __init__(self, ram, level):
         self.level = level
         self.cells = {(c, r) for r in range(12) for c in range(32) if ram.pf(c, r)}
-        # gocce: tutta la colonna e' un ostacolo; presse: conta solo la parte
-        # abbassata in questo momento (si passa quando sono su)
-        if level != model.PRESS_LEVEL:
-            self.cells |= drop_cells(level)
+        # gocce e presse: conta solo dove sono in questo momento (si passa
+        # aspettando che si spostino)
         self.cells |= model.wall_cells(walls(ram))
 
     def pf(self, c, r):
@@ -177,8 +180,8 @@ WALK_SFX = set()   # effetti sonori visti durante l'ultima camminata
 
 def walk_to(s, level, goals, max_time=40.0):
     """Muove il biscotto con i tasti lungo il percorso calcolato."""
-    if level == model.PRESS_LEVEL:
-        # le presse sbarrano la strada a tratti e rallentano chi le tocca:
+    if moving(level):
+        # gocce e presse sbarrano la strada a tratti e rallentano chi le tocca:
         # il test non sa aspettare il momento giusto, gli serve piu' tempo
         max_time *= 3
     WALK_SFX.clear()
@@ -201,8 +204,8 @@ def walk_to(s, level, goals, max_time=40.0):
         g = Grid(r, level)
         path = g.path(pos, goals)
         if path is None:
-            if level == model.PRESS_LEVEL:
-                s.wait(0.15)       # una pressa sbarra la strada: si aspetta che risalga
+            if moving(level):
+                s.wait(0.15)       # una goccia o una pressa sbarra la strada: si aspetta
                 continue
             return False, r
         # punta qualche passo avanti lungo il percorso
@@ -268,7 +271,7 @@ def static_checks(s, r, level):
     for i in range(8):
         if bits & (1 << i):
             col, top = 3 + 7 * (i % 4), (0 if i < 4 else 6)
-            n = sum(r.pf(col, rr) for rr in range(top, top + 4))
+            n = sum(r.pf(col, rr) for rr in range(top, top + 5))
             if n != 1 or (top == 6 and not r.pf(col, 5)):
                 bad.append((col, top, n))
     if bits and level != model.PRESS_LEVEL:
@@ -906,6 +909,25 @@ def mouth_pass_phase(s, level):
             PLAYER0X: 10, PLAYER0Y: 64, V["hitCooldown"]: 250})
 
 
+def drop_phase(s, level):
+    """Ogni goccia scende fino al piano (sopra) o al pavimento (sotto)."""
+    bits = OBJECTS[level - 1][3]
+    low = {}
+    t0 = time.time()
+    while time.time() - t0 < 4.5:
+        r = s.save()
+        for i in range(8):
+            if bits & (1 << i):
+                col, top = 3 + 7 * (i % 4), (0 if i < 4 else 6)
+                rows = [rr for rr in range(top, top + 5) if r.pf(col, rr)]
+                if rows:
+                    low[i] = max(low.get(i, 0), rows[-1])
+        s.wait(0.1)
+    exp = {i: (4 if i < 4 else 10) for i in range(8) if bits & (1 << i)}
+    check(level, "le gocce arrivano fino al piano (riga 4) e al pavimento (riga 10)", low == exp,
+          f"riga piu' bassa raggiunta={low}")
+
+
 def press_phase(s, level):
     """Le presse si allungano fino in fondo e schiacciano il biscotto (una
     vita); stando fermi accanto a un oggetto non si perde niente."""
@@ -967,6 +989,8 @@ def play_level(s, level, extra=True):
             push_phase(s, level)
         if level == model.PRESS_LEVEL:
             press_phase(s, level)
+        elif OBJECTS[level - 1][3]:
+            drop_phase(s, level)
         life_phase(s, level)
         # nel livello delle presse l'unico oggetto fisso e' il piano (con i
         # varchi): il rallentamento si prova negli altri livelli
@@ -1093,6 +1117,21 @@ def main():
         s.wait(0.3)
     r = start_level(s, LEVELS + 1)
     check(1, "il livello segreto non si sceglie con Select (dopo il 6 torna l'1)", r.v("level") == 1)
+    # combinazione segreta dal titolo: leva in su + fuoco, poi Reset
+    s.poke({PFSCORE2: 0x02, V["hitCooldown"]: 0, V["mouth0x"]: r[PLAYER0X], V["mouth0y"]: r[PLAYER0Y],
+            V["mouth1x"]: r[PLAYER0X], V["mouth1y"]: r[PLAYER0Y]})
+    s.wait(0.8)
+    s.down("Up", "space")
+    s.wait(0.4)
+    r = s.save()
+    check(BOSS, "su + fuoco nel titolo: si accende il 7o segnalino", r.flag(0) == 0 and r.pf(13, 6),
+          f"titolo={r.flag(0) == 0} riga 6={r.pf_rows()[6][:16]}")
+    s.tap("F2", 0.15)
+    s.up("Up", "space")
+    s.wait(0.8)
+    r = s.save()
+    check(BOSS, "su + fuoco + Reset: parte la Bocca Gigante", r.v("level") == BOSS and r.flag(0) == 1,
+          f"level={r.v('level')}")
     s.close()
 
     fails = [x for x in RESULTS if not x[2]]

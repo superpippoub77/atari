@@ -100,7 +100,7 @@ def wall_y(key):
 
 
 def drop_cells(level, objects=OBJECTS):
-    """celle delle gocce (4 righe) o delle presse a T (livello PRESS_LEVEL:
+    """celle delle gocce (5 righe, fino al piano o al pavimento) o delle presse a T (livello PRESS_LEVEL:
     perno di 5 righe e testa larga 3 colonne che puo' stare in ognuna)."""
     cells = set()
     bits = objects[level - 1][3]
@@ -110,7 +110,7 @@ def drop_cells(level, objects=OBJECTS):
             col = 3 + 7 * (i % 4)
             top = 0 if i < 4 else 6
             cols = (col - 1, col, col + 1) if press else (col,)
-            cells |= {(c, r) for c in cols for r in range(top, top + (5 if press else 4))}
+            cells |= {(c, r) for c in cols for r in range(top, top + 5)}
     return cells
 
 

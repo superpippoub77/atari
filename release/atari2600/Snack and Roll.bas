@@ -310,10 +310,22 @@ __attract_mode
 
    ; selettore di livello iniziale con lo switch Select (6 scelte),
    ; indicatore a segmenti nella riga libera del titolo
-   if switchselect && !_b1_prevSelect{1} then _choco_count = _choco_count + 1 : if _choco_count = _Levels then _choco_count = 0
+   if switchselect && !_b1_prevSelect{1} then _choco_count = _choco_count + 1 : if _choco_count >= _Levels then _choco_count = 0
    _b1_prevSelect{1} = 0
    if switchselect then _b1_prevSelect{1} = 1
-   pfhline 1 6 11 off
+   ; combinazione segreta: leva in su + fuoco = Bocca Gigante (si accende
+   ; un 7o segnalino; Reset la fa partire, Select torna al livello 1)
+   asm
+ lda SWCHA
+ and #$10
+ bne no_boss
+ bit INPT4
+ bmi no_boss
+ lda #_Levels
+ sta _choco_count
+no_boss
+end
+   pfhline 1 6 13 off
    temp1=_choco_count*2+1
    pfpixel temp1 6 on
    ; le due "l" di Roll (colonne 18 e 20) sventolano: ogni 16 frame la
@@ -1158,8 +1170,9 @@ __wall_next
    ; GOCCE (colonna 3 di "objects") - chiamata ad ogni frame
    ;_________________________________________________________________________________________________________________________
    ; Ogni 16 frame la goccia di ogni sezione scende di una riga: si cancella
-   ; la sua colonna (4 righe) e si accende il nuovo punto, senza sfarfallio.
-   ; Sopra: righe 0-3 (appese al soffitto). Sotto: righe 6-9 (appese al piano).
+   ; la sua colonna (5 righe) e si accende il nuovo punto, senza sfarfallio.
+   ; Sopra: righe 0-4 (dal soffitto al piano). Sotto: righe 6-10 (dal piano
+   ; al pavimento).
    ;*************************************************************************************************************************
 __update_drops
    if _level = _Boss then goto __boss
@@ -1185,15 +1198,20 @@ __drop_loop
 drop_turn
 end
    if _level = _Levels then goto __press
-   temp1 = temp6 + 3
+   temp1 = temp6 + 4
    pfvline temp5 temp6 temp1 off
-   ; riga della goccia: un passo ogni 16 frame, sfasata per colonna
+   ; riga della goccia (tabella dropy): un passo ogni 16 frame, sfasata
+   ; per colonna; arriva fino al piano o al pavimento
    asm
- lda #3
+ lda temp5
+ and #3
+ sta temp2
+ lda #1
  jsr tick16
  clc
- adc temp5
- and #3
+ adc temp2
+ tax
+ lda dropy,x
  sta temp1
 end
    temp1 = temp1 + temp6
@@ -1674,6 +1692,11 @@ end
 
    ; presse: su, su, scende, giu' di colpo (fino in fondo), giu', risale;
    ; la tabella e' periodica (9 valori = 6 + 3) per lo sfasamento 0-3
+   ; gocce: scendono di 5 righe (fino al piano o al pavimento) e restano
+   ; giu' un passo; periodica (9 valori = 6 + 3) per lo sfasamento 0-3
+   data dropy
+   0, 1, 2, 3, 4, 4, 0, 1, 2
+end
    data presslen
    0, 0, 1, 4, 4, 2, 0, 0, 1
 end
