@@ -20,8 +20,9 @@
 > - I muri mobili si spostano quando il biscotto li spinge e **schiacciano le bocche** (+10, conta come bocca colpita).
 > - **Livello 5, il rompicapo dei muri**: ci sono muri mobili **sia sopra sia sotto il piano**. Quello di sopra poggia sul piano sotto una lampada appesa al soffitto; i due di sotto stanno sul pavimento sotto una lampada appesa al piano. Ogni muro con la sua lampada chiude la colonna, e sparando non si passa (muri e lampade sopra i muri non si rompono). Tutta la metà destra dello schermo si raggiunge solo spingendo un muro: quello sopra il piano, oppure il primo muro di sotto e poi il secondo. Tra i due muri di sotto c'è una stanza chiusa, con uno zuccherino. Nessuna combinazione di spinte chiude per sempre uno zuccherino.
 > - Bocche più lente, che passano sopra a qualsiasi oggetto. Una bocca uccisa ricompare nel suo angolo dopo circa 4 secondi.
-> - Schermata iniziale: il biscotto, inseguito dalla bocca, scorre in continuo entrando sempre da destra.
-> - **Audio**: tema iniziale *Hot Cross Buns* (filastrocca tradizionale inglese sui panini dolci), musica leggera di sottofondo ed effetti presi dal *bbsoundtest* di batari Basic (sparo, zuccherino, blocco abbattuto, bocca uccisa, super potere, scossa, cambio livello, muro spinto).
+> - Schermata iniziale: il biscotto, inseguito dalla bocca, scorre in continuo entrando sempre da destra; le due "l" di *Roll* sventolano.
+> - Gocce e presse si muovono con calma (un passo ogni 16 fotogrammi) e si ridisegnano una per fotogramma, così lo schermo resta sempre stabile a 312 righe (PAL).
+> - **Audio**: tema iniziale rock'n'roll originale (giro di boogie in Do), musica leggera di sottofondo ed effetti presi dal *bbsoundtest* di batari Basic (sparo, zuccherino, blocco abbattuto, bocca uccisa, super potere, scossa, cambio livello, muro spinto).
 > - Zuccherini ben distribuiti: uno per ognuna delle 8 sezioni, su tutta la larghezza dello schermo, sopra e sotto il piano. Ognuno è fuori dagli oggetti indistruttibili oppure dentro una tazza o un muro di cioccolato, da bucare a colpi di cioccolatino.
 > - Si può sparare tenendo premuta una direzione.
 > - **Più suspense**:

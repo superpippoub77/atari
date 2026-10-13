@@ -259,7 +259,7 @@ __main_loop
    ;_________________________________________________________________________________________________________________________
    ; Canale 1. Ogni passo della tabella: 0 = la nota continua,
    ; 1 = pausa, altro = nuova nota (valore AUDF).
-   ; Titolo: "Hot Cross Buns" (AUDC 4), un passo ogni
+   ; Titolo: rock'n'roll (AUDC 4), un passo ogni
    ; 6 frame (una semicroma). In gioco: arpeggio leggero (AUDC 12, volume
    ; basso), un passo ogni 8 frame. Quando il tempo sta per finire
    ; (ultimi 2 segmenti) o durante la fuga finale (sacchetto visibile)
@@ -316,6 +316,18 @@ __attract_mode
    pfhline 1 6 11 off
    temp1=_choco_count*2+1
    pfpixel temp1 6 on
+   ; le due "l" di Roll (colonne 18 e 20) sventolano: ogni 16 frame la
+   ; cima (riga 7) si sposta di una colonna a destra e poi torna
+   ; (colonne 18-21 della riga 7 = bit 5-2 del byte 30 del playfield)
+   asm
+ lda _frame_counter
+ and #15
+ bne roll_still
+ lda playfield+30
+ eor #%00111100
+ sta playfield+30
+roll_still
+end
 
    goto __skip_missile
 
@@ -974,14 +986,14 @@ end
    32, 16, 51, 11, 61, 13, 39, 31,
 end
 
-   ; tema del titolo (semicrome, AUDC 4): "Hot Cross Buns", filastrocca
-   ; tradizionale inglese sui panini dolci (Mi5=23 Re5=26 Do5=29;
-   ; 0 = continua, 1 = pausa)
+   ; tema del titolo (semicrome, AUDC 4): rock'n'roll originale, giro di
+   ; boogie in Do (Do Fa Sol) con le note staccate (Do5=29 Mi5=23 Fa5=21
+   ; Sol5=19 La5=17 Sib5=16 Si5=15 Do6=14 Re6=12; 0 = continua, 1 = pausa)
    data titlemusic
-   23, 0, 0, 1, 26, 0, 0, 1, 29, 0, 0, 0, 0, 0, 1, 1,
-   23, 0, 0, 1, 26, 0, 0, 1, 29, 0, 0, 0, 0, 0, 1, 1,
-   29, 1, 29, 1, 29, 1, 29, 1, 26, 1, 26, 1, 26, 1, 26, 1,
-   23, 0, 0, 1, 26, 0, 0, 1, 29, 0, 0, 0, 0, 0, 0, 1
+   29, 1, 23, 1, 19, 1, 17, 1, 16, 1, 17, 1, 19, 1, 23, 1,
+   29, 1, 23, 1, 19, 1, 17, 1, 16, 1, 17, 1, 19, 0, 0, 1,
+   21, 1, 17, 1, 14, 1, 12, 1, 14, 1, 17, 1, 21, 0, 0, 1,
+   19, 1, 15, 1, 12, 1, 15, 1, 14, 0, 0, 0, 0, 0, 1, 1
 end
 
    ; musica di sottofondo in gioco (AUDC 12, volume basso): arpeggi di
@@ -1145,15 +1157,16 @@ __wall_next
    ;*************************************************************************************************************************
    ; GOCCE (colonna 3 di "objects") - chiamata ad ogni frame
    ;_________________________________________________________________________________________________________________________
-   ; Ogni 8 frame la goccia di ogni sezione scende di una riga: si cancella
+   ; Ogni 16 frame la goccia di ogni sezione scende di una riga: si cancella
    ; la sua colonna (4 righe) e si accende il nuovo punto, senza sfarfallio.
    ; Sopra: righe 0-3 (appese al soffitto). Sotto: righe 6-9 (appese al piano).
    ;*************************************************************************************************************************
 __update_drops
    if _level = _Boss then goto __boss
-   ; ogni 4 frame: le gocce cambiano posizione ogni 8 (ridisegnarle uguali
-   ; non costa nulla), le presse si aggiornano meta' per volta (sotto)
-   if _frame_counter & 3 then return otherbank
+   ; Una goccia (o pressa) per frame, a turno: quella con
+   ; (colonna xor riga) & 7 = frame & 7 (le 8 hanno valori diversi).
+   ; Ognuna si ridisegna ogni 8 frame, due volte per passo (16 frame).
+   ; Di piu' insieme sforerebbero il tempo del frame (lo schermo balla).
    temp2 = _level - 1
    temp2 = temp2 * 8
    temp2 = temp2 + 3
@@ -1162,45 +1175,65 @@ __update_drops
 __drop_loop
    if !temp4 then return otherbank
    if !(temp4 & 1) then goto __drop_next
+   asm
+ lda temp6
+ eor temp5
+ eor _frame_counter
+ and #7
+ beq drop_turn
+ jmp .__drop_next
+drop_turn
+end
    if _level = _Levels then goto __press
    temp1 = temp6 + 3
    pfvline temp5 temp6 temp1 off
-   temp1 = _frame_counter / 8
-   temp1 = temp1 + temp5
-   temp1 = temp1 & 3
+   ; riga della goccia: un passo ogni 16 frame, sfasata per colonna
+   asm
+ lda #3
+ jsr tick16
+ clc
+ adc temp5
+ and #3
+ sta temp1
+end
    temp1 = temp1 + temp6
    pfpixel temp5 temp1 on
    goto __drop_next
+   ; A = (secondi & A) * 3 + frame / 16: conta i passi da 16 frame
+   ; (3 per secondo di gioco da 48 frame). Usa temp1.
+   asm
+tick16
+ and _seconds_counter
+ sta temp1
+ asl
+ adc temp1
+ sta temp1
+ lda _frame_counter
+ lsr
+ lsr
+ lsr
+ lsr
+ clc
+ adc temp1
+ rts
+end
    ; PRESSA (livello 6, al posto delle gocce): uno stantuffo a T, perno
    ; sottile (1 colonna) con la testa larga (3 colonne) in fondo, lungo
    ; fino a 5 righe (righe 0-4 dal soffitto, 6-10 dal piano). Ciclo di 6
-   ; passi da 8 frame (un "secondo" di gioco), sfasato per colonna:
+   ; passi da 16 frame (due "secondi" di gioco), sfasato per colonna:
    ; presslen = riga della testa (dall'alto), pressold = quella del passo
    ; prima. Si ridisegna solo cio' che cambia (8 presse ridisegnate per
    ; intero sforerebbero il tempo del frame):
    ;   1) via la testa vecchia, 2) perno allungato o accorciato,
    ;   3) testa nuova.
-   ; Meta' per volta: le presse di sopra nei frame 0, 8, 16..., quelle di
-   ; sotto 4 frame dopo (8 presse insieme sforerebbero il tempo del frame).
+   ; Una per frame, a turno (vedi __update_drops).
    ; In assembly per stare nel banco: le due righe (vecchia e nuova)
    ; restano sullo stack. pfhline/pfvline: A = colonna, Y = riga,
    ; temp3 = estremo finale, X = 0 accende / 1 spegne; usano temp1-temp3.
 __press
    asm
- lda _frame_counter
- and #4
- beq press_upper
- lda temp6
- beq press_skip
- bne press_go
-press_upper
- lda temp6
- bne press_skip
-press_go
- lda _frame_counter
- lsr
- lsr
- lsr
+ lda #1
+ jsr tick16
  sta temp1
  lda temp5
  and #3

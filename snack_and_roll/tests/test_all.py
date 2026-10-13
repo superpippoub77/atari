@@ -911,7 +911,7 @@ def press_phase(s, level):
     vita); stando fermi accanto a un oggetto non si perde niente."""
     r = s.save()
     seen = set()
-    for _ in range(12):
+    for _ in range(24):
         r = s.save()
         seen.add(sum(r.pf(10, rr) for rr in range(5)))
         s.wait(0.08)
@@ -921,7 +921,7 @@ def press_phase(s, level):
     r = s.save()
     s.poke({PLAYER0X: 54, PLAYER0Y: 36, V["hitCooldown"]: 0, V["mouth0wait"]: 250, V["mouth1wait"]: 250,
             PFSCORE2: 0xAA, V["flags"]: r.v("flags") & ~0x40})
-    s.wait(1.5)
+    s.wait(3.0)
     r = s.save()
     check(level, "la pressa che scende sul biscotto lo schiaccia: una vita in meno",
           r[PFSCORE2] == 0x2A and r.v("hitCooldown") > 0, f"vite={r[PFSCORE2]:08b}")
