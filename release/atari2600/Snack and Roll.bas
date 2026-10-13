@@ -270,8 +270,7 @@ __main_loop
    if _mouthTick < 6 then goto __music_done
    _mouthTick = 0
    temp1 = titlemusic[_music_index]
-   _music_index = _music_index + 1
-   if _music_index >= 64 then _music_index = 0
+   _music_index = (_music_index + 1) & 63
    AUDC1 = 4 : temp2 = 5
    goto __music_note
 __game_music
@@ -280,7 +279,17 @@ __game_music
    if bally < 200 then temp3 = 3
    temp4 = _frame_counter & temp3
    if temp4 then goto __music_done
-   temp1 = gamemusic[_music_index]
+   ; passi pari: nota (gamemusic[passo/2]); passi dispari: pausa
+   asm
+ lda _music_index
+ lsr
+ tax
+ lda #1
+ bcs gm_pause
+ lda gamemusic,x
+gm_pause
+ sta temp1
+end
    _music_index = (_music_index + 1) & 31
    AUDC1 = 12 : temp2 = 2
    if temp3 = 3 then temp2 = 4
@@ -303,30 +312,50 @@ __attract_mode
    ; lo schermo verso sinistra inseguito dalla bocca, senza pause e senza
    ; tornare indietro; uscito a sinistra rientra da destra
    if !(_frame_counter&1) then player0x = player0x - 1
-   if player0x < 2 || player0x > 150 then player0x = 150
+   ; (sotto 0 si passa a 255: basta il controllo > 150)
+   if player0x > 150 then player0x = 150
    player0y=53 : player1y=53 : player1x = player0x + 15 : COLUP1=_P1_color : COLUP0=_P0_color
    ; la bocca, ancora fuori dallo schermo a destra, non si disegna
    if player1x > 152 then player1y = 200
 
    ; selettore di livello iniziale con lo switch Select (6 scelte),
    ; indicatore a segmenti nella riga libera del titolo
-   if switchselect && !_b1_prevSelect{1} then _choco_count = _choco_count + 1 : if _choco_count = _Levels then _choco_count = 0
+   if switchselect && !_b1_prevSelect{1} then _choco_count = _choco_count + 1 : if _choco_count >= _Levels then _choco_count = 0
    _b1_prevSelect{1} = 0
    if switchselect then _b1_prevSelect{1} = 1
-   pfhline 1 6 11 off
+   ; combinazione segreta: leva in su + fuoco = Bocca Gigante (si accende
+   ; un 7o segnalino; Reset la fa partire, Select torna al livello 1)
+   asm
+ lda SWCHA
+ and #$10
+ bne no_boss
+ bit INPT4
+ bmi no_boss
+ lda #_Levels
+ sta _choco_count
+no_boss
+end
+   pfhline 1 6 13 off
    temp1=_choco_count*2+1
    pfpixel temp1 6 on
-   ; le due "l" di Roll (colonne 18 e 20) sventolano: ogni 16 frame la
-   ; cima (riga 7) si sposta di una colonna a destra e poi torna
-   ; (colonne 18-21 della riga 7 = bit 5-2 del byte 30 del playfield)
+   ; le due "l" di Roll (colonne 18 e 20, righe 7-10) oscillano come due
+   ; alberi: la base (riga 10) resta ferma e le tre righe sopra si piegano
+   ; a scalare (cima di 2 colonne, righe 8-9 di 1) verso destra, poi
+   ; tornano dritte e la cima si piega a sinistra (di piu' toccherebbe la
+   ; "o"). Un passo ogni 8 frame, un ciclo al secondo. Colonne 16-23 delle
+   ; righe 7, 8, 9 = byte 30, 34, 38 del playfield (colonna 16 = bit 7,
+   ; la "o" nelle righe 8-9).
    asm
  lda _frame_counter
- and #15
- bne roll_still
- lda playfield+30
- eor #%00111100
+ lsr
+ lsr
+ lsr
+ tax
+ lda rollsway,x
  sta playfield+30
-roll_still
+ lda rollsway89,x
+ sta playfield+34
+ sta playfield+38
 end
 
    goto __skip_missile
@@ -950,6 +979,15 @@ __done
    ; jingle => allegra
    ; melody => suspance
    ;*************************************************************************************************************************
+   ; due "l" del titolo: dritte, piegate a destra poco e tanto, poco,
+   ; dritte, cima a sinistra. Riga 7 (cima) e righe 8-9.
+   data rollsway
+   %00101000, %00010100, %00001010, %00010100, %00101000, %01010000
+end
+   data rollsway89
+   %10101000, %10101000, %10010100, %10101000, %10101000, %10101000
+end
+
    data mouthcolors
    $48, $6A
 end
@@ -999,11 +1037,10 @@ end
    ; musica di sottofondo in gioco (AUDC 12, volume basso): arpeggi di
    ; Do, La minore, Fa e Sol, una nota ogni due passi
    ; (Do4=19 Mi4=15 Sol4=12 La3=23 Fa3=29 Sol3=25 Si3=20 Re4=17)
+   ; (solo le note: tra una nota e l'altra il lettore mette una pausa)
    data gamemusic
-   19, 1, 15, 1, 12, 1, 15, 1,
-   23, 1, 19, 1, 15, 1, 19, 1,
-   29, 1, 23, 1, 19, 1, 23, 1,
-   25, 1, 20, 1, 17, 1, 20, 1
+   19, 15, 12, 15, 23, 19, 15, 19,
+   29, 23, 19, 23, 25, 20, 17, 20
 end
 
    ; avvia un effetto sonoro se non ne sta suonando uno piu' importante
@@ -1158,8 +1195,9 @@ __wall_next
    ; GOCCE (colonna 3 di "objects") - chiamata ad ogni frame
    ;_________________________________________________________________________________________________________________________
    ; Ogni 16 frame la goccia di ogni sezione scende di una riga: si cancella
-   ; la sua colonna (4 righe) e si accende il nuovo punto, senza sfarfallio.
-   ; Sopra: righe 0-3 (appese al soffitto). Sotto: righe 6-9 (appese al piano).
+   ; la sua colonna (5 righe) e si accende il nuovo punto, senza sfarfallio.
+   ; Sopra: righe 0-4 (dal soffitto al piano). Sotto: righe 6-10 (dal piano
+   ; al pavimento).
    ;*************************************************************************************************************************
 __update_drops
    if _level = _Boss then goto __boss
@@ -1185,15 +1223,20 @@ __drop_loop
 drop_turn
 end
    if _level = _Levels then goto __press
-   temp1 = temp6 + 3
+   temp1 = temp6 + 4
    pfvline temp5 temp6 temp1 off
-   ; riga della goccia: un passo ogni 16 frame, sfasata per colonna
+   ; riga della goccia (tabella dropy): un passo ogni 16 frame, sfasata
+   ; per colonna; arriva fino al piano o al pavimento
    asm
- lda #3
+ lda temp5
+ and #3
+ sta temp2
+ lda #1
  jsr tick16
  clc
- adc temp5
- and #3
+ adc temp2
+ tax
+ lda dropy,x
  sta temp1
 end
    temp1 = temp1 + temp6
@@ -1674,6 +1717,11 @@ end
 
    ; presse: su, su, scende, giu' di colpo (fino in fondo), giu', risale;
    ; la tabella e' periodica (9 valori = 6 + 3) per lo sfasamento 0-3
+   ; gocce: scendono di 5 righe (fino al piano o al pavimento) e restano
+   ; giu' un passo; periodica (9 valori = 6 + 3) per lo sfasamento 0-3
+   data dropy
+   0, 1, 2, 3, 4, 4, 0, 1, 2
+end
    data presslen
    0, 0, 1, 4, 4, 2, 0, 0, 1
 end
