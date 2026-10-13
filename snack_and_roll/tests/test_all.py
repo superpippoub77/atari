@@ -26,8 +26,8 @@ SUGAR = [
     49, 9, 58, 10, 37, 29, 54, 22,
     49, 17, 51, 19, 52, 20, 39, 22,
     33, 25, 42, 18, 53, 21, 62, 14,
-    56, 8, 35, 27, 37, 21, 55, 14,
-    33, 9, 43, 11, 37, 29, 47, 23,
+    56, 8, 35, 27, 37, 21, 55, 15,
+    33, 9, 43, 11, 37, 13, 47, 15,
     32, 16, 51, 11, 61, 13, 39, 31,
 ]
 
@@ -78,7 +78,7 @@ PUSH_SUGARS = _push_sugars()   # {livello: zuccherini raggiungibili solo spingen
 
 
 def walls(ram):
-    """Colonne dei muri spingibili presenti (255 = nessuno)."""
+    """Muri spingibili presenti (255 = nessuno): colonna, + 128 se sul piano."""
     return [c for c in (ram.v("pushCol"), ram.v("pushCol2"), ram.v("pushCol3")) if c != 255]
 
 
@@ -95,8 +95,7 @@ class Grid:
         # abbassata in questo momento (si passa quando sono su)
         if level != model.PRESS_LEVEL:
             self.cells |= drop_cells(level)
-        for pc in walls(ram):
-            self.cells |= {(pc, 8), (pc, 9), (pc, 10)}
+        self.cells |= model.wall_cells(walls(ram))
 
     def pf(self, c, r):
         if c >= 32:  # come pfread: sconfina nella riga successiva
@@ -425,18 +424,20 @@ WALL_NAMES = ("pushCol", "pushCol2", "pushCol3")
 
 def move_wall(s, k, target, max_time=25.0):
     """Riporta il muro k nella colonna target spingendolo (il biscotto viene
-    messo dal lato giusto del muro, sul pavimento)."""
+    messo dal lato giusto del muro, sul pavimento o sul piano)."""
     t0 = time.time()
+    y = model.wall_y(target)
     while time.time() - t0 < max_time:
         r = s.save()
-        c = r.v(WALL_NAMES[k])
-        if c == target:
+        key = r.v(WALL_NAMES[k])
+        if key == target:
             return True
-        if c < target:
-            s.poke({PLAYER0X: 4 * c + 9 - 3, PLAYER0Y: 84, V["hitCooldown"]: 250})
+        c = key & 127
+        if c < target & 127:
+            s.poke({PLAYER0X: 4 * c + 9 - 3, PLAYER0Y: y, V["hitCooldown"]: 250})
             s.hold(["Right"], 0.14)   # al massimo una colonna (un passo ogni 8 frame)
         else:
-            s.poke({PLAYER0X: 4 * c + 18 + 2, PLAYER0Y: 84, V["hitCooldown"]: 250})
+            s.poke({PLAYER0X: 4 * c + 18 + 2, PLAYER0Y: y, V["hitCooldown"]: 250})
             s.hold(["Left"], 0.14)
     return False
 
@@ -454,11 +455,11 @@ def push_open(s, level, goals, attempts=4):
             return how is not None, how
         idx = [i for i, n in enumerate(WALL_NAMES) if r.v(n) != 255]
         ws = tuple(r.v(WALL_NAMES[i]) for i in idx)
-        static = g.cells - {(c, rr) for c in ws for rr in (8, 9, 10)}
+        static = g.cells - model.wall_cells(ws)
         reach = model.Grid(g.cells).reachable(start)
         plan = None
         for wi, d, n, new in model.single_pushes(static, ws, reach):
-            if model.Grid(static | {(c, rr) for c in new for rr in (8, 9, 10)}).path(start, goals) is not None:
+            if model.Grid(static | model.wall_cells(new)).path(start, goals) is not None:
                 plan = (wi, d, n, new)
                 break
         if plan is None:
@@ -471,7 +472,7 @@ def push_open(s, level, goals, attempts=4):
         t0 = time.time()
         while time.time() - t0 < 8:
             r = s.save()
-            if (r.v(name) - target) * d >= 0:
+            if ((r.v(name) & 127) - (target & 127)) * d >= 0:
                 break
             s.hold([key], 0.05)
     r = s.save()
@@ -508,10 +509,14 @@ def sugar_phase(s, level):
         if level in PUSH_SUGARS and v in PUSH_SUGARS[level]:
             rr = s.save()
             blocked = Grid(rr, level).path((rr[PLAYER0X], rr[PLAYER0Y]), goals) is None
-            check(level, f"zuccherino {k}: senza spingere un muro non si raggiunge", blocked)
-            okp, how = push_open(s, level, goals)
-            check(level, f"zuccherino {k}: raggiunto spingendo un muro", okp and how is not None,
-                  f"muro {how[0]} a {how[1]} di {how[2]} colonne" if how else "nessuna spinta utile")
+            if walls(rr) != model.wall_cols(level) and not blocked:
+                # la strada l'ha gia' aperta una spinta per uno zuccherino precedente
+                check(level, f"zuccherino {k}: gia' aperto spingendo un muro prima", True, str(walls(rr)))
+            else:
+                check(level, f"zuccherino {k}: senza spingere un muro non si raggiunge", blocked)
+                okp, how = push_open(s, level, goals)
+                check(level, f"zuccherino {k}: raggiunto spingendo un muro", okp and how is not None,
+                      f"muro {how[0]} a {how[1]} di {how[2]} colonne" if how else "nessuna spinta utile")
         opened, shots = open_way(s, level, goals)
         check(level, f"zuccherino {k}: raggiungibile" + (f" (bucati {shots} blocchi)" if shots else ""), opened)
         if not opened:
@@ -702,42 +707,55 @@ def bag_phase(s, level):
 
 def push_phase(s, level):
     r = s.save()
-    cols = walls(r)
+    keys = walls(r)
     exp = model.wall_cols(level)
-    check(level, f"muri spingibili disegnati nelle colonne {exp} (righe 8-10)",
-          cols == exp and all(r.pf(c, rr) for c in cols for rr in (8, 9, 10)), f"muri={cols}")
+    check(level, f"muri spingibili disegnati: {exp} (colonna, +128 = sul piano, righe 2-4; "
+          "altrimenti sul pavimento, righe 8-10)",
+          keys == exp and all(r.pf(c, rr) for c, rr in model.wall_cells(keys)), f"muri={keys}")
+    check(level, "muri sia sopra sia sotto il piano",
+          any(k & 128 for k in exp) and any(not k & 128 for k in exp))
     s.shot(f"{OUT}/atari_L{level}_muri.png")
     names = ("pushCol", "pushCol2", "pushCol3")
-    for k, c in enumerate(cols):
-        # biscotto a sinistra del muro, sul pavimento, Destra tenuto premuto
-        s.poke({PLAYER0X: 4 * c + 9 - 3, PLAYER0Y: 84, V["hitCooldown"]: 250})
+    for k, key in enumerate(keys):
+        c, rows_k, y = key & 127, model.wall_rows(key), model.wall_y(key)
+        where = "sul piano" if key & 128 else "sul pavimento"
+        # biscotto a sinistra del muro, Destra tenuto premuto
+        s.poke({PLAYER0X: 4 * c + 9 - 3, PLAYER0Y: y, V["hitCooldown"]: 250})
         s.down("Right")
         heard = sfx_seen(s, 1.4)
         s.up("Right")
         r = s.save()
-        c2 = r.v(names[k])
-        check(level, f"muro {k + 1}: suono del muro spinto", SFX["muro"] in heard, f"effetti sentiti={sorted(heard)}")
-        ok_cols = all(r.pf(c2, rr) for rr in (8, 9, 10)) and not any(r.pf(c, rr) for rr in (8, 9, 10))
-        check(level, f"muro {k + 1}: spingendo a destra si sposta", c2 > c and ok_cols, f"colonna {c}->{c2}")
+        key2 = r.v(names[k])
+        c2 = key2 & 127
+        check(level, f"muro {k + 1} ({where}): suono del muro spinto", SFX["muro"] in heard,
+              f"effetti sentiti={sorted(heard)}")
+        ok_cols = (key2 & 128 == key & 128 and all(r.pf(c2, rr) for rr in rows_k)
+                   and not any(r.pf(c, rr) for rr in rows_k))
+        check(level, f"muro {k + 1} ({where}): spingendo a destra si sposta", c2 > c and ok_cols,
+              f"colonna {c}->{c2}")
         check(level, f"muro {k + 1}: spingere non attiva lo slow motion", r.flag(6) == 0)
-        s.poke({PLAYER0X: 4 * c2 + 18 + 2, PLAYER0Y: 84, V["hitCooldown"]: 250})
+        s.poke({PLAYER0X: 4 * c2 + 18 + 2, PLAYER0Y: y, V["hitCooldown"]: 250})
         s.hold(["Left"], 1.4)
         r = s.save()
-        c3 = r.v(names[k])
-        check(level, f"muro {k + 1}: spingendo a sinistra torna indietro", c3 < c2, f"colonna {c2}->{c3}")
-    # il cioccolatino non distrugge i muri
-    c = walls(r)[0]
-    s.poke({PLAYER0X: 4 * c + 18 + 14, PLAYER0Y: 84, V["hitCooldown"]: 250,
-            V["flags"]: r.v("flags") & ~0xC0})
-    s.down("Left", "space")
-    s.wait(0.08)
-    s.up("Left", "space")
-    s.wait(0.8)
-    r = s.save()
-    check(level, "il cioccolatino non distrugge il muro", all(r.pf(c, rr) for rr in (8, 9, 10)))
+        c3 = r.v(names[k]) & 127
+        check(level, f"muro {k + 1} ({where}): spingendo a sinistra torna indietro", c3 < c2,
+              f"colonna {c2}->{c3}")
+    # il cioccolatino non distrugge i muri (uno sul piano e uno sul pavimento)
+    for key in ([k for k in walls(r) if k & 128][:1] + [k for k in walls(r) if not k & 128][:1]):
+        c = key & 127
+        r = s.save()
+        s.poke({PLAYER0X: 4 * c + 18 + 14, PLAYER0Y: model.wall_y(key), V["hitCooldown"]: 250,
+                V["flags"]: r.v("flags") & ~0xC0})
+        s.down("Left", "space")
+        s.wait(0.08)
+        s.up("Left", "space")
+        s.wait(0.8)
+        r = s.save()
+        check(level, f"il cioccolatino non distrugge il muro {'sul piano' if key & 128 else 'sul pavimento'}",
+              all(r.pf(c, rr) for rr in model.wall_rows(key)))
     # --- il muro schiaccia la bocca ---
     r = s.save()
-    c = walls(r)[0]
+    c = [k for k in walls(r) if not k & 128][0]
     score0 = r.score()
     # bocca 0 subito a sinistra del muro, sul pavimento (ferma per _hitCooldown);
     # il biscotto spinge il muro verso sinistra, sopra la bocca
@@ -806,7 +824,7 @@ def slow_sound_phase(s, level):
     reach = model.Grid(g.cells).reachable()
     spot = None
     fixed = {(c, rr) for rr in range(11) for c in range(32) if r.pf(c, rr)} - drop_cells(level)
-    fixed -= {(c, rr) for c in walls(r) for rr in (8, 9, 10)}
+    fixed -= model.wall_cells(walls(r))
     for (x, y) in sorted(reach):
         if x >= 140 or not 20 < y < 88 or (x + 1, y) in g.moves(x, y):
             continue

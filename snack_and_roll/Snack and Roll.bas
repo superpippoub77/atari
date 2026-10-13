@@ -259,7 +259,7 @@ __main_loop
    ;_________________________________________________________________________________________________________________________
    ; Canale 1. Ogni passo della tabella: 0 = la nota continua,
    ; 1 = pausa, altro = nuova nota (valore AUDF).
-   ; Titolo: tema "avventura" stile Indiana Jones (AUDC 4), un passo ogni
+   ; Titolo: "Hot Cross Buns" (AUDC 4), un passo ogni
    ; 6 frame (una semicroma). In gioco: arpeggio leggero (AUDC 12, volume
    ; basso), un passo ogni 8 frame. Quando il tempo sta per finire
    ; (ultimi 2 segmenti) o durante la fuga finale (sacchetto visibile)
@@ -313,7 +313,7 @@ __attract_mode
    if switchselect && !_b1_prevSelect{1} then _choco_count = _choco_count + 1 : if _choco_count = _Levels then _choco_count = 0
    _b1_prevSelect{1} = 0
    if switchselect then _b1_prevSelect{1} = 1
-   pfhline 1 6 9 off
+   pfhline 1 6 11 off
    temp1=_choco_count*2+1
    pfpixel temp1 6 on
 
@@ -627,10 +627,14 @@ __Skip_Fire
    ; Vale dalla riga 6 in giu': anche la lampada appesa sopra il muro e'
    ; protetta, cosi' non si scavalca il muro sparando (livello 5)
    ; (if semplici: un || dentro un if annidato non viene compilato bene)
+   ; (muri sul piano: colonna + 128, protetti nelle righe 0-4)
+   temp1 = temp5
+   if temp6 < 5 then temp1 = temp5 | 128 : goto __pw_check
    if temp6 < 6 then goto __not_push_wall
-   if temp5 = _pushCol then goto __delete_missile
-   if temp5 = _pushCol2 then goto __delete_missile
-   if temp5 = _pushCol3 then goto __delete_missile
+__pw_check
+   if temp1 = _pushCol then goto __delete_missile
+   if temp1 = _pushCol2 then goto __delete_missile
+   if temp1 = _pushCol3 then goto __delete_missile
 __not_push_wall
 
    ; --- regola semplificata: solo la riga "in cima" di ogni gruppo è
@@ -740,11 +744,7 @@ __skip_down
    temp3 = (player0y-4)/8
 
    ; MURI SPINGIBILI: il biscotto li spinge verso sinistra
-   if temp5 < 8 then goto __no_push_left
-   temp2 = 255
-   if temp6 = _pushCol then temp2 = 0
-   if temp6 = _pushCol2 then temp2 = 1
-   if temp6 = _pushCol3 then temp2 = 2
+   gosub __wall_hit
    if temp2 = 255 then goto __no_push_left
    temp4 = 255 : gosub __push_wall bank2
    goto __skip_left
@@ -764,11 +764,7 @@ __skip_left
    temp3 = (player0y-4)/8
 
    ; MURI SPINGIBILI: il biscotto li spinge verso destra
-   if temp5 < 8 then goto __no_push_right
-   temp2 = 255
-   if temp6 = _pushCol then temp2 = 0
-   if temp6 = _pushCol2 then temp2 = 1
-   if temp6 = _pushCol3 then temp2 = 2
+   gosub __wall_hit
    if temp2 = 255 then goto __no_push_right
    temp4 = 1 : gosub __push_wall bank2
    goto __skip_right
@@ -792,6 +788,41 @@ __slow_on
    _b3_prevSlow{3} = 1
    callmacro sfx 3
 __slow_sound_done
+
+   goto __game_collision
+
+   ; muro davanti al biscotto? temp6 = colonna davanti, temp5 = riga della
+   ; parte bassa del biscotto. Muri sul pavimento (righe 8-10): si spingono
+   ; con la parte bassa nelle righe 8-10; muri sul piano (righe 2-4, colonna
+   ; + 128 in _pushCol): con la parte bassa nelle righe 2-4.
+   ; Ritorna temp2 = quale muro (0-2) o 255.
+__wall_hit
+   asm
+   lda temp6
+   ldy temp5
+   cpy #8
+   bcs .wh_key
+   cpy #2
+   bcc .wh_none
+   cpy #5
+   bcs .wh_none
+   ora #128
+.wh_key
+   ldx #0
+   cmp _pushCol
+   beq .wh_done
+   inx
+   cmp _pushCol2
+   beq .wh_done
+   inx
+   cmp _pushCol3
+   beq .wh_done
+.wh_none
+   ldx #255
+.wh_done
+   stx temp2
+   rts
+end
 
 __game_collision
    ;*************************************************************************************************************************
@@ -938,20 +969,19 @@ end
    49, 9, 58, 10, 37, 29, 54, 22,
    49, 17, 51, 19, 52, 20, 39, 22,
    33, 25, 42, 18, 53, 21, 62, 14,
-   56, 8, 35, 27, 37, 21, 55, 14,
-   33, 9, 43, 11, 37, 29, 47, 23,
+   56, 8, 35, 27, 37, 21, 55, 15,
+   33, 9, 43, 11, 37, 13, 47, 15,
    32, 16, 51, 11, 61, 13, 39, 31,
 end
 
-   ; tema del titolo (semicrome, AUDC 4): Mi Fa Sol Do... Re Mi Fa...
-   ; Sol La Si Fa... La Si Do Re Mi...   (Mi5=23 Fa5=21 Sol5=19 La5=17
-   ; Si5=15 Do6=14 Re5=26 Re6=12 Mi6=11 Fa6=10; 0 = continua, 1 = pausa)
+   ; tema del titolo (semicrome, AUDC 4): "Hot Cross Buns", filastrocca
+   ; tradizionale inglese sui panini dolci (Mi5=23 Re5=26 Do5=29;
+   ; 0 = continua, 1 = pausa)
    data titlemusic
-   23, 0, 21, 19, 0, 0, 14, 0, 0, 0, 0, 1,
-   26, 0, 23, 21, 0, 0, 0, 0, 0, 0, 0, 1,
-   19, 0, 17, 15, 0, 0, 10, 0, 0, 0, 0, 1,
-   17, 0, 15, 14, 0, 0, 12, 0, 11, 0, 0, 0, 0, 0, 0, 1,
-   1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1
+   23, 0, 0, 1, 26, 0, 0, 1, 29, 0, 0, 0, 0, 0, 1, 1,
+   23, 0, 0, 1, 26, 0, 0, 1, 29, 0, 0, 0, 0, 0, 1, 1,
+   29, 1, 29, 1, 29, 1, 29, 1, 26, 1, 26, 1, 26, 1, 26, 1,
+   23, 0, 0, 1, 26, 0, 0, 1, 29, 0, 0, 0, 0, 0, 0, 1
 end
 
    ; musica di sottofondo in gioco (AUDC 12, volume basso): arpeggi di
@@ -1083,27 +1113,33 @@ __skip_tavoli
    pfhline 12 10 19 on
 __no_boss_setup
 
-   ; --- MURI SPINGIBILI (colonna 1 di objects, sezioni basse b4-b7) ---
-   ; un muro per bit acceso, nella colonna sezione+1 (4, 11, 18, 25),
-   ; poggiato sul pavimento (righe 8-10). Al massimo 3 muri. Una lampada
+   ; --- MURI SPINGIBILI (colonna 1 di objects) ---
+   ; un muro per bit acceso, nella colonna sezione+1 (4, 11, 18, 25).
+   ; Bit 4-7: sezioni basse, muro sul pavimento (righe 8-10). Al massimo
+   ; 3 muri in tutto. Una lampada
    ; bassa nella stessa sezione pende proprio sopra il muro (colonna
    ; sezione+1, righe 6-7): insieme chiudono la colonna dal piano al
    ; pavimento e per passare bisogna spingere il muro.
+   ; Bit 0-3: muri sul piano nelle sezioni alte b0-b3 (righe 2-4, sotto
+   ; una lampada appesa al soffitto), memorizzati come colonna + 128.
    _pushCol = 255 : _pushCol2 = 255 : _pushCol3 = 255
    temp2 = _current_object_level + 1
    temp4 = objects[temp2]
-   temp4 = temp4 / 16
-   temp5 = 4
+   temp5 = 4 : temp6 = 2
 __wall_loop
    if !temp4 then return otherbank
    if !(temp4 & 1) then goto __wall_next
-   pfvline temp5 8 10 on
-   if _pushCol = 255 then _pushCol = temp5 : goto __wall_next
-   if _pushCol2 = 255 then _pushCol2 = temp5 : goto __wall_next
-   _pushCol3 = temp5
+   temp1 = temp6 + 2
+   pfvline temp5 temp6 temp1 on
+   temp1 = temp5
+   if temp6 = 2 then temp1 = temp5 | 128
+   if _pushCol = 255 then _pushCol = temp1 : goto __wall_next
+   if _pushCol2 = 255 then _pushCol2 = temp1 : goto __wall_next
+   _pushCol3 = temp1
 __wall_next
    temp4 = temp4 / 2
    temp5 = temp5 + 7
+   if temp5 = 32 then temp5 = 4 : temp6 = 8
    goto __wall_loop
 
    ;*************************************************************************************************************************
@@ -1337,19 +1373,72 @@ __push_wall
    temp1 = _pushCol
    if temp6 = 1 then temp1 = _pushCol2
    if temp6 = 2 then temp1 = _pushCol3
+   ; temp4 = valore vecchio, temp5 = nuovo (col + direzione; il bit 7 dei
+   ; muri sul piano resta), temp6 = quale muro
    temp5 = temp1 + temp4
-   if temp5 > 31 then return otherbank
-   ; pfread/pfvline usano temp1-temp3: la vecchia colonna va in temp4
    temp4 = temp1
-   if pfread(temp5, 8) then return otherbank
-   if pfread(temp5, 9) then return otherbank
-   if pfread(temp5, 10) then return otherbank
-   pfvline temp4 8 10 off
-   pfvline temp5 8 10 on
+   ; In assembly: le 3 righe del muro (8-10, o 2-4 col bit 7) devono essere
+   ; libere nella colonna nuova; la riga corrente sta sullo stack.
+   ; pfread: A = colonna, Y = riga, risultato 0 = pixel acceso.
+   asm
+ lda temp5
+ and #127
+ cmp #32
+ bcs pw_out
+ lda #8
+ bit temp5
+ bpl pw_base
+ lda #2
+pw_base
+ pha
+ jsr pw_read
+ beq pw_busy
+ jsr pw_read
+ beq pw_busy
+ jsr pw_read
+ beq pw_busy
+ tsx
+ dec $0101,x
+ lda $0101,x
+ sta temp3
+ sec
+ sbc #2
+ tay
+ lda temp4
+ and #127
+ ldx #1
+ jsr pfvline
+ tsx
+ lda $0101,x
+ sta temp3
+ sec
+ sbc #2
+ tay
+ lda temp5
+ and #127
+ ldx #0
+ jsr pfvline
+ pla
+ jmp .__pw_moved
+pw_read
+ tsx
+ ldy $0103,x
+ inc $0103,x
+ lda temp5
+ and #127
+ jmp pfread
+pw_busy
+ pla
+pw_out
+end
+   return otherbank
+__pw_moved
    if temp6 = 0 then _pushCol = temp5
    if temp6 = 1 then _pushCol2 = temp5
    if temp6 = 2 then _pushCol3 = temp5
    callmacro sfx 2
+   ; i muri sul piano non schiacciano le bocche
+   if temp5 >= 128 then return otherbank
 
    ; --- bocche schiacciate dal muro ---
    ; il muro occupa i pixel x da temp4 a temp4+3, righe 8-10 (y >= 65)
@@ -1358,27 +1447,52 @@ __push_wall
    ; larghezza della bocca: 8 pixel, 16 dal livello 4 (NUSIZ1 doppio)
    temp3 = 7
    if _level > 3 then temp3 = 15
-   if _mouth0wait then goto __crush_mouth1
-   if _mouth0y < 65 then goto __crush_mouth1
-   temp2 = temp4 + 3
-   if _mouth0x > temp2 then goto __crush_mouth1
-   temp2 = _mouth0x + temp3
-   if temp2 < temp4 then goto __crush_mouth1
-   _mouth0wait = _Mouth_Respawn : _mouth0y = 200
-   score = score + 10 : _b5_enablePalyer1{5} = 0
-   callmacro sfx 6
-__crush_mouth1
-   if _level < 4 then return otherbank
-   if _mouth1wait then return otherbank
-   if _mouth1y < 65 then return otherbank
-   temp2 = temp4 + 3
-   if _mouth1x > temp2 then return otherbank
-   temp2 = _mouth1x + temp3
-   if temp2 < temp4 then return otherbank
-   _mouth1wait = _Mouth_Respawn : _mouth1y = 200
-   score = score + 10 : _b5_enablePalyer1{5} = 0
-   callmacro sfx 6
+   ; bit 7 di temp5 / temp6 = bocca 0 / 1 schiacciata (la bocca 1 c'e'
+   ; dal livello 4)
+   asm
+ ldx _mouth0x
+ ldy _mouth0y
+ lda _mouth0wait
+ jsr pw_hit
+ ror temp5
+ lda _level
+ cmp #4
+ bcc pw_m1
+ ldx _mouth1x
+ ldy _mouth1y
+ lda _mouth1wait
+ jsr pw_hit
+pw_m1
+ ror temp6
+end
+   if temp5{7} then _mouth0wait = _Mouth_Respawn : _mouth0y = 200 : gosub __crushed
+   if temp6{7} then _mouth1wait = _Mouth_Respawn : _mouth1y = 200 : gosub __crushed
    return otherbank
+__crushed
+   score = score + 10 : _b5_enablePalyer1{5} = 0
+   callmacro sfx 6
+   return thisbank
+   ; bocca in X (x), Y (y), A (attesa, gia' nei flag): carry = schiacciata
+   asm
+pw_hit
+ bne pw_no
+ cpy #65
+ bcc pw_no
+ stx temp1
+ clc
+ lda temp4
+ adc #3
+ cmp temp1
+ bcc pw_no
+ clc
+ txa
+ adc temp3
+ cmp temp4
+ rts
+pw_no
+ clc
+ rts
+end
 
    ;*************************************************************************************************************************
    ; EFFETTI SONORI (canale 0) - presi dal bbsoundtest di batari Basic
@@ -1539,8 +1653,8 @@ end
    %00000000, %00000000, %00000000, %00000000, %10101010, %01111010, %00100010, 18,
    %01111111, %00000000, %00000000, %00000000, %10000000, %00000000, %00101011, 136,
    %00000000, %00000000, %00110111, %00000000, %00000000, %00000000, %00001011, 18,
-   %00000000, %00000000, %10101010, %01010101, %00000000, %00000000, %00101011, 136,
-   %00000000, %11100000, %00000000, %00001010, %11100000, %00000000, %01111110, 136,
+   %00000000, %00000000, %00000000, %11111111, %00000000, %00000000, %00101011, 136,
+   %00000000, %01100100, %00000000, %00000000, %01100100, %00000000, %01111110, 136,
    %00000000, %00000000, %00000000, %11111111, %00000000, %00000000, %00101011, 136,
    %00000000, %00000000, %00000000, %00000000, %00000000, %00000000, %01010101, 136,
 end
