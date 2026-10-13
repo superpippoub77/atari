@@ -20,15 +20,16 @@ from model import (OBJECTS, LEVELS, Grid, build, destroy_closure, drop_cells, la
 
 
 def push_lanes(level, base, objects=OBJECTS):
-    """Celle in cui un muro spingibile puo' arrivare (righe 8-10)."""
+    """Celle in cui un muro spingibile puo' arrivare (righe 8-10 o 2-4)."""
     lane = set()
-    for c0 in wall_cols(level, objects):
+    for k in wall_cols(level, objects):
+        c0, rows_k = k & 127, model.wall_rows(k)
         for step in (-1, 1):
             c = c0
             while 0 <= c <= 31:
-                if c != c0 and any((c, r) in base for r in (8, 9, 10)):
+                if c != c0 and any((c, r) in base for r in rows_k):
                     break
-                lane |= {(c, r) for r in (8, 9, 10)}
+                lane |= {(c, r) for r in rows_k}
                 c += step
     return lane
 
@@ -105,7 +106,7 @@ def choose(level, info, base):
 # livelli con la disposizione decisa a mano (verificata qui sotto):
 # livello 5 = muri mobili. Gli zuccherini delle stanze A (b5) e B (b6)
 # si prendono solo spingendo un muro.
-FIXED = {5: [33, 9, 43, 11, 37, 29, 47, 23]}
+FIXED = {5: [33, 9, 43, 11, 37, 13, 47, 15]}
 
 
 def check_fixed(level, seq, objects=OBJECTS):
@@ -117,6 +118,8 @@ def check_fixed(level, seq, objects=OBJECTS):
         cell = sugar_cell(v)
         if cell in base or cell in lamps:
             raise RuntimeError(f"L{level}: zuccherino {v} dentro un oggetto")
+        if cell in push_lanes(level, base, objects):
+            raise RuntimeError(f"L{level}: zuccherino {v} dove un muro spinto puo' coprirlo")
         if not sugar_reachable(v, union):
             raise RuntimeError(f"L{level}: zuccherino {v} irraggiungibile anche spingendo i muri")
         info[v] = "free" if sugar_reachable(v, reach0) else "push"
@@ -155,6 +158,8 @@ def layout(objects=OBJECTS, verbose=True):
                 print(f"{r:2d} " + "".join(line))
             for i, v in enumerate(seq):
                 print(f"   {i}: valore {v:2d} sezione b{section_of(v)} {info[v]:6s} xy={sugar_xy(v)}")
+            if wall_cols(level, objects):
+                reach = model.push_reach(level, objects)[1]
             print("   sacchetto raggiungibile:", ball_ok(objects[level - 1][7], 28, reach))
     return table
 
