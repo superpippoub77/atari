@@ -921,8 +921,13 @@ def press_phase(s, level):
     r = s.save()
     s.poke({PLAYER0X: 54, PLAYER0Y: 36, V["hitCooldown"]: 0, V["mouth0wait"]: 250, V["mouth1wait"]: 250,
             PFSCORE2: 0xAA, V["flags"]: r.v("flags") & ~0x40})
-    s.wait(3.0)
-    r = s.save()
+    # (la pressa fa un ciclo ogni 2 secondi: si aspetta il primo colpo)
+    t0 = time.time()
+    while time.time() - t0 < 3.0:
+        s.wait(0.1)
+        r = s.save()
+        if r[PFSCORE2] != 0xAA:
+            break
     check(level, "la pressa che scende sul biscotto lo schiaccia: una vita in meno",
           r[PFSCORE2] == 0x2A and r.v("hitCooldown") > 0, f"vite={r[PFSCORE2]:08b}")
     # fermo a contatto col piano, sotto e sopra, lontano dalle presse
