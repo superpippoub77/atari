@@ -20,11 +20,12 @@ SCORE = 0x93
 PFSCORE1, PFSCORE2 = 0xF2, 0xF3
 
 V = {
-    "angle": A["a"], "frame": A["b"], "wave": A["c"], "spawnT": A["d"], "alive0": A["e"], "alive1": A["f"],
-    "state": A["g"], "acc": A["h"], "b0x": A["i"], "b0y": A["k"], "b0d": A["m"], "b0t": A["n"],
-    "b1x": A["o"], "b1y": A["q"], "b1d": A["s"], "b1t": A["t"], "interval": A["w"], "sfxId": A["x"],
-    "sfxT": A["y"], "blocked": A["z"],
+    "angle": A["a"], "frame": A["b"], "level": A["c"], "spawnT": A["d"], "alive": A["e"], "quota": A["f"],
+    "state": A["g"], "acc": A["h"], "b0x": A["i"], "b0y": A["k"], "b0v": A["m"], "b0t": A["n"],
+    "b1x": A["o"], "b1y": A["q"], "b1v": A["s"], "b1t": A["t"], "interval": A["w"], "sfxId": A["x"],
+    "sfxT": A["y"], "music": A["z"],
 }
+PADDLE = 0x91          # valore del paddle letto dal kernel (readpaddle)
 
 
 class Ram:
@@ -58,11 +59,11 @@ class Ram:
         return int("".join("%02x" % self[SCORE + i] for i in range(3)))
 
     def alive(self):
-        return bin(self.v("alive0")).count("1") + bin(self.v("alive1") & 15).count("1")
+        return bin(self.v("alive") & 63).count("1")
 
 
 class Stella:
-    def __init__(self, rom, tag="t"):
+    def __init__(self, rom, tag="t", extra=()):
         self.home = f"{SP}/stellahome_{tag}"
         os.makedirs(self.home, exist_ok=True)
         # copia della ROM con un nome senza spazi (Stella ci basa il nome dello stato)
@@ -75,6 +76,7 @@ class Stella:
         self.state = f"{self.home}/.config/stella/state/{self.name}.st0"
         self.ram_off = None
         self.env = dict(os.environ, HOME=self.home)
+        self.extra = list(extra)   # es. ["-lc", "DRIVING"] per il volante
         # al primo avvio con una configurazione nuova Stella a volte non
         # risponde ai tasti: in quel caso si riavvia (fino a 3 tentativi)
         for attempt in range(3):
@@ -87,7 +89,7 @@ class Stella:
 
     def _start(self, rom):
         self.p = subprocess.Popen(
-            ["stella", "-fullscreen", "0", "-tia.zoom", "2", "-sound", "0", "-uimessages", "0", rom],
+            ["stella", "-fullscreen", "0", "-tia.zoom", "2", "-sound", "0", "-uimessages", "0", *self.extra, rom],
             env=self.env, stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
         # aspetta che la finestra esista e che F9 produca davvero uno stato
         for _ in range(60):
@@ -138,11 +140,11 @@ class Stella:
         return Ram(data[self.ram_off:self.ram_off + 128])
 
     def _find_ram(self, data):
-        # all'avvio: anello intero (alive0=255, alive1=15), proiettili liberi (255)
+        # all'avvio: stato = paddle (bit 5), proiettili liberi (255), livello 0
         a = lambda c: A[c] - 0x80
         for i in range(len(data) - 128):
-            if (data[i + a("e")] == 255 and data[i + a("f")] == 15 and data[i + a("n")] == 255
-                    and data[i + a("t")] == 255 and data[i + a("c")] == 1):
+            if (data[i + a("g")] & 0x2F == 0x20 and data[i + a("n")] == 255
+                    and data[i + a("t")] == 255 and data[i + a("c")] == 0 and data[i + 0x73] == 0xFF):
                 return i
         raise RuntimeError("RAM non trovata nello stato")
 
