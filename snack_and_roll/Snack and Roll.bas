@@ -270,8 +270,7 @@ __main_loop
    if _mouthTick < 6 then goto __music_done
    _mouthTick = 0
    temp1 = titlemusic[_music_index]
-   _music_index = _music_index + 1
-   if _music_index >= 64 then _music_index = 0
+   _music_index = (_music_index + 1) & 63
    AUDC1 = 4 : temp2 = 5
    goto __music_note
 __game_music
@@ -303,7 +302,8 @@ __attract_mode
    ; lo schermo verso sinistra inseguito dalla bocca, senza pause e senza
    ; tornare indietro; uscito a sinistra rientra da destra
    if !(_frame_counter&1) then player0x = player0x - 1
-   if player0x < 2 || player0x > 150 then player0x = 150
+   ; (sotto 0 si passa a 255: basta il controllo > 150)
+   if player0x > 150 then player0x = 150
    player0y=53 : player1y=53 : player1x = player0x + 15 : COLUP1=_P1_color : COLUP0=_P0_color
    ; la bocca, ancora fuori dallo schermo a destra, non si disegna
    if player1x > 152 then player1y = 200
@@ -328,17 +328,19 @@ end
    pfhline 1 6 13 off
    temp1=_choco_count*2+1
    pfpixel temp1 6 on
-   ; le due "l" di Roll (colonne 18 e 20) sventolano: ogni 16 frame la
-   ; cima (riga 7) si sposta di una colonna a destra e poi torna
-   ; (colonne 18-21 della riga 7 = bit 5-2 del byte 30 del playfield)
+   ; le due "l" di Roll (colonne 18 e 20) oscillano come due alberi: la
+   ; base resta ferma e la cima (riga 7) si piega a sinistra, torna dritta,
+   ; si piega a destra e torna dritta, una volta al secondo (tabella
+   ; rollsway, un valore ogni 8 frame; colonne 16-23 della riga 7 = byte 30
+   ; del playfield, colonna 16 = bit 7)
    asm
  lda _frame_counter
- and #15
- bne roll_still
- lda playfield+30
- eor #%00111100
+ lsr
+ lsr
+ lsr
+ tax
+ lda rollsway,x
  sta playfield+30
-roll_still
 end
 
    goto __skip_missile
@@ -962,6 +964,12 @@ __done
    ; jingle => allegra
    ; melody => suspance
    ;*************************************************************************************************************************
+   ; cima delle due "l" del titolo: sinistra, sinistra, dritta, destra,
+   ; destra, dritta
+   data rollsway
+   %01010000, %01010000, %00101000, %00010100, %00010100, %00101000
+end
+
    data mouthcolors
    $48, $6A
 end
