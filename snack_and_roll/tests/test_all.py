@@ -883,6 +883,10 @@ def mouth_pass_phase(s, level):
     if not check(level, "trovato un oggetto da far attraversare alla bocca", target is not None):
         return
     c, row = target
+    if level == model.PRESS_LEVEL:
+        # la colonna del perno (3 + 7k), anche se il pixel trovato e' il
+        # bordo della testa larga
+        c = 3 + 7 * round((c - 3) / 7)
     y = row * 8 + 7
     mx = 4 * c + 17 - 14          # bocca a sinistra dell'oggetto
     px = mx + 44                   # biscotto a destra, stessa riga
