@@ -1005,6 +1005,13 @@ end
    ;*************************************************************************************************************************
 __load_level
    missile1height = 1
+   ; LEVETTE DI DIFFICOLTA' (lette a ogni inizio livello, A = piu' difficile)
+   ; sinistra A: bocche piu' veloci (2 frame in meno per passo; _speed
+   ; vale almeno 2, quindi al massimo 0 = un passo a ogni frame)
+   ; destra A: il livello parte con 6 tacche di tempo invece di 8
+   ; (e niente bonus tempo, vedi __time_bonus)
+   if !switchleftb then _speed = _speed - 2
+   if !switchrightb then pfscore1 = %11111100
    _current_object_level = _level - 1
    _current_object_level = _current_object_level * 8
    temp2 = _current_object_level + 7 : _ballx = objects[temp2]
@@ -1199,6 +1206,7 @@ __boss_hit
    ; bonus tempo: ogni segmento rimasto della barra vale 20 punti, contati
    ; uno alla volta con un tic
 __time_bonus
+   if !switchrightb then return otherbank
    if !pfscore1 then return otherbank
    pfscore1 = pfscore1 * 2 : score = score + 20
    AUDC0 = 4 : AUDF0 = 8 : AUDV0 = 8

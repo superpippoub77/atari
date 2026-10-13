@@ -1,5 +1,5 @@
 """Test rapido delle novita' di giocabilita' (fuga finale, tempo in scadenza,
-bonus tempo, avviso di fine super potere, combo "partita perfetta").
+bonus tempo, avviso di fine super potere, combo "partita perfetta", levette di difficolta').
 
 Uso:
   xvfb-run -a -s "-screen 0 800x600x24" python3 test_features.py . "../bin/Snack and Roll.bas.bin" /tmp/screenshot
@@ -125,6 +125,27 @@ try:
     s.wait(1.6)
     r = s.save()
     check("super potere: finisce dopo l'avviso", r.v("hitCooldown") == 0, f"cooldown={r.v('hitCooldown')}")
+
+    # --- levette di difficolta' (Stella: F5/F6 sinistra A/B, F7/F8 destra A/B) ---
+    # si leggono a inizio livello: si passa al livello successivo col sacchetto
+    def next_level(ballx):
+        s.poke({PFSCORE1: 0xFF, SCORE: 0, SCORE + 1: 0, SCORE + 2: 0, V["hitCooldown"]: 250,
+                V["choco_bits"]: 0xFF, V["choco_count"]: 8, BALLY: 28, BALLX: ballx,
+                PLAYER0X: ballx - 4, PLAYER0Y: 30})
+        s.wait(2.5)
+        return s.save()
+    s.tap("F5", 0.2)
+    s.tap("F7", 0.2)
+    r = next_level(136)          # livello 2 -> 3, levette in A
+    check("levette in A: livello 3, bocche piu' veloci (9-2=7 frame per passo), 6 tacche, niente bonus",
+          r.v("level") == 3 and r.v("speed") == 7 and r[PFSCORE1] == 0xFC and r.score() == 0,
+          f"livello={r.v('level')} speed={r.v('speed')} tempo={r[PFSCORE1]:08b} punti={r.score()}")
+    s.tap("F6", 0.2)
+    s.tap("F8", 0.2)
+    r = next_level(18)           # livello 3 -> 4, levette in B
+    check("levette in B: livello 4 normale (8 frame per passo, 8 tacche, bonus 160)",
+          r.v("level") == 4 and r.v("speed") == 8 and r[PFSCORE1] == 0xFF and r.score() == 160,
+          f"livello={r.v('level')} speed={r.v('speed')} tempo={r[PFSCORE1]:08b} punti={r.score()}")
 finally:
     s.close()
 
