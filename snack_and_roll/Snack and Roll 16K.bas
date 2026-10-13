@@ -177,7 +177,7 @@ __inizialize
 
    ; Impostazione del timer iniziale e delle vite
    pfscore1 = %11111111 : pfscore2 = %10101010
-   pfscorecolor = $08 : scorecolor = $10
+   pfscorecolor = $08 : scorecolor = $1C
 
    ;*************************************************************************************************************************
    ; PLAYFIELD: TITOLO
@@ -467,7 +467,7 @@ __skip_all_sugar
    $0E
    $24
    $26
-   $02
+   $08
    $05
    $9E
    $0E
@@ -480,7 +480,7 @@ end
    $24
    $26
    $24
-   $02
+   $08
    $28
    $26
    $24
@@ -492,6 +492,9 @@ end
    if !_b4_enableLight{4} && _frame_counter&7 then pfcolors:
    0
 end
+   ; parete della cucina: un colore per livello (nero a luce spenta)
+   COLUBK = 0
+   if temp1 then COLUBK = wallcolor[_level]
 
    ;*************************************************************************************************************************
    ; CONTENITORE FINALE (BALL)
@@ -549,7 +552,7 @@ __no_power_warn
    ; ---- 2 ----
    if !pfscore1 then goto __decrease_health_bar
    ; ---- 3 ----
-   if !pfscore2 then goto __game_start
+   if !pfscore2 then gosub __gameover_card bank2 : goto __game_start
 
    ; direzione del biscotto = direzione della levetta, anche se davanti
    ; c'e' un ostacolo. Prima veniva azzerata e reimpostata solo dal
@@ -862,7 +865,7 @@ __decrease_health_bar
   pfscore2=pfscore2/4
   pfscore1=%11111111
   _hitCooldown = 90
-  if !pfscore2 then goto __game_start
+  if !pfscore2 then gosub __gameover_card bank2 : goto __game_start
   goto __done
 
    ; la bocca _mouthIndex sparisce e ricomparira' dopo _Mouth_Respawn frame
@@ -883,11 +886,13 @@ __change_level
    _level=_level+1
    ; dopo l'ultimo livello c'e' la Bocca Gigante, poi si riparte dal
    ; primo livello, un giro piu' veloce
-   if _level > _Boss then _level = 1 : _lap = _lap + 1
+   if _level > _Boss then gosub __victory_card bank3 : _level = 1 : _lap = _lap + 1
 
 __skip_to_change
    pfscorecolor = $08
+   ; (punteggio chiaro: si legge anche sulle pareti colorate)
    scorecolor=(scorecolor + $10) & $F0
+   scorecolor=scorecolor | $0C
    pfscore1=%11111111
    pfscore2=%10101010
    bally=200
@@ -910,6 +915,8 @@ __skip_to_change
    if temp2 < temp3 then _speed = temp1 - temp2
    pfclear
    gosub __load_level bank4
+   ; cartello di inizio livello (banco 2)
+   gosub __level_card bank3
    ; le variabili usate dal caricamento tornano a fare da contatori
    _mouth0x=20 : _mouth0y=8 : _mouth1x=140 : _mouth1y=90
    _mouth0wait = 0 : _mouth1wait = 0 : _mouthTick = 0
@@ -927,6 +934,11 @@ __done
    ; jingle => allegra
    ; melody => suspance
    ;*************************************************************************************************************************
+   ; colore della parete per livello (il primo valore non si usa)
+   data wallcolor
+   $00, $90, $50, $D0, $80, $B0, $70, $40
+end
+
    data mouthcolors
    $48, $6A
 end
@@ -996,16 +1008,29 @@ end
    ;*************************************************************************************************************************
    ; SCHERMATE AD ALTA RISOLUZIONE (sprite a 48 pixel)
    ;*************************************************************************************************************************
-   ; >>> generato da tools/gen_hires.py
+   ; >>> generato da tools/gen_hires.py 2
+   ; --- un fotogramma del titolo (chiamato ad ogni frame dal banco 1) ---
 __title_frame
    asm
+ jsr h2_title
+end
+   return otherbank
+   ; --- cartelli: restano sullo schermo qualche secondo con la loro
+   ; musichetta (canale 1), poi si torna al gioco ---
+   ; tutte le vite perse
+__gameover_card
+   asm
+ jsr h2_show_over
+end
+   return otherbank
+   asm
 HR_X = 56          ; x del player0 (il player1 sta 8 pixel piu' a destra)
-HR_VBLANK = 49     ; righe di VBLANK (timer da 64 cicli)
+HR_VBLANK = 54     ; righe di VBLANK (timer da 64 cicli)
 HR_OVERSCAN = 41   ; righe di overscan (timer da 64 cicli)
-; --- fine dell'overscan, VSYNC, VBLANK ---
-hr_ovs
+h2_begin
+h2_ovs
  lda INTIM
- bmi hr_ovs
+ bmi h2_ovs
  lda #2
  sta WSYNC
  sta VSYNC
@@ -1040,355 +1065,25 @@ hr_ovs
  sta VDELP1
  lda #HR_X
  ldx #0
- jsr hr_pos
+ jsr h2_pos
  lda #HR_X+8
  ldx #1
- jsr hr_pos
+ jsr h2_pos
  sta WSYNC
  sta HMOVE
- lda _frame_counter
- lsr
- lsr
- lsr
- tax
- lda hr_roll_st,x
- sta temp3
- lda _frame_counter
- lsr
- lsr
- tax
- lda hr_cookie_st,x
- sta temp4
- ldx _choco_count
- lda hr_level_st,x
- sta temp5
-hr_vbw
+ rts
+h2_vbwait
  lda INTIM
- bne hr_vbw
+ bne h2_vbwait
  sta WSYNC
  lda #0
  sta VBLANK
-; --- snack: 14 righe vuote, poi 11 righe di disegno ---
- ldx #14
-hr_snack_gap
+ rts
+; X = righe vuote prima del pavimento
+h2_floor
  sta WSYNC
  dex
- bne hr_snack_gap
- if (<*) > $70
-  jmp hr_snack_al
-  align 256
- endif
-hr_snack_al
- sta WSYNC
- lda #11
- sta temp1
- tay
- lda hr_snack_c,y
- sta COLUP0
- sta COLUP1
- sta WSYNC
-hr_snack_loop
- ldy temp1
- lda hr_snack_g0,y
- sta GRP0
- lda hr_snack_g1,y
- sta GRP1
- lda hr_snack_g2,y
- sta GRP0
- lda hr_snack_g5,y
- sta temp2
- ldx hr_snack_g4,y
- lda hr_snack_g3,y
- ldy temp2
- sta GRP1
- stx GRP0
- sty GRP1
- sta GRP0
- sta WSYNC
- ldy temp1
- lda hr_snack_g0,y
- sta GRP0
- lda hr_snack_g1,y
- sta GRP1
- lda hr_snack_g2,y
- sta GRP0
- lda hr_snack_g5,y
- sta temp2
- ldx hr_snack_g4,y
- lda hr_snack_g3,y
- ldy temp2
- sta GRP1
- stx GRP0
- sty GRP1
- sta GRP0
- dec temp1
- ldy temp1
- lda hr_snack_c,y
- sta COLUP0
- sta.w COLUP1
- bne hr_snack_loop
- lda #0
- sta GRP0
- sta GRP1
- sta GRP0
- sta WSYNC
-; --- napo: 3 righe vuote, poi 7 righe di disegno ---
- ldx #3
-hr_napo_gap
- sta WSYNC
- dex
- bne hr_napo_gap
- if (<*) > $70
-  jmp hr_napo_al
-  align 256
- endif
-hr_napo_al
- sta WSYNC
- lda #7
- sta temp1
- tay
- lda hr_napo_c,y
- sta COLUP0
- sta COLUP1
- sta WSYNC
-hr_napo_loop
- ldy temp1
- lda hr_napo_g0,y
- sta GRP0
- lda hr_napo_g1,y
- sta GRP1
- lda hr_napo_g2,y
- sta GRP0
- lda hr_napo_g5,y
- sta temp2
- ldx hr_napo_g4,y
- lda hr_napo_g3,y
- ldy temp2
- sta GRP1
- stx GRP0
- sty GRP1
- sta GRP0
- sta WSYNC
- ldy temp1
- lda hr_napo_g0,y
- sta GRP0
- lda hr_napo_g1,y
- sta GRP1
- lda hr_napo_g2,y
- sta GRP0
- lda hr_napo_g5,y
- sta temp2
- ldx hr_napo_g4,y
- lda hr_napo_g3,y
- ldy temp2
- sta GRP1
- stx GRP0
- sty GRP1
- sta GRP0
- dec temp1
- ldy temp1
- lda hr_napo_c,y
- sta COLUP0
- sta.w COLUP1
- bne hr_napo_loop
- lda #0
- sta GRP0
- sta GRP1
- sta GRP0
- sta WSYNC
-; --- roll: 3 righe vuote, poi 11 righe di disegno ---
- ldx #3
-hr_roll_gap
- sta WSYNC
- dex
- bne hr_roll_gap
- if (<*) > $70
-  jmp hr_roll_al
-  align 256
- endif
-hr_roll_al
- sta WSYNC
- lda temp3
- sta temp1
- tay
- lda hr_roll_c,y
- sta COLUP0
- sta COLUP1
- sta WSYNC
-hr_roll_loop
- ldy temp1
- lda hr_roll_g0,y
- sta GRP0
- lda hr_roll_g1,y
- sta GRP1
- lda hr_roll_g2,y
- sta GRP0
- lda hr_roll_g5,y
- sta temp2
- ldx hr_roll_g4,y
- lda hr_roll_g3,y
- ldy temp2
- sta GRP1
- stx GRP0
- sty GRP1
- sta GRP0
- sta WSYNC
- ldy temp1
- lda hr_roll_g0,y
- sta GRP0
- lda hr_roll_g1,y
- sta GRP1
- lda hr_roll_g2,y
- sta GRP0
- lda hr_roll_g5,y
- sta temp2
- ldx hr_roll_g4,y
- lda hr_roll_g3,y
- ldy temp2
- sta GRP1
- stx GRP0
- sty GRP1
- sta GRP0
- dec temp1
- ldy temp1
- lda hr_roll_c,y
- sta COLUP0
- sta.w COLUP1
- bne hr_roll_loop
- lda #0
- sta GRP0
- sta GRP1
- sta GRP0
- sta WSYNC
-; --- level: 10 righe vuote, poi 7 righe di disegno ---
- ldx #10
-hr_level_gap
- sta WSYNC
- dex
- bne hr_level_gap
- if (<*) > $70
-  jmp hr_level_al
-  align 256
- endif
-hr_level_al
- sta WSYNC
- lda temp5
- sta temp1
- tay
- lda hr_level_c,y
- sta COLUP0
- sta COLUP1
- sta WSYNC
-hr_level_loop
- ldy temp1
- lda hr_level_g0,y
- sta GRP0
- lda hr_level_g1,y
- sta GRP1
- lda hr_level_g2,y
- sta GRP0
- lda hr_level_g5,y
- sta temp2
- ldx hr_level_g4,y
- lda hr_level_g3,y
- ldy temp2
- sta GRP1
- stx GRP0
- sty GRP1
- sta GRP0
- sta WSYNC
- ldy temp1
- lda hr_level_g0,y
- sta GRP0
- lda hr_level_g1,y
- sta GRP1
- lda hr_level_g2,y
- sta GRP0
- lda hr_level_g5,y
- sta temp2
- ldx hr_level_g4,y
- lda hr_level_g3,y
- ldy temp2
- sta GRP1
- stx GRP0
- sty GRP1
- sta GRP0
- dec temp1
- ldy temp1
- lda hr_level_c,y
- sta COLUP0
- sta.w COLUP1
- bne hr_level_loop
- lda #0
- sta GRP0
- sta GRP1
- sta GRP0
- sta WSYNC
-; --- cookie: 14 righe vuote, poi 18 righe di disegno ---
- ldx #14
-hr_cookie_gap
- sta WSYNC
- dex
- bne hr_cookie_gap
- if (<*) > $70
-  jmp hr_cookie_al
-  align 256
- endif
-hr_cookie_al
- sta WSYNC
- lda temp4
- sta temp1
- tay
- lda hr_cookie_c,y
- sta COLUP0
- sta COLUP1
- sta WSYNC
-hr_cookie_loop
- ldy temp1
- lda hr_cookie_g0,y
- sta GRP0
- lda hr_cookie_g1,y
- sta GRP1
- lda hr_cookie_g2,y
- sta GRP0
- lda hr_cookie_g5,y
- sta temp2
- ldx hr_cookie_g4,y
- lda hr_cookie_g3,y
- ldy temp2
- sta GRP1
- stx GRP0
- sty GRP1
- sta GRP0
- sta WSYNC
- ldy temp1
- lda hr_cookie_g0,y
- sta GRP0
- lda hr_cookie_g1,y
- sta GRP1
- lda hr_cookie_g2,y
- sta GRP0
- lda hr_cookie_g5,y
- sta temp2
- ldx hr_cookie_g4,y
- lda hr_cookie_g3,y
- ldy temp2
- sta GRP1
- stx GRP0
- sty GRP1
- sta GRP0
- dec temp1
- ldy temp1
- lda hr_cookie_c,y
- sta COLUP0
- sta.w COLUP1
- bne hr_cookie_loop
- lda #0
- sta GRP0
- sta GRP1
- sta GRP0
- sta WSYNC
-; --- pavimento a scacchi ---
+ bne h2_floor
  lda #1
  sta CTRLPF
  lda #$64
@@ -1403,10 +1098,10 @@ hr_cookie_loop
  lda #$CC
  sta PF2
  ldx #1
-hr_floor0
+h2_floor0
  sta WSYNC
  dex
- bne hr_floor0
+ bne h2_floor0
  sta WSYNC
  lda #$30
  sta PF0
@@ -1415,10 +1110,10 @@ hr_floor0
  lda #$33
  sta PF2
  ldx #2
-hr_floor1
+h2_floor1
  sta WSYNC
  dex
- bne hr_floor1
+ bne h2_floor1
  sta WSYNC
  lda #$C0
  sta PF0
@@ -1427,10 +1122,10 @@ hr_floor1
  lda #$CC
  sta PF2
  ldx #2
-hr_floor2
+h2_floor2
  sta WSYNC
  dex
- bne hr_floor2
+ bne h2_floor2
  sta WSYNC
  lda #$30
  sta PF0
@@ -1439,10 +1134,10 @@ hr_floor2
  lda #$33
  sta PF2
  ldx #3
-hr_floor3
+h2_floor3
  sta WSYNC
  dex
- bne hr_floor3
+ bne h2_floor3
  sta WSYNC
  lda #$C0
  sta PF0
@@ -1451,10 +1146,10 @@ hr_floor3
  lda #$CC
  sta PF2
  ldx #4
-hr_floor4
+h2_floor4
  sta WSYNC
  dex
- bne hr_floor4
+ bne h2_floor4
  sta WSYNC
  lda #$30
  sta PF0
@@ -1463,10 +1158,10 @@ hr_floor4
  lda #$33
  sta PF2
  ldx #5
-hr_floor5
+h2_floor5
  sta WSYNC
  dex
- bne hr_floor5
+ bne h2_floor5
  sta WSYNC
  lda #$C0
  sta PF0
@@ -1475,10 +1170,10 @@ hr_floor5
  lda #$CC
  sta PF2
  ldx #6
-hr_floor6
+h2_floor6
  sta WSYNC
  dex
- bne hr_floor6
+ bne h2_floor6
  sta WSYNC
  lda #$30
  sta PF0
@@ -1487,10 +1182,10 @@ hr_floor6
  lda #$33
  sta PF2
  ldx #7
-hr_floor7
+h2_floor7
  sta WSYNC
  dex
- bne hr_floor7
+ bne h2_floor7
  sta WSYNC
  lda #$C0
  sta PF0
@@ -1499,10 +1194,10 @@ hr_floor7
  lda #$CC
  sta PF2
  ldx #9
-hr_floor8
+h2_floor8
  sta WSYNC
  dex
- bne hr_floor8
+ bne h2_floor8
  sta WSYNC
  lda #$30
  sta PF0
@@ -1511,34 +1206,28 @@ hr_floor8
  lda #$33
  sta PF2
  ldx #15
-hr_floor9
+h2_floor9
  sta WSYNC
  dex
- bne hr_floor9
+ bne h2_floor9
  sta WSYNC
  lda #0
  sta PF0
  sta PF1
  sta PF2
  sta COLUBK
-; --- 1 righe vuote fino in fondo ---
- ldx #1
-hr_end_gap
- sta WSYNC
- dex
- bne hr_end_gap
  lda #2
  sta VBLANK
  lda #128+HR_OVERSCAN
  sta TIM64T
- jmp hr_done
+ rts
 ; A = x, X = oggetto (0 = player0, 1 = player1)
-hr_pos
+h2_pos
  sta WSYNC
  sec
-hr_div
+h2_div
  sbc #15
- bcs hr_div
+ bcs h2_div
  eor #7
  asl
  asl
@@ -1547,268 +1236,1796 @@ hr_div
  sta HMP0,x
  sta RESP0,x
  rts
+; ===== schermata title =====
+h2_title
+ jsr h2_begin
+ lda _frame_counter
+ lsr
+ lsr
+ lsr
+ tax
+ lda h2_roll_frame8,x
+ sta temp3
+ ldx _choco_count
+ lda h2_level_choice,x
+ sta temp4
+ lda _frame_counter
+ lsr
+ lsr
+ tax
+ lda h2_cookie_frame4,x
+ sta temp5
+ jsr h2_vbwait
+; --- snack: 14 righe vuote, poi 11 righe di disegno ---
+ ldx #14
+h2_title0_gap
+ sta WSYNC
+ dex
+ bne h2_title0_gap
+ if (<*) > $94
+  jmp h2_title0_al
+  align 256
+ endif
+h2_title0_al
+ lda #11
+ sta temp1
+ tay
+ lda h2_snack_c,y
+ sta COLUP0
+ sta COLUP1
+ sta WSYNC
+h2_title0_loop
+ ldy temp1
+ lda h2_snack_g0,y
+ sta GRP0
+ lda h2_snack_g1,y
+ sta GRP1
+ lda h2_snack_g2,y
+ sta GRP0
+ lda h2_snack_g5,y
+ sta temp2
+ ldx h2_snack_g4,y
+ lda h2_snack_g3,y
+ ldy temp2
+ sta GRP1
+ stx GRP0
+ sty GRP1
+ sta GRP0
+ sta WSYNC
+ ldy temp1
+ lda h2_snack_g0,y
+ sta GRP0
+ lda h2_snack_g1,y
+ sta GRP1
+ lda h2_snack_g2,y
+ sta GRP0
+ lda h2_snack_g5,y
+ sta temp2
+ ldx h2_snack_g4,y
+ lda h2_snack_g3,y
+ ldy temp2
+ sta GRP1
+ stx GRP0
+ sty GRP1
+ sta GRP0
+ dec temp1
+ ldy temp1
+ lda h2_snack_c,y
+ sta COLUP0
+ sta.w COLUP1
+ bne h2_title0_loop
+h2_title0_end
+ if >h2_title0_loop != >h2_title0_end
+  echo "ERRORE: il ciclo h2_title0 attraversa una pagina"
+  err
+ endif
+ lda #0
+ sta GRP0
+ sta GRP1
+ sta GRP0
+ sta WSYNC
+; --- napo: 3 righe vuote, poi 7 righe di disegno ---
+ ldx #3
+h2_title1_gap
+ sta WSYNC
+ dex
+ bne h2_title1_gap
+ if (<*) > $94
+  jmp h2_title1_al
+  align 256
+ endif
+h2_title1_al
+ lda #7
+ sta temp1
+ tay
+ lda h2_napo_c,y
+ sta COLUP0
+ sta COLUP1
+ sta WSYNC
+h2_title1_loop
+ ldy temp1
+ lda h2_napo_g0,y
+ sta GRP0
+ lda h2_napo_g1,y
+ sta GRP1
+ lda h2_napo_g2,y
+ sta GRP0
+ lda h2_napo_g5,y
+ sta temp2
+ ldx h2_napo_g4,y
+ lda h2_napo_g3,y
+ ldy temp2
+ sta GRP1
+ stx GRP0
+ sty GRP1
+ sta GRP0
+ sta WSYNC
+ ldy temp1
+ lda h2_napo_g0,y
+ sta GRP0
+ lda h2_napo_g1,y
+ sta GRP1
+ lda h2_napo_g2,y
+ sta GRP0
+ lda h2_napo_g5,y
+ sta temp2
+ ldx h2_napo_g4,y
+ lda h2_napo_g3,y
+ ldy temp2
+ sta GRP1
+ stx GRP0
+ sty GRP1
+ sta GRP0
+ dec temp1
+ ldy temp1
+ lda h2_napo_c,y
+ sta COLUP0
+ sta.w COLUP1
+ bne h2_title1_loop
+h2_title1_end
+ if >h2_title1_loop != >h2_title1_end
+  echo "ERRORE: il ciclo h2_title1 attraversa una pagina"
+  err
+ endif
+ lda #0
+ sta GRP0
+ sta GRP1
+ sta GRP0
+ sta WSYNC
+; --- roll: 3 righe vuote, poi 11 righe di disegno ---
+ ldx #3
+h2_title2_gap
+ sta WSYNC
+ dex
+ bne h2_title2_gap
+ if (<*) > $94
+  jmp h2_title2_al
+  align 256
+ endif
+h2_title2_al
+ lda temp3
+ sta temp1
+ tay
+ lda h2_roll_c,y
+ sta COLUP0
+ sta COLUP1
+ sta WSYNC
+h2_title2_loop
+ ldy temp1
+ lda h2_roll_g0,y
+ sta GRP0
+ lda h2_roll_g1,y
+ sta GRP1
+ lda h2_roll_g2,y
+ sta GRP0
+ lda h2_roll_g5,y
+ sta temp2
+ ldx h2_roll_g4,y
+ lda h2_roll_g3,y
+ ldy temp2
+ sta GRP1
+ stx GRP0
+ sty GRP1
+ sta GRP0
+ sta WSYNC
+ ldy temp1
+ lda h2_roll_g0,y
+ sta GRP0
+ lda h2_roll_g1,y
+ sta GRP1
+ lda h2_roll_g2,y
+ sta GRP0
+ lda h2_roll_g5,y
+ sta temp2
+ ldx h2_roll_g4,y
+ lda h2_roll_g3,y
+ ldy temp2
+ sta GRP1
+ stx GRP0
+ sty GRP1
+ sta GRP0
+ dec temp1
+ ldy temp1
+ lda h2_roll_c,y
+ sta COLUP0
+ sta.w COLUP1
+ bne h2_title2_loop
+h2_title2_end
+ if >h2_title2_loop != >h2_title2_end
+  echo "ERRORE: il ciclo h2_title2 attraversa una pagina"
+  err
+ endif
+ lda #0
+ sta GRP0
+ sta GRP1
+ sta GRP0
+ sta WSYNC
+; --- level: 10 righe vuote, poi 7 righe di disegno ---
+ ldx #10
+h2_title3_gap
+ sta WSYNC
+ dex
+ bne h2_title3_gap
+ if (<*) > $94
+  jmp h2_title3_al
+  align 256
+ endif
+h2_title3_al
+ lda temp4
+ sta temp1
+ tay
+ lda h2_level_c,y
+ sta COLUP0
+ sta COLUP1
+ sta WSYNC
+h2_title3_loop
+ ldy temp1
+ lda h2_level_g0,y
+ sta GRP0
+ lda h2_level_g1,y
+ sta GRP1
+ lda h2_level_g2,y
+ sta GRP0
+ lda h2_level_g5,y
+ sta temp2
+ ldx h2_level_g4,y
+ lda h2_level_g3,y
+ ldy temp2
+ sta GRP1
+ stx GRP0
+ sty GRP1
+ sta GRP0
+ sta WSYNC
+ ldy temp1
+ lda h2_level_g0,y
+ sta GRP0
+ lda h2_level_g1,y
+ sta GRP1
+ lda h2_level_g2,y
+ sta GRP0
+ lda h2_level_g5,y
+ sta temp2
+ ldx h2_level_g4,y
+ lda h2_level_g3,y
+ ldy temp2
+ sta GRP1
+ stx GRP0
+ sty GRP1
+ sta GRP0
+ dec temp1
+ ldy temp1
+ lda h2_level_c,y
+ sta COLUP0
+ sta.w COLUP1
+ bne h2_title3_loop
+h2_title3_end
+ if >h2_title3_loop != >h2_title3_end
+  echo "ERRORE: il ciclo h2_title3 attraversa una pagina"
+  err
+ endif
+ lda #0
+ sta GRP0
+ sta GRP1
+ sta GRP0
+ sta WSYNC
+; --- cookie: 14 righe vuote, poi 18 righe di disegno ---
+ ldx #14
+h2_title4_gap
+ sta WSYNC
+ dex
+ bne h2_title4_gap
+ if (<*) > $94
+  jmp h2_title4_al
+  align 256
+ endif
+h2_title4_al
+ lda temp5
+ sta temp1
+ tay
+ lda h2_cookie_c,y
+ sta COLUP0
+ sta COLUP1
+ sta WSYNC
+h2_title4_loop
+ ldy temp1
+ lda h2_cookie_g0,y
+ sta GRP0
+ lda h2_cookie_g1,y
+ sta GRP1
+ lda h2_cookie_g2,y
+ sta GRP0
+ lda h2_cookie_g5,y
+ sta temp2
+ ldx h2_cookie_g4,y
+ lda h2_cookie_g3,y
+ ldy temp2
+ sta GRP1
+ stx GRP0
+ sty GRP1
+ sta GRP0
+ sta WSYNC
+ ldy temp1
+ lda h2_cookie_g0,y
+ sta GRP0
+ lda h2_cookie_g1,y
+ sta GRP1
+ lda h2_cookie_g2,y
+ sta GRP0
+ lda h2_cookie_g5,y
+ sta temp2
+ ldx h2_cookie_g4,y
+ lda h2_cookie_g3,y
+ ldy temp2
+ sta GRP1
+ stx GRP0
+ sty GRP1
+ sta GRP0
+ dec temp1
+ ldy temp1
+ lda h2_cookie_c,y
+ sta COLUP0
+ sta.w COLUP1
+ bne h2_title4_loop
+h2_title4_end
+ if >h2_title4_loop != >h2_title4_end
+  echo "ERRORE: il ciclo h2_title4 attraversa una pagina"
+  err
+ endif
+ lda #0
+ sta GRP0
+ sta GRP1
+ sta GRP0
+ sta WSYNC
+ ldx #1
+ jmp h2_floor
+; ===== schermata over =====
+h2_over
+ jsr h2_begin
+ jsr h2_vbwait
+; --- game: 24 righe vuote, poi 11 righe di disegno ---
+ ldx #24
+h2_over0_gap
+ sta WSYNC
+ dex
+ bne h2_over0_gap
+ if (<*) > $94
+  jmp h2_over0_al
+  align 256
+ endif
+h2_over0_al
+ lda #11
+ sta temp1
+ tay
+ lda h2_game_c,y
+ sta COLUP0
+ sta COLUP1
+ sta WSYNC
+h2_over0_loop
+ ldy temp1
+ lda h2_game_g0,y
+ sta GRP0
+ lda h2_game_g1,y
+ sta GRP1
+ lda h2_game_g2,y
+ sta GRP0
+ lda h2_game_g5,y
+ sta temp2
+ ldx h2_game_g4,y
+ lda h2_game_g3,y
+ ldy temp2
+ sta GRP1
+ stx GRP0
+ sty GRP1
+ sta GRP0
+ sta WSYNC
+ ldy temp1
+ lda h2_game_g0,y
+ sta GRP0
+ lda h2_game_g1,y
+ sta GRP1
+ lda h2_game_g2,y
+ sta GRP0
+ lda h2_game_g5,y
+ sta temp2
+ ldx h2_game_g4,y
+ lda h2_game_g3,y
+ ldy temp2
+ sta GRP1
+ stx GRP0
+ sty GRP1
+ sta GRP0
+ dec temp1
+ ldy temp1
+ lda h2_game_c,y
+ sta COLUP0
+ sta.w COLUP1
+ bne h2_over0_loop
+h2_over0_end
+ if >h2_over0_loop != >h2_over0_end
+  echo "ERRORE: il ciclo h2_over0 attraversa una pagina"
+  err
+ endif
+ lda #0
+ sta GRP0
+ sta GRP1
+ sta GRP0
+ sta WSYNC
+; --- over: 6 righe vuote, poi 11 righe di disegno ---
+ ldx #6
+h2_over1_gap
+ sta WSYNC
+ dex
+ bne h2_over1_gap
+ if (<*) > $94
+  jmp h2_over1_al
+  align 256
+ endif
+h2_over1_al
+ lda #11
+ sta temp1
+ tay
+ lda h2_over_c,y
+ sta COLUP0
+ sta COLUP1
+ sta WSYNC
+h2_over1_loop
+ ldy temp1
+ lda h2_over_g0,y
+ sta GRP0
+ lda h2_over_g1,y
+ sta GRP1
+ lda h2_over_g2,y
+ sta GRP0
+ lda h2_over_g5,y
+ sta temp2
+ ldx h2_over_g4,y
+ lda h2_over_g3,y
+ ldy temp2
+ sta GRP1
+ stx GRP0
+ sty GRP1
+ sta GRP0
+ sta WSYNC
+ ldy temp1
+ lda h2_over_g0,y
+ sta GRP0
+ lda h2_over_g1,y
+ sta GRP1
+ lda h2_over_g2,y
+ sta GRP0
+ lda h2_over_g5,y
+ sta temp2
+ ldx h2_over_g4,y
+ lda h2_over_g3,y
+ ldy temp2
+ sta GRP1
+ stx GRP0
+ sty GRP1
+ sta GRP0
+ dec temp1
+ ldy temp1
+ lda h2_over_c,y
+ sta COLUP0
+ sta.w COLUP1
+ bne h2_over1_loop
+h2_over1_end
+ if >h2_over1_loop != >h2_over1_end
+  echo "ERRORE: il ciclo h2_over1 attraversa una pagina"
+  err
+ endif
+ lda #0
+ sta GRP0
+ sta GRP1
+ sta GRP0
+ sta WSYNC
+; --- bitten: 26 righe vuote, poi 18 righe di disegno ---
+ ldx #26
+h2_over2_gap
+ sta WSYNC
+ dex
+ bne h2_over2_gap
+ if (<*) > $94
+  jmp h2_over2_al
+  align 256
+ endif
+h2_over2_al
+ lda #18
+ sta temp1
+ tay
+ lda h2_bitten_c,y
+ sta COLUP0
+ sta COLUP1
+ sta WSYNC
+h2_over2_loop
+ ldy temp1
+ lda h2_bitten_g0,y
+ sta GRP0
+ lda h2_bitten_g1,y
+ sta GRP1
+ lda h2_bitten_g2,y
+ sta GRP0
+ lda h2_bitten_g5,y
+ sta temp2
+ ldx h2_bitten_g4,y
+ lda h2_bitten_g3,y
+ ldy temp2
+ sta GRP1
+ stx GRP0
+ sty GRP1
+ sta GRP0
+ sta WSYNC
+ ldy temp1
+ lda h2_bitten_g0,y
+ sta GRP0
+ lda h2_bitten_g1,y
+ sta GRP1
+ lda h2_bitten_g2,y
+ sta GRP0
+ lda h2_bitten_g5,y
+ sta temp2
+ ldx h2_bitten_g4,y
+ lda h2_bitten_g3,y
+ ldy temp2
+ sta GRP1
+ stx GRP0
+ sty GRP1
+ sta GRP0
+ dec temp1
+ ldy temp1
+ lda h2_bitten_c,y
+ sta COLUP0
+ sta.w COLUP1
+ bne h2_over2_loop
+h2_over2_end
+ if >h2_over2_loop != >h2_over2_end
+  echo "ERRORE: il ciclo h2_over2 attraversa una pagina"
+  err
+ endif
+ lda #0
+ sta GRP0
+ sta GRP1
+ sta GRP0
+ sta WSYNC
+ ldx #21
+ jmp h2_floor
+; --- cartello over: 150 fotogrammi ---
+h2_show_over
+ lda #150
+ sta temp6
+ lda #0
+ sta AUDV0
+h2_show_over_loop
+ lda #150
+ sec
+ sbc temp6
+ lsr
+ lsr
+ lsr
+ tay
+ ldx #0
+ lda h2_jingle_over,y
+ beq h2_show_over_q
+ ldx #6
+h2_show_over_q
+ sta AUDF1
+ stx AUDV1
+ lda #4
+ sta AUDC1
+ jsr h2_over
+ dec temp6
+ bne h2_show_over_loop
+ lda #0
+ sta AUDV1
+ sta NUSIZ0
+ sta VDELP1
+ rts
 ; --- tabelle (nessuna attraversa un confine di pagina) ---
- if (<*) + 12 > 256
-  align 256
- endif
-hr_snack_g0
- .byte 0, %01111110, %11111111, %11100111, %00000111, %00011111, %01111110, %11111000, %11100000, %11100111, %11111111, %01111110
- if (<*) + 12 > 256
-  align 256
- endif
-hr_snack_g1
- .byte 0, %00111001, %00111001, %00111001, %00111001, %00111001, %00111001, %00111011, %00111111, %00111111, %00111101, %00111001
- if (<*) + 12 > 256
-  align 256
- endif
-hr_snack_g2
- .byte 0, %11001110, %11001110, %11001110, %11001110, %11001111, %11001111, %11001110, %11001110, %11001110, %11000111, %11000011
- if (<*) + 12 > 256
-  align 256
- endif
-hr_snack_g3
- .byte 0, %01110001, %01110011, %01110011, %01110011, %11110011, %11110011, %01110011, %01110011, %01110011, %11100011, %11000001
- if (<*) + 12 > 256
-  align 256
- endif
-hr_snack_g4
- .byte 0, %11111000, %11111100, %10011100, %10000000, %10000000, %10000000, %10000000, %10000000, %10011100, %11111100, %11111000
- if (<*) + 12 > 256
-  align 256
- endif
-hr_snack_g5
- .byte 0, %11100111, %11100111, %11101110, %11111100, %11111000, %11110000, %11110000, %11111000, %11111100, %11101110, %11100111
- if (<*) + 12 > 256
-  align 256
- endif
-hr_snack_c
- .byte $00, $44, $46, $46, $26, $28, $28, $2A, $2C, $2C, $2E, $2E
- if (<*) + 8 > 256
-  align 256
- endif
-hr_napo_g0
- .byte 0, %00000000, %00000000, %00000000, %00000000, %00000000, %00000000, %00000000
- if (<*) + 8 > 256
-  align 256
- endif
-hr_napo_g1
- .byte 0, %00000000, %00000000, %00000000, %00000000, %00000000, %00000000, %00000000
- if (<*) + 8 > 256
-  align 256
- endif
-hr_napo_g2
- .byte 0, %00000100, %00000100, %00000100, %00000100, %00010101, %00010110, %00010100
- if (<*) + 8 > 256
-  align 256
- endif
-hr_napo_g3
- .byte 0, %01000000, %01000000, %01000000, %11000000, %01010000, %01010000, %01010000
- if (<*) + 8 > 256
-  align 256
- endif
-hr_napo_g4
- .byte 0, %00000000, %00000000, %00000000, %00000000, %00000000, %00000000, %00000000
- if (<*) + 8 > 256
-  align 256
- endif
-hr_napo_g5
- .byte 0, %00000000, %00000000, %00000000, %00000000, %00000000, %00000000, %00000000
- if (<*) + 8 > 256
-  align 256
- endif
-hr_napo_c
- .byte $00, $0E, $0E, $0E, $0E, $0E, $0E, $0E
- if (<*) + 48 > 256
-  align 256
- endif
-hr_roll_g0
- .byte 0, %11100000, %11100000, %11100001, %11100011, %11100111, %11111111, %11111111, %11100001, %11100001, %11111111, %11111111, 0, %11100000, %11100000, %11100001
- .byte %11100011, %11100111, %11111111, %11111111, %11100001, %11100001, %11111111, %11111111, 0, %11100000, %11100000, %11100001, %11100011, %11100111, %11111111, %11111111
- .byte %11100001, %11100001, %11111111, %11111111, 0, %11100000, %11100000, %11100001, %11100011, %11100111, %11111111, %11111111, %11100001, %11100001, %11111111, %11111111
- if (<*) + 48 > 256
-  align 256
- endif
-hr_roll_g1
- .byte 0, %11100011, %11100111, %11001111, %10001110, %00001110, %10001110, %11001110, %11001110, %11001111, %11000111, %10000011, 0, %11100011, %11100111, %11001111
- .byte %10001110, %00001110, %10001110, %11001110, %11001110, %11001111, %11000111, %10000011, 0, %11100011, %11100111, %11001111, %10001110, %00001110, %10001110, %11001110
- .byte %11001110, %11001111, %11000111, %10000011, 0, %11100011, %11100111, %11001111, %10001110, %00001110, %10001110, %11001110, %11001110, %11001111, %11000111, %10000011
- if (<*) + 48 > 256
-  align 256
- endif
-hr_roll_g2
- .byte 0, %11111000, %11111100, %00011110, %00001110, %00001110, %00001110, %00001110, %00001110, %00011110, %11111100, %11111000, 0, %11111000, %11111100, %00011110
- .byte %00001110, %00001110, %00001110, %00001110, %00001110, %00011110, %11111100, %11111000, 0, %11111000, %11111100, %00011110, %00001110, %00001110, %00001110, %00001110
- .byte %00001110, %00011110, %11111100, %11111000, 0, %11111000, %11111100, %00011110, %00001110, %00001110, %00001110, %00001110, %00001110, %00011110, %11111100, %11111000
- if (<*) + 48 > 256
-  align 256
- endif
-hr_roll_g3
- .byte 0, %01111111, %01111111, %01110000, %01110000, %01110000, %01110000, %01110000, %01110000, %01110000, %01110000, %01110000, 0, %01111111, %01111111, %01110000
- .byte %01110000, %01110000, %01110000, %01110000, %00111000, %00111000, %00111000, %00111000, 0, %01111111, %01111111, %01110000, %01110000, %01110000, %00111000, %00111000
- .byte %00111000, %00011100, %00011100, %00011100, 0, %01111111, %01111111, %01110000, %01110000, %01110000, %01110000, %01110000, %11100000, %11100000, %11100000, %11100000
- if (<*) + 48 > 256
-  align 256
- endif
-hr_roll_g4
- .byte 0, %11100111, %11100111, %00000111, %00000111, %00000111, %00000111, %00000111, %00000111, %00000111, %00000111, %00000111, 0, %11100111, %11100111, %00000111
- .byte %00000111, %00000111, %00000111, %00000111, %00000011, %00000011, %00000011, %00000011, 0, %11100111, %11100111, %00000111, %00000111, %00000111, %00000011, %00000011
- .byte %00000011, %00000001, %00000001, %00000001, 0, %11100111, %11100111, %00000111, %00000111, %00000111, %00000111, %00000111, %00001110, %00001110, %00001110, %00001110
- if (<*) + 48 > 256
-  align 256
- endif
-hr_roll_g5
- .byte 0, %11111110, %11111110, %00000000, %00000000, %00000000, %00000000, %00000000, %00000000, %00000000, %00000000, %00000000, 0, %11111110, %11111110, %00000000
- .byte %00000000, %00000000, %00000000, %00000000, %10000000, %10000000, %10000000, %10000000, 0, %11111110, %11111110, %00000000, %00000000, %00000000, %10000000, %10000000
- .byte %10000000, %11000000, %11000000, %11000000, 0, %11111110, %11111110, %00000000, %00000000, %00000000, %00000000, %00000000, %00000000, %00000000, %00000000, %00000000
- if (<*) + 48 > 256
-  align 256
- endif
-hr_roll_c
- .byte $00, $44, $46, $46, $26, $28, $28, $2A, $2C, $2C, $2E, $2E, $00, $44, $46, $46
- .byte $26, $28, $28, $2A, $2C, $2C, $2E, $2E, $00, $44, $46, $46, $26, $28, $28, $2A
- .byte $2C, $2C, $2E, $2E, $00, $44, $46, $46, $26, $28, $28, $2A, $2C, $2C, $2E, $2E
- if (<*) + 6 > 256
-  align 256
- endif
-hr_roll_st
- .byte 11, 23, 35, 23, 11, 47
- if (<*) + 76 > 256
-  align 256
- endif
-hr_cookie_g0
+ align 256
+h2_cookie_g0
  .byte 0, %00000000, %00000000, %00000000, %00000001, %00000011, %00001111, %00011111, %00011111, %00011111, %00011111, %00011111, %00011111, %00001111, %00000011, %00000001
  .byte %00000000, %00000000, %00000000, 0, %00000000, %00000000, %00000000, %00000001, %00000011, %00001111, %00011111, %00011111, %00011111, %00011111, %00011111, %00011111
  .byte %00001111, %00000011, %00000001, %00000000, %00000000, %00000000, 0, %00000000, %00000000, %00000000, %00000001, %00000011, %00001111, %00011111, %00011111, %00011111
  .byte %00011111, %00011111, %00011111, %00001111, %00000011, %00000001, %00000000, %00000000, %00000000, 0, %00000000, %00000000, %00000000, %00000001, %00000011, %00001111
  .byte %00011111, %00011111, %00011111, %00011111, %00011111, %00011111, %00001111, %00000011, %00000001, %00000000, %00000000, %00000000
- if (<*) + 76 > 256
-  align 256
- endif
-hr_cookie_g1
+h2_cookie_g1
  .byte 0, %00000000, %00000111, %00111111, %11111111, %11111111, %11111111, %11111111, %11111111, %11111111, %11111111, %00011111, %11111111, %11111111, %11111111, %11111111
  .byte %00111111, %00000111, %00000000, 0, %00000000, %00000111, %00111111, %11111111, %11111111, %11111111, %11111111, %11111111, %11111100, %11111111, %11111111, %11111111
  .byte %11110001, %11111111, %11111111, %00111111, %00000111, %00000000, 0, %00000000, %00000111, %00111111, %11111111, %11111111, %11111000, %11111111, %11111111, %11111111
  .byte %11111110, %11111111, %11111111, %11111111, %11111111, %11111111, %00111111, %00000111, %00000000, 0, %00000000, %00000111, %00111111, %11111111, %11111111, %11111111
  .byte %11111111, %10001111, %11111111, %11111111, %11111111, %11111111, %11111111, %11111111, %11111111, %00111111, %00000111, %00000000
- if (<*) + 76 > 256
-  align 256
- endif
-hr_cookie_g2
+h2_cookie_g2
  .byte 0, %00000111, %11111111, %11111111, %11111111, %11111111, %11111111, %00011111, %11111111, %11111111, %11111000, %11111111, %11111111, %11000111, %11111111, %11111111
  .byte %11111111, %11111111, %00000111, 0, %00000111, %11111111, %11111111, %11111111, %11100011, %11111111, %11111111, %11111111, %01111111, %11111100, %11111111, %11111111
  .byte %11111111, %11111111, %11111111, %11111111, %11111111, %00000111, 0, %00000111, %11111111, %11111111, %11111111, %11111111, %11111111, %11111111, %11111100, %11111111
  .byte %00111111, %11111110, %11111111, %11111111, %11111111, %11100011, %11111111, %11111111, %00000111, 0, %00000111, %11111111, %11111111, %11111111, %11111111, %11111110
  .byte %11111111, %11110001, %11111111, %11111111, %11111111, %10001111, %11111111, %11111111, %11111111, %11111111, %11111111, %00000111
- if (<*) + 76 > 256
-  align 256
- endif
-hr_cookie_g3
+h2_bitten_g0
+ .byte 0, %00000000, %00000000, %00000000, %00000001, %00000011, %00001111, %00011111, %00011111, %00011111, %00011111, %00011111, %00011111, %00001111, %00000011, %00000001
+ .byte %00000000, %00000000, %00000000
+h2_napo_g0
+ .byte 0, %00000000, %00000000, %00000000, %00000000, %00000000, %00000000, %00000000
+ align 256
+h2_cookie_g3
  .byte 0, %11100000, %11111111, %11111111, %11111111, %11000111, %11111111, %11111111, %11111111, %10001111, %11111111, %11111111, %11000111, %11111111, %11111111, %11111111
  .byte %11111111, %11111111, %11100000, 0, %11100000, %11111111, %11111111, %11111111, %11111111, %11111111, %11111111, %00011110, %11111111, %01111111, %11110001, %11111111
  .byte %11111111, %00011111, %11111111, %11111111, %11111111, %11100000, 0, %11100000, %11111111, %11111111, %11111111, %11111111, %11110001, %11111111, %01111111, %11111000
  .byte %11111111, %00111111, %11111111, %11111000, %11111111, %11111111, %11111111, %11111111, %11100000, 0, %11100000, %11111111, %11111111, %11111111, %11111111, %00111111
  .byte %11111111, %11110001, %11111111, %00011111, %11111111, %11111111, %11111111, %11111111, %11000111, %11111111, %11111111, %11100000
- if (<*) + 76 > 256
-  align 256
- endif
-hr_cookie_g4
+h2_cookie_g4
  .byte 0, %00000000, %11100000, %11111100, %11111111, %11111111, %11111111, %11111111, %11111111, %11111111, %10001111, %11111111, %11111111, %11111111, %11111111, %11111111
  .byte %11111100, %11100000, %00000000, 0, %00000000, %11100000, %11111100, %11111111, %11111111, %11111111, %11111111, %00111111, %11111111, %11111111, %11111111, %11111111
  .byte %11111111, %11111111, %11111111, %11111100, %11100000, %00000000, 0, %00000000, %11100000, %11111100, %11111111, %11111111, %11111111, %11111111, %11111111, %11111111
  .byte %11111111, %11111111, %11111111, %11111111, %11111111, %11111111, %11111100, %11100000, %00000000, 0, %00000000, %11100000, %11111100, %11111111, %11111111, %11111111
  .byte %11111111, %11111111, %11111111, %11111111, %10001111, %11111111, %11111111, %11111111, %11111111, %11111100, %11100000, %00000000
- if (<*) + 76 > 256
-  align 256
- endif
-hr_cookie_g5
+h2_cookie_g5
  .byte 0, %00000000, %00000000, %00000000, %10000000, %11000000, %11110000, %11111000, %11111000, %11111000, %11111000, %11111000, %11111000, %11110000, %11000000, %10000000
  .byte %00000000, %00000000, %00000000, 0, %00000000, %00000000, %00000000, %10000000, %11000000, %11110000, %11111000, %11111000, %11111000, %11111000, %11111000, %11111000
  .byte %11110000, %11000000, %10000000, %00000000, %00000000, %00000000, 0, %00000000, %00000000, %00000000, %10000000, %11000000, %11110000, %11111000, %11111000, %11111000
  .byte %11111000, %11111000, %11111000, %11110000, %11000000, %10000000, %00000000, %00000000, %00000000, 0, %00000000, %00000000, %00000000, %10000000, %11000000, %11110000
  .byte %11111000, %11111000, %11111000, %11111000, %11111000, %11111000, %11110000, %11000000, %10000000, %00000000, %00000000, %00000000
- if (<*) + 76 > 256
-  align 256
- endif
-hr_cookie_c
+h2_bitten_g1
+ .byte 0, %00000000, %00000111, %00111111, %11111111, %11111111, %11111111, %11111111, %11111111, %11111111, %11111111, %00011111, %11111111, %11111111, %11111111, %11111111
+ .byte %00111111, %00000111, %00000000
+h2_napo_g1
+ .byte 0, %00000000, %00000000, %00000000, %00000000, %00000000, %00000000, %00000000
+ align 256
+h2_cookie_c
  .byte $00, $22, $22, $24, $24, $26, $26, $28, $28, $28, $28, $2A, $2A, $2A, $2A, $2C
  .byte $2C, $2C, $2C, $00, $22, $22, $24, $24, $26, $26, $28, $28, $28, $28, $2A, $2A
  .byte $2A, $2A, $2C, $2C, $2C, $2C, $00, $22, $22, $24, $24, $26, $26, $28, $28, $28
  .byte $28, $2A, $2A, $2A, $2A, $2C, $2C, $2C, $2C, $00, $22, $22, $24, $24, $26, $26
  .byte $28, $28, $28, $28, $2A, $2A, $2A, $2A, $2C, $2C, $2C, $2C
- if (<*) + 12 > 256
-  align 256
- endif
-hr_cookie_st
- .byte 18, 18, 18, 37, 37, 37, 56, 56, 56, 75, 75, 75
- if (<*) + 56 > 256
-  align 256
- endif
-hr_level_g0
+h2_level_g0
  .byte 0, %01111101, %01000000, %01000000, %01000000, %01000000, %01000000, %01000001, 0, %11111011, %10000001, %10000001, %10000001, %10000001, %10000001, %10000011
  .byte 0, %11111011, %10000001, %10000001, %10000001, %10000001, %10000001, %10000011, 0, %11111011, %10000001, %10000001, %10000001, %10000001, %10000001, %10000011
  .byte 0, %11111011, %10000001, %10000001, %10000001, %10000001, %10000001, %10000011, 0, %11111011, %10000001, %10000001, %10000001, %10000001, %10000001, %10000011
  .byte 0, %00000000, %00000000, %00000000, %00000000, %00000000, %00000000, %00000000
- if (<*) + 56 > 256
-  align 256
- endif
-hr_level_g1
+h2_level_g1
  .byte 0, %11000100, %10001010, %10010001, %10010001, %10010001, %10010001, %11010001, 0, %10001000, %00010100, %00100010, %00100010, %00100010, %00100010, %10100010
  .byte 0, %10001000, %00010100, %00100010, %00100010, %00100010, %00100010, %10100010, 0, %10001000, %00010100, %00100010, %00100010, %00100010, %00100010, %10100010
  .byte 0, %10001000, %00010100, %00100010, %00100010, %00100010, %00100010, %10100010, 0, %10001000, %00010100, %00100010, %00100010, %00100010, %00100010, %10100010
  .byte 0, %00011110, %00010001, %00010001, %00011110, %00010001, %00010001, %00011110
- if (<*) + 56 > 256
-  align 256
- endif
-hr_level_g2
+h2_level_g2
  .byte 0, %01111101, %01000001, %01000001, %01111001, %01000001, %01000001, %01111101, 0, %11111011, %10000010, %10000010, %11110010, %10000010, %10000010, %11111010
  .byte 0, %11111011, %10000010, %10000010, %11110010, %10000010, %10000010, %11111010, 0, %11111011, %10000010, %10000010, %11110010, %10000010, %10000010, %11111010
  .byte 0, %11111011, %10000010, %10000010, %11110010, %10000010, %10000010, %11111010, 0, %11111011, %10000010, %10000010, %11110010, %10000010, %10000010, %11111010
  .byte 0, %00111001, %01000100, %01000100, %01000100, %01000101, %01000101, %00111000
- if (<*) + 56 > 256
-  align 256
- endif
-hr_level_g3
+h2_snack_g0
+ .byte 0, %01111110, %11111111, %11100111, %00000111, %00011111, %01111110, %11111000, %11100000, %11100111, %11111111, %01111110
+ align 256
+h2_level_g3
  .byte 0, %11110111, %00000100, %00000100, %00000100, %00000100, %00000100, %00000100, 0, %11101111, %00001000, %00001000, %00001000, %00001000, %00001000, %00001000
  .byte 0, %11101111, %00001000, %00001000, %00001000, %00001000, %00001000, %00001000, 0, %11101111, %00001000, %00001000, %00001000, %00001000, %00001000, %00001000
  .byte 0, %11101111, %00001000, %00001000, %00001000, %00001000, %00001000, %00001000, 0, %11101111, %00001000, %00001000, %00001000, %00001000, %00001000, %00001000
  .byte 0, %11100111, %00010000, %00010000, %11100011, %00000100, %00000100, %11110011
- if (<*) + 56 > 256
-  align 256
- endif
-hr_level_g4
+h2_level_g4
  .byte 0, %11001110, %00010001, %00010001, %00010001, %00010001, %00010001, %00001110, 0, %10011100, %00100010, %00100010, %00100010, %00100010, %00100010, %00011100
  .byte 0, %10011100, %00100010, %00100010, %00100010, %00100010, %00100010, %00011100, 0, %10011100, %00100010, %00100010, %00100010, %00100010, %00100010, %00011100
  .byte 0, %10011100, %00100010, %00100010, %00100010, %00100010, %00100010, %00011100, 0, %10011100, %00100010, %00100010, %00100010, %00100010, %00100010, %00011100
  .byte 0, %10010000, %01000000, %01010000, %10010000, %00010000, %00010000, %11010000
- if (<*) + 56 > 256
-  align 256
- endif
-hr_level_g5
+h2_level_g5
  .byte 0, %00001110, %00000100, %00000100, %00000100, %00000100, %00001100, %00000100, 0, %00011111, %00001000, %00000100, %00000010, %00000001, %00010001, %00001110
  .byte 0, %00011110, %00000001, %00000001, %00001110, %00000001, %00000001, %00011110, 0, %00000010, %00000010, %00011111, %00010010, %00001010, %00000110, %00000010
  .byte 0, %00001110, %00010001, %00000001, %00000001, %00011110, %00010000, %00011111, 0, %00001110, %00010001, %00010001, %00011110, %00010000, %00010000, %00001110
  .byte 0, %00000000, %00000000, %00000000, %00000000, %00000000, %00000000, %00000000
- if (<*) + 56 > 256
-  align 256
- endif
-hr_level_c
+h2_level_c
  .byte $00, $98, $9A, $9A, $9C, $9C, $9E, $9E, $00, $98, $9A, $9A, $9C, $9C, $9E, $9E
  .byte $00, $98, $9A, $9A, $9C, $9C, $9E, $9E, $00, $98, $9A, $9A, $9C, $9C, $9E, $9E
  .byte $00, $98, $9A, $9A, $9C, $9C, $9E, $9E, $00, $98, $9A, $9A, $9C, $9C, $9E, $9E
  .byte $00, $98, $9A, $9A, $9C, $9C, $9E, $9E
- if (<*) + 7 > 256
-  align 256
- endif
-hr_level_st
+h2_bitten_g2
+ .byte 0, %00000111, %11111111, %11111111, %11111111, %11111111, %11111111, %00011111, %11111111, %11111111, %11111000, %11111111, %11111111, %11000111, %11111111, %11111111
+ .byte %11111111, %11111111, %00000111
+h2_snack_g1
+ .byte 0, %00111001, %00111001, %00111001, %00111001, %00111001, %00111001, %00111011, %00111111, %00111111, %00111101, %00111001
+ align 256
+h2_roll_g0
+ .byte 0, %11100000, %11100000, %11100001, %11100011, %11100111, %11111111, %11111111, %11100001, %11100001, %11111111, %11111111, 0, %11100000, %11100000, %11100001
+ .byte %11100011, %11100111, %11111111, %11111111, %11100001, %11100001, %11111111, %11111111, 0, %11100000, %11100000, %11100001, %11100011, %11100111, %11111111, %11111111
+ .byte %11100001, %11100001, %11111111, %11111111, 0, %11100000, %11100000, %11100001, %11100011, %11100111, %11111111, %11111111, %11100001, %11100001, %11111111, %11111111
+h2_roll_g1
+ .byte 0, %11100011, %11100111, %11001111, %10001110, %00001110, %10001110, %11001110, %11001110, %11001111, %11000111, %10000011, 0, %11100011, %11100111, %11001111
+ .byte %10001110, %00001110, %10001110, %11001110, %11001110, %11001111, %11000111, %10000011, 0, %11100011, %11100111, %11001111, %10001110, %00001110, %10001110, %11001110
+ .byte %11001110, %11001111, %11000111, %10000011, 0, %11100011, %11100111, %11001111, %10001110, %00001110, %10001110, %11001110, %11001110, %11001111, %11000111, %10000011
+h2_roll_g2
+ .byte 0, %11111000, %11111100, %00011110, %00001110, %00001110, %00001110, %00001110, %00001110, %00011110, %11111100, %11111000, 0, %11111000, %11111100, %00011110
+ .byte %00001110, %00001110, %00001110, %00001110, %00001110, %00011110, %11111100, %11111000, 0, %11111000, %11111100, %00011110, %00001110, %00001110, %00001110, %00001110
+ .byte %00001110, %00011110, %11111100, %11111000, 0, %11111000, %11111100, %00011110, %00001110, %00001110, %00001110, %00001110, %00001110, %00011110, %11111100, %11111000
+h2_roll_g3
+ .byte 0, %01111111, %01111111, %01110000, %01110000, %01110000, %01110000, %01110000, %01110000, %01110000, %01110000, %01110000, 0, %01111111, %01111111, %01110000
+ .byte %01110000, %01110000, %01110000, %01110000, %00111000, %00111000, %00111000, %00111000, 0, %01111111, %01111111, %01110000, %01110000, %01110000, %00111000, %00111000
+ .byte %00111000, %00011100, %00011100, %00011100, 0, %01111111, %01111111, %01110000, %01110000, %01110000, %01110000, %01110000, %11100000, %11100000, %11100000, %11100000
+h2_roll_g4
+ .byte 0, %11100111, %11100111, %00000111, %00000111, %00000111, %00000111, %00000111, %00000111, %00000111, %00000111, %00000111, 0, %11100111, %11100111, %00000111
+ .byte %00000111, %00000111, %00000111, %00000111, %00000011, %00000011, %00000011, %00000011, 0, %11100111, %11100111, %00000111, %00000111, %00000111, %00000011, %00000011
+ .byte %00000011, %00000001, %00000001, %00000001, 0, %11100111, %11100111, %00000111, %00000111, %00000111, %00000111, %00000111, %00001110, %00001110, %00001110, %00001110
+h2_snack_g2
+ .byte 0, %11001110, %11001110, %11001110, %11001110, %11001111, %11001111, %11001110, %11001110, %11001110, %11000111, %11000011
+ align 256
+h2_roll_g5
+ .byte 0, %11111110, %11111110, %00000000, %00000000, %00000000, %00000000, %00000000, %00000000, %00000000, %00000000, %00000000, 0, %11111110, %11111110, %00000000
+ .byte %00000000, %00000000, %00000000, %00000000, %10000000, %10000000, %10000000, %10000000, 0, %11111110, %11111110, %00000000, %00000000, %00000000, %10000000, %10000000
+ .byte %10000000, %11000000, %11000000, %11000000, 0, %11111110, %11111110, %00000000, %00000000, %00000000, %00000000, %00000000, %00000000, %00000000, %00000000, %00000000
+h2_roll_c
+ .byte $00, $44, $46, $46, $26, $28, $28, $2A, $2C, $2C, $2E, $2E, $00, $44, $46, $46
+ .byte $26, $28, $28, $2A, $2C, $2C, $2E, $2E, $00, $44, $46, $46, $26, $28, $28, $2A
+ .byte $2C, $2C, $2E, $2E, $00, $44, $46, $46, $26, $28, $28, $2A, $2C, $2C, $2E, $2E
+h2_bitten_g3
+ .byte 0, %11100000, %11111111, %11111111, %11111111, %11000111, %11111111, %11111111, %11111111, %10001111, %11111111, %11111111, %11000111, %11111111, %11111111, %11111111
+ .byte %11111111, %11111111, %11100000
+h2_bitten_g4
+ .byte 0, %00000000, %11100000, %11111100, %11111111, %11111111, %11111111, %11111100, %11110000, %11000000, %10000000, %10000000, %10000000, %10000000, %11000000, %11000000
+ .byte %11110000, %11100000, %00000000
+h2_bitten_g5
+ .byte 0, %00000000, %10000000, %00000000, %10001000, %11000000, %11110000, %00000010, %00000000, %00000000, %00000000, %00000000, %00000000, %00000000, %00000000, %00000000
+ .byte %00000000, %00000000, %00000000
+h2_bitten_c
+ .byte $00, $22, $22, $24, $24, $26, $26, $28, $28, $28, $28, $2A, $2A, $2A, $2A, $2C
+ .byte $2C, $2C, $2C
+h2_jingle_over
+ .byte 14, 0, 17, 0, 19, 0, 23, 23, 29, 29, 29, 29, 0, 0, 0, 0
+ .byte 0, 0, 0
+h2_snack_g3
+ .byte 0, %01110001, %01110011, %01110011, %01110011, %11110011, %11110011, %01110011, %01110011, %01110011, %11100011, %11000001
+h2_snack_g4
+ .byte 0, %11111000, %11111100, %10011100, %10000000, %10000000, %10000000, %10000000, %10000000, %10011100, %11111100, %11111000
+h2_snack_g5
+ .byte 0, %11100111, %11100111, %11101110, %11111100, %11111000, %11110000, %11110000, %11111000, %11111100, %11101110, %11100111
+h2_snack_c
+ .byte $00, $44, $46, $46, $26, $28, $28, $2A, $2C, $2C, $2E, $2E
+h2_game_g0
+ .byte 0, %00000011, %00000111, %00000111, %00000111, %00000111, %00000111, %00000111, %00000111, %00000111, %00000111, %00000011
+ align 256
+h2_game_g1
+ .byte 0, %11110001, %11111001, %00111001, %00111001, %01111001, %01111001, %00000001, %00000001, %00111001, %11111000, %11110000
+h2_game_g2
+ .byte 0, %11001110, %11001110, %11001110, %11001110, %11111110, %11111110, %11001110, %11001110, %11001110, %11111100, %01111000
+h2_game_g3
+ .byte 0, %01100001, %01100001, %01100001, %01100001, %01100001, %01100001, %01101101, %01111111, %01111111, %01110011, %01100001
+h2_game_g4
+ .byte 0, %10011111, %10011111, %10011100, %10011100, %10011100, %10011111, %10011111, %10011100, %10011100, %10011111, %10011111
+h2_game_g5
+ .byte 0, %11100000, %11100000, %00000000, %00000000, %00000000, %10000000, %10000000, %00000000, %00000000, %11100000, %11100000
+h2_game_c
+ .byte $00, $40, $42, $42, $44, $44, $46, $46, $48, $48, $4A, $4C
+h2_over_g0
+ .byte 0, %00000011, %00000111, %00000111, %00000111, %00000111, %00000111, %00000111, %00000111, %00000111, %00000111, %00000011
+h2_over_g1
+ .byte 0, %11110000, %11111000, %00111000, %00111000, %00111001, %00111001, %00111001, %00111001, %00111001, %11111001, %11110001
+h2_over_g2
+ .byte 0, %00110000, %01111000, %11111100, %11111100, %11001110, %11001110, %11001110, %11001110, %11001110, %11001110, %11001110
+h2_over_g3
+ .byte 0, %01111111, %01111111, %01110000, %01110000, %01110000, %01111110, %01111110, %01110000, %01110000, %01111111, %01111111
+h2_over_g4
+ .byte 0, %10011100, %10011100, %00011100, %00011101, %00011111, %00011111, %00011111, %00011100, %00011100, %10011111, %10011111
+h2_over_g5
+ .byte 0, %11100000, %11100000, %11000000, %10000000, %00000000, %11000000, %11100000, %11100000, %11100000, %11100000, %11000000
+h2_over_c
+ .byte $00, $40, $42, $42, $44, $44, $46, $46, $48, $48, $4A, $4C
+h2_cookie_frame4
+ .byte 18, 18, 18, 37, 37, 37, 56, 56, 56, 75, 75, 75
+h2_napo_g2
+ .byte 0, %00000100, %00000100, %00000100, %00000100, %00010101, %00010110, %00010100
+h2_napo_g3
+ .byte 0, %01000000, %01000000, %01000000, %11000000, %01010000, %01010000, %01010000
+h2_napo_g4
+ .byte 0, %00000000, %00000000, %00000000, %00000000, %00000000, %00000000, %00000000
+h2_napo_g5
+ .byte 0, %00000000, %00000000, %00000000, %00000000, %00000000, %00000000, %00000000
+h2_napo_c
+ .byte $00, $0E, $0E, $0E, $0E, $0E, $0E, $0E
+h2_level_choice
  .byte 7, 15, 23, 31, 39, 47, 55
-hr_done
+h2_roll_frame8
+ .byte 11, 23, 35, 23, 11, 47
 end
-   return otherbank
    ; <<< fine
 
 
    bank 3
-   ; (libero)
+   ;*************************************************************************************************************************
+   ; CARTELLO DI INIZIO LIVELLO (sprite a 48 pixel)
+   ;*************************************************************************************************************************
+   ; >>> generato da tools/gen_hires.py 3
+   ; --- cartello di inizio livello: LIVELLO, numero grande, nome dello
+   ; schema, con la sua musichetta ---
+__level_card
+   asm
+ jsr h3_show_card
+end
+   return otherbank
+   ; Bocca Gigante sconfitta
+__victory_card
+   asm
+ jsr h3_show_win
+end
+   return otherbank
+   asm
+h3_begin
+h3_ovs
+ lda INTIM
+ bmi h3_ovs
+ lda #2
+ sta WSYNC
+ sta VSYNC
+ sta WSYNC
+ sta WSYNC
+ sta WSYNC
+ lda #0
+ sta VSYNC
+ lda #2
+ sta VBLANK
+ lda #HR_VBLANK
+ sta TIM64T
+ lda #0
+ sta PF0
+ sta PF1
+ sta PF2
+ sta ENAM0
+ sta ENAM1
+ sta ENABL
+ sta GRP0
+ sta GRP1
+ sta GRP0
+ sta REFP0
+ sta REFP1
+ lda #$90
+ sta COLUBK
+ lda #3
+ sta NUSIZ0
+ sta NUSIZ1
+ lda #1
+ sta VDELP0
+ sta VDELP1
+ lda #HR_X
+ ldx #0
+ jsr h3_pos
+ lda #HR_X+8
+ ldx #1
+ jsr h3_pos
+ sta WSYNC
+ sta HMOVE
+ rts
+h3_vbwait
+ lda INTIM
+ bne h3_vbwait
+ sta WSYNC
+ lda #0
+ sta VBLANK
+ rts
+; X = righe vuote prima del pavimento
+h3_floor
+ sta WSYNC
+ dex
+ bne h3_floor
+ lda #1
+ sta CTRLPF
+ lda #$64
+ sta COLUPF
+ sta WSYNC
+ lda #$0C
+ sta COLUBK
+ lda #$C0
+ sta PF0
+ lda #$33
+ sta PF1
+ lda #$CC
+ sta PF2
+ ldx #1
+h3_floor0
+ sta WSYNC
+ dex
+ bne h3_floor0
+ sta WSYNC
+ lda #$30
+ sta PF0
+ lda #$CC
+ sta PF1
+ lda #$33
+ sta PF2
+ ldx #2
+h3_floor1
+ sta WSYNC
+ dex
+ bne h3_floor1
+ sta WSYNC
+ lda #$C0
+ sta PF0
+ lda #$33
+ sta PF1
+ lda #$CC
+ sta PF2
+ ldx #2
+h3_floor2
+ sta WSYNC
+ dex
+ bne h3_floor2
+ sta WSYNC
+ lda #$30
+ sta PF0
+ lda #$CC
+ sta PF1
+ lda #$33
+ sta PF2
+ ldx #3
+h3_floor3
+ sta WSYNC
+ dex
+ bne h3_floor3
+ sta WSYNC
+ lda #$C0
+ sta PF0
+ lda #$33
+ sta PF1
+ lda #$CC
+ sta PF2
+ ldx #4
+h3_floor4
+ sta WSYNC
+ dex
+ bne h3_floor4
+ sta WSYNC
+ lda #$30
+ sta PF0
+ lda #$CC
+ sta PF1
+ lda #$33
+ sta PF2
+ ldx #5
+h3_floor5
+ sta WSYNC
+ dex
+ bne h3_floor5
+ sta WSYNC
+ lda #$C0
+ sta PF0
+ lda #$33
+ sta PF1
+ lda #$CC
+ sta PF2
+ ldx #6
+h3_floor6
+ sta WSYNC
+ dex
+ bne h3_floor6
+ sta WSYNC
+ lda #$30
+ sta PF0
+ lda #$CC
+ sta PF1
+ lda #$33
+ sta PF2
+ ldx #7
+h3_floor7
+ sta WSYNC
+ dex
+ bne h3_floor7
+ sta WSYNC
+ lda #$C0
+ sta PF0
+ lda #$33
+ sta PF1
+ lda #$CC
+ sta PF2
+ ldx #9
+h3_floor8
+ sta WSYNC
+ dex
+ bne h3_floor8
+ sta WSYNC
+ lda #$30
+ sta PF0
+ lda #$CC
+ sta PF1
+ lda #$33
+ sta PF2
+ ldx #15
+h3_floor9
+ sta WSYNC
+ dex
+ bne h3_floor9
+ sta WSYNC
+ lda #0
+ sta PF0
+ sta PF1
+ sta PF2
+ sta COLUBK
+ lda #2
+ sta VBLANK
+ lda #128+HR_OVERSCAN
+ sta TIM64T
+ rts
+; A = x, X = oggetto (0 = player0, 1 = player1)
+h3_pos
+ sta WSYNC
+ sec
+h3_div
+ sbc #15
+ bcs h3_div
+ eor #7
+ asl
+ asl
+ asl
+ asl
+ sta HMP0,x
+ sta RESP0,x
+ rts
+; ===== schermata card =====
+h3_card
+ jsr h3_begin
+ ldx _level
+ lda h3_number_curlevel,x
+ sta temp3
+ ldx _level
+ lda h3_lname_curlevel,x
+ sta temp4
+ lda temp6
+ and #15
+ tax
+ lda h3_cookie_count16,x
+ sta temp5
+ jsr h3_vbwait
+; --- livello: 18 righe vuote, poi 7 righe di disegno ---
+ ldx #18
+h3_card0_gap
+ sta WSYNC
+ dex
+ bne h3_card0_gap
+ if (<*) > $94
+  jmp h3_card0_al
+  align 256
+ endif
+h3_card0_al
+ lda #7
+ sta temp1
+ tay
+ lda h3_livello_c,y
+ sta COLUP0
+ sta COLUP1
+ sta WSYNC
+h3_card0_loop
+ ldy temp1
+ lda h3_livello_g0,y
+ sta GRP0
+ lda h3_livello_g1,y
+ sta GRP1
+ lda h3_livello_g2,y
+ sta GRP0
+ lda h3_livello_g5,y
+ sta temp2
+ ldx h3_livello_g4,y
+ lda h3_livello_g3,y
+ ldy temp2
+ sta GRP1
+ stx GRP0
+ sty GRP1
+ sta GRP0
+ sta WSYNC
+ ldy temp1
+ lda h3_livello_g0,y
+ sta GRP0
+ lda h3_livello_g1,y
+ sta GRP1
+ lda h3_livello_g2,y
+ sta GRP0
+ lda h3_livello_g5,y
+ sta temp2
+ ldx h3_livello_g4,y
+ lda h3_livello_g3,y
+ ldy temp2
+ sta GRP1
+ stx GRP0
+ sty GRP1
+ sta GRP0
+ dec temp1
+ ldy temp1
+ lda h3_livello_c,y
+ sta COLUP0
+ sta.w COLUP1
+ bne h3_card0_loop
+h3_card0_end
+ if >h3_card0_loop != >h3_card0_end
+  echo "ERRORE: il ciclo h3_card0 attraversa una pagina"
+  err
+ endif
+ lda #0
+ sta GRP0
+ sta GRP1
+ sta GRP0
+ sta WSYNC
+; --- number: 6 righe vuote, poi 11 righe di disegno ---
+ ldx #6
+h3_card1_gap
+ sta WSYNC
+ dex
+ bne h3_card1_gap
+ if (<*) > $94
+  jmp h3_card1_al
+  align 256
+ endif
+h3_card1_al
+ lda temp3
+ sta temp1
+ tay
+ lda h3_number_c,y
+ sta COLUP0
+ sta COLUP1
+ sta WSYNC
+h3_card1_loop
+ ldy temp1
+ lda h3_number_g0,y
+ sta GRP0
+ lda h3_number_g1,y
+ sta GRP1
+ lda h3_number_g2,y
+ sta GRP0
+ lda h3_number_g5,y
+ sta temp2
+ ldx h3_number_g4,y
+ lda h3_number_g3,y
+ ldy temp2
+ sta GRP1
+ stx GRP0
+ sty GRP1
+ sta GRP0
+ sta WSYNC
+ ldy temp1
+ lda h3_number_g0,y
+ sta GRP0
+ lda h3_number_g1,y
+ sta GRP1
+ lda h3_number_g2,y
+ sta GRP0
+ lda h3_number_g5,y
+ sta temp2
+ ldx h3_number_g4,y
+ lda h3_number_g3,y
+ ldy temp2
+ sta GRP1
+ stx GRP0
+ sty GRP1
+ sta GRP0
+ dec temp1
+ ldy temp1
+ lda h3_number_c,y
+ sta COLUP0
+ sta.w COLUP1
+ bne h3_card1_loop
+h3_card1_end
+ if >h3_card1_loop != >h3_card1_end
+  echo "ERRORE: il ciclo h3_card1 attraversa una pagina"
+  err
+ endif
+ lda #0
+ sta GRP0
+ sta GRP1
+ sta GRP0
+ sta WSYNC
+; --- lname: 8 righe vuote, poi 7 righe di disegno ---
+ ldx #8
+h3_card2_gap
+ sta WSYNC
+ dex
+ bne h3_card2_gap
+ if (<*) > $94
+  jmp h3_card2_al
+  align 256
+ endif
+h3_card2_al
+ lda temp4
+ sta temp1
+ tay
+ lda h3_lname_c,y
+ sta COLUP0
+ sta COLUP1
+ sta WSYNC
+h3_card2_loop
+ ldy temp1
+ lda h3_lname_g0,y
+ sta GRP0
+ lda h3_lname_g1,y
+ sta GRP1
+ lda h3_lname_g2,y
+ sta GRP0
+ lda h3_lname_g5,y
+ sta temp2
+ ldx h3_lname_g4,y
+ lda h3_lname_g3,y
+ ldy temp2
+ sta GRP1
+ stx GRP0
+ sty GRP1
+ sta GRP0
+ sta WSYNC
+ ldy temp1
+ lda h3_lname_g0,y
+ sta GRP0
+ lda h3_lname_g1,y
+ sta GRP1
+ lda h3_lname_g2,y
+ sta GRP0
+ lda h3_lname_g5,y
+ sta temp2
+ ldx h3_lname_g4,y
+ lda h3_lname_g3,y
+ ldy temp2
+ sta GRP1
+ stx GRP0
+ sty GRP1
+ sta GRP0
+ dec temp1
+ ldy temp1
+ lda h3_lname_c,y
+ sta COLUP0
+ sta.w COLUP1
+ bne h3_card2_loop
+h3_card2_end
+ if >h3_card2_loop != >h3_card2_end
+  echo "ERRORE: il ciclo h3_card2 attraversa una pagina"
+  err
+ endif
+ lda #0
+ sta GRP0
+ sta GRP1
+ sta GRP0
+ sta WSYNC
+; --- cookie: 16 righe vuote, poi 18 righe di disegno ---
+ ldx #16
+h3_card3_gap
+ sta WSYNC
+ dex
+ bne h3_card3_gap
+ if (<*) > $94
+  jmp h3_card3_al
+  align 256
+ endif
+h3_card3_al
+ lda temp5
+ sta temp1
+ tay
+ lda h3_cookie_c,y
+ sta COLUP0
+ sta COLUP1
+ sta WSYNC
+h3_card3_loop
+ ldy temp1
+ lda h3_cookie_g0,y
+ sta GRP0
+ lda h3_cookie_g1,y
+ sta GRP1
+ lda h3_cookie_g2,y
+ sta GRP0
+ lda h3_cookie_g5,y
+ sta temp2
+ ldx h3_cookie_g4,y
+ lda h3_cookie_g3,y
+ ldy temp2
+ sta GRP1
+ stx GRP0
+ sty GRP1
+ sta GRP0
+ sta WSYNC
+ ldy temp1
+ lda h3_cookie_g0,y
+ sta GRP0
+ lda h3_cookie_g1,y
+ sta GRP1
+ lda h3_cookie_g2,y
+ sta GRP0
+ lda h3_cookie_g5,y
+ sta temp2
+ ldx h3_cookie_g4,y
+ lda h3_cookie_g3,y
+ ldy temp2
+ sta GRP1
+ stx GRP0
+ sty GRP1
+ sta GRP0
+ dec temp1
+ ldy temp1
+ lda h3_cookie_c,y
+ sta COLUP0
+ sta.w COLUP1
+ bne h3_card3_loop
+h3_card3_end
+ if >h3_card3_loop != >h3_card3_end
+  echo "ERRORE: il ciclo h3_card3 attraversa una pagina"
+  err
+ endif
+ lda #0
+ sta GRP0
+ sta GRP1
+ sta GRP0
+ sta WSYNC
+ ldx #21
+ jmp h3_floor
+; --- cartello card: 110 fotogrammi ---
+h3_show_card
+ lda #110
+ sta temp6
+ lda #0
+ sta AUDV0
+h3_show_card_loop
+ lda #110
+ sec
+ sbc temp6
+ lsr
+ lsr
+ lsr
+ tay
+ ldx #0
+ lda h3_jingle_card,y
+ beq h3_show_card_q
+ ldx #6
+h3_show_card_q
+ sta AUDF1
+ stx AUDV1
+ lda #4
+ sta AUDC1
+ jsr h3_card
+ dec temp6
+ bne h3_show_card_loop
+ lda #0
+ sta AUDV1
+ sta NUSIZ0
+ sta VDELP1
+ rts
+; ===== schermata win =====
+h3_win
+ jsr h3_begin
+ lda temp6
+ and #15
+ tax
+ lda h3_cookie_count16,x
+ sta temp3
+ jsr h3_vbwait
+; --- vinto: 20 righe vuote, poi 7 righe di disegno ---
+ ldx #20
+h3_win0_gap
+ sta WSYNC
+ dex
+ bne h3_win0_gap
+ if (<*) > $94
+  jmp h3_win0_al
+  align 256
+ endif
+h3_win0_al
+ lda #7
+ sta temp1
+ tay
+ lda h3_vinto_c,y
+ sta COLUP0
+ sta COLUP1
+ sta WSYNC
+h3_win0_loop
+ ldy temp1
+ lda h3_vinto_g0,y
+ sta GRP0
+ lda h3_vinto_g1,y
+ sta GRP1
+ lda h3_vinto_g2,y
+ sta GRP0
+ lda h3_vinto_g5,y
+ sta temp2
+ ldx h3_vinto_g4,y
+ lda h3_vinto_g3,y
+ ldy temp2
+ sta GRP1
+ stx GRP0
+ sty GRP1
+ sta GRP0
+ sta WSYNC
+ ldy temp1
+ lda h3_vinto_g0,y
+ sta GRP0
+ lda h3_vinto_g1,y
+ sta GRP1
+ lda h3_vinto_g2,y
+ sta GRP0
+ lda h3_vinto_g5,y
+ sta temp2
+ ldx h3_vinto_g4,y
+ lda h3_vinto_g3,y
+ ldy temp2
+ sta GRP1
+ stx GRP0
+ sty GRP1
+ sta GRP0
+ dec temp1
+ ldy temp1
+ lda h3_vinto_c,y
+ sta COLUP0
+ sta.w COLUP1
+ bne h3_win0_loop
+h3_win0_end
+ if >h3_win0_loop != >h3_win0_end
+  echo "ERRORE: il ciclo h3_win0 attraversa una pagina"
+  err
+ endif
+ lda #0
+ sta GRP0
+ sta GRP1
+ sta GRP0
+ sta WSYNC
+; --- bravo: 8 righe vuote, poi 11 righe di disegno ---
+ ldx #8
+h3_win1_gap
+ sta WSYNC
+ dex
+ bne h3_win1_gap
+ if (<*) > $94
+  jmp h3_win1_al
+  align 256
+ endif
+h3_win1_al
+ lda #11
+ sta temp1
+ tay
+ lda h3_bravo_c,y
+ sta COLUP0
+ sta COLUP1
+ sta WSYNC
+h3_win1_loop
+ ldy temp1
+ lda h3_bravo_g0,y
+ sta GRP0
+ lda h3_bravo_g1,y
+ sta GRP1
+ lda h3_bravo_g2,y
+ sta GRP0
+ lda h3_bravo_g5,y
+ sta temp2
+ ldx h3_bravo_g4,y
+ lda h3_bravo_g3,y
+ ldy temp2
+ sta GRP1
+ stx GRP0
+ sty GRP1
+ sta GRP0
+ sta WSYNC
+ ldy temp1
+ lda h3_bravo_g0,y
+ sta GRP0
+ lda h3_bravo_g1,y
+ sta GRP1
+ lda h3_bravo_g2,y
+ sta GRP0
+ lda h3_bravo_g5,y
+ sta temp2
+ ldx h3_bravo_g4,y
+ lda h3_bravo_g3,y
+ ldy temp2
+ sta GRP1
+ stx GRP0
+ sty GRP1
+ sta GRP0
+ dec temp1
+ ldy temp1
+ lda h3_bravo_c,y
+ sta COLUP0
+ sta.w COLUP1
+ bne h3_win1_loop
+h3_win1_end
+ if >h3_win1_loop != >h3_win1_end
+  echo "ERRORE: il ciclo h3_win1 attraversa una pagina"
+  err
+ endif
+ lda #0
+ sta GRP0
+ sta GRP1
+ sta GRP0
+ sta WSYNC
+; --- cookie: 26 righe vuote, poi 18 righe di disegno ---
+ ldx #26
+h3_win2_gap
+ sta WSYNC
+ dex
+ bne h3_win2_gap
+ if (<*) > $94
+  jmp h3_win2_al
+  align 256
+ endif
+h3_win2_al
+ lda temp3
+ sta temp1
+ tay
+ lda h3_cookie_c,y
+ sta COLUP0
+ sta COLUP1
+ sta WSYNC
+h3_win2_loop
+ ldy temp1
+ lda h3_cookie_g0,y
+ sta GRP0
+ lda h3_cookie_g1,y
+ sta GRP1
+ lda h3_cookie_g2,y
+ sta GRP0
+ lda h3_cookie_g5,y
+ sta temp2
+ ldx h3_cookie_g4,y
+ lda h3_cookie_g3,y
+ ldy temp2
+ sta GRP1
+ stx GRP0
+ sty GRP1
+ sta GRP0
+ sta WSYNC
+ ldy temp1
+ lda h3_cookie_g0,y
+ sta GRP0
+ lda h3_cookie_g1,y
+ sta GRP1
+ lda h3_cookie_g2,y
+ sta GRP0
+ lda h3_cookie_g5,y
+ sta temp2
+ ldx h3_cookie_g4,y
+ lda h3_cookie_g3,y
+ ldy temp2
+ sta GRP1
+ stx GRP0
+ sty GRP1
+ sta GRP0
+ dec temp1
+ ldy temp1
+ lda h3_cookie_c,y
+ sta COLUP0
+ sta.w COLUP1
+ bne h3_win2_loop
+h3_win2_end
+ if >h3_win2_loop != >h3_win2_end
+  echo "ERRORE: il ciclo h3_win2 attraversa una pagina"
+  err
+ endif
+ lda #0
+ sta GRP0
+ sta GRP1
+ sta GRP0
+ sta WSYNC
+ ldx #31
+ jmp h3_floor
+; --- cartello win: 160 fotogrammi ---
+h3_show_win
+ lda #160
+ sta temp6
+ lda #0
+ sta AUDV0
+h3_show_win_loop
+ lda #160
+ sec
+ sbc temp6
+ lsr
+ lsr
+ lsr
+ tay
+ ldx #0
+ lda h3_jingle_win,y
+ beq h3_show_win_q
+ ldx #6
+h3_show_win_q
+ sta AUDF1
+ stx AUDV1
+ lda #4
+ sta AUDC1
+ jsr h3_win
+ dec temp6
+ bne h3_show_win_loop
+ lda #0
+ sta AUDV1
+ sta NUSIZ0
+ sta VDELP1
+ rts
+; --- tabelle (nessuna attraversa un confine di pagina) ---
+ align 256
+h3_number_g0
+ .byte 0, %00000000, %00000000, %00000000, %00000000, %00000000, %00000000, %00000000, %00000000, %00000000, %00000000, %00000000, 0, %00000000, %00000000, %00000000
+ .byte %00000000, %00000000, %00000000, %00000000, %00000000, %00000000, %00000000, %00000000, 0, %00000000, %00000000, %00000000, %00000000, %00000000, %00000000, %00000000
+ .byte %00000000, %00000000, %00000000, %00000000, 0, %00000000, %00000000, %00000000, %00000000, %00000000, %00000000, %00000000, %00000000, %00000000, %00000000, %00000000
+ .byte 0, %00000000, %00000000, %00000000, %00000000, %00000000, %00000000, %00000000, %00000000, %00000000, %00000000, %00000000, 0, %00000000, %00000000, %00000000
+ .byte %00000000, %00000000, %00000000, %00000000, %00000000, %00000000, %00000000, %00000000, 0, %00000111, %00000111, %00000111, %00000111, %00000111, %00000111, %00000111
+ .byte %00000111, %00000111, %00000111, %00000111
+h3_number_g1
+ .byte 0, %00000000, %00000000, %00000000, %00000000, %00000000, %00000000, %00000000, %00000000, %00000000, %00000000, %00000000, 0, %00000000, %00000000, %00000000
+ .byte %00000000, %00000000, %00000000, %00000000, %00000000, %00000000, %00000000, %00000000, 0, %00000000, %00000000, %00000000, %00000000, %00000000, %00000000, %00000000
+ .byte %00000000, %00000000, %00000000, %00000000, 0, %00000000, %00000000, %00000000, %00000000, %00000000, %00000000, %00000000, %00000000, %00000000, %00000000, %00000000
+ .byte 0, %00000000, %00000000, %00000000, %00000000, %00000000, %00000000, %00000000, %00000000, %00000000, %00000000, %00000000, 0, %00000000, %00000000, %00000000
+ .byte %00000000, %00000000, %00000000, %00000000, %00000000, %00000000, %00000000, %00000000, 0, %11110000, %11111001, %00111001, %00111001, %00111001, %11110001, %11110001
+ .byte %00111001, %00111001, %11111001, %11110000
+h3_number_g2
+ .byte 0, %00000111, %00000111, %00000001, %00000001, %00000001, %00000001, %00000001, %00000001, %00000111, %00000011, %00000001, 0, %00001111, %00001111, %00001111
+ .byte %00000111, %00000011, %00000001, %00000000, %00000000, %00001110, %00001111, %00000111, 0, %00000111, %00001111, %00001110, %00000000, %00000000, %00000001, %00000001
+ .byte %00000000, %00001110, %00001111, %00000111, 0, %00000000, %00000000, %00000000, %00000000, %00001111, %00001111, %00001100, %00000110, %00000011, %00000001, %00000000
+ .byte 0, %00000111, %00001111, %00001110, %00000000, %00000000, %00001111, %00001111, %00001110, %00001110, %00001111, %00001111, 0, %00000111, %00001111, %00001110
+ .byte %00001110, %00001110, %00001111, %00001111, %00001110, %00001110, %00001111, %00000111, 0, %11111100, %11111110, %11001110, %11001110, %11001110, %11001110, %11001110
+ .byte %11001110, %11001110, %11111110, %11111100
+ align 256
+h3_number_g3
+ .byte 0, %11110000, %11110000, %11000000, %11000000, %11000000, %11000000, %11000000, %11000000, %11000000, %11000000, %11000000, 0, %11110000, %11110000, %00000000
+ .byte %10000000, %11000000, %11100000, %11110000, %01110000, %01110000, %11110000, %11100000, 0, %11100000, %11110000, %01110000, %01110000, %01110000, %11100000, %11100000
+ .byte %01110000, %01110000, %11110000, %11100000, 0, %11100000, %11100000, %11100000, %11100000, %11110000, %11110000, %11100000, %11100000, %11100000, %11100000, %11100000
+ .byte 0, %11100000, %11110000, %01110000, %01110000, %01110000, %11110000, %11100000, %00000000, %00000000, %11110000, %11110000, 0, %11100000, %11110000, %01110000
+ .byte %01110000, %01110000, %11110000, %11100000, %00000000, %01110000, %11110000, %11100000, 0, %00111111, %01111111, %01110011, %00000011, %00001111, %00111111, %01111100
+ .byte %01110000, %01110011, %01111111, %00111111
+h3_number_g4
+ .byte 0, %00000000, %00000000, %00000000, %00000000, %00000000, %00000000, %00000000, %00000000, %00000000, %00000000, %00000000, 0, %00000000, %00000000, %00000000
+ .byte %00000000, %00000000, %00000000, %00000000, %00000000, %00000000, %00000000, %00000000, 0, %00000000, %00000000, %00000000, %00000000, %00000000, %00000000, %00000000
+ .byte %00000000, %00000000, %00000000, %00000000, 0, %00000000, %00000000, %00000000, %00000000, %00000000, %00000000, %00000000, %00000000, %00000000, %00000000, %00000000
+ .byte 0, %00000000, %00000000, %00000000, %00000000, %00000000, %00000000, %00000000, %00000000, %00000000, %00000000, %00000000, 0, %00000000, %00000000, %00000000
+ .byte %00000000, %00000000, %00000000, %00000000, %00000000, %00000000, %00000000, %00000000, 0, %00001111, %10011111, %10011100, %10000000, %10000011, %00001111, %00011111
+ .byte %00011100, %10011100, %10011111, %00001111
+h3_number_g5
+ .byte 0, %00000000, %00000000, %00000000, %00000000, %00000000, %00000000, %00000000, %00000000, %00000000, %00000000, %00000000, 0, %00000000, %00000000, %00000000
+ .byte %00000000, %00000000, %00000000, %00000000, %00000000, %00000000, %00000000, %00000000, 0, %00000000, %00000000, %00000000, %00000000, %00000000, %00000000, %00000000
+ .byte %00000000, %00000000, %00000000, %00000000, 0, %00000000, %00000000, %00000000, %00000000, %00000000, %00000000, %00000000, %00000000, %00000000, %00000000, %00000000
+ .byte 0, %00000000, %00000000, %00000000, %00000000, %00000000, %00000000, %00000000, %00000000, %00000000, %00000000, %00000000, 0, %00000000, %00000000, %00000000
+ .byte %00000000, %00000000, %00000000, %00000000, %00000000, %00000000, %00000000, %00000000, 0, %11000000, %11100000, %11100000, %11100000, %11100000, %11000000, %00000000
+ .byte %00000000, %11100000, %11100000, %11000000
+ align 256
+h3_number_c
+ .byte $00, $44, $46, $46, $26, $28, $28, $2A, $2C, $2C, $2E, $2E, $00, $44, $46, $46
+ .byte $26, $28, $28, $2A, $2C, $2C, $2E, $2E, $00, $44, $46, $46, $26, $28, $28, $2A
+ .byte $2C, $2C, $2E, $2E, $00, $44, $46, $46, $26, $28, $28, $2A, $2C, $2C, $2E, $2E
+ .byte $00, $44, $46, $46, $26, $28, $28, $2A, $2C, $2C, $2E, $2E, $00, $44, $46, $46
+ .byte $26, $28, $28, $2A, $2C, $2C, $2E, $2E, $00, $44, $46, $46, $26, $28, $28, $2A
+ .byte $2C, $2C, $2E, $2E
+h3_cookie_g0
+ .byte 0, %00000000, %00000000, %00000000, %00000001, %00000011, %00001111, %00011111, %00011111, %00011111, %00011111, %00011111, %00011111, %00001111, %00000011, %00000001
+ .byte %00000000, %00000000, %00000000, 0, %00000000, %00000000, %00000000, %00000001, %00000011, %00001111, %00011111, %00011111, %00011111, %00011111, %00011111, %00011111
+ .byte %00001111, %00000011, %00000001, %00000000, %00000000, %00000000, 0, %00000000, %00000000, %00000000, %00000001, %00000011, %00001111, %00011111, %00011111, %00011111
+ .byte %00011111, %00011111, %00011111, %00001111, %00000011, %00000001, %00000000, %00000000, %00000000, 0, %00000000, %00000000, %00000000, %00000001, %00000011, %00001111
+ .byte %00011111, %00011111, %00011111, %00011111, %00011111, %00011111, %00001111, %00000011, %00000001, %00000000, %00000000, %00000000
+h3_cookie_g1
+ .byte 0, %00000000, %00000111, %00111111, %11111111, %11111111, %11111111, %11111111, %11111111, %11111111, %11111111, %00011111, %11111111, %11111111, %11111111, %11111111
+ .byte %00111111, %00000111, %00000000, 0, %00000000, %00000111, %00111111, %11111111, %11111111, %11111111, %11111111, %11111111, %11111100, %11111111, %11111111, %11111111
+ .byte %11110001, %11111111, %11111111, %00111111, %00000111, %00000000, 0, %00000000, %00000111, %00111111, %11111111, %11111111, %11111000, %11111111, %11111111, %11111111
+ .byte %11111110, %11111111, %11111111, %11111111, %11111111, %11111111, %00111111, %00000111, %00000000, 0, %00000000, %00000111, %00111111, %11111111, %11111111, %11111111
+ .byte %11111111, %10001111, %11111111, %11111111, %11111111, %11111111, %11111111, %11111111, %11111111, %00111111, %00000111, %00000000
+h3_cookie_count16
+ .byte 18, 18, 18, 18, 37, 37, 37, 37, 56, 56, 56, 56, 75, 75, 75, 75
+ align 256
+h3_cookie_g2
+ .byte 0, %00000111, %11111111, %11111111, %11111111, %11111111, %11111111, %00011111, %11111111, %11111111, %11111000, %11111111, %11111111, %11000111, %11111111, %11111111
+ .byte %11111111, %11111111, %00000111, 0, %00000111, %11111111, %11111111, %11111111, %11100011, %11111111, %11111111, %11111111, %01111111, %11111100, %11111111, %11111111
+ .byte %11111111, %11111111, %11111111, %11111111, %11111111, %00000111, 0, %00000111, %11111111, %11111111, %11111111, %11111111, %11111111, %11111111, %11111100, %11111111
+ .byte %00111111, %11111110, %11111111, %11111111, %11111111, %11100011, %11111111, %11111111, %00000111, 0, %00000111, %11111111, %11111111, %11111111, %11111111, %11111110
+ .byte %11111111, %11110001, %11111111, %11111111, %11111111, %10001111, %11111111, %11111111, %11111111, %11111111, %11111111, %00000111
+h3_cookie_g3
+ .byte 0, %11100000, %11111111, %11111111, %11111111, %11000111, %11111111, %11111111, %11111111, %10001111, %11111111, %11111111, %11000111, %11111111, %11111111, %11111111
+ .byte %11111111, %11111111, %11100000, 0, %11100000, %11111111, %11111111, %11111111, %11111111, %11111111, %11111111, %00011110, %11111111, %01111111, %11110001, %11111111
+ .byte %11111111, %00011111, %11111111, %11111111, %11111111, %11100000, 0, %11100000, %11111111, %11111111, %11111111, %11111111, %11110001, %11111111, %01111111, %11111000
+ .byte %11111111, %00111111, %11111111, %11111000, %11111111, %11111111, %11111111, %11111111, %11100000, 0, %11100000, %11111111, %11111111, %11111111, %11111111, %00111111
+ .byte %11111111, %11110001, %11111111, %00011111, %11111111, %11111111, %11111111, %11111111, %11000111, %11111111, %11111111, %11100000
+h3_cookie_g4
+ .byte 0, %00000000, %11100000, %11111100, %11111111, %11111111, %11111111, %11111111, %11111111, %11111111, %10001111, %11111111, %11111111, %11111111, %11111111, %11111111
+ .byte %11111100, %11100000, %00000000, 0, %00000000, %11100000, %11111100, %11111111, %11111111, %11111111, %11111111, %00111111, %11111111, %11111111, %11111111, %11111111
+ .byte %11111111, %11111111, %11111111, %11111100, %11100000, %00000000, 0, %00000000, %11100000, %11111100, %11111111, %11111111, %11111111, %11111111, %11111111, %11111111
+ .byte %11111111, %11111111, %11111111, %11111111, %11111111, %11111111, %11111100, %11100000, %00000000, 0, %00000000, %11100000, %11111100, %11111111, %11111111, %11111111
+ .byte %11111111, %11111111, %11111111, %11111111, %10001111, %11111111, %11111111, %11111111, %11111111, %11111100, %11100000, %00000000
+h3_jingle_win
+ .byte 19, 19, 14, 14, 19, 14, 12, 12, 12, 0, 14, 12, 11, 11, 11, 11
+ .byte 0, 0, 0, 0, 0
+ align 256
+h3_cookie_g5
+ .byte 0, %00000000, %00000000, %00000000, %10000000, %11000000, %11110000, %11111000, %11111000, %11111000, %11111000, %11111000, %11111000, %11110000, %11000000, %10000000
+ .byte %00000000, %00000000, %00000000, 0, %00000000, %00000000, %00000000, %10000000, %11000000, %11110000, %11111000, %11111000, %11111000, %11111000, %11111000, %11111000
+ .byte %11110000, %11000000, %10000000, %00000000, %00000000, %00000000, 0, %00000000, %00000000, %00000000, %10000000, %11000000, %11110000, %11111000, %11111000, %11111000
+ .byte %11111000, %11111000, %11111000, %11110000, %11000000, %10000000, %00000000, %00000000, %00000000, 0, %00000000, %00000000, %00000000, %10000000, %11000000, %11110000
+ .byte %11111000, %11111000, %11111000, %11111000, %11111000, %11111000, %11110000, %11000000, %10000000, %00000000, %00000000, %00000000
+h3_cookie_c
+ .byte $00, $22, $22, $24, $24, $26, $26, $28, $28, $28, $28, $2A, $2A, $2A, $2A, $2C
+ .byte $2C, $2C, $2C, $00, $22, $22, $24, $24, $26, $26, $28, $28, $28, $28, $2A, $2A
+ .byte $2A, $2A, $2C, $2C, $2C, $2C, $00, $22, $22, $24, $24, $26, $26, $28, $28, $28
+ .byte $28, $2A, $2A, $2A, $2A, $2C, $2C, $2C, $2C, $00, $22, $22, $24, $24, $26, $26
+ .byte $28, $28, $28, $28, $2A, $2A, $2A, $2A, $2C, $2C, $2C, $2C
+h3_lname_g0
+ .byte 0, %00000000, %00000000, %00000000, %00000000, %00000000, %00000000, %00000001, 0, %00000000, %00000000, %00000000, %00000000, %00000000, %00000000, %00000000
+ .byte 0, %00001000, %00001000, %00001000, %00001010, %00001010, %00001101, %00001000, 0, %00000000, %00000000, %00000000, %00000000, %00000000, %00000000, %00000000
+ .byte 0, %00000001, %00000000, %00000000, %00000000, %00000001, %00000001, %00000000, 0, %00000010, %00000010, %00000010, %00000011, %00000010, %00000010, %00000011
+ .byte 0, %00000111, %00001000, %00001000, %00001001, %00001000, %00001000, %00000111
+h3_jingle_card
+ .byte 29, 23, 19, 14, 0, 19, 14, 14, 14, 0, 0, 0, 0, 0
+h3_bravo_g0
+ .byte 0, %11111110, %11111111, %11100111, %11100111, %11100111, %11111110, %11111110, %11100111, %11100111, %11111111, %11111110
+h3_bravo_g1
+ .byte 0, %00111001, %00111001, %00111001, %00111011, %00111110, %00111111, %00111111, %00111001, %00111001, %00111111, %00111111
+h3_livello_g0
+ .byte 0, %00001111, %00001000, %00001000, %00001000, %00001000, %00001000, %00001000
+ align 256
+h3_lname_g1
+ .byte 0, %01000100, %01000100, %01000100, %01000111, %01000100, %01000100, %11110011, 0, %00010001, %00010001, %00010001, %00010001, %00010001, %00010001, %01111100
+ .byte 0, %10011100, %10100010, %10100010, %10100010, %10100010, %10100010, %10100010, 0, %00111100, %01000101, %01000101, %01001101, %01000001, %01000001, %00111100
+ .byte 0, %11100100, %00010100, %00010100, %11100111, %00000100, %00000100, %11110111, 0, %00001000, %00001001, %00001010, %11001111, %00101000, %00101000, %11001111
+ .byte 0, %10111001, %10010010, %10010010, %10010010, %00010010, %00010010, %10111001
+h3_lname_g2
+ .byte 0, %01000100, %01001010, %01010001, %11010001, %01010001, %01010001, %10010001, 0, %00010111, %00010100, %00010010, %11110001, %00010000, %00010000, %11100111
+ .byte 0, %10001011, %10010010, %10100010, %11110011, %10001010, %10001010, %11110011, 0, %11100011, %00010100, %00010100, %00010100, %00010100, %00010100, %11100011
+ .byte 0, %00011101, %00001001, %00001001, %10001001, %01001001, %01001001, %10011101, 0, %10111110, %00100000, %00100000, %00111100, %10100000, %10100000, %00111110
+ .byte 0, %11101000, %00101000, %00101000, %01101111, %00001000, %00001000, %11100111
+h3_lname_g3
+ .byte 0, %00111001, %01000101, %01000101, %01000101, %01000101, %01000101, %00111001, 0, %11011111, %00010000, %00001000, %00000100, %10000010, %01000001, %11011111
+ .byte 0, %11100010, %00000010, %00000010, %11000010, %00000010, %00000010, %11101111, 0, %11001111, %00010000, %00010000, %00010000, %00010000, %00010000, %11001111
+ .byte 0, %00010011, %00010100, %00010100, %00110100, %01010100, %10010100, %00010011, 0, %11110011, %00001000, %00001000, %01110001, %10000010, %10000010, %01111001
+ .byte 0, %10100010, %10100010, %10100010, %10100110, %10101010, %10110010, %00100010
+h3_lname_g4
+ .byte 0, %11110111, %00000010, %00000010, %00000010, %00000010, %00000010, %00000111, 0, %01111100, %01000000, %01000000, %01111000, %01000000, %01000000, %01111100
+ .byte 0, %00001000, %00001000, %00001000, %00001000, %00001000, %00001000, %10111110, 0, %01111100, %01000000, %01000000, %01111000, %01000000, %01000000, %01111100
+ .byte 0, %11011101, %01001000, %01001001, %11001001, %00001001, %00001001, %11011101, 0, %11001111, %00101000, %00101000, %11001111, %00001000, %00001000, %11101111
+ .byte 0, %00100011, %00100010, %00100010, %00100011, %00100010, %00100010, %11111011
+h3_bravo_g2
+ .byte 0, %11001110, %11001110, %10001110, %00001110, %00001111, %10001111, %11001110, %11001110, %11001110, %11000111, %10000011
+h3_bravo_g3
+ .byte 0, %01110000, %01110000, %01110001, %01110001, %11110011, %11110011, %01110011, %01110011, %01110011, %11100011, %11000011
+h3_livello_g1
+ .byte 0, %10111000, %00010001, %00010010, %00010010, %00010010, %00010010, %00111010
+ align 256
+h3_lname_g5
+ .byte 0, %00000000, %00000000, %00000000, %00000000, %00000000, %00000000, %00000000, 0, %00000000, %00000000, %00000000, %00000000, %00000000, %00000000, %00000000
+ .byte 0, %11100000, %01000000, %01000000, %01000000, %01000000, %01000000, %11100000, 0, %00000000, %00000000, %00000000, %00000000, %00000000, %00000000, %00000000
+ .byte 0, %00000000, %00000000, %00000000, %00000000, %00000000, %00000000, %00000000, 0, %10000000, %00000000, %00000000, %00000000, %00000000, %00000000, %10000000
+ .byte 0, %11100000, %00000000, %00000000, %11000000, %00000000, %00000000, %11100000
+h3_lname_c
+ .byte $00, $98, $9A, $9A, $9C, $9C, $9E, $9E, $00, $98, $9A, $9A, $9C, $9C, $9E, $9E
+ .byte $00, $98, $9A, $9A, $9C, $9C, $9E, $9E, $00, $98, $9A, $9A, $9C, $9C, $9E, $9E
+ .byte $00, $98, $9A, $9A, $9C, $9C, $9E, $9E, $00, $98, $9A, $9A, $9C, $9C, $9E, $9E
+ .byte $00, $98, $9A, $9A, $9C, $9C, $9E, $9E
+h3_bravo_g4
+ .byte 0, %01100000, %11110000, %11111000, %11111000, %10011100, %10011100, %10011100, %10011100, %10011100, %10011100, %10011100
+h3_bravo_g5
+ .byte 0, %01111110, %11111111, %11100111, %11100111, %11100111, %11100111, %11100111, %11100111, %11100111, %11111111, %01111110
+h3_bravo_c
+ .byte $00, $2C, $4C, $6C, $8C, $DC, $BC, $9C, $7C, $5C, $3C, $2E
+h3_livello_g2
+ .byte 0, %10001111, %01001000, %00101000, %00101111, %00101000, %00101000, %00101111
+h3_livello_g3
+ .byte 0, %10111110, %00100000, %00100000, %00100000, %00100000, %00100000, %10100000
+h3_livello_g4
+ .byte 0, %11111001, %10000010, %10000010, %10000010, %10000010, %10000010, %10000001
+h3_livello_g5
+ .byte 0, %11000000, %00100000, %00100000, %00100000, %00100000, %00100000, %11000000
+h3_livello_c
+ .byte $00, $08, $0A, $0A, $0C, $0C, $0E, $0E
+h3_vinto_g0
+ .byte 0, %10001010, %10001010, %10001010, %11111011, %10001010, %10001010, %10001001
+h3_vinto_g1
+ .byte 0, %00101110, %00100100, %00100100, %11100100, %00100100, %00100100, %11001110
+h3_vinto_g2
+ .byte 0, %00000100, %00001010, %00010001, %00010001, %00010001, %00010001, %00010001
+h3_vinto_g3
+ .byte 0, %01110100, %00100100, %00100100, %00100100, %00100101, %00100110, %01110100
+h3_vinto_g4
+ .byte 0, %01000100, %01000100, %01000100, %11000100, %01000100, %01000100, %01011111
+h3_vinto_g5
+ .byte 0, %00111001, %01000100, %01000101, %01000101, %01000101, %01000101, %00111001
+h3_vinto_c
+ .byte $00, $28, $2A, $2A, $2C, $2C, $2E, $2E
+h3_lname_curlevel
+ .byte 7, 7, 15, 23, 31, 39, 47, 55
+ align 256
+h3_number_curlevel
+ .byte 11, 11, 23, 35, 47, 59, 71, 83
+end
+   ; <<< fine
 
    bank 4
 
