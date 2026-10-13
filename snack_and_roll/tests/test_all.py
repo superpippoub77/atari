@@ -233,7 +233,7 @@ def start_level(s, level):
         s.tap("F1", 0.1)
         s.wait(0.15)
     s.tap("F2", 0.15)
-    s.wait(0.8)
+    s.wait(0.8 + CARD)
     return s.save()
 
 
@@ -701,6 +701,9 @@ def bag_phase(s, level):
           f"level={r.v('level')}")
     heard = sfx_seen(s, 0.2, r)
     check(level, "suono del cambio livello", SFX["livello"] in heard, f"effetti sentiti={sorted(heard)}")
+    if CARD:
+        s.wait(CARD + (OVER if level == BOSS else 0))
+        r = s.save()
     if True:
         check(nxt, "partenza dal punto (10,64) con 4 vite e tempo pieno",
               abs(r[PLAYER0X] - 10) <= 16 and abs(r[PLAYER0Y] - 64) <= 16 and r[PFSCORE2] == 0xAA and r[PFSCORE1] == 0xFF,
@@ -1101,6 +1104,8 @@ def main():
         r = play_level(s, level, extra=True)
         s.wait(0.3)
     boss_phase(s)
+    if CARD:
+        s.wait(OVER + CARD)    # 16K: cartello della vittoria e del livello 1
     r = s.save()
     check(1, f"dopo la Bocca Gigante si riparte dal livello 1 (secondo giro)",
           r.v("level") == 1 and r.v("lap") == 1 and r.flag(0) == 1, f"level={r.v('level')} giro={r.v('lap')}")
@@ -1115,7 +1120,7 @@ def main():
         check(level, f"Select x{level - 1} + Reset parte dal livello {level}", r.v("level") == level)
         s.poke({PFSCORE2: 0x02, V["hitCooldown"]: 0, V["mouth0x"]: r[PLAYER0X], V["mouth0y"]: r[PLAYER0Y],
                 V["mouth1x"]: r[PLAYER0X], V["mouth1y"]: r[PLAYER0Y]})
-        s.wait(0.5)
+        s.wait(0.5 + OVER)
         r = s.save()
         check(level, "ultima vita persa: game over e ritorno al titolo", r.flag(0) == 0)
         s.wait(0.3)
@@ -1124,15 +1129,17 @@ def main():
     # combinazione segreta dal titolo: leva in su + fuoco, poi Reset
     s.poke({PFSCORE2: 0x02, V["hitCooldown"]: 0, V["mouth0x"]: r[PLAYER0X], V["mouth0y"]: r[PLAYER0Y],
             V["mouth1x"]: r[PLAYER0X], V["mouth1y"]: r[PLAYER0Y]})
-    s.wait(0.8)
+    s.wait(0.8 + OVER)
     s.down("Up", "space")
     s.wait(0.4)
     r = s.save()
-    check(BOSS, "su + fuoco nel titolo: si accende il 7o segnalino", r.flag(0) == 0 and r.pf(13, 6),
-          f"titolo={r.flag(0) == 0} riga 6={r.pf_rows()[6][:16]}")
+    # (16K: il titolo scrive BOSS! al posto del 7o segnalino)
+    shown = r.v("choco_count") == LEVELS if SIXTEEN else r.pf(13, 6)
+    check(BOSS, "su + fuoco nel titolo: scelta la Bocca Gigante (7o segnalino / BOSS!)",
+          r.flag(0) == 0 and shown, f"titolo={r.flag(0) == 0} scelta={r.v('choco_count')}")
     s.tap("F2", 0.15)
     s.up("Up", "space")
-    s.wait(0.8)
+    s.wait(0.8 + CARD)
     r = s.save()
     check(BOSS, "su + fuoco + Reset: parte la Bocca Gigante", r.v("level") == BOSS and r.flag(0) == 1,
           f"level={r.v('level')}")

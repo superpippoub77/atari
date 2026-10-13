@@ -20,6 +20,14 @@ xvfb-run -a -s "-screen 0 800x600x24" python3 test_all.py . "../bin/Snack and Ro
 
 Dura circa 25 minuti e salva gli screenshot di ogni livello nella cartella indicata.
 
+Per la versione 16K (cartelli ad alta risoluzione che fermano il gioco per qualche secondo) si indicano i secondi da aspettare:
+
+```bash
+SNR_CARD=2.5 SNR_OVER=3.4 xvfb-run -a -s "-screen 0 800x600x24" python3 test_all.py . "../bin16/Snack and Roll 16K.bas.bin" /tmp/screenshot
+```
+
+`SNR_CARD` è il cartello di inizio livello, `SNR_OVER` il GAME OVER e la vittoria. La stessa variabile vale per `test_features.py`.
+
 ## Come funziona
 
 - `snr.py` avvia Stella e preme i tasti con `xdotool`. Per leggere la RAM salva lo stato (F9).
