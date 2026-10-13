@@ -16,12 +16,12 @@
 > 🔧 **Versione Atari aggiornata**
 > - Gli zuccherini compaiono uno alla volta, fermi, senza sfarfallio.
 > - Gli oggetti della parte alta poggiano sempre sul piano di lavoro; lampade, gocce e cioccolato della parte bassa sono appesi al piano.
-> - **6 livelli**: il nuovo livello 5 è il livello dei muri mobili, il vecchio livello 5 diventa il 6. Dopo il livello 6 c'è il **livello segreto della Bocca Gigante** (vedi sotto), poi si riparte dal primo con le bocche più veloci (un giro in più), finché ci sono vite.
+> - **6 livelli a tema**: 1 tavoli, 2 tazze, 3 muri di cioccolato, 4 gocce, 5 muri mobili, 6 **presse** (al buio). Dopo il livello 6 c'è il **livello segreto della Bocca Gigante** (vedi sotto), poi si riparte dal primo con le bocche più veloci (un giro in più), finché ci sono vite.
 > - I muri mobili si spostano quando il biscotto li spinge e **schiacciano le bocche** (+10, conta come bocca colpita).
 > - **Livello 5, il rompicapo dei muri**: ogni muro sta sotto una lampada appesa al piano e insieme chiudono la colonna. Sotto il piano ci sono tre stanze; in due si entra solo spingendo un muro (sparando non si passa: la lampada sopra il muro non si rompe). Nella prima si entra spingendo il primo muro; nella seconda o dalla stanza di destra spingendo il terzo muro, oppure spingendo il primo muro di 3-4 colonne, scavalcandolo e spingendo il secondo. Se si spinge il muro troppo in là una strada si chiude, ma resta sempre l'altra.
 > - Bocche più lente, che passano sopra a qualsiasi oggetto. Una bocca uccisa ricompare nel suo angolo dopo circa 4 secondi.
 > - Schermata iniziale: il biscotto, inseguito dalla bocca, scorre in continuo entrando sempre da destra.
-> - **Audio**: tema iniziale stile Indiana Jones, musica leggera di sottofondo ed effetti presi dal *bbsoundtest* di batari Basic (sparo, zuccherino, blocco abbattuto, bocca uccisa, super potere, scossa, cambio livello, muro spinto).
+> - **Audio**: tema iniziale stile Indiana Jones (accorciato a 64 passi), musica leggera di sottofondo ed effetti presi dal *bbsoundtest* di batari Basic (sparo, zuccherino, blocco abbattuto, bocca uccisa, super potere, scossa, cambio livello, muro spinto).
 > - Zuccherini ben distribuiti: uno per ognuna delle 8 sezioni, su tutta la larghezza dello schermo, sopra e sotto il piano. Ognuno è fuori dagli oggetti indistruttibili oppure dentro una tazza o un muro di cioccolato, da bucare a colpi di cioccolatino.
 > - Si può sparare tenendo premuta una direzione.
 > - **Più suspense**:
@@ -32,6 +32,7 @@
 >   - *combo partita perfetta*: finché nel livello non perdi una vita ogni zuccherino vale doppio (100 punti invece di 50);
 >   - lo zuccherino dorato (super potere) è giallo, lo zuccherino chiave è azzurro.
 > - **Levette di difficoltà** (lette a ogni inizio livello): sinistra in A = Bocche più veloci; destra in A = il livello parte con 6 tacche di tempo invece di 8 e niente bonus tempo. In B il gioco è normale.
+> - **Livello 6, le presse**: solo presse, 4 appese al soffitto e 4 al piano. Ogni pressa è uno stantuffo a T (perno sottile, testa larga) che scende fino in fondo a ritmo, sfasata dalle vicine come un'onda: se ti prende sotto perdi una vita. Il livello parte al buio.
 > - **Livello segreto: la Bocca Gigante** (boss, dopo il livello 6). Una bocca enorme con i denti insegue il biscotto e gli sputa contro: lo sputo toglie una vita. Si batte con 8 colpi di cioccolatino; la barra dell'energia sul pavimento si svuota a ogni colpo. Ogni colpo la respinge nell'angolo opposto e la rende più veloce; dopo il quarto colpo sputa tre volte al secondo, dopo il quinto lampeggia. Ogni colpo vale 50 punti, la vittoria 500 in più, poi compare il sacchetto. Non si sceglie con Select.
 > - Altre correzioni: un colpo alla bocca vale +10 una volta sola; la luce si spegne a 32 secondi ma si può riaccendere subito, e ogni nuovo livello parte con la luce accesa (tranne il 5).
 > - La ROM viene provata in automatico nell'emulatore Stella: [`snack_and_roll/tests`](snack_and_roll/tests/README.md).

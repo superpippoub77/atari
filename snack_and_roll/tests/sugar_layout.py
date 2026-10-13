@@ -44,9 +44,13 @@ def analyse(level, objects=OBJECTS):
     drops = drop_cells(level, objects)
     push = wall_cols(level, objects) or None
     lane = push_lanes(level, base, objects)
-    # le gocce sono ostacoli che si muovono: non si contano come distruttibili
-    final, destroyed, reach = destroy_closure(base | drops, level, push_col=push)
-    final |= drops
+    # le gocce sono ostacoli che si muovono: non si contano come distruttibili.
+    # Le presse si attraversano al momento giusto: non bloccano la strada
+    # (ma nessuno zuccherino sta nella loro colonna)
+    press = level == model.PRESS_LEVEL
+    final, destroyed, reach = destroy_closure(base if press else base | drops, level, push_col=push)
+    if not press:
+        final |= drops
     reach = Grid(final).reachable()
     destroyed -= drops
     lamps = lamp_cells(level, objects)
