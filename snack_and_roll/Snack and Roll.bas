@@ -279,7 +279,17 @@ __game_music
    if bally < 200 then temp3 = 3
    temp4 = _frame_counter & temp3
    if temp4 then goto __music_done
-   temp1 = gamemusic[_music_index]
+   ; passi pari: nota (gamemusic[passo/2]); passi dispari: pausa
+   asm
+ lda _music_index
+ lsr
+ tax
+ lda #1
+ bcs gm_pause
+ lda gamemusic,x
+gm_pause
+ sta temp1
+end
    _music_index = (_music_index + 1) & 31
    AUDC1 = 12 : temp2 = 2
    if temp3 = 3 then temp2 = 4
@@ -328,11 +338,13 @@ end
    pfhline 1 6 13 off
    temp1=_choco_count*2+1
    pfpixel temp1 6 on
-   ; le due "l" di Roll (colonne 18 e 20) oscillano come due alberi: la
-   ; base resta ferma e la cima (riga 7) si piega a sinistra, torna dritta,
-   ; si piega a destra e torna dritta, una volta al secondo (tabella
-   ; rollsway, un valore ogni 8 frame; colonne 16-23 della riga 7 = byte 30
-   ; del playfield, colonna 16 = bit 7)
+   ; le due "l" di Roll (colonne 18 e 20, righe 7-10) oscillano come due
+   ; alberi: la base (riga 10) resta ferma e le tre righe sopra si piegano
+   ; a scalare (cima di 2 colonne, righe 8-9 di 1) verso destra, poi
+   ; tornano dritte e la cima si piega a sinistra (di piu' toccherebbe la
+   ; "o"). Un passo ogni 8 frame, un ciclo al secondo. Colonne 16-23 delle
+   ; righe 7, 8, 9 = byte 30, 34, 38 del playfield (colonna 16 = bit 7,
+   ; la "o" nelle righe 8-9).
    asm
  lda _frame_counter
  lsr
@@ -341,6 +353,9 @@ end
  tax
  lda rollsway,x
  sta playfield+30
+ lda rollsway89,x
+ sta playfield+34
+ sta playfield+38
 end
 
    goto __skip_missile
@@ -964,10 +979,13 @@ __done
    ; jingle => allegra
    ; melody => suspance
    ;*************************************************************************************************************************
-   ; cima delle due "l" del titolo: sinistra, sinistra, dritta, destra,
-   ; destra, dritta
+   ; due "l" del titolo: dritte, piegate a destra poco e tanto, poco,
+   ; dritte, cima a sinistra. Riga 7 (cima) e righe 8-9.
    data rollsway
-   %01010000, %01010000, %00101000, %00010100, %00010100, %00101000
+   %00101000, %00010100, %00001010, %00010100, %00101000, %01010000
+end
+   data rollsway89
+   %10101000, %10101000, %10010100, %10101000, %10101000, %10101000
 end
 
    data mouthcolors
@@ -1019,11 +1037,10 @@ end
    ; musica di sottofondo in gioco (AUDC 12, volume basso): arpeggi di
    ; Do, La minore, Fa e Sol, una nota ogni due passi
    ; (Do4=19 Mi4=15 Sol4=12 La3=23 Fa3=29 Sol3=25 Si3=20 Re4=17)
+   ; (solo le note: tra una nota e l'altra il lettore mette una pausa)
    data gamemusic
-   19, 1, 15, 1, 12, 1, 15, 1,
-   23, 1, 19, 1, 15, 1, 19, 1,
-   29, 1, 23, 1, 19, 1, 23, 1,
-   25, 1, 20, 1, 17, 1, 20, 1
+   19, 15, 12, 15, 23, 19, 15, 19,
+   29, 23, 19, 23, 25, 20, 17, 20
 end
 
    ; avvia un effetto sonoro se non ne sta suonando uno piu' importante
