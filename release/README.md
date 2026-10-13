@@ -6,6 +6,7 @@ Tutte le versioni del gioco, pronte da usare.
 |---|---|---|
 | **Atari 2600** (originale) | [`atari2600/SnackAndRoll.bin`](atari2600/SnackAndRoll.bin) | ROM da 8K (PAL). Aprila con l'emulatore [Stella](https://stella-emu.github.io/) o caricala su una cartuccia flash (Harmony, PlusCart, UnoCart). F2 = Reset (gioca), F1 = Select (livello). |
 | **Atari 2600** (sorgente) | [`atari2600/Snack and Roll.bas`](atari2600/Snack%20and%20Roll.bas) | Sorgente batari Basic da cui è compilata la ROM. |
+| **Atari 2600 16K** (grafica migliorata) | [`atari2600/SnackAndRoll16K.bin`](atari2600/SnackAndRoll16K.bin) | ROM da 16K con bankswitching F6 (PAL), stessa partita della 8K: titolo ad alta risoluzione, cartelli di inizio livello, GAME OVER e vittoria, pareti colorate. Sorgente: [`atari2600/Snack and Roll 16K.bas`](atari2600/Snack%20and%20Roll%2016K.bas). |
 | **Circular Defense** (Atari 2600, nuovo gioco) | [`circular_defense/CircularDefense.bin`](circular_defense/CircularDefense.bin) | ROM da 8K F8 (PAL), con paddle o joystick: difendi 6 città con il difensore che gira attorno al cannone, 8 livelli. Sorgente: [`circular_defense/Circular Defense.bas`](circular_defense/Circular%20Defense.bas). Dettagli in [`../circular_defense/`](../circular_defense/README.md). |
 | **Windows** 64 bit | [`windows/SnackAndRoll-windows-x86_64.zip`](windows/SnackAndRoll-windows-x86_64.zip) | Estrai lo zip e avvia `SnackAndRoll.exe`. Al primo avvio Windows SmartScreen può avvisare che l'app non è firmata: *Ulteriori informazioni → Esegui comunque*. |
 | **Linux** 64 bit | [`linux/SnackAndRoll-linux-x86_64.zip`](linux/SnackAndRoll-linux-x86_64.zip) | Estrai lo zip e avvia `./SnackAndRoll.x86_64` (se serve: `chmod +x SnackAndRoll.x86_64`). |
@@ -23,6 +24,10 @@ Schermate della ROM Atari prese dall'emulatore Stella (1280×960, pixel nitidi, 
 titolo, livelli 1-6, Bocca Gigante (livello segreto) e una tavola riassuntiva (`tavola_livelli.png`).
 
 ![Livelli](screenshots/tavola_livelli.png)
+
+Versione 16K (cartella [`screenshots/16k/`](screenshots/16k/)): titolo, cartello di inizio livello, i 6 livelli, la Bocca Gigante, vittoria e GAME OVER.
+
+![Versione 16K](screenshots/tavola_16k.png)
 
 ## Note
 
