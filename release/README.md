@@ -11,6 +11,11 @@ Tutte le versioni del gioco, pronte da usare.
 | **Android** (telefoni e tablet) | [`android/SnackAndRoll-android.apk`](android/SnackAndRoll-android.apk) | Copia l'APK sul telefono e aprilo. Consenti "installa app sconosciute" quando richiesto. Android 7.0 o superiore, ARM 32/64 bit. Comandi touch sullo schermo. |
 | **Browser** (anche iPhone/iPad) | [`web/`](web/) | Versione HTML5: pubblica la cartella su un qualsiasi hosting statico (GitHub Pages, itch.io…) e apri `index.html`. Non funziona aprendo il file direttamente dal disco. |
 
+## Manuale di istruzioni
+
+Il manuale per la box (comandi, levette di difficoltà, livelli, punteggi, consigli) è qui:
+[Snack 'n' Roll – Manuale di istruzioni](https://claude.ai/code/artifact/461c41f4-fddc-4602-a24b-4cb253a66f2d).
+
 ## Schermate
 
 Schermate della ROM Atari prese dall'emulatore Stella (1280×960, pixel nitidi, adatte alla stampa), nella cartella [`screenshots/`](screenshots/):
@@ -31,7 +36,7 @@ titolo, livelli 1-6, Bocca Gigante (livello segreto) e una tavola riassuntiva (`
 
 | Versione | Come è stata provata |
 |---|---|
-| Atari 2600 | Emulatore Stella: partita completa dal livello 1 alla vittoria giocata in automatico con i tasti. Sono 525 controlli su zuccherini, bocche, sacchetto, appoggi degli oggetti, luce, tempo, vite, muri spingibili, suoni e Bocca Gigante, più un test delle novità di giocabilità (fuga finale, tempo in scadenza, bonus tempo, fine del super potere, combo) ([`snack_and_roll/tests`](../snack_and_roll/tests/README.md)) |
+| Atari 2600 | Emulatore Stella: partita completa dal livello 1 alla vittoria giocata in automatico con i tasti. Sono 525 controlli (più il test delle levette di difficoltà) su zuccherini, bocche, sacchetto, appoggi degli oggetti, luce, tempo, vite, muri spingibili, suoni e Bocca Gigante, più un test delle novità di giocabilità (fuga finale, tempo in scadenza, bonus tempo, fine del super potere, combo) ([`snack_and_roll/tests`](../snack_and_roll/tests/README.md)) |
 | Windows | Wine 9 su Linux: avvio, titolo, partita |
 | Linux | Avvio diretto del binario esportato |
 | Browser | Chromium: caricamento, titolo, partita, nessun errore in console |

@@ -29,6 +29,7 @@
 >   - *fine super potere*: nell'ultimo secondo il biscotto lampeggia più veloce e tre bip avvisano che sta finendo;
 >   - *combo partita perfetta*: finché nel livello non perdi una vita ogni zuccherino vale doppio (100 punti invece di 50);
 >   - lo zuccherino dorato (super potere) è giallo, lo zuccherino chiave è azzurro.
+> - **Levette di difficoltà** (lette a ogni inizio livello): sinistra in A = Bocche più veloci; destra in A = il livello parte con 6 tacche di tempo invece di 8 e niente bonus tempo. In B il gioco è normale.
 > - **Livello segreto: la Bocca Gigante** (boss, dopo il livello 6). Una bocca enorme con i denti insegue il biscotto e gli sputa contro: lo sputo toglie una vita. Si batte con 8 colpi di cioccolatino; la barra dell'energia sul pavimento si svuota a ogni colpo. Ogni colpo la respinge nell'angolo opposto e la rende più veloce; dopo il quarto colpo sputa tre volte al secondo, dopo il quinto lampeggia. Ogni colpo vale 50 punti, la vittoria 500 in più, poi compare il sacchetto. Non si sceglie con Select.
 > - Altre correzioni: un colpo alla bocca vale +10 una volta sola; la luce si spegne a 32 secondi ma si può riaccendere subito, e ogni nuovo livello parte con la luce accesa (tranne il 5).
 > - La ROM viene provata in automatico nell'emulatore Stella: [`snack_and_roll/tests`](snack_and_roll/tests/README.md).
