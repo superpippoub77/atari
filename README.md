@@ -9,6 +9,8 @@
 >
 > 📦 **Download** (Atari 2600 `.bin`, Windows, Linux, Android, Browser): cartella [`release/`](release/README.md).
 
+> 🛡️ **Nuovo gioco:** [*Circular Defense*](circular_defense/README.md) per Atari 2600. Difendi la città con uno scudo che gira attorno al cannone.
+
 ---
 
 > 🔧 **Versione Atari aggiornata**
