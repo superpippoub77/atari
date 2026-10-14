@@ -21,6 +21,10 @@ SIXTEEN = CARD > 0
 A = {c: 0xD4 + i for i, c in enumerate("abcdefghijklmnopqrstuvwxyz")}
 PLAYER0X, PLAYER1X, MISSILE0X, MISSILE1X, BALLX = 0x80, 0x81, 0x82, 0x83, 0x84
 PLAYER0Y, PLAYER1Y, MISSILE0Y, MISSILE1Y, BALLY = 0x85, 0x86, 0x91, 0x88, 0x89
+BALLHEIGHT = 0x92
+# zuccherino e sputo della Bocca Gigante: missile1 nella 8K, ball nella 16K
+# (la 16K usa la memoria del missile1 per i colori della bocca)
+SUGARX, SUGARY = (BALLX, BALLY) if SIXTEEN else (MISSILE1X, MISSILE1Y)
 PLAYFIELD = 0xA4
 SCORE = 0x93
 PFSCORE1, PFSCORE2 = 0xF2, 0xF3

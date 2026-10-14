@@ -498,7 +498,7 @@ def sugar_phase(s, level):
             rr = s.save()
             bits = rr.v("choco_bits")
             idx = next((i for i in range(8) if not bits >> i & 1), 8)
-            pos.append((rr[MISSILE1X], rr[MISSILE1Y], idx))
+            pos.append((rr[SUGARX], rr[SUGARY], idx))
             s.wait(0.07)
         steady = all(p == (ex, ey, k) for p in pos)
         check(level, f"zuccherino {k}: visibile da solo e fermo in ({ex},{ey})", steady, str(pos))
@@ -544,7 +544,7 @@ def sugar_phase(s, level):
     r = s.save()
     check(level, "8 zuccherini, nessuno contato due volte", r.v("choco_count") == 8 and r.v("choco_bits") == 0xFF,
           f"count={r.v('choco_count')}")
-    check(level, "dopo l'ultimo non compare piu' nulla", r[MISSILE1Y] == 200)
+    check(level, "dopo l'ultimo non compare piu' nulla", r[SUGARY] == 200)
     if r.flag(5) == 1:
         check(level, "il sacchetto non appare prima di colpire la bocca", r[BALLY] != 28)
     else:
@@ -1020,7 +1020,7 @@ def boss_phase(s):
     check(BOSS, f"dopo il livello {LEVELS} arriva la Bocca Gigante (livello {BOSS})",
           r.v("level") == BOSS and r.flag(0) == 1, f"level={r.v('level')}")
     check(BOSS, "niente zuccherini, chiave gia' presa, luce accesa",
-          r.v("choco_bits") == 0xFF and r.flag(2) == 1 and r.flag(4) == 1 and r[MISSILE1Y] in (200, r.v("mouth1y")),
+          r.v("choco_bits") == 0xFF and r.flag(2) == 1 and r.flag(4) == 1 and r[SUGARY] in (200, r.v("mouth1y")),
           f"bits={r.v('choco_bits'):08b} flags={r.v('flags'):08b}")
     print("\n".join("     " + x for x in r.pf_rows()))
     check(BOSS, "barra dell'energia piena (8 pixel sul pavimento)", all(r.pf(c, 10) for c in range(12, 20)))
@@ -1033,7 +1033,7 @@ def boss_phase(s):
     t0 = time.time()
     while time.time() - t0 < 3 and not seen:
         r = s.save()
-        seen = r.v("mouth1y") < 200 and r[MISSILE1Y] == r.v("mouth1y")
+        seen = r.v("mouth1y") < 200 and r[SUGARY] == r.v("mouth1y")
         s.wait(0.05)
     check(BOSS, "la Bocca Gigante sputa", seen, f"sputo=({r.v('mouth1x')},{r.v('mouth1y')})")
     s.shot(f"{OUT}/atari_boss_sputo.png")
