@@ -1076,13 +1076,86 @@ def boss_phase(s):
     check(BOSS, "la Bocca Gigante sputa", seen, f"sputo=({r.v('mouth1x')},{r.v('mouth1y')})")
     s.shot(f"{OUT}/atari_boss_sputo.png")
 
+    if not SIXTEEN:
+        # sputi mirati al biscotto, in 8 direzioni (0 su, 1 su-destra, 2
+        # destra, ... 7 su-sinistra)
+        for name, (px, py), d in (("a destra", (120, 30), 2), ("a sinistra", (12, 30), 6),
+                                  ("in basso a sinistra", (12, 84), 5), ("in alto a destra", (130, 8), 1),
+                                  ("sotto", (64, 84), 4)):
+            s.poke({V["hitCooldown"]: 250, PFSCORE1: 0xFF, PFSCORE2: 0xAA, V["mouth0x"]: 50, V["mouth0y"]: 30,
+                    V["mouth1y"]: 200, V["spit2y"]: 200, PLAYER0X: px, PLAYER0Y: py})
+            t0 = time.time()
+            while time.time() - t0 < 2.5:
+                r = s.save()
+                if r.v("mouth1y") < 200:
+                    break
+            check(BOSS, f"sputo mirato al biscotto {name}", r.v("mouth1y") < 200 and r.v("spitDir") & 7 == d,
+                  f"direzione={r.v('spitDir') & 7} attesa={d} sputo=({r.v('mouth1x')},{r.v('mouth1y')})")
+        # dopo il quarto colpo lo sputo si divide in due (direzioni vicine)
+        s.poke({V["choco_count"]: 4, V["hitCooldown"]: 250, V["mouth0x"]: 50, V["mouth0y"]: 30,
+                V["mouth1y"]: 200, V["spit2y"]: 200, PLAYER0X: 130, PLAYER0Y: 30})
+        split = None
+        t0 = time.time()
+        while time.time() - t0 < 2 and split is None:
+            r = s.save()
+            if r.v("spit2y") < 200 and r.v("mouth1y") < 200:
+                split = r
+        if split:
+            s.shot(f"{OUT}/atari_boss_sputi.png")
+            r = split
+        d1, d2 = r.v("spitDir") & 7, (r.v("spitDir") >> 4) & 7
+        check(BOSS, "dopo il quarto colpo lo sputo si divide in due",
+              split is not None and (d2 - d1) & 7 == 2,
+              f"sputi=({r.v('mouth1x')},{r.v('mouth1y')}) ({r.v('spit2x')},{r.v('spit2y')}) direzioni {d1},{d2}")
+        s.poke({V["choco_count"]: 0, V["mouth1y"]: 200, V["spit2y"]: 200})
+
     # lo sputo fa perdere una vita
     s.poke({V["hitCooldown"]: 0, PFSCORE2: 0xAA, PLAYER0X: 110, PLAYER0Y: 84,
-            V["mouth0x"]: 20, V["mouth0y"]: 8, V["mouth1x"]: 112, V["mouth1y"]: 76})
+            V["mouth0x"]: 20, V["mouth0y"]: 8, V["mouth1x"]: 112, V["mouth1y"]: 76,
+            **({} if SIXTEEN else {V["spitDir"]: 4, V["spit2y"]: 200})})
     s.wait(0.4)
     r = s.save()
     check(BOSS, "lo sputo colpisce il biscotto: si perde una vita", r[PFSCORE2] == 0x2A,
           f"vite={r[PFSCORE2]:08b}")
+
+    if not SIXTEEN:
+        # colpita: resta ferma dov'e' per un attimo, e intanto un altro colpo
+        # non conta; poi riprende a inseguire
+        r = s.save()
+        s.poke({V["hitCooldown"]: 0, PFSCORE1: 0xFF, PFSCORE2: 0xAA, V["mouth0x"]: 80, V["mouth0y"]: 30,
+                V["mouth1y"]: 200, V["spit2y"]: 200, PLAYER0X: 40, PLAYER0Y: 30, V["frame"]: 5,
+                V["flags"]: r.v("flags") & ~0xC0})
+        s.down("Right", "space")
+        s.wait(0.06)
+        s.up("Right", "space")
+        hit = None
+        t0 = time.time()
+        while time.time() - t0 < 1.5 and hit is None:
+            r = s.save()
+            if r.v("choco_count") == 1:
+                hit = r
+        s.wait(0.1)
+        r2 = s.save()
+        check(BOSS, "colpita, la Bocca Gigante resta ferma dov'e' (lampeggia)",
+              hit is not None and r2.v("hitCooldown") > 0 and
+              (r2.v("mouth0x"), r2.v("mouth0y")) == (hit.v("mouth0x"), hit.v("mouth0y")) and hit.v("mouth0x") > 60,
+              f"bocca {hit and (hit.v('mouth0x'), hit.v('mouth0y'))} -> ({r2.v('mouth0x')},{r2.v('mouth0y')}) attesa={r2.v('hitCooldown')}")
+        # un altro colpo mentre e' ferma non conta
+        s.poke({V["hitCooldown"]: 40, V["flags"]: r2.v("flags") & ~0xC0, PLAYER0X: 40, PLAYER0Y: 30})
+        s.down("Right", "space")
+        s.wait(0.06)
+        s.up("Right", "space")
+        s.wait(0.4)
+        r3 = s.save()
+        check(BOSS, "mentre e' ferma un altro colpo non conta", r3.v("choco_count") == 1,
+              f"colpi={r3.v('choco_count')}")
+        s.wait(0.6)
+        r4 = s.save()
+        check(BOSS, "poi riprende a inseguire il biscotto",
+              (r4.v("mouth0x"), r4.v("mouth0y")) != (r3.v("mouth0x"), r3.v("mouth0y")),
+              f"bocca ({r3.v('mouth0x')},{r3.v('mouth0y')}) -> ({r4.v('mouth0x')},{r4.v('mouth0y')})")
+        # si riparte da zero colpi (il primo pixel della barra resta spento)
+        s.poke({V["choco_count"]: 0})
 
     # 8 colpi di cioccolatino
     score0 = r.score()
@@ -1091,8 +1164,10 @@ def boss_phase(s):
         got = False
         for _ in range(4):
             r = s.save()
-            s.poke({V["hitCooldown"]: 250, PFSCORE1: 0xFF, PFSCORE2: 0xAA, V["mouth0x"]: 100, V["mouth0y"]: 60,
-                    V["mouth1y"]: 200, PLAYER0X: 110, PLAYER0Y: 84, V["flags"]: r.v("flags") & ~0xC0})
+            # (la Bocca Gigante appena colpita non si puo' colpire: _hitCooldown a 0)
+            s.poke({V["hitCooldown"]: 0, PFSCORE1: 0xFF, PFSCORE2: 0xAA, V["mouth0x"]: 100, V["mouth0y"]: 60,
+                    V["mouth1y"]: 200, PLAYER0X: 110, PLAYER0Y: 84, V["flags"]: r.v("flags") & ~0xC0,
+                    **({} if SIXTEEN else {V["spit2y"]: 200})})
             s.down("Up", "space")
             s.wait(0.06)
             s.up("Up", "space")

@@ -37,6 +37,8 @@ V = {
     "choco_count": A["t"], "ballx_var": A["u"], "hitCooldown": A["v"], "sfxDur": A["z"],
     "pushCol2": A["w"], "pushCol3": A["x"], "mouth0wait": A["j"], "mouth1wait": A["r"],
     "mouthTick": A["n"], "lap": A["y"],
+    # Bocca Gigante (8K): secondo sputo, direzioni, strada fatta (var44-var47)
+    "spit2x": PLAYFIELD + 44, "spit2y": PLAYFIELD + 45, "spitDir": PLAYFIELD + 46, "spitTime": PLAYFIELD + 47,
 }
 
 
