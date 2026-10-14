@@ -704,6 +704,12 @@ def bag_phase(s, level):
     if CARD:
         s.wait(CARD + (OVER if level == BOSS else 0))
         r = s.save()
+    # il numero del livello cambia subito, ma il livello nuovo si carica
+    # dopo il conteggio del bonus tempo: si aspetta il biscotto alla partenza
+    t0 = time.time()
+    while time.time() - t0 < 5 and (r[PLAYER0X], r[PLAYER0Y]) != (10, 64):
+        s.wait(0.1)
+        r = s.save()
     if True:
         check(nxt, "partenza dal punto (10,64) con 4 vite e tempo pieno",
               abs(r[PLAYER0X] - 10) <= 16 and abs(r[PLAYER0Y] - 64) <= 16 and r[PFSCORE2] == 0xAA and r[PFSCORE1] == 0xFF,
@@ -806,7 +812,10 @@ def light_phase(s, level):
             break
     if not check(level, "trovato un punto sotto il piano", target is not None):
         return
-    walk_to(s, level, {target})
+    # (ci si mette direttamente: camminando si potrebbe toccare il sacchetto,
+    # gia' apparso, e passare al livello dopo)
+    s.poke({PLAYER0X: target[0], PLAYER0Y: target[1], V["hitCooldown"]: 250})
+    s.wait(0.2)
     before = [s.save().pf(c, 5) for c in range(32)]
     for attempts in range(1, 4):
         r = s.save()
