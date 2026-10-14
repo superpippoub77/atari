@@ -243,7 +243,7 @@ BLOCKS = {
     "snack": dict(variants=[snack()], colors=GOLD),
     "napo": dict(variants=[text("'N'")], colors=[0x0E] * 7),
     "roll": dict(variants=[roll(0), roll(1), roll(2), roll(-1)], colors=GOLD),
-    "cookie": dict(variants=[cookie(f) for f in range(4)], colors=COOKIE),
+    "cookie": dict(variants=[cookie(f, 3) for f in range(3)], colors=COOKIE),
     "level": dict(variants=[text(f"LIVELLO {n}") if n < 7 else text("BOSS!")
                             for n in range(1, 8)], colors=CYAN),
     "livello": dict(variants=[text("LIVELLO")], colors=WHITE),
@@ -259,10 +259,10 @@ BLOCKS = {
 # delle partenze, e la tabella (indice -> variante)
 SELECT = {
     "frame8": (" lda _frame_counter\n lsr\n lsr\n lsr\n tax", [0, 1, 2, 1, 0, 3]),
-    "frame4": (" lda _frame_counter\n lsr\n lsr\n tax", [i // 3 % 4 for i in range(12)]),
+    "frame4": (" lda _frame_counter\n lsr\n lsr\n tax", [i // 4 % 3 for i in range(12)]),
     "choice": (" ldx _choco_count", list(range(7))),
     "curlevel": (" ldx _level", [0] + list(range(7))),   # livelli 1-7
-    "count16": (" lda temp6\n and #15\n tax", [i // 4 % 4 for i in range(16)]),
+    "count16": (" lda temp6\n and #15\n tax", [i // 4 % 3 for i in range(16)]),
 }
 # schermate: (pezzo, righe vuote prima, scelta della variante)
 SCREENS = {
@@ -615,8 +615,8 @@ def emit_show(o, P, sname):
 
 WRAPPERS = {
     2: r"""
-   ; --- un fotogramma del titolo (chiamato ad ogni frame dal banco 1) ---
-__title_frame
+   ; --- un fotogramma del titolo (da __title_frame, dopo la musica) ---
+__title_draw
    asm
  jsr h2_title
 end

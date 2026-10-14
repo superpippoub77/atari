@@ -76,19 +76,19 @@ try:
             V["hitCooldown"]: 0, PFSCORE1: 0xFF})
     rate_n = mouth_rate(s)
     s.poke({PLAYER0X: 140, PLAYER0Y: 84, V["mouth0x"]: 20, V["mouth0y"]: 84,
-            BALLY: 28, BALLX: 18, PFSCORE1: 0xFF})
+            BALLY: 28, BALLX: 18, BALLHEIGHT: 16, PFSCORE1: 0xFF})
     rate_f = mouth_rate(s)
     check("fuga finale: le bocche vanno al doppio", 11 <= rate_n <= 13 and 5 <= rate_f <= 7,
           f"normale {rate_n:.1f}, fuga {rate_f:.1f} frame/passo")
     s.poke({PLAYER0X: 140, PLAYER0Y: 84, V["mouth0x"]: 20, V["mouth0y"]: 84,
-            BALLY: 28, BALLX: 18, V["hitCooldown"]: 250})
+            BALLY: 28, BALLX: 18, BALLHEIGHT: 16, V["hitCooldown"]: 250})
     rate = music_rate(s)
     check("fuga finale: musica al doppio", 3.5 <= rate <= 4.5, f"{rate:.1f}")
 
     # --- bonus tempo al cambio di livello ---
     r = s.save()
     s.poke({PFSCORE1: 0xFF, SCORE: 0, SCORE + 1: 0, SCORE + 2: 0, V["hitCooldown"]: 250,
-            V["choco_bits"]: 0xFF, V["choco_count"]: 8, BALLY: 28, BALLX: 18,
+            V["choco_bits"]: 0xFF, V["choco_count"]: 8, BALLY: 28, BALLX: 18, BALLHEIGHT: 16,
             PLAYER0X: 14, PLAYER0Y: 30})
     s.wait(0.3)
     mid = s.save()
@@ -130,7 +130,7 @@ try:
     # si leggono a inizio livello: si passa al livello successivo col sacchetto
     def next_level(ballx):
         s.poke({PFSCORE1: 0xFF, SCORE: 0, SCORE + 1: 0, SCORE + 2: 0, V["hitCooldown"]: 250,
-                V["choco_bits"]: 0xFF, V["choco_count"]: 8, BALLY: 28, BALLX: ballx,
+                V["choco_bits"]: 0xFF, V["choco_count"]: 8, BALLY: 28, BALLX: ballx, BALLHEIGHT: 16,
                 PLAYER0X: ballx - 4, PLAYER0Y: 30})
         s.wait(2.5 + CARD)
         return s.save()

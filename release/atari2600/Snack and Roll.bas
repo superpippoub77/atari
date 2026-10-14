@@ -515,20 +515,11 @@ __skip_all_sugar
    if !(_frame_counter&31) then temp1 = 1
 
    ;Background visibile con effetto flash se il flag della lamp è spento
-   if temp1 && _level<3 then pfcolors:
-   $05
-   $9E
-   $0E
-   $24
-   $26
-   $02
-   $05
-   $9E
-   $0E
-   $24
-   $26
-end
-   if temp1 && _level>2 then pfcolors:
+   ; righe 0-4 sopra il piano, 5 piano, 6-10 sotto. Dal livello 3 i colori
+   ; del cioccolato; nei livelli 1, 2 e 5 le lampade (paralume grigio,
+   ; lampadina azzurra) sono sempre dello stesso colore
+   if !temp1 then goto __pfc_done
+   pfcolors:
    $28
    $26
    $24
@@ -541,6 +532,21 @@ end
    $26
    $24
 end
+   if _level > 2 && _level <> 5 then goto __pfc_done
+   pfcolors:
+   $05
+   $9E
+   $0E
+   $24
+   $26
+   $02
+   $05
+   $9E
+   $0E
+   $24
+   $26
+end
+__pfc_done
 
    ; Background
    if !_b4_enableLight{4} && _frame_counter&7 then pfcolors:
