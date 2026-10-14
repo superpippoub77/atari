@@ -614,9 +614,9 @@ def mouth_phase(s, level):
         score0 = r.score()
         # la bocca (ferma per _hitCooldown) viene messa davanti al biscotto, niente slow motion
         mx = x + (18 if level == model.PRESS_LEVEL else 26)   # tra le presse c'e' poco spazio
-        # (nel livello delle presse la seconda bocca va su un'altra riga: nello
-        # spazio stretto tra le presse il colpo le prenderebbe tutte e due)
-        my1 = (y + 30 if y < 50 else y - 30) if level == model.PRESS_LEVEL else y
+        # (la seconda bocca va su un'altra riga: tenendo premuto il fuoco
+        # parte subito un altro cioccolatino, che la colpirebbe)
+        my1 = y + 30 if y < 50 else y - 30
         s.poke({V["flags"]: r.v("flags") & ~0xC0, V["mouth0x"]: mx, V["mouth0y"]: y,
                 V["mouth1x"]: mx, V["mouth1y"]: my1, V["hitCooldown"]: 200})
         # destra e fuoco premuti insieme, come un giocatore vero
