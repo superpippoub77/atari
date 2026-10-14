@@ -614,9 +614,9 @@ def mouth_phase(s, level):
         score0 = r.score()
         # la bocca (ferma per _hitCooldown) viene messa davanti al biscotto, niente slow motion
         mx = x + (18 if level == model.PRESS_LEVEL else 26)   # tra le presse c'e' poco spazio
-        # (nel livello delle presse la seconda bocca va su un'altra riga: nello
-        # spazio stretto tra le presse il colpo le prenderebbe tutte e due)
-        my1 = (y + 30 if y < 50 else y - 30) if level == model.PRESS_LEVEL else y
+        # (la seconda bocca va su un'altra riga: tenendo premuto il fuoco
+        # parte subito un altro cioccolatino, che la colpirebbe)
+        my1 = y + 30 if y < 50 else y - 30
         s.poke({V["flags"]: r.v("flags") & ~0xC0, V["mouth0x"]: mx, V["mouth0y"]: y,
                 V["mouth1x"]: mx, V["mouth1y"]: my1, V["hitCooldown"]: 200})
         # destra e fuoco premuti insieme, come un giocatore vero
@@ -650,8 +650,8 @@ def mouth_phase(s, level):
         corner = (20, 8) if i == 0 else (140, 90)
         check(level, "dopo circa 4 secondi la bocca ricompare nel suo angolo",
               r.v(f"mouth{i}wait") == 0 and 2.5 <= elapsed <= 7 and
-              # (tra due letture passano fino a ~0,45 s: la bocca puo' gia' aver fatto qualche passo)
-              abs(r.v(f"mouth{i}x") - corner[0]) <= 6 and abs(r.v(f"mouth{i}y") - corner[1]) <= 6,
+              # (tra due letture passano fino a ~0,45 s: la bocca puo' gia' aver fatto qualche passo, al livello 6 anche 7 px)
+              abs(r.v(f"mouth{i}x") - corner[0]) <= 12 and abs(r.v(f"mouth{i}y") - corner[1]) <= 12,
               f"dopo {elapsed:.1f} s in ({r.v(f'mouth{i}x')},{r.v(f'mouth{i}y')})")
     s.wait(0.3)
     r = s.save()
@@ -703,6 +703,12 @@ def bag_phase(s, level):
     check(level, "suono del cambio livello", SFX["livello"] in heard, f"effetti sentiti={sorted(heard)}")
     if CARD:
         s.wait(CARD + (OVER if level == BOSS else 0))
+        r = s.save()
+    # il numero del livello cambia subito, ma il livello nuovo si carica
+    # dopo il conteggio del bonus tempo: si aspetta il biscotto alla partenza
+    t0 = time.time()
+    while time.time() - t0 < 5 and (r[PLAYER0X], r[PLAYER0Y]) != (10, 64):
+        s.wait(0.1)
         r = s.save()
     if True:
         check(nxt, "partenza dal punto (10,64) con 4 vite e tempo pieno",
@@ -806,7 +812,11 @@ def light_phase(s, level):
             break
     if not check(level, "trovato un punto sotto il piano", target is not None):
         return
-    walk_to(s, level, {target})
+    # (ci si mette direttamente: camminando si potrebbe toccare il sacchetto,
+    # gia' apparso, e passare al livello dopo)
+    s.poke({PLAYER0X: target[0], PLAYER0Y: target[1], V["hitCooldown"]: 250})
+    s.wait(0.2)
+    before = [s.save().pf(c, 5) for c in range(32)]
     for attempts in range(1, 4):
         r = s.save()
         s.poke({V["flags"]: r.v("flags") & ~0xC0})
@@ -821,6 +831,34 @@ def light_phase(s, level):
             break
         print(f"     (tentativo {attempts}: p0=({r[PLAYER0X]},{r[PLAYER0Y]}) dir={r.v('dir'):08b})")
     check(level, "sparando sul piano la luce si riaccende", r.flag(4) == 1)
+    # trucco: il primo colpo toglie un pezzo di piano (4 colonne), uno solo
+    # per livello
+    after = [r.pf(c, 5) for c in range(32)]
+    gone = [c for c in range(32) if before[c] and not after[c]]
+    check(level, "il colpo toglie un pezzo di piano (al massimo 4 colonne vicine)",
+          gone and max(gone) - min(gone) <= 3, f"colonne tolte={gone}")
+    spot = None
+    for c in range(2, 30):
+        # (biscotto nelle colonne c-1..c+1: niente oggetti sotto il piano, se
+        # no lo rallentano e da rallentato non spara)
+        if after[c] and after[c + 1] and all(abs(c - g) > 5 for g in gone) and \
+                not any(r.pf(k, 6) or r.pf(k, 7) for k in range(c - 1, c + 3)):
+            spot = c
+            break
+    if spot is not None:
+        # (il biscotto, con Su premuto, puo' essere salito nel buco: lo si
+        # rimette sotto il piano, sotto un altro pezzo)
+        s.poke({PLAYER0X: 4 * spot + 14, PLAYER0Y: target[1], V["flags"]: r.v("flags") & ~0xD0,
+                V["hitCooldown"]: 250})
+        s.wait(0.2)
+        s.down("Up")
+        s.tap("space", 0.12)
+        s.up("Up")
+        s.wait(0.6)
+        r = s.save()
+        again = [c for c in range(32) if after[c] and not r.pf(c, 5)]
+        check(level, "un secondo colpo riaccende la luce ma non toglie altri pezzi",
+              r.flag(4) == 1 and not again, f"luce={r.flag(4)} altre colonne tolte={again}")
 
 
 def slow_sound_phase(s, level):
