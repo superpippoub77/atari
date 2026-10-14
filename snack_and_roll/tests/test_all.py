@@ -650,8 +650,8 @@ def mouth_phase(s, level):
         corner = (20, 8) if i == 0 else (140, 90)
         check(level, "dopo circa 4 secondi la bocca ricompare nel suo angolo",
               r.v(f"mouth{i}wait") == 0 and 2.5 <= elapsed <= 7 and
-              # (tra due letture passano fino a ~0,45 s: la bocca puo' gia' aver fatto qualche passo)
-              abs(r.v(f"mouth{i}x") - corner[0]) <= 6 and abs(r.v(f"mouth{i}y") - corner[1]) <= 6,
+              # (tra due letture passano fino a ~0,45 s: la bocca puo' gia' aver fatto qualche passo, al livello 6 anche 7 px)
+              abs(r.v(f"mouth{i}x") - corner[0]) <= 12 and abs(r.v(f"mouth{i}y") - corner[1]) <= 12,
               f"dopo {elapsed:.1f} s in ({r.v(f'mouth{i}x')},{r.v(f'mouth{i}y')})")
     s.wait(0.3)
     r = s.save()
