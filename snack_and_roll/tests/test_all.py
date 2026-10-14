@@ -807,6 +807,7 @@ def light_phase(s, level):
     if not check(level, "trovato un punto sotto il piano", target is not None):
         return
     walk_to(s, level, {target})
+    before = [s.save().pf(c, 5) for c in range(32)]
     for attempts in range(1, 4):
         r = s.save()
         s.poke({V["flags"]: r.v("flags") & ~0xC0})
@@ -821,6 +822,34 @@ def light_phase(s, level):
             break
         print(f"     (tentativo {attempts}: p0=({r[PLAYER0X]},{r[PLAYER0Y]}) dir={r.v('dir'):08b})")
     check(level, "sparando sul piano la luce si riaccende", r.flag(4) == 1)
+    # trucco: il primo colpo toglie un pezzo di piano (4 colonne), uno solo
+    # per livello
+    after = [r.pf(c, 5) for c in range(32)]
+    gone = [c for c in range(32) if before[c] and not after[c]]
+    check(level, "il colpo toglie un pezzo di piano (al massimo 4 colonne vicine)",
+          gone and max(gone) - min(gone) <= 3, f"colonne tolte={gone}")
+    spot = None
+    for c in range(2, 30):
+        # (biscotto nelle colonne c-1..c+1: niente oggetti sotto il piano, se
+        # no lo rallentano e da rallentato non spara)
+        if after[c] and after[c + 1] and all(abs(c - g) > 5 for g in gone) and \
+                not any(r.pf(k, 6) or r.pf(k, 7) for k in range(c - 1, c + 3)):
+            spot = c
+            break
+    if spot is not None:
+        # (il biscotto, con Su premuto, puo' essere salito nel buco: lo si
+        # rimette sotto il piano, sotto un altro pezzo)
+        s.poke({PLAYER0X: 4 * spot + 14, PLAYER0Y: target[1], V["flags"]: r.v("flags") & ~0xD0,
+                V["hitCooldown"]: 250})
+        s.wait(0.2)
+        s.down("Up")
+        s.tap("space", 0.12)
+        s.up("Up")
+        s.wait(0.6)
+        r = s.save()
+        again = [c for c in range(32) if after[c] and not r.pf(c, 5)]
+        check(level, "un secondo colpo riaccende la luce ma non toglie altri pezzi",
+              r.flag(4) == 1 and not again, f"luce={r.flag(4)} altre colonne tolte={again}")
 
 
 def slow_sound_phase(s, level):

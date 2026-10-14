@@ -508,50 +508,8 @@ __skip_all_sugar
    ; veniva rispenta per tutto quel secondo e non si poteva riaccendere)
    if !_frame_counter && _seconds_counter && !(_seconds_counter&31) then _b4_enableLight{4} = 0
 
-   ; temp1 = "mostra i colori normali questo frame" - vero se
-   ; la luce è accesa, oppure se è il fotogramma di flash col buio
-   temp1 = 0
-   if _b4_enableLight{4} then temp1 = 1
-   if !(_frame_counter&31) then temp1 = 1
-
-   ;Background visibile con effetto flash se il flag della lamp è spento
-   ; righe 0-4 sopra il piano, 5 piano, 6-10 sotto. Dal livello 3 i colori
-   ; del cioccolato; nei livelli 1, 2 e 5 le lampade (paralume grigio,
-   ; lampadina azzurra) sono sempre dello stesso colore
-   if !temp1 then goto __pfc_done
-   pfcolors:
-   $28
-   $26
-   $24
-   $26
-   $24
-   $02
-   $28
-   $26
-   $24
-   $26
-   $24
-end
-   if _level > 2 && _level <> 5 then goto __pfc_done
-   pfcolors:
-   $05
-   $9E
-   $0E
-   $24
-   $26
-   $02
-   $05
-   $9E
-   $0E
-   $24
-   $26
-end
-__pfc_done
-
-   ; Background
-   if !_b4_enableLight{4} && _frame_counter&7 then pfcolors:
-   0
-end
+   ; colori del playfield (luce, buio, colori per livello): banco 2
+   gosub __pf_colors bank2
 
    ;*************************************************************************************************************************
    ; CONTENITORE FINALE (BALL)
@@ -559,10 +517,11 @@ end
    ; il sacchetto finale individuato come ball viene visualizzato solo dopo aver trovato gli 8 cioccolatini nel playfield
    ; e la bocca è stata colpita (dal livello 4 serve anche la chiave)
    ; _ballx viene letto dalla colonna 7 di "objects" al caricamento del livello
+   ; (il bit 0 ricorda il pezzo di piano tolto, vedi __piano_hit)
    ;*************************************************************************************************************************
    temp4 = 1
    if _level > 3 && !_b2_hasKey{2} then temp4 = 0
-   if _choco_count = 8 && !_b5_enablePalyer1{5} && temp4 then ballx = _ballx : bally = 28
+   if _choco_count = 8 && !_b5_enablePalyer1{5} && temp4 then ballx = _ballx & 254 : bally = 28
 
    ;*************************************************************************************************************************
    ; CHECK
@@ -665,7 +624,9 @@ __Skip_Fire
    ; a sinistra della colonna 0 (x<18) il calcolo della colonna "scavalca"
    ; e pfread leggerebbe pixel della riga sotto: li' non c'e' nulla da colpire
    if temp5 > 31 then goto __skip_missile
-   if temp6 = 5 && pfread(temp5,temp6) then _b4_enableLight{4}=1 : goto __delete_missile
+   ; colpito il piano di lavoro: si riaccende la luce e (una volta per
+   ; livello) se ne toglie un pezzo per passare (banco 2)
+   if temp6 = 5 && pfread(temp5,temp6) then _b4_enableLight{4}=1 : gosub __piano_hit bank2 : goto __delete_missile
 
    ;non colpisce nulla
    if !pfread(temp5,temp6) then goto __skip_missile
@@ -979,6 +940,7 @@ __done
    drawscreen
    goto __main_loop
 
+
    ;*************************************************************************************************************************
    ; MUSICHE E TABELLE DEL BANCO 1
    ;_________________________________________________________________________________________________________________________
@@ -1093,6 +1055,29 @@ end
    ;  - gli oggetti della parte bassa poggiano sul pavimento (riga 10),
    ;    le lampade e le gocce della parte alta sono appese al soffitto.
    ;*************************************************************************************************************************
+   ; --- sottoprogrammi del caricamento livelli (in assembly) ---
+   ; objbit: Y = colonna di "objects" -> A = bit della sezione corrente
+   ; (0 = oggetto assente); piano_sub: A = larghezza, disegna il piano di
+   ; lavoro (riga 5) dalla colonna della sezione per A+1 colonne
+   asm
+objbit
+ tya
+ clc
+ adc _current_object_level
+ tax
+ lda objects,x
+ and _current_bit_object
+ rts
+piano_sub
+ clc
+ adc _playfield_section
+ sta temp3
+ lda _playfield_section
+ ldy #5
+ ldx #0
+ jmp pfhline
+end
+
 __load_level
    missile1height = 1
    ; LEVETTE DI DIFFICOLTA' (lette a ogni inizio livello, A = piu' difficile)
@@ -1117,42 +1102,70 @@ __load_level
 
 __loop_objects
    ; TAZZE
-   if !(objects[_current_object_level]&_current_bit_object) then goto __skip_tazze
+   asm
+ ldy #0
+ jsr objbit
+ beq .__skip_tazze
+end
    callmacro cup _playfield_section _playfield_down
    if _playfield_up then goto __skip_tazze
-   callmacro piano _playfield_section 4
+   asm
+ lda #4
+ jsr piano_sub
+end
 __skip_tazze
 
    ; MURI DI CIOCCOLATO
-   temp2 = _current_object_level+2
-   if !(objects[temp2]&_current_bit_object) then goto __skip_muri
+   asm
+ ldy #2
+ jsr objbit
+ beq .__skip_muri
+end
    callmacro chocolate _playfield_section _playfield_down
    temp5 = _playfield_section + 4
    if _playfield_up then pfpixel temp5 5 on : goto __skip_muri
-   callmacro piano _playfield_section 4
+   asm
+ lda #4
+ jsr piano_sub
+end
 __skip_muri
 
    ; GOCCE: qui si disegna solo il punto di appoggio delle gocce basse
    ; (la goccia che scende la anima __update_drops ad ogni frame)
-   temp2 = _current_object_level+3
-   if !(objects[temp2]&_current_bit_object) then goto __skip_gocce
+   asm
+ ldy #3
+ jsr objbit
+ beq .__skip_gocce
+end
    if _playfield_up then pfpixel _playfield_section 5 on
 __skip_gocce
 
    ; LAMPADE
-   temp2 = _current_object_level+4
-   if !(objects[temp2]&_current_bit_object) then goto __skip_lampade
+   asm
+ ldy #4
+ jsr objbit
+ beq .__skip_lampade
+end
    callmacro lamp _playfield_section _playfield_up
    if !_playfield_up then goto __skip_lampade
-   callmacro piano _playfield_section 2
+   asm
+ lda #2
+ jsr piano_sub
+end
 __skip_lampade
 
    ; TAVOLO + SEDIA
-   temp2 = _current_object_level+5
-   if !(objects[temp2]&_current_bit_object) then goto __skip_tavoli
+   asm
+ ldy #5
+ jsr objbit
+ beq .__skip_tavoli
+end
    callmacro table _playfield_section _playfield_down
    if _playfield_up then goto __skip_tavoli
-   callmacro piano _playfield_section 4
+   asm
+ lda #4
+ jsr piano_sub
+end
 __skip_tavoli
 
    _current_bit_object = _current_bit_object * 2
@@ -1419,6 +1432,91 @@ __boss_hit
    return otherbank
 
    ;*************************************************************************************************************************
+   ; COLORI DEL PLAYFIELD (chiamato ad ogni frame dal banco 1)
+   ;*************************************************************************************************************************
+__pf_colors
+   ; temp1 = "mostra i colori normali questo frame" - vero se
+   ; la luce è accesa, oppure se è il fotogramma di flash col buio
+   temp1 = 0
+   if _b4_enableLight{4} then temp1 = 1
+   if !(_frame_counter&31) then temp1 = 1
+
+   ;Background visibile con effetto flash se il flag della lamp è spento
+   ; righe 0-4 sopra il piano, 5 piano, 6-10 sotto. Dal livello 3 i colori
+   ; del cioccolato; nei livelli 1, 2 e 5 le lampade (paralume grigio,
+   ; lampadina azzurra) sono sempre dello stesso colore
+   if !temp1 then goto __pfc_done
+   pfcolors:
+   $28
+   $26
+   $24
+   $26
+   $24
+   $02
+   $28
+   $26
+   $24
+   $26
+   $24
+end
+   if _level = 5 then goto __pfc_level5
+   if _level > 2 then goto __pfc_done
+   pfcolors:
+   $05
+   $9E
+   $0E
+   $24
+   $26
+   $02
+   $05
+   $9E
+   $0E
+   $24
+   $26
+end
+   goto __pfc_done
+   ; livello 5: lampade come nei primi livelli, muri mobili tutti marroni
+__pfc_level5
+   pfcolors:
+   $05
+   $9E
+   $24
+   $26
+   $24
+   $02
+   $05
+   $9E
+   $24
+   $26
+   $24
+end
+__pfc_done
+   ; Background
+   if !_b4_enableLight{4} && _frame_counter&7 then pfcolors:
+   0
+end
+
+   return otherbank
+
+
+   ;*************************************************************************************************************************
+   ; TRUCCO: PEZZO DI PIANO DI LAVORO (chiamato quando un cioccolatino lo colpisce)
+   ;*************************************************************************************************************************
+   ; Una volta per livello il colpo toglie un pezzo di piano largo 4 colonne
+   ; (dalla colonna colpita - 1 alla + 2): si apre un passaggio tra sopra e
+   ; sotto. Il bit 0 di _ballx (sempre pari, riletto a ogni livello) ricorda
+   ; che il pezzo e' gia' stato tolto. temp5 = colonna colpita.
+__piano_hit
+   if _ballx & 1 then return otherbank
+   _ballx = _ballx | 1
+   temp1 = temp5 - 1 : temp2 = temp5 + 2
+   if !temp5 then temp1 = 0
+   if temp2 > 31 then temp2 = 31
+   pfhline temp1 5 temp2 off
+   callmacro sfx 4
+   return otherbank
+
+   ;*************************************************************************************************************************
    ; BONUS TEMPO (chiamato da __change_level)
    ;*************************************************************************************************************************
    ; bonus tempo: ogni segmento rimasto della barra vale 20 punti, contati
@@ -1592,58 +1690,48 @@ end
    ;  7 = powerup      super potere (zuccherino dorato)
    ;  8 = oneup        cambio livello
    ;*************************************************************************************************************************
+   ; lettore in assembly: una tabella con l'indirizzo di ogni effetto
+   ; (sfx_lo/sfx_hi, dopo i dati); temp1-temp2 = puntatore all'effetto
 __play_sfx
-   if !_sfxId then return otherbank
-   if _sfxDur then _sfxDur = _sfxDur - 1 : return otherbank
-   temp6 = _sfxPos
-   on _sfxId goto __sfx_none __sfx_shot __sfx_push __sfx_slow __sfx_block __sfx_sugar __sfx_mouth __sfx_power __sfx_level
-__sfx_none
-   return otherbank
-__sfx_shot
-   temp1 = sfx_shot[temp6] : temp6 = temp6 + 1
-   temp2 = sfx_shot[temp6] : temp6 = temp6 + 1
-   temp3 = sfx_shot[temp6]
-   goto __sfx_note
-__sfx_push
-   temp1 = sfx_push[temp6] : temp6 = temp6 + 1
-   temp2 = sfx_push[temp6] : temp6 = temp6 + 1
-   temp3 = sfx_push[temp6]
-   goto __sfx_note
-__sfx_slow
-   temp1 = sfx_slow[temp6] : temp6 = temp6 + 1
-   temp2 = sfx_slow[temp6] : temp6 = temp6 + 1
-   temp3 = sfx_slow[temp6]
-   goto __sfx_note
-__sfx_block
-   temp1 = sfx_block[temp6] : temp6 = temp6 + 1
-   temp2 = sfx_block[temp6] : temp6 = temp6 + 1
-   temp3 = sfx_block[temp6]
-   goto __sfx_note
-__sfx_sugar
-   temp1 = sfx_sugar[temp6] : temp6 = temp6 + 1
-   temp2 = sfx_sugar[temp6] : temp6 = temp6 + 1
-   temp3 = sfx_sugar[temp6]
-   goto __sfx_note
-__sfx_mouth
-   temp1 = sfx_mouth[temp6] : temp6 = temp6 + 1
-   temp2 = sfx_mouth[temp6] : temp6 = temp6 + 1
-   temp3 = sfx_mouth[temp6]
-   goto __sfx_note
-__sfx_power
-   temp1 = sfx_power[temp6] : temp6 = temp6 + 1
-   temp2 = sfx_power[temp6] : temp6 = temp6 + 1
-   temp3 = sfx_power[temp6]
-   goto __sfx_note
-__sfx_level
-   temp1 = sfx_level[temp6] : temp6 = temp6 + 1
-   temp2 = sfx_level[temp6] : temp6 = temp6 + 1
-   temp3 = sfx_level[temp6]
-   goto __sfx_note
-__sfx_note
-   if temp1 = 255 then _sfxId = 0 : AUDV0 = 0 : return otherbank
-   AUDV0 = temp1 / 16 : AUDC0 = temp1 & 15 : AUDF0 = temp2
-   _sfxDur = temp3 - 1
-   _sfxPos = _sfxPos + 3
+   asm
+ lda _sfxId
+ beq sfx_done
+ lda _sfxDur
+ beq sfx_next
+ dec _sfxDur
+ jmp sfx_done
+sfx_next
+ ldx _sfxId
+ lda sfx_lo-1,x
+ sta temp1
+ lda sfx_hi-1,x
+ sta temp2
+ ldy _sfxPos
+ lda (temp1),y
+ cmp #255
+ bne sfx_play
+ lda #0
+ sta _sfxId
+ sta AUDV0
+ beq sfx_done
+sfx_play
+ sta AUDC0
+ lsr
+ lsr
+ lsr
+ lsr
+ sta AUDV0
+ iny
+ lda (temp1),y
+ sta AUDF0
+ iny
+ lda (temp1),y
+ sta _sfxDur
+ dec _sfxDur
+ iny
+ sty _sfxPos
+sfx_done
+end
    return otherbank
 
    ; pewpew (10 note) - sparo
@@ -1694,7 +1782,12 @@ end
    255
 end
 
-
+   asm
+sfx_lo
+ .byte <sfx_shot, <sfx_push, <sfx_slow, <sfx_block, <sfx_sugar, <sfx_mouth, <sfx_power, <sfx_level
+sfx_hi
+ .byte >sfx_shot, >sfx_push, >sfx_slow, >sfx_block, >sfx_sugar, >sfx_mouth, >sfx_power, >sfx_level
+end
 
    ;*************************************************************************************************************************
    ; SUDDIVISIONE DEL PLAYFIELD (griglia 4x2, 8 sezioni)
@@ -1799,12 +1892,30 @@ end
 
    ; PIANO DI LAVORO: temp4 = bit dei 7 segmenti (il primo e' 0-7, poi 4k..4k+4)
    macro divisor
-      temp5 = 0
-      temp6 = 7
-__divisor_loop
-      if temp4 & 1 then pfhline temp5 5 temp6 on
-      temp4 = temp4 / 2
-      temp5 = temp5 + 4
-      temp6 = temp5 + 4
-      if temp5 < 28 then goto __divisor_loop
+      ; (in assembly: segmento k dalla colonna 4k alla 4k+4, il primo 0-7)
+      asm
+ lda #0
+ sta temp5
+ lda #7
+ sta temp6
+div_loop
+ lsr temp4
+ bcc div_skip
+ lda temp6
+ sta temp3
+ lda temp5
+ ldy #5
+ ldx #0
+ jsr pfhline
+div_skip
+ lda temp5
+ clc
+ adc #4
+ sta temp5
+ adc #4
+ sta temp6
+ lda temp5
+ cmp #28
+ bcc div_loop
+end
 end

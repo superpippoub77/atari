@@ -35,7 +35,7 @@ SNR_CARD=2.5 SNR_OVER=3.4 xvfb-run -a -s "-screen 0 800x600x24" python3 test_all
 - `model.py` è un modello Python del caricamento dei livelli e delle regole di movimento del BAS.
   Serve a calcolare i percorsi e a verificare che ogni zuccherino e ogni sacchetto sia raggiungibile.
 - `sugar_layout.py` calcola e verifica la disposizione degli zuccherini (`data sugar`). Simula i colpi di cioccolatino per sapere quali oggetti il giocatore riesce davvero a bucare. Poi sceglie uno zuccherino per sezione: fuori dagli oggetti indistruttibili, oppure dentro la riga distruttibile di una tazza o di un muro di cioccolato. Da lanciare con `python3 sugar_layout.py`; stampa le mappe e la tabella per il BAS.
-- `sfx_from_soundtest.py` estrae gli effetti scelti dal *bbsoundtest* di batari Basic e genera il lettore di effetti del banco 2 (`python3 sfx_from_soundtest.py bbsoundtest.bas`). Per risparmiare ROM unisce le note consecutive uguali (senza cambiare il suono), dimezza gli effetti (una nota su due, durata doppia) e dimezza due volte i tre più lunghi (esplosione, super potere, cambio livello): lo spazio serve alle presse del livello 6.
+- `sfx_from_soundtest.py` estrae gli effetti scelti dal *bbsoundtest* di batari Basic e genera il lettore di effetti del banco 2 (`python3 sfx_from_soundtest.py bbsoundtest.bas`). Il lettore degli effetti è in assembly (una tabella con l'indirizzo di ogni effetto). Per risparmiare ROM unisce le note consecutive uguali (senza cambiare il suono), dimezza gli effetti (una nota su due, durata doppia) e dimezza due volte i tre più lunghi (esplosione, super potere, cambio livello): lo spazio serve alle presse del livello 6.
 - `test_features.py` (circa 1 minuto) prova le novità di giocabilità: fuga finale (bocche e musica al doppio), tempo in scadenza (musica veloce, barra rossa), bonus tempo a fine livello, fine del super potere, combo "partita perfetta" (zuccherino doppio senza vite perse) e levette di difficoltà (in A: Bocche più veloci, 6 tacche, niente bonus; in B: normale). Si lancia come `test_all.py`.
 - `test_all.py` gioca una partita completa sui 6 livelli e sul livello segreto della Bocca Gigante, fino all'inizio del secondo giro. Per ogni livello controlla:
   - nessun oggetto sospeso nel vuoto: tutto poggia sul piano di lavoro o sul pavimento, oppure è appeso al soffitto o al piano;
@@ -47,6 +47,7 @@ SNR_CARD=2.5 SNR_OVER=3.4 xvfb-run -a -s "-screen 0 800x600x24" python3 test_all
   - il cioccolatino lanciato con direzione e fuoco premuti insieme colpisce la bocca: +10, una volta sola;
   - il sacchetto compare solo alle condizioni giuste, si raggiunge e porta al livello successivo;
   - la luce si spegne dopo 32 secondi e si riaccende sparando sul piano di lavoro;
+  - il trucco del piano: il primo colpo toglie un pezzo di piano (al massimo 4 colonne vicine), un secondo colpo riaccende la luce ma non toglie altri pezzi;
   - la barra del tempo, le vite e il game over;
   - la selezione del livello con Select;
   - le presse del livello 6: stantuffi a T (perno continuo, testa larga in fondo) che si allungano e si ritirano; scendendo sul biscotto lo schiacciano (una vita), stando fermi a contatto col piano non succede niente; nei percorsi del test le presse si attraversano aspettando che risalgano;

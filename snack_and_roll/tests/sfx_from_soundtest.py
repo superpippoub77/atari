@@ -81,25 +81,49 @@ def main():
     for sid, key, src, desc in SOUNDS:
         w(f"   ;  {sid} = {src:12s} {desc}")
     w("   ;*************************************************************************************************************************")
+    w("   ; lettore in assembly: una tabella con l'indirizzo di ogni effetto")
+    w("   ; (sfx_lo/sfx_hi, dopo i dati); temp1-temp2 = puntatore all'effetto")
     w("__play_sfx")
-    w("   if !_sfxId then return otherbank")
-    w("   if _sfxDur then _sfxDur = _sfxDur - 1 : return otherbank")
-    w("   temp6 = _sfxPos")
-    labels = " ".join(["__sfx_none"] + [f"__sfx_{key}" for _, key, _, _ in SOUNDS])
-    w(f"   on _sfxId goto {labels}")
-    w("__sfx_none")
-    w("   return otherbank")
-    for sid, key, src, desc in SOUNDS:
-        w(f"__sfx_{key}")
-        w(f"   temp1 = sfx_{key}[temp6] : temp6 = temp6 + 1")
-        w(f"   temp2 = sfx_{key}[temp6] : temp6 = temp6 + 1")
-        w(f"   temp3 = sfx_{key}[temp6]")
-        w("   goto __sfx_note")
-    w("__sfx_note")
-    w("   if temp1 = 255 then _sfxId = 0 : AUDV0 = 0 : return otherbank")
-    w("   AUDV0 = temp1 / 16 : AUDC0 = temp1 & 15 : AUDF0 = temp2")
-    w("   _sfxDur = temp3 - 1")
-    w("   _sfxPos = _sfxPos + 3")
+    w("   asm")
+    for l in """ lda _sfxId
+ beq sfx_done
+ lda _sfxDur
+ beq sfx_next
+ dec _sfxDur
+ jmp sfx_done
+sfx_next
+ ldx _sfxId
+ lda sfx_lo-1,x
+ sta temp1
+ lda sfx_hi-1,x
+ sta temp2
+ ldy _sfxPos
+ lda (temp1),y
+ cmp #255
+ bne sfx_play
+ lda #0
+ sta _sfxId
+ sta AUDV0
+ beq sfx_done
+sfx_play
+ sta AUDC0
+ lsr
+ lsr
+ lsr
+ lsr
+ sta AUDV0
+ iny
+ lda (temp1),y
+ sta AUDF0
+ iny
+ lda (temp1),y
+ sta _sfxDur
+ dec _sfxDur
+ iny
+ sty _sfxPos
+sfx_done""".split("\n"):
+        w(l)
+    w("end")
     w("   return otherbank")
     w("")
     total = 0
@@ -124,6 +148,13 @@ def main():
             w("   " + ", ".join(str(x) for x in data[i:i + 18]))
         w("end")
         w("")
+    w("   asm")
+    w("sfx_lo")
+    w(" .byte " + ", ".join(f"<sfx_{key}" for _, key, _, _ in SOUNDS))
+    w("sfx_hi")
+    w(" .byte " + ", ".join(f">sfx_{key}" for _, key, _, _ in SOUNDS))
+    w("end")
+    w("")
     sys.stderr.write(f"dati effetti: {total} byte\n")
     print("\n".join(lines))
 
