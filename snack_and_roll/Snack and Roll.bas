@@ -907,6 +907,9 @@ __change_level
    if _level > _Boss then _level = 1 : _lap = _lap + 1
 
 __skip_to_change
+   ; un cioccolatino ancora in volo non passa al livello nuovo (colpirebbe
+   ; il piano appena disegnato)
+   missile0y = 200 : _b7_gameMissile0Moving{7} = 0
    pfscorecolor = $08
    scorecolor=(scorecolor + $10) & $F0
    pfscore1=%11111111
