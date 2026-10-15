@@ -144,6 +144,12 @@
    dim _ballx = u
    dim _attractDir = y
    dim _hitCooldown = v
+   ; Bocca Gigante: secondo sputo, direzioni e strada fatta (riga 11
+   ; del playfield, nascosta)
+   dim _spit2x = var44
+   dim _spit2y = var45
+   dim _spitDir = var46
+   dim _spitTime = var47
    ; chiave (zuccherino 1) e stato dello slow motion nel frame precedente
    dim _b2_hasKey = k
    dim _b3_prevSlow = k
@@ -401,6 +407,8 @@ __mouth1_alive
    if !_mouth0wait then gosub __move_mouth
    temp6 = 1
    if temp1 = 2 && !_mouth1wait then gosub __move_mouth
+   ; la Bocca Gigante e' larga 32 pixel: non esce a destra
+   if _level = _Boss && _mouth0x > 120 then _mouth0x = 120
 __mouth_still
 
    ; una bocca uccisa non si disegna (player1 fuori dallo schermo)
@@ -456,12 +464,18 @@ __skip_bocche
    if pfscore2 = %10101010 then score = score + 50
    if temp2 = 2 then _b2_hasKey{2} = 1
    if temp2 = 1 then goto __golden_sugar
-   callmacro sfx 5
+   asm
+ ldx #5
+ jsr sfx_go1
+end
    goto __no_sugar_hit
 __golden_sugar
    ; super potere: bocche congelate e biscotto invulnerabile
    _hitCooldown = 120
-   callmacro sfx 7
+   asm
+ ldx #7
+ jsr sfx_go1
+end
 __no_sugar_hit
 
    ; cerca il primo zuccherino non ancora raccolto (indice in temp4)
@@ -589,7 +603,10 @@ __Skip_Joystick_Precheck
    if _b7_gameMissile0Moving{7} || _b6_enableSlowMotion{6} then goto __Skip_Fire
 
    _b7_gameMissile0Moving{7} = 1
-   callmacro sfx 1
+   asm
+ ldx #1
+ jsr sfx_go1
+end
 
    ; Direzione iniziale del missile esattamente uguale a a quella del giocatore
    _Bit4_M0_Dir_Up{4} = _Bit0_P0_Dir_Up{0}
@@ -654,7 +671,10 @@ __not_push_wall
 
    ; colpisce il playfield
    pfpixel temp5 temp6 off : score = score + 1
-   callmacro sfx 4
+   asm
+ ldx #4
+ jsr sfx_go1
+end
 
 __delete_missile
 
@@ -794,7 +814,10 @@ __skip_right
 __slow_on
    if _b3_prevSlow{3} then goto __slow_sound_done
    _b3_prevSlow{3} = 1
-   callmacro sfx 3
+   asm
+ ldx #3
+ jsr sfx_go1
+end
 __slow_sound_done
 
    goto __game_collision
@@ -867,11 +890,16 @@ __no_press_hit
    ;
    ;*************************************************************************************************************************
 __destroy_mouth
-   score = score + 10
-   _b5_enablePalyer1{5} = 0
-   callmacro sfx 6
    ; il cioccolatino sparisce (prima continuava e poteva colpire due volte)
    _b7_gameMissile0Moving{7} = 0 : missile0y = 200
+   ; la Bocca Gigante appena colpita (ferma) non si puo' colpire di nuovo
+   if _level = _Boss && _hitCooldown then goto __done
+   score = score + 10
+   _b5_enablePalyer1{5} = 0
+   asm
+ ldx #6
+ jsr sfx_go1
+end
    if _level = _Boss then gosub __boss_hit bank2 : goto __done
    ; la collisione si riferisce alla bocca disegnata nel frame precedente:
    ; con due bocche e' l'altra rispetto a _mouthIndex
@@ -892,6 +920,20 @@ __kill_mouth
    if _mouthIndex then _mouth1wait = _Mouth_Respawn : _mouth1y = 200
    return
 
+
+   ; effetto sonoro X (se ha priorita' maggiore o uguale a quello in corso)
+   asm
+sfx_go1
+ cpx _sfxId
+ bcc sfx_go1_skip
+ stx _sfxId
+ lda #0
+ sta _sfxPos
+ sta _sfxDur
+sfx_go1_skip
+ rts
+end
+
 __decrease_timer_bar
    pfscore1 = pfscore1 * 2
    goto __done
@@ -900,7 +942,10 @@ __change_level
    ; bonus tempo (banco 2)
    gosub __time_bonus bank2
    _sfxId = 0
-   callmacro sfx 8
+   asm
+ ldx #8
+ jsr sfx_go1
+end
    _level=_level+1
    ; dopo l'ultimo livello c'e' la Bocca Gigante, poi si riparte dal
    ; primo livello, un giro piu' veloce
@@ -1015,9 +1060,6 @@ end
 end
 
    ; avvia un effetto sonoro se non ne sta suonando uno piu' importante
-   macro sfx
-   if _sfxId <= {1} then _sfxId = {1} : _sfxPos = 0 : _sfxDur = 0
-end
 
    ;#########################################################################################################################
    ;#########################################################################################################################
@@ -1041,6 +1083,78 @@ __boss_gfx
    %01111110
 end
    return
+
+   ;*************************************************************************************************************************
+   ; COLORI DEL PLAYFIELD (chiamato ad ogni frame dal banco 1)
+   ;*************************************************************************************************************************
+__pf_colors
+   ; righe 0-4 sopra il piano, 5 piano, 6-10 sotto. Dal livello 3 i colori
+   ; del cioccolato; nei livelli 1, 2 e 5 le lampade (paralume grigio,
+   ; lampadina azzurra) sono sempre dello stesso colore. Al buio tutto
+   ; e' piu' scuro, senza lampeggi
+   if !_b4_enableLight{4} then goto __pfc_dark
+   pfcolors:
+   $28
+   $26
+   $24
+   $26
+   $24
+   $02
+   $28
+   $26
+   $24
+   $26
+   $24
+end
+   if _level = 5 then goto __pfc_level5
+   if _level > 2 then goto __pfc_done
+   pfcolors:
+   $05
+   $9E
+   $0E
+   $24
+   $26
+   $02
+   $05
+   $9E
+   $0E
+   $24
+   $26
+end
+   goto __pfc_done
+   ; livello 5: lampade come nei primi livelli, muri mobili tutti marroni
+__pfc_level5
+   pfcolors:
+   $05
+   $9E
+   $24
+   $26
+   $24
+   $02
+   $05
+   $9E
+   $24
+   $26
+   $24
+end
+   goto __pfc_done
+__pfc_dark
+   pfcolors:
+   $22
+   $22
+   $20
+   $22
+   $20
+   $02
+   $22
+   $22
+   $20
+   $22
+   $20
+end
+__pfc_done
+
+   return otherbank
 
    ;*************************************************************************************************************************
    ; PLAYFIELD DEL LIVELLO (eseguito una volta all'inizio del livello)
@@ -1181,6 +1295,7 @@ __skip_tavoli
    ; e' alto 4 righe, barra dell'energia (8 pixel) sul pavimento ---
    if _level <> _Boss then goto __no_boss_setup
    _choco_bits = 255 : _b2_hasKey{2} = 1 : missile1height = 4
+   _mouth1y = 200 : _spit2y = 200
    pfhline 12 10 19 on
 __no_boss_setup
 
@@ -1383,123 +1498,251 @@ __boss
    return otherbank
 __boss_alive
    gosub __boss_gfx
-__boss_closed
-   player1:
-   %00111100
-   %01111110
-   %11111111
-   %11111111
-   %10111101
-   %11111111
-   %11111111
-   %01111110
+   ; appena colpita (ferma per _hitCooldown) o quasi sconfitta: lampeggia
+   asm
+ lda _frame_counter
+ and #4
+ beq boss_noflash
+ lda _hitCooldown
+ bne boss_flash
+ lda _choco_count
+ cmp #5
+ bcc boss_noflash
+boss_flash
+ lda #$0E
+ sta COLUP1
+boss_noflash
 end
-__boss_gfx_done
-   ; quasi sconfitta (5 colpi o piu'): lampeggia
-   temp1 = _frame_counter & 4
-   if temp1 && _choco_count > 4 then COLUP1 = $0E
    ; frame per passo: 10 all'inizio, 3 al settimo colpo
    _speed = 10 - _choco_count
-   if _mouth0x > 120 then _mouth0x = 120
-   if _mouth1y < 200 then goto __spit_move
-   ; uno sputo al secondo, tre al secondo dopo il quarto colpo
-   temp1 = _frame_counter
-   if _choco_count > 3 then temp1 = _frame_counter & 15
-   if temp1 then goto __spit_show
-   _mouth1x = _mouth0x + 14
-   _mouth1y = _mouth0y + 2
-   if player0y < _mouth0y then _mouth1y = _mouth0y - 10
-   callmacro sfx 1
-__spit_move
-   ; lo sputo si allontana dalla bocca, verso l'alto o verso il basso
-   if _mouth1y > _mouth0y then _mouth1y = _mouth1y + 2 else _mouth1y = _mouth1y - 2
-   if _mouth1y > 92 then _mouth1y = 200
-   if !collision(player0, missile1) then goto __spit_show
-   _mouth1y = 200
-   if _hitCooldown then goto __spit_show
+   ; --- sputo 1 (_mouth1x/_mouth1y, direzione nei bit 0-2 di _spitDir) ---
+   ; uno sputo al secondo, tre al secondo dopo il quarto colpo. Parte dal
+   ; centro della bocca, mirato al biscotto (8 direzioni, tabella spitaim:
+   ; sinistra/centro/destra + 3 * sopra/stessa altezza/sotto)
+   asm
+ lda _mouth1y
+ cmp #200
+ bcs spit_new
+ jmp spit_move
+spit_new
+ lda _choco_count
+ cmp #4
+ lda _frame_counter
+ bcc spit_rate
+ and #15
+spit_rate
+ beq spit_fire
+ jmp spit2
+spit_fire
+ lda _mouth0x
+ clc
+ adc #14
+ sta _mouth1x
+ lda _mouth0y
+ sec
+ sbc #2
+ sta _mouth1y
+ lda #0
+ sta _spitTime
+ ldx #1
+ lda _mouth0x
+ clc
+ adc #20
+ cmp player0x
+ bcs spit_h1
+ ldx #2
+spit_h1
+ lda _mouth0x
+ clc
+ adc #4
+ sta temp4
+ lda player0x
+ cmp temp4
+ bcs spit_h2
+ ldx #0
+spit_h2
+ lda _mouth0y
+ clc
+ adc #4
+ cmp player0y
+ bcs spit_v1
+ inx
+ inx
+ inx
+ inx
+ inx
+ inx
+ bne spit_v3
+spit_v1
+ lda player0y
+ clc
+ adc #8
+ cmp _mouth0y
+ bcc spit_v3
+ inx
+ inx
+ inx
+spit_v3
+ lda _spitDir
+ and #$F0
+ ora spitdx+16,x
+ sta _spitDir
+end
+   asm
+ ldx #1
+ jsr sfx_go2
+end
+   ; avanza; dopo il quarto colpo, a meta' strada si divide in due sputi
+   ; che si allargano (direzioni accanto a quella di partenza)
+   asm
+spit_move
+ lda _spitDir
+ and #7
+ tax
+ lda _mouth1x
+ clc
+ adc spitdx,x
+ sta _mouth1x
+ cmp #151
+ bcs spit_kill1
+ lda _mouth1y
+ clc
+ adc spitdx+8,x
+ sta _mouth1y
+ cmp #93
+ bcs spit_kill1
+ inc _spitTime
+ lda _choco_count
+ cmp #4
+ bcc spit2
+ lda _spitTime
+ cmp #14
+ bne spit2
+ lda _spit2y
+ cmp #200
+ bcc spit2
+ lda _mouth1x
+ sta _spit2x
+ lda _mouth1y
+ sta _spit2y
+ inx
+ txa
+ and #7
+ asl
+ asl
+ asl
+ asl
+ sta temp3
+ dex
+ dex
+ txa
+ and #7
+ ora temp3
+ sta _spitDir
+ jmp spit2
+spit_kill1
+ lda #200
+ sta _mouth1y
+spit2
+ lda _spit2y
+ cmp #200
+ bcs spit_hit
+ lda _spitDir
+ lsr
+ lsr
+ lsr
+ lsr
+ tax
+ lda _spit2x
+ clc
+ adc spitdx,x
+ sta _spit2x
+ cmp #151
+ bcs spit_kill2
+ lda _spit2y
+ clc
+ adc spitdx+8,x
+ sta _spit2y
+ cmp #93
+ bcc spit_hit
+spit_kill2
+ lda #200
+ sta _spit2y
+spit_hit
+ ; lo sputo che tocca il biscotto toglie una vita (via tutti e due)
+ bit CXM1P
+ bpl .__spit_show
+ lda #200
+ sta _mouth1y
+ sta _spit2y
+ lda _hitCooldown
+ bne .__spit_show
+end
    pfscore2 = pfscore2 / 4 : pfscore1 = 255 : _hitCooldown = 90
 __spit_show
-   missile1x = _mouth1x : missile1y = _mouth1y
+   ; un solo missile1: con due sputi si disegnano a frame alterni
+   asm
+ lda _mouth1x
+ sta missile1x
+ lda _mouth1y
+ sta missile1y
+ lda _spit2y
+ cmp #200
+ bcs spit_done
+ lda _mouth1y
+ cmp #200
+ bcs spit_show2
+ lda _frame_counter
+ lsr
+ bcs spit_done
+spit_show2
+ lda _spit2x
+ sta missile1x
+ lda _spit2y
+ sta missile1y
+spit_done
+end
    return otherbank
 
-   ; colpo di cioccolatino alla Bocca Gigante
+   ; direzioni: 0 su, 1 su-destra, 2 destra, 3 giu'-destra, 4 giu',
+   ; 5 giu'-sinistra, 6 sinistra, 7 su-sinistra
+   ; spitdx: passo in x; spitdx+8: passo in y; spitdx+16: direzione
+   ; verso il biscotto, (sinistra/centro/destra) + 3 * (sopra/stessa
+   ; altezza/sotto)
+   data spitdx
+   0, 2, 2, 2, 0, 254, 254, 254
+   254, 254, 0, 2, 2, 2, 0, 254
+   7, 0, 1, 6, 4, 2, 5, 4, 3
+end
+
+   ; colpo di cioccolatino alla Bocca Gigante: resta ferma dov'e' per un
+   ; attimo (_hitCooldown), e intanto non si puo' colpire di nuovo
 __boss_hit
    _choco_count = _choco_count + 1 : score = score + 40
    temp5 = 20 - _choco_count
    pfpixel temp5 10 off
-   _mouth1y = 200 : _mouth0y = 8 : _mouth0x = 120
-   if player0x > 70 then _mouth0x = 20
+   _hitCooldown = 30
    if _choco_count < 8 then return otherbank
-   _b5_enablePalyer1{5} = 0 : score = score + 500
-   callmacro sfx 7
+   score = score + 500
+   asm
+ ldx #7
+ jsr sfx_go2
+end
    return otherbank
 
-   ;*************************************************************************************************************************
-   ; COLORI DEL PLAYFIELD (chiamato ad ogni frame dal banco 1)
-   ;*************************************************************************************************************************
-__pf_colors
-   ; temp1 = "mostra i colori normali questo frame" - vero se
-   ; la luce è accesa, oppure se è il fotogramma di flash col buio
-   temp1 = 0
-   if _b4_enableLight{4} then temp1 = 1
-   if !(_frame_counter&31) then temp1 = 1
-
-   ;Background visibile con effetto flash se il flag della lamp è spento
-   ; righe 0-4 sopra il piano, 5 piano, 6-10 sotto. Dal livello 3 i colori
-   ; del cioccolato; nei livelli 1, 2 e 5 le lampade (paralume grigio,
-   ; lampadina azzurra) sono sempre dello stesso colore
-   if !temp1 then goto __pfc_done
-   pfcolors:
-   $28
-   $26
-   $24
-   $26
-   $24
-   $02
-   $28
-   $26
-   $24
-   $26
-   $24
-end
-   if _level = 5 then goto __pfc_level5
-   if _level > 2 then goto __pfc_done
-   pfcolors:
-   $05
-   $9E
-   $0E
-   $24
-   $26
-   $02
-   $05
-   $9E
-   $0E
-   $24
-   $26
-end
-   goto __pfc_done
-   ; livello 5: lampade come nei primi livelli, muri mobili tutti marroni
-__pfc_level5
-   pfcolors:
-   $05
-   $9E
-   $24
-   $26
-   $24
-   $02
-   $05
-   $9E
-   $24
-   $26
-   $24
-end
-__pfc_done
-   ; Background
-   if !_b4_enableLight{4} && _frame_counter&7 then pfcolors:
-   0
+   ; effetto sonoro X (se ha priorita' maggiore o uguale a quello in corso)
+   asm
+sfx_go2
+ cpx _sfxId
+ bcc sfx_go2_skip
+ stx _sfxId
+ lda #0
+ sta _sfxPos
+ sta _sfxDur
+sfx_go2_skip
+ rts
 end
 
-   return otherbank
 
 
    ;*************************************************************************************************************************
@@ -1510,14 +1753,18 @@ end
    ; sotto. Il bit 0 di _ballx (sempre pari, riletto a ogni livello) ricorda
    ; che il pezzo e' gia' stato tolto. temp5 = colonna colpita.
 __piano_hit
-   if _ballx & 1 then return otherbank
+   if _ballx & 1 then return
    _ballx = _ballx | 1
    temp1 = temp5 - 1 : temp2 = temp5 + 2
    if !temp5 then temp1 = 0
    if temp2 > 31 then temp2 = 31
    pfhline temp1 5 temp2 off
-   callmacro sfx 4
+   asm
+ ldx #4
+ jsr sfx_go2
+end
    return otherbank
+
 
    ;*************************************************************************************************************************
    ; BONUS TEMPO (chiamato da __change_level)
@@ -1619,7 +1866,10 @@ __pw_moved
    if temp6 = 0 then _pushCol = temp5
    if temp6 = 1 then _pushCol2 = temp5
    if temp6 = 2 then _pushCol3 = temp5
-   callmacro sfx 2
+   asm
+ ldx #2
+ jsr sfx_go2
+end
    ; i muri sul piano non schiacciano le bocche
    if temp5 >= 128 then return otherbank
 
@@ -1653,7 +1903,10 @@ end
    return otherbank
 __crushed
    score = score + 10 : _b5_enablePalyer1{5} = 0
-   callmacro sfx 6
+   asm
+ ldx #6
+ jsr sfx_go2
+end
    return thisbank
    ; bocca in X (x), Y (y), A (attesa, gia' nei flag): carry = schiacciata
    asm

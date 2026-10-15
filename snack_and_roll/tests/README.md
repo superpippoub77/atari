@@ -54,5 +54,5 @@ SNR_CARD=2.5 SNR_OVER=3.4 xvfb-run -a -s "-screen 0 800x600x24" python3 test_all
   - i muri spingibili (3 al livello 5, sopra e sotto il piano): si spostano spingendoli con la levetta nei due sensi, si fermano a fine corsia, non si distruggono e schiacciano le bocche; alla fine tornano al loro posto;
   - livello 5: gli zuccherini delle stanze chiuse non si raggiungono senza spingere un muro; il test trova la spinta giusta (`model.single_pushes`) e la esegue con la levetta;
   - una bocca uccisa (con un cioccolatino o schiacciata) sparisce e ricompare nel suo angolo dopo circa 4 secondi;
-  - dopo il livello 6 arriva la Bocca Gigante: sputa, lo sputo toglie una vita, 8 colpi svuotano la barra dell'energia, alla sconfitta compare il sacchetto (+50 a colpo, +500 alla fine); non si sceglie con Select;
+  - dopo il livello 6 arriva la Bocca Gigante: sputa mirando al biscotto (8 direzioni), dopo il quarto colpo lo sputo si divide in due, lo sputo toglie una vita, colpita resta ferma un attimo e intanto non si colpisce di nuovo, 8 colpi svuotano la barra dell'energia, alla sconfitta compare il sacchetto (+50 a colpo, +500 alla fine); non si sceglie con Select;
   - dopo la Bocca Gigante si riparte dal livello 1 con le bocche più veloci.
