@@ -22,7 +22,7 @@
 ---
 
 > 🔧 **Versione Atari aggiornata**
-> - Gli zuccherini compaiono uno alla volta, fermi, senza sfarfallio.
+> - Gli zuccherini compaiono uno alla volta, fermi, senza sfarfallio. Posizioni e ordine di comparsa sono scelti con una simulazione Monte Carlo (`snack_and_roll/tools/sugar_opt.py`): uno per ogni zona dello schema, tratti di strada equilibrati, niente zuccherini nell'angolo da cui partono le bocche, e la probabilità di essere morsi cresce con il livello (circa 11%, 18%, 18%, 43%, 49%, 54% per un giocatore medio simulato).
 > - Gli oggetti della parte alta poggiano sempre sul piano di lavoro; lampade, gocce e cioccolato della parte bassa sono appesi al piano.
 > - **6 livelli a tema**: 1 tavoli, 2 tazze, 3 muri di cioccolato, 4 gocce (solo gocce: 8, una per sezione, che scendono fino al piano o al pavimento), 5 muri mobili, 6 **presse** (al buio). Dopo il livello 6 c'è il **livello segreto della Bocca Gigante** (vedi sotto), poi si riparte dal primo con le bocche più veloci (un giro in più), finché ci sono vite.
 > - I muri mobili si spostano quando il biscotto li spinge e **schiacciano le bocche** (+10, conta come bocca colpita).
@@ -44,7 +44,7 @@
 > - **Livello 6, le presse**: solo presse, 4 appese al soffitto e 4 al piano. Ogni pressa è uno stantuffo a T (perno sottile, testa larga) che scende fino in fondo a ritmo, sfasata dalle vicine come un'onda: se ti prende sotto perdi una vita. Il livello parte al buio.
 > - **Livello segreto: la Bocca Gigante** (boss, dopo il livello 6). Una bocca enorme con i denti insegue il biscotto e gli sputa contro, mirando al biscotto in 8 direzioni (anche di lato e in diagonale): lo sputo toglie una vita. Si batte con 8 colpi di cioccolatino; la barra dell'energia sul pavimento si svuota a ogni colpo. Colpita, resta ferma dov'è per un attimo e lampeggia (in quel momento non si può colpire di nuovo), poi riprende a inseguire, più veloce; dopo il quarto colpo sputa tre volte al secondo e ogni sputo a metà strada si divide in due che si allargano, dopo il quinto lampeggia. Ogni colpo vale 50 punti, la vittoria 500 in più, poi compare il sacchetto. Non si sceglie con Select, ma con una **combinazione segreta**: nel titolo tieni la leva in su e il pulsante premuti (si accende un 7° segnalino) e premi Reset.
 > - **Trucco del piano di lavoro**: in ogni livello il primo cioccolatino che colpisce il piano di lavoro ne toglie un pezzo (4 colonne) e apre una scorciatoia tra sopra e sotto. Un solo pezzo per livello: i colpi successivi riaccendono soltanto la luce.
-> - Nel livello 5 le lampade hanno i colori dei primi livelli (paralume grigio, lampadina azzurra) e i muri mobili restano marrone cioccolato.
+> - Nel livello 5 le lampade hanno i colori dei primi livelli (paralume grigio, lampadina azzurra) e i muri mobili sono a blocchetti di cioccolato (chiaro, scuro, chiaro), così si riconoscono come muri da spingere.
 > - Altre correzioni: un colpo alla bocca vale +10 una volta sola; la luce si spegne a 32 secondi ma si può riaccendere subito, e ogni nuovo livello parte con la luce accesa (tranne il 5).
 > - La ROM viene provata in automatico nell'emulatore Stella: [`snack_and_roll/tests`](snack_and_roll/tests/README.md).
 

@@ -9,7 +9,8 @@ Regole:
   - uno zuccherino per ognuna delle 8 sezioni (b0..b7): distribuiti su tutto
     lo schema, sopra e sotto il piano di lavoro.
 
-Uso:  python3 sugar_layout.py          -> stampa mappe e tabella per il BAS
+Uso:  python3 sugar_layout.py          -> verifica la tabella del BAS
+      python3 sugar_layout.py --genera -> disposizione con le regole semplici
 """
 import sys
 
@@ -106,7 +107,7 @@ def choose(level, info, base):
 # livelli con la disposizione decisa a mano (verificata qui sotto):
 # livello 5 = muri mobili. Gli zuccherini delle stanze A (b5) e B (b6)
 # si prendono solo spingendo un muro.
-FIXED = {5: [33, 9, 43, 11, 37, 13, 47, 15]}
+FIXED = {5: [9, 15, 47, 43, 37, 41, 10, 13]}
 
 
 def check_fixed(level, seq, objects=OBJECTS):
@@ -164,9 +165,41 @@ def layout(objects=OBJECTS, verbose=True):
     return table
 
 
+def bas_table():
+    import os
+    import re
+    bas = os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", "Snack and Roll.bas")
+    m = re.search(r"data sugar\n(.*?)\nend", open(bas, encoding="utf-8").read(), re.S)
+    nums = [int(x) for x in re.findall(r"\d+", m.group(1))]
+    return [nums[i * 8:(i + 1) * 8] for i in range(LEVELS)]
+
+
+def verify(table, objects=OBJECTS):
+    """controlla la tabella del BAS (scelta con tools/sugar_opt.py) con le regole sopra."""
+    ok = True
+    for level, seq in enumerate(table, 1):
+        if sorted(section_of(v) for v in seq) != list(range(8)):
+            print(f"L{level}: non c'e' uno zuccherino per sezione: {seq}")
+            ok = False
+        if level in FIXED:
+            info = check_fixed(level, seq, objects)
+        else:
+            info = analyse(level, objects)[3]
+        bad = [v for v in seq if info[v] == "no"]
+        if bad:
+            print(f"L{level}: zuccherini in posizioni non valide: {bad}")
+            ok = False
+        print(f"L{level}: " + " ".join(f"{v}({info[v]})" for v in seq))
+    return ok
+
+
 if __name__ == "__main__":
-    t = layout()
-    print("\ndata sugar")
-    for i, seq in enumerate(t):
-        print("   " + ", ".join(str(v) for v in seq) + ",")
-    sys.exit(0)
+    # senza argomenti: verifica la tabella del BAS; --genera: vecchia
+    # disposizione calcolata con le regole semplici
+    if "--genera" in sys.argv:
+        t = layout()
+        print("\ndata sugar")
+        for i, seq in enumerate(t):
+            print("   " + ", ".join(str(v) for v in seq) + ",")
+        sys.exit(0)
+    sys.exit(0 if verify(bas_table()) else 1)
