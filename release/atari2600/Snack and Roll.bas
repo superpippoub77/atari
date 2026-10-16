@@ -1026,18 +1026,20 @@ end
    ; zuccherino per sezione, cosi' sono distribuiti su tutto lo schema.
    ; Ogni zuccherino e' fuori dagli oggetti indistruttibili oppure dentro
    ; la riga distruttibile di una tazza o di un muro di cioccolato (si buca
-   ; a colpi di cioccolatino). Ordine di comparsa: si parte in basso a
-   ; sinistra e si attraversa lo schermo alternando sotto e sopra.
-   ; Posizioni calcolate e verificate con snack_and_roll/tests/sugar_layout.py
+   ; a colpi di cioccolatino). Posizioni e ordine di comparsa scelti con
+   ; snack_and_roll/tools/sugar_opt.py (simulazione Monte Carlo: tratti
+   ; equilibrati, niente zuccherini nell'angolo delle bocche, probabilita'
+   ; di essere morsi che cresce con il livello) e verificati con
+   ; snack_and_roll/tests/sugar_layout.py
    ;*************************************************************************************************************************
    data sugar
 
-   49, 9, 58, 10, 37, 29, 54, 22,
-   49, 17, 51, 19, 52, 20, 39, 22,
-   33, 25, 42, 18, 53, 21, 62, 14,
-   56, 8, 35, 27, 37, 21, 55, 15,
-   33, 9, 43, 11, 37, 13, 47, 15,
-   32, 16, 51, 11, 61, 13, 39, 31,
+   20, 61, 18, 34, 63, 49, 25, 23,
+   43, 55, 33, 19, 36, 13, 17, 22,
+   45, 57, 39, 27, 42, 21, 17, 15,
+   54, 31, 43, 57, 53, 27, 17, 29,
+   9, 15, 47, 43, 37, 41, 10, 13,
+   57, 63, 51, 19, 53, 31, 25, 29,
 end
 
    ; tema del titolo (semicrome, AUDC 4): rock'n'roll originale, giro di
@@ -1122,20 +1124,21 @@ end
    $26
 end
    goto __pfc_done
-   ; livello 5: lampade come nei primi livelli, muri mobili tutti marroni
+   ; livello 5: lampade come nei primi livelli, muri mobili a blocchetti
+   ; di cioccolato (chiaro, scuro, chiaro: si vede che sono da spingere)
 __pfc_level5
    pfcolors:
    $05
    $9E
-   $24
-   $26
-   $24
+   $28
+   $22
+   $28
    $02
    $05
    $9E
-   $24
-   $26
-   $24
+   $28
+   $22
+   $28
 end
    goto __pfc_done
 __pfc_dark
