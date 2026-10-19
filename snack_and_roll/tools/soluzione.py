@@ -31,12 +31,12 @@ NAMES = {1: "I tavoli", 2: "Le tazze", 3: "I muri di cioccolato", 4: "Le gocce",
          5: "Il rompicapo dei muri", 6: "Le presse"}
 # colori delle righe (pfcolors del BAS) per disegnare le mappe
 ROWCOL = {
-    "a": ["#4a4a4a", "#7fe8ff", "#e8e8e8", "#8a6a10", "#a07c18", "#303030",
-          "#4a4a4a", "#7fe8ff", "#e8e8e8", "#8a6a10", "#a07c18"],
+    "a": ["#4a4a4a", "#ffe066", "#e8e8e8", "#8a6a10", "#a07c18", "#303030",
+          "#4a4a4a", "#ffe066", "#e8e8e8", "#8a6a10", "#a07c18"],
     "b": ["#b08a20", "#a07c18", "#8a6a10", "#a07c18", "#8a6a10", "#303030",
           "#b08a20", "#a07c18", "#8a6a10", "#a07c18", "#8a6a10"],
-    "c": ["#4a4a4a", "#7fe8ff", "#b08a20", "#5a4008", "#b08a20", "#303030",
-          "#4a4a4a", "#7fe8ff", "#b08a20", "#5a4008", "#b08a20"],
+    "c": ["#4a4a4a", "#ffe066", "#8a6a10", "#4a3404", "#8a6a10", "#303030",
+          "#4a4a4a", "#ffe066", "#8a6a10", "#4a3404", "#8a6a10"],
 }
 PALETTE = {1: "a", 2: "a", 3: "b", 4: "b", 5: "c", 6: "b"}
 

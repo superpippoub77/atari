@@ -8,6 +8,8 @@
 > Si trova in [`snack_and_roll_godot/`](snack_and_roll_godot/README.md).
 >
 > 📦 **Download** (Atari 2600 `.bin`, Windows, Linux, Android, Browser): cartella [`release/`](release/README.md).
+>
+> 🕹️ **Gioca subito nel browser**: [`index.html`](index.html) apre l'emulatore Atari 2600 (Javatari.js, in [`emulator/`](emulator/)) con la ROM già caricata; i pulsanti in alto passano a Snack 'n' Roll 16K e a Circular Defense. Il workflow [`.github/workflows/main.yml`](.github/workflows/main.yml) la pubblica su Aruba (via FTP) a ogni push su `main`, in `www.filippomorano.com/projects/atari2600/`.
 
 > 🛡️ **Nuovo gioco:** [*Circular Defense*](circular_defense/README.md) per Atari 2600. Difendi 6 città con il paddle (o col joystick) in 8 livelli.
 >
@@ -44,7 +46,7 @@
 > - **Livello 6, le presse**: solo presse, 4 appese al soffitto e 4 al piano. Ogni pressa è uno stantuffo a T (perno sottile, testa larga) che scende fino in fondo a ritmo, sfasata dalle vicine come un'onda: se ti prende sotto perdi una vita. Il livello parte al buio.
 > - **Livello segreto: la Bocca Gigante** (boss, dopo il livello 6). Una bocca enorme con i denti insegue il biscotto e gli sputa contro, mirando al biscotto in 8 direzioni (anche di lato e in diagonale): lo sputo toglie una vita. Si batte con 8 colpi di cioccolatino; la barra dell'energia sul pavimento si svuota a ogni colpo. Colpita, resta ferma dov'è per un attimo e lampeggia (in quel momento non si può colpire di nuovo), poi riprende a inseguire, più veloce; dopo il quarto colpo sputa tre volte al secondo e ogni sputo a metà strada si divide in due che si allargano, dopo il quinto lampeggia. Ogni colpo vale 50 punti, la vittoria 500 in più, poi compare il sacchetto. Non si sceglie con Select, ma con una **combinazione segreta**: nel titolo tieni la leva in su e il pulsante premuti (si accende un 7° segnalino) e premi Reset.
 > - **Trucco del piano di lavoro**: in ogni livello il primo cioccolatino che colpisce il piano di lavoro ne toglie un pezzo (4 colonne) e apre una scorciatoia tra sopra e sotto. Un solo pezzo per livello: i colpi successivi riaccendono soltanto la luce.
-> - Nel livello 5 le lampade hanno i colori dei primi livelli (paralume grigio, lampadina azzurra) e i muri mobili sono a blocchetti di cioccolato (chiaro, scuro, chiaro), così si riconoscono come muri da spingere.
+> - Le lampade dei livelli 1, 2 e 5 hanno il paralume grigio e la lampadina gialla che traballa: con la luce accesa ogni tanto, a caso, si accende di un giallo più scuro. Nel livello 5 i muri mobili sono a blocchetti di cioccolato (chiaro, scuro, chiaro), così si riconoscono come muri da spingere.
 > - Altre correzioni: un colpo alla bocca vale +10 una volta sola; la luce si spegne a 32 secondi ma si può riaccendere subito, e ogni nuovo livello parte con la luce accesa (tranne il 5).
 > - La ROM viene provata in automatico nell'emulatore Stella: [`snack_and_roll/tests`](snack_and_roll/tests/README.md).
 
