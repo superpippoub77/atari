@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Spike Fever 2600</title>
+<style>
+  body { margin: 0; background: #10131c; color: #e8e8f0; font: 14px/1.5 Arial, sans-serif; text-align: center; }
+  h1 { color: #ffd23a; margin: 18px 0 2px; letter-spacing: 2px; }
+  .by { color: #8aa0c8; margin-bottom: 14px; }
+  #javatari { margin: 0 auto; }
+  .help { max-width: 760px; margin: 16px auto; text-align: left; padding: 0 16px; color: #b8c4dc; }
+  .help b { color: #fff; }
+  a { color: #7ad0ff; }
+</style>
+</head>
+<body>
+<h1>SPIKE FEVER 2600</h1>
+<div class="by">by SpikeCode AI · cartuccia da 16K per Atari 2600 · <a href="spikefever2600.bin" download>scarica la ROM</a> · <a href="4k/index.html">versione 4K (4 contro 4)</a> · <a href="../index.html">tutti i giochi</a> · <a href="https://github.com/superpippoub77/spikeball">versione completa (Spikeball)</a></div>
+<div id="javatari"><div id="javatari-screen"></div></div>
+<div class="help">
+  <p><b>1 PLAYER</b>: scegli la nazionale e affronta 6 livelli: Cina in palestra, Brasile sulla sabbia di Copacabana, USA a Los Angeles, Cuba ai Caraibi al tramonto, Giappone sotto il Fuji, URSS nella finale di Mosca. <b>2 PLAYERS</b>: ognuno sceglie la nazionale, poi l'arena.</p>
+  <p><b>Comandi</b> (frecce + SPAZIO):</p>
+  <ul>
+    <li><b>battuta</b>: SPAZIO lancia, di nuovo quando la palla è rossa; al lancio SU = altissima, verso la rete = in salto;</li>
+    <li><b>ricezione</b>: vai sul segno giallo, SPAZIO = tuffo;</li>
+    <li><b>alzata</b>: GIÙ = primo tempo, verso il fondo = seconda linea, verso la rete + SPAZIO = palleggio di seconda;</li>
+    <li><b>attacco</b>: SPAZIO quando la palla è rossa; SU = pallonetto, GIÙ = potente, verso la rete/il fondo = corta/lunga;</li>
+    <li><b>muro</b>: SPAZIO quando attaccano gli avversari.</li>
+  </ul>
+  <p><b>F12</b> = GAME RESET (titolo) · <b>F11</b> = GAME SELECT · <b>F9</b> = difficoltà destra. Il secondo giocatore usa il secondo joystick di Javatari.</p>
+  <p>La ROM (16K, formato F6) funziona anche in Stella e su un Atari 2600 vero con una cartuccia flash. Emulatore nel browser: <a href="https://github.com/ppeccin/javatari.js">Javatari.js</a> di Paulo Peccin (licenza AGPL, vedi <a href="../emulator/license.txt">license.txt</a>).</p>
+</div>
+<script src="../emulator/javatari.js"></script>
+<script>
+  Javatari.CARTRIDGE_URL = "spikefever2600.bin";
+  Javatari.CARTRIDGE_CHANGE_DISABLED = true;
+  Javatari.AUTO_POWER_ON_DELAY = 300;
+</script>
+</body>
+</html>

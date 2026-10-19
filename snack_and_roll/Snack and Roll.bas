@@ -524,6 +524,56 @@ __skip_all_sugar
 
    ; colori del playfield (luce, buio, colori per livello): banco 2
    gosub __pf_colors bank2
+   ; lampadine dei lampadari (livelli 1, 2 e 5) che traballano: con la luce
+   ; accesa ogni tanto, a caso, un frame di giallo piu' scuro (bit del
+   ; contatore dei frame mescolati: circa un frame su quattro)
+   asm
+ lda _b4_enableLight
+ and #%00010000
+ beq .__bulb_done
+ lda _level
+ cmp #5
+ beq bulb_level_ok
+ cmp #3
+ bcs .__bulb_done
+bulb_level_ok
+ lda _frame_counter
+ lsr
+ lsr
+ eor _frame_counter
+ and #5
+ bne .__bulb_done
+end
+   if _level = 5 then goto __bulb5
+   pfcolors:
+   $05
+   $28
+   $0E
+   $24
+   $26
+   $02
+   $05
+   $28
+   $0E
+   $24
+   $26
+end
+   goto __bulb_done
+__bulb5
+   pfcolors:
+   $05
+   $28
+   $24
+   $20
+   $24
+   $02
+   $05
+   $28
+   $24
+   $20
+   $24
+end
+__bulb_done
 
    ;*************************************************************************************************************************
    ; CONTENITORE FINALE (BALL)
@@ -1092,7 +1142,7 @@ end
 __pf_colors
    ; righe 0-4 sopra il piano, 5 piano, 6-10 sotto. Dal livello 3 i colori
    ; del cioccolato; nei livelli 1, 2 e 5 le lampade (paralume grigio,
-   ; lampadina azzurra) sono sempre dello stesso colore. Al buio tutto
+   ; lampadina gialla) sono sempre dello stesso colore. Al buio tutto
    ; e' piu' scuro, senza lampeggi
    if !_b4_enableLight{4} then goto __pfc_dark
    pfcolors:
@@ -1112,33 +1162,34 @@ end
    if _level > 2 then goto __pfc_done
    pfcolors:
    $05
-   $9E
+   $2E
    $0E
    $24
    $26
    $02
    $05
-   $9E
+   $2E
    $0E
    $24
    $26
 end
    goto __pfc_done
    ; livello 5: lampade come nei primi livelli, muri mobili a blocchetti
-   ; di cioccolato (chiaro, scuro, chiaro: si vede che sono da spingere)
+   ; di cioccolato (chiaro, scuro, chiaro: si vede che sono da spingere),
+   ; piu' scuri della lampadina gialla anche quando traballa
 __pfc_level5
    pfcolors:
    $05
-   $9E
-   $28
-   $22
-   $28
+   $2E
+   $24
+   $20
+   $24
    $02
    $05
-   $9E
-   $28
-   $22
-   $28
+   $2E
+   $24
+   $20
+   $24
 end
    goto __pfc_done
 __pfc_dark

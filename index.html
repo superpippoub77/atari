@@ -1,0 +1,146 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Snack 'n' Roll – Atari 2600</title>
+<meta name="description" content="Gioca a Snack 'n' Roll, Circular Defense e Spike Fever per Atari 2600 direttamente nel browser.">
+<style>
+  :root {
+    --bg: #14100c;
+    --panel: #221a12;
+    --line: #3a2c1e;
+    --text: #f3e6d0;
+    --muted: #b9a585;
+    --accent: #e8b23a;
+    --accent-ink: #1b1308;
+  }
+  * { box-sizing: border-box; }
+  body {
+    margin: 0;
+    background: var(--bg);
+    color: var(--text);
+    font: 16px/1.5 system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+  }
+  header, main, footer { max-width: 980px; margin: 0 auto; padding: 0 16px; }
+  header { padding-top: 20px; text-align: center; }
+  h1 { margin: 0; font-size: 28px; letter-spacing: .5px; }
+  h1 span { color: var(--accent); }
+  .sub { margin: 4px 0 0; color: var(--muted); }
+  nav.games {
+    display: flex; flex-wrap: wrap; gap: 8px; justify-content: center;
+    margin: 18px 0 14px;
+  }
+  nav.games a {
+    padding: 8px 14px; border-radius: 999px; border: 1px solid var(--line);
+    color: var(--text); text-decoration: none; background: var(--panel);
+  }
+  nav.games a.on { background: var(--accent); color: var(--accent-ink); border-color: var(--accent); font-weight: 600; }
+  #javatari { text-align: center; margin: 0 auto; }
+  #javatari-screen { margin: 0 auto; box-shadow: 0 6px 28px rgba(0,0,0,.6); }
+  .cols { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin: 22px 0; }
+  @media (max-width: 720px) { .cols { grid-template-columns: 1fr; } }
+  section.card { background: var(--panel); border: 1px solid var(--line); border-radius: 10px; padding: 14px 16px; }
+  section.card h2 { margin: 0 0 8px; font-size: 18px; color: var(--accent); }
+  table { border-collapse: collapse; width: 100%; }
+  td { padding: 4px 0; vertical-align: top; }
+  td:first-child { width: 42%; color: var(--muted); }
+  kbd {
+    display: inline-block; min-width: 1.6em; padding: 0 6px; border: 1px solid var(--line);
+    border-bottom-width: 2px; border-radius: 4px; background: #2d2318; font: 13px/1.6 ui-monospace, monospace;
+    text-align: center;
+  }
+  ul { margin: 0; padding-left: 18px; }
+  a { color: var(--accent); }
+  footer { color: var(--muted); font-size: 13px; padding-bottom: 28px; }
+</style>
+</head>
+<body>
+<header>
+  <h1>Snack <span>'n'</span> Roll</h1>
+  <p class="sub" id="sub">Atari 2600 · gioca subito nel browser</p>
+  <nav class="games" id="games">
+    <a href="?gioco=snack" data-g="snack">Snack 'n' Roll (8K)</a>
+    <a href="?gioco=snack16k" data-g="snack16k">Snack 'n' Roll 16K</a>
+    <a href="?gioco=circular" data-g="circular">Circular Defense</a>
+    <a href="?gioco=spike" data-g="spike">Spike Fever (16K)</a>
+    <a href="?gioco=spike4k" data-g="spike4k">Spike Fever 4K</a>
+  </nav>
+</header>
+
+<main>
+  <div id="javatari">
+    <div id="javatari-screen"></div>
+  </div>
+
+  <div class="cols">
+    <section class="card" id="comandi-spike" hidden>
+      <h2>Comandi di Spike Fever</h2>
+      <p style="margin:0">Pallavolo in stile Power Spikes. Frecce + <kbd>Spazio</kbd>: battuta, ricezione (vai sul segno giallo), alzata, attacco quando la palla è rossa, muro. <kbd>F12</kbd> = Game Reset (titolo), <kbd>F11</kbd> = Game Select (1 o 2 giocatori), <kbd>F4</kbd>/<kbd>F9</kbd> = difficoltà.</p>
+      <p style="margin:10px 0 0">Tutte le mosse sono nella <a id="spike-page" href="spike_fever/index.html">pagina di Spike Fever</a>.</p>
+    </section>
+    <section class="card" id="comandi">
+      <h2>Comandi</h2>
+      <table>
+        <tr><td>Muovi</td><td><kbd>←</kbd> <kbd>↑</kbd> <kbd>→</kbd> <kbd>↓</kbd></td></tr>
+        <tr><td>Fuoco (cioccolatino)</td><td><kbd>Spazio</kbd></td></tr>
+        <tr><td>Reset (inizia)</td><td><kbd>F12</kbd> o la levetta <b>Game Reset</b></td></tr>
+        <tr><td>Select (livello)</td><td><kbd>F11</kbd> o la levetta <b>Game Select</b></td></tr>
+        <tr><td>Levette di difficoltà</td><td><kbd>F4</kbd> (giocatore 1) · <kbd>F9</kbd> (giocatore 2)</td></tr>
+        <tr><td>Bocca Gigante</td><td>nel titolo tieni <kbd>↑</kbd> + <kbd>Spazio</kbd> e premi <kbd>F12</kbd></td></tr>
+      </table>
+      <p style="margin:10px 0 0;color:var(--muted)">Sotto lo schermo c'è la console: si possono cliccare le levette (Power, Select, Reset, difficoltà). Il pulsante con le frecce apre lo schermo intero; su telefono compaiono i comandi touch.</p>
+    </section>
+    <section class="card">
+      <h2>Scarica e leggi</h2>
+      <ul>
+        <li><a id="dl" href="release/atari2600/SnackAndRoll.bin" download>Scarica la ROM</a> per Stella o una cartuccia flash (Harmony, PlusCart, UnoCart)</li>
+        <li class="snack-only"><a href="https://claude.ai/code/artifact/461c41f4-fddc-4602-a24b-4cb253a66f2d" target="_blank" rel="noopener">Manuale di istruzioni</a></li>
+        <li class="snack-only"><a href="release/screenshots/01_livello1.png" target="_blank">Schermate</a> (titolo, livelli, Bocca Gigante)</li>
+      </ul>
+      <p style="margin:10px 0 0;color:var(--muted)">Snack 'n' Roll e Circular Defense sono in formato PAL, Spike Fever in NTSC: l'emulatore riconosce da solo il formato.</p>
+    </section>
+  </div>
+</main>
+
+<footer>
+  Emulatore: <a href="https://github.com/ppeccin/javatari.js" target="_blank" rel="noopener">Javatari.js</a> di Paulo Augusto Peccin,
+  licenza <a href="emulator/license.txt">AGPL-3.0</a> (file non modificato, codice sorgente al link).
+  Atari e Atari 2600 sono marchi dei rispettivi proprietari.
+</footer>
+
+<script src="emulator/javatari.js"></script>
+<script>
+  (function () {
+    var GAMES = {
+      snack:    { rom: "release/atari2600/SnackAndRoll.bin",          title: "Snack 'n' Roll",   sub: "Atari 2600 · ROM 8K PAL" },
+      snack16k: { rom: "release/atari2600/SnackAndRoll16K.bin",       title: "Snack 'n' Roll",   sub: "Atari 2600 · ROM 16K PAL (grafica migliorata)" },
+      circular: { rom: "release/circular_defense/CircularDefense.bin", title: "Circular Defense", sub: "Atari 2600 · ROM 8K PAL · joystick o paddle" },
+      spike:    { rom: "spike_fever/spikefever2600.bin",             title: "Spike Fever 2600", sub: "Atari 2600 · ROM 16K NTSC · pallavolo 2 contro 2", page: "spike_fever/index.html" },
+      spike4k:  { rom: "spike_fever/4k/sf4k.bin",                    title: "Spike Fever 2600", sub: "Atari 2600 · ROM 4K NTSC · pallavolo 4 contro 4", page: "spike_fever/4k/index.html" }
+    };
+    var key = new URLSearchParams(location.search).get("gioco");
+    if (!GAMES[key]) key = "snack";
+    var g = GAMES[key];
+    // la ROM parte da sola all'apertura della pagina
+    Javatari.CARTRIDGE_URL = g.rom;
+    Javatari.CARTRIDGE_SHOW_RECENT = false;
+    document.getElementById("sub").textContent = g.sub;
+    document.getElementById("dl").href = g.rom;
+    if (key !== "snack" && key !== "snack16k") document.querySelector("h1").textContent = g.title;
+    if (g.page) {
+      // Spike Fever: comandi suoi al posto di quelli di Snack 'n' Roll
+      document.getElementById("comandi").hidden = true;
+      document.getElementById("comandi-spike").hidden = false;
+      document.getElementById("spike-page").href = g.page;
+      var only = document.querySelectorAll(".snack-only");
+      for (var j = 0; j < only.length; j++) only[j].hidden = true;
+    }
+    var links = document.querySelectorAll("#games a");
+    for (var i = 0; i < links.length; i++) {
+      if (links[i].getAttribute("data-g") === key) links[i].className = "on";
+    }
+  })();
+</script>
+</body>
+</html>
