@@ -9,7 +9,7 @@
 >
 > 📦 **Download** (Atari 2600 `.bin`, Windows, Linux, Android, Browser): cartella [`release/`](release/README.md).
 >
-> 🕹️ **Gioca subito nel browser**: [`index.html`](index.html) apre l'emulatore Atari 2600 (Javatari.js, in [`emulator/`](emulator/)) con la ROM già caricata; i pulsanti in alto passano a Snack 'n' Roll 16K e a Circular Defense. Il workflow [`.github/workflows/main.yml`](.github/workflows/main.yml) la pubblica su Aruba (via FTP) a ogni push su `main`, in `www.filippomorano.com/projects/atari2600/`.
+> 🕹️ **Gioca subito nel browser**: [`index.html`](index.html) apre l'emulatore Atari 2600 (Javatari.js, in [`emulator/`](emulator/)) con la ROM già caricata; i pulsanti in alto passano a Snack 'n' Roll 16K, a Circular Defense e a [*Spike Fever 2600*](spike_fever/README.md) (pallavolo in stile Power Spikes, 16K e 4K, preso dalla repository [spikeball](https://github.com/superpippoub77/spikeball)). Il workflow [`.github/workflows/main.yml`](.github/workflows/main.yml) la pubblica su Aruba (via FTP) a ogni push su `main`, in `www.filippomorano.com/projects/atari2600/`.
 
 > 🛡️ **Nuovo gioco:** [*Circular Defense*](circular_defense/README.md) per Atari 2600. Difendi 6 città con il paddle (o col joystick) in 8 livelli.
 >
