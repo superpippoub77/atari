@@ -1,0 +1,182 @@
+{
+  "level": 6,
+  "name": "Sector Zeta",
+  "playerStart": {
+    "x": 240,
+    "y": 380
+  },
+  "timeLimit": 17,
+  "bases": [
+    {
+      "id": "A",
+      "x": 140,
+      "y": 280,
+      "w": 160,
+      "h": 160,
+      "type": "safe",
+      "oxygen": 9,
+      "final": false
+    },
+    {
+      "id": "B",
+      "x": 520,
+      "y": 100,
+      "w": 144,
+      "h": 144,
+      "type": "standard",
+      "oxygen": 6,
+      "final": false
+    },
+    {
+      "id": "C",
+      "x": 920,
+      "y": 100,
+      "w": 144,
+      "h": 144,
+      "type": "standard",
+      "oxygen": 5,
+      "final": false
+    },
+    {
+      "id": "D",
+      "x": 520,
+      "y": 580,
+      "w": 144,
+      "h": 144,
+      "type": "standard",
+      "oxygen": 6,
+      "final": false
+    },
+    {
+      "id": "E",
+      "x": 920,
+      "y": 580,
+      "w": 144,
+      "h": 144,
+      "type": "standard",
+      "oxygen": 4,
+      "final": false
+    },
+    {
+      "id": "F",
+      "x": 1120,
+      "y": 380,
+      "w": 176,
+      "h": 176,
+      "type": "military",
+      "oxygen": 30,
+      "final": true
+    }
+  ],
+  "correctPaths": [
+    [
+      "A",
+      "B",
+      "C",
+      "F"
+    ],
+    [
+      "A",
+      "D",
+      "E",
+      "F"
+    ]
+  ],
+  "obstacles": [
+    {
+      "type": "wall",
+      "x": 420,
+      "y": 80,
+      "width": 32,
+      "height": 500
+    },
+    {
+      "type": "wall",
+      "x": 832,
+      "y": 80,
+      "width": 32,
+      "height": 500
+    },
+    {
+      "type": "wall",
+      "x": 420,
+      "y": 528,
+      "width": 284,
+      "height": 32
+    },
+    {
+      "type": "laser",
+      "x": 640,
+      "y": 160,
+      "damage": 15
+    },
+    {
+      "type": "laser",
+      "x": 640,
+      "y": 592,
+      "damage": 15
+    },
+    {
+      "type": "laser",
+      "x": 1000,
+      "y": 360,
+      "damage": 15
+    }
+  ],
+  "enemies": [
+    {
+      "type": "sniper",
+      "x": 540,
+      "y": 380,
+      "hp": 2,
+      "weapon": "sniper",
+      "patrol": false
+    },
+    {
+      "type": "sniper",
+      "x": 960,
+      "y": 200,
+      "hp": 2,
+      "weapon": "sniper",
+      "patrol": false
+    },
+    {
+      "type": "sniper",
+      "x": 960,
+      "y": 592,
+      "hp": 2,
+      "weapon": "sniper",
+      "patrol": false
+    },
+    {
+      "type": "guard",
+      "x": 660,
+      "y": 380,
+      "hp": 4,
+      "weapon": "pistol",
+      "patrol": true
+    },
+    {
+      "type": "drone",
+      "x": 832,
+      "y": 300,
+      "hp": 2,
+      "weapon": "pistol",
+      "patrol": true
+    },
+    {
+      "type": "drone",
+      "x": 832,
+      "y": 480,
+      "hp": 2,
+      "weapon": "pistol",
+      "patrol": true
+    }
+  ],
+  "worldWidth": 1280,
+  "worldHeight": 720,
+  "collectibles": [
+    { "id": "key1", "x": 440, "y": 340 },
+    { "id": "key2", "x": 840, "y": 540 }
+  ]
+}
