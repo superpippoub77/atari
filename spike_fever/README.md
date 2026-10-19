@@ -20,6 +20,25 @@ Accanto alla 16K c'è la cartuccia da **4K**, giocabile da [`4k/index.html`](4k/
 - **Comandi**: gli stessi della 16K, senza i menu.
 - **Compilazione**: `cd 4k && python3 gen_data.py > data.inc && node build.js` crea `sf4k.bin`, che occupa esattamente 4096 byte. Per farci stare tutto, le tabelle delle arene si sovrappongono dove coincidono. Contano anche i bit che il TIA ignora: il bit 0 dei colori e il nibble basso di PF0.
 
+## Versione 8K: la 4K allargata (cartella [`8k/`](8k/))
+La cartuccia da **8K** (bankswitching F8, NTSC), giocabile da [`8k/index.html`](8k/index.html), è la 4K con un banco in più. Il banco 0 contiene il titolo e la logica della partita, il banco 1 il kernel e i giocatori.
+- **Titolo**: logo grande SPIKE / FEVER sfumato dal giallo al rosso (come la 16K). Sotto c'è un quadro animato: lo schiacciatore rincorre, salta e schiaccia, il muro salta contro di lui e la palla rotola. Il menu mostra la modalità scelta con GAME SELECT (persone, giocatori per squadra, arena) e PUSH FIRE lampeggia. Il pulsante o GAME RESET fa partire la partita; dopo una decina di secondi parte la dimostrazione.
+- **Più pose**:
+  - corsa a 4 passi;
+  - salto con le braccia su e caduta a gambe raccolte;
+  - schiacciata con il seguito del colpo;
+  - palleggio dell'alzatore;
+  - muro con le braccia alte.
+- **Fisica del gioco completo** (dalla repository spikeball, `match.js`):
+  - **Rimbalzi**: la palla a terra rimbalza (velocità verticale × 0,44, orizzontale × 0,63, come lo 0,45 / 0,6 dell'originale) e rotola finché si ferma, anche dopo il punto.
+  - **Rete**: smorza la palla (vx × −0,19, vy × 0,31 se scende) invece di respingerla sempre allo stesso modo.
+  - **Qualità della schiacciata**: dipende dal tempo. In perfetto tempo la schiacciata è potente (arriva in metà tempo). Al limite della finestra, una volta su due finisce in rete. Anche il computer ogni tanto schiaccia forte.
+  - **Ricezione del computer** (la penalità di velocità dell'originale): sulle palle veloci il suo errore di piazzamento cresce del 50%.
+- **Compilazione**: `cd 8k && python3 gen_data.py && node build.js`. `gen_data.py` scrive `data.inc` e `title.inc`; il risultato è `sf8k.bin`, 8192 byte.
+- **Controlli**:
+  - `python3 check_banks.py sf8k.lst` controlla che nessun banco usi etichette dell'altro (i due banchi stanno agli stessi indirizzi, quindi dasm non se ne accorge);
+  - `python3 stack_depth.py sf8k.asm bank0.asm logic.asm` misura la profondità delle chiamate (lo stack ha 10 byte).
+
 ## Modalità (versione 16K)
 - **1 PLAYER**: scegli la tua nazionale tra 10 (Italia, Francia, Germania, Spagna, Brasile, USA, Giappone, Cina, Cuba, URSS), poi affronti 6 livelli.
 

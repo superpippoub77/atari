@@ -9,7 +9,7 @@
 >
 > 📦 **Download** (Atari 2600 `.bin`, Windows, Linux, Android, Browser): cartella [`release/`](release/README.md).
 >
-> 🕹️ **Gioca subito nel browser**: [`index.html`](index.html) apre l'emulatore Atari 2600 (Javatari.js, in [`emulator/`](emulator/)) con la ROM già caricata; i pulsanti in alto passano a Snack 'n' Roll 16K, a Circular Defense a [*Spike Fever 2600*](spike_fever/README.md) e a [*OXYGEN 2600*](oxygen/README.md) (pallavolo in stile Power Spikes, 16K e 4K, preso dalla repository [spikeball](https://github.com/superpippoub77/spikeball)). Il workflow [`.github/workflows/main.yml`](.github/workflows/main.yml) la pubblica su Aruba (via FTP) a ogni push su `main`, in `www.filippomorano.com/projects/atari2600/`.
+> 🕹️ **Gioca subito nel browser**: [`index.html`](index.html) apre l'emulatore Atari 2600 (Javatari.js, in [`emulator/`](emulator/)) con la ROM già caricata; i pulsanti in alto passano a Snack 'n' Roll 16K, a Circular Defense a [*Spike Fever 2600*](spike_fever/README.md) e a [*OXYGEN 2600*](oxygen/README.md) (pallavolo in stile Power Spikes, 16K, 8K e 4K, preso dalla repository [spikeball](https://github.com/superpippoub77/spikeball)). Il workflow [`.github/workflows/main.yml`](.github/workflows/main.yml) la pubblica su Aruba (via FTP) a ogni push su `main`, in `www.filippomorano.com/projects/atari2600/`.
 
 > 🫧 **Nuovo gioco:** [*OXYGEN 2600*](oxygen/README.md), dal gioco Phaser *OXYGEN*. Cartuccia 8K: attraversa 12 settori prima che finisca l'ossigeno, prendi le 2 chiavi e attiva l'interruttore nella base finale.
 
