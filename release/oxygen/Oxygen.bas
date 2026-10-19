@@ -98,8 +98,14 @@ __title_wait
    if !joy0fire && !switchreset then goto __title_wait
 
    ;*************************************************************************************************************************
-   ; NUOVA PARTITA
+   ; NUOVA PARTITA (Reset nel titolo o durante la partita): si parte quando
+   ; Reset e il pulsante sono stati rilasciati (se no al primo frame il
+   ; Reset ancora premuto riporterebbe al titolo)
    ;*************************************************************************************************************************
+__new_game
+   AUDV0 = 0
+   drawscreen
+   if switchreset || joy0fire then goto __new_game
    score = 0 : _level = 0
    pfscore2 = %00101010
 __new_level
@@ -188,7 +194,7 @@ __o2_done
    gosub __draw_sprites
    gosub __sfx_update
    drawscreen
-   if switchreset then goto __title
+   if switchreset then goto __new_game
    goto __main
 
    ;*************************************************************************************************************************
