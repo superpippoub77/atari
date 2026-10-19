@@ -65,6 +65,7 @@
     <a href="?gioco=circular" data-g="circular">Circular Defense</a>
     <a href="?gioco=spike" data-g="spike">Spike Fever (16K)</a>
     <a href="?gioco=spike4k" data-g="spike4k">Spike Fever 4K</a>
+    <a href="?gioco=oxygen" data-g="oxygen">Oxygen</a>
   </nav>
 </header>
 
@@ -78,6 +79,11 @@
       <h2>Comandi di Spike Fever</h2>
       <p style="margin:0">Pallavolo in stile Power Spikes. Frecce + <kbd>Spazio</kbd>: battuta, ricezione (vai sul segno giallo), alzata, attacco quando la palla è rossa, muro. <kbd>F12</kbd> = Game Reset (titolo), <kbd>F11</kbd> = Game Select (1 o 2 giocatori), <kbd>F4</kbd>/<kbd>F9</kbd> = difficoltà.</p>
       <p style="margin:10px 0 0">Tutte le mosse sono nella <a id="spike-page" href="spike_fever/index.html">pagina di Spike Fever</a>.</p>
+    </section>
+    <section class="card" id="comandi-oxy" hidden>
+      <h2>Comandi di Oxygen</h2>
+      <p style="margin:0">Frecce = muovi, <kbd>Spazio</kbd> = spara nella direzione in cui cammini. <kbd>F12</kbd> o <kbd>Spazio</kbd> nel titolo = nuova partita. Levette <kbd>F4</kbd>/<kbd>F9</kbd>: B B normal, sinistra A hard, destra A beginner, A A expert.</p>
+      <p style="margin:10px 0 0">Nelle basi l'ossigeno non cala; la bombola al centro lo ricarica. Prendi le 2 chiavi e tocca l'interruttore nella base finale. La barra dell'ossigeno è verde, gialla o rossa come la bussola dell'originale.</p>
     </section>
     <section class="card" id="comandi">
       <h2>Comandi</h2>
@@ -98,7 +104,7 @@
         <li class="snack-only"><a href="https://claude.ai/code/artifact/461c41f4-fddc-4602-a24b-4cb253a66f2d" target="_blank" rel="noopener">Manuale di istruzioni</a></li>
         <li class="snack-only"><a href="release/screenshots/01_livello1.png" target="_blank">Schermate</a> (titolo, livelli, Bocca Gigante)</li>
       </ul>
-      <p style="margin:10px 0 0;color:var(--muted)">Snack 'n' Roll e Circular Defense sono in formato PAL, Spike Fever in NTSC: l'emulatore riconosce da solo il formato.</p>
+      <p style="margin:10px 0 0;color:var(--muted)">Snack 'n' Roll, Circular Defense e Oxygen sono in formato PAL, Spike Fever in NTSC: l'emulatore riconosce da solo il formato.</p>
     </section>
   </div>
 </main>
@@ -117,7 +123,8 @@
       snack16k: { rom: "release/atari2600/SnackAndRoll16K.bin",       title: "Snack 'n' Roll",   sub: "Atari 2600 · ROM 16K PAL (grafica migliorata)" },
       circular: { rom: "release/circular_defense/CircularDefense.bin", title: "Circular Defense", sub: "Atari 2600 · ROM 8K PAL · joystick o paddle" },
       spike:    { rom: "spike_fever/spikefever2600.bin",             title: "Spike Fever 2600", sub: "Atari 2600 · ROM 16K NTSC · pallavolo 2 contro 2", page: "spike_fever/index.html" },
-      spike4k:  { rom: "spike_fever/4k/sf4k.bin",                    title: "Spike Fever 2600", sub: "Atari 2600 · ROM 4K NTSC · pallavolo 4 contro 4", page: "spike_fever/4k/index.html" }
+      spike4k:  { rom: "spike_fever/4k/sf4k.bin",                    title: "Spike Fever 2600", sub: "Atari 2600 · ROM 4K NTSC · pallavolo 4 contro 4", page: "spike_fever/4k/index.html" },
+      oxygen:   { rom: "release/oxygen/Oxygen.bin",                  title: "Oxygen 2600",      sub: "Atari 2600 · ROM 8K PAL · arriva alla base finale prima che finisca l'ossigeno", oxy: true }
     };
     var key = new URLSearchParams(location.search).get("gioco");
     if (!GAMES[key]) key = "snack";
@@ -128,6 +135,12 @@
     document.getElementById("sub").textContent = g.sub;
     document.getElementById("dl").href = g.rom;
     if (key !== "snack" && key !== "snack16k") document.querySelector("h1").textContent = g.title;
+    if (g.oxy) {
+      document.getElementById("comandi").hidden = true;
+      document.getElementById("comandi-oxy").hidden = false;
+      var o = document.querySelectorAll(".snack-only");
+      for (var k = 0; k < o.length; k++) o[k].hidden = true;
+    }
     if (g.page) {
       // Spike Fever: comandi suoi al posto di quelli di Snack 'n' Roll
       document.getElementById("comandi").hidden = true;

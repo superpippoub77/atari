@@ -1,0 +1,30 @@
+{
+  "level": 11,
+  "name": "Sector Lambda",
+  "worldWidth": 1280,
+  "worldHeight": 720,
+  "playerStart": { "x": 100, "y": 300 },
+  "timeLimit": 90,
+  "bases": [
+    { "id": "A", "x": 50, "y": 250, "w": 120, "h": 120, "type": "safe", "oxygen": 15, "final": false },
+    { "id": "B", "x": 400, "y": 150, "w": 100, "h": 100, "type": "standard", "oxygen": 10, "final": false },
+    { "id": "C", "x": 750, "y": 280, "w": 100, "h": 100, "type": "standard", "oxygen": 8, "final": false },
+    { "id": "D", "x": 400, "y": 480, "w": 100, "h": 100, "type": "standard", "oxygen": 12, "final": false },
+    { "id": "E", "x": 1080, "y": 310, "w": 150, "h": 150, "type": "military", "oxygen": 20, "final": true }
+  ],
+  "correctPaths": [["A", "B", "C", "E"], ["A", "D", "E"]],
+  "obstacles": [
+    { "type": "wall", "x": 250, "y": 100, "width": 20, "height": 400 },
+    { "type": "wall", "x": 650, "y": 200, "width": 20, "height": 380 },
+    { "type": "wall", "x": 900, "y": 100, "width": 20, "height": 280 }
+  ],
+  "enemies": [
+    { "type": "guard", "x": 450, "y": 350, "hp": 3, "weapon": "pistol", "patrol": true },
+    { "type": "guard", "x": 800, "y": 280, "hp": 3, "weapon": "pistol", "patrol": false },
+    { "type": "sniper", "x": 980, "y": 310, "hp": 2, "weapon": "sniper", "patrol": false }
+  ],
+  "collectibles": [
+    { "id": "key1", "x": 540, "y": 440 },
+    { "id": "key2", "x": 940, "y": 640 }
+  ]
+}

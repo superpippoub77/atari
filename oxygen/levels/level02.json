@@ -1,0 +1,53 @@
+{
+  "level": 2,
+  "name": "Sector Beta",
+  "lighting": "flicker",
+  "worldWidth": 1280,
+  "worldHeight": 720,
+  "playerStart": { "x": 120, "y": 340 },
+  "timeLimit": 25,
+
+  "bases": [
+    { "id": "A", "x": 60,   "y": 290, "w": 110, "h": 110, "type": "safe",     "oxygen": 12, "final": false, "doors": ["right", "bottom"] },
+    { "id": "B", "x": 400,  "y": 100, "w": 100, "h": 100, "type": "standard", "oxygen": 8,  "final": false, "doors": ["left", "right", "bottom"] },
+    { "id": "C", "x": 760,  "y": 120, "w": 100, "h": 100, "type": "standard", "oxygen": 6,  "final": false, "doors": ["left", "right"] },
+    { "id": "D", "x": 260,  "y": 510, "w": 100, "h": 100, "type": "standard", "oxygen": 8,  "final": false, "doors": ["top", "right"] },
+    { "id": "F", "x": 620,  "y": 510, "w": 100, "h": 100, "type": "standard", "oxygen": 5,  "final": false, "doors": ["left", "right"] },
+    { "id": "G", "x": 1080, "y": 295, "w": 150, "h": 150, "type": "military", "oxygen": 30, "final": true,  "doors": ["left", "bottom"] }
+  ],
+
+  "correctPaths": [
+    ["A", "B", "C", "G"],
+    ["A", "D", "F", "G"]
+  ],
+
+  "obstacles": [
+    { "type": "wall", "x": 240, "y": 80,  "width": 20, "height": 440 },
+    { "type": "wall", "x": 600, "y": 200, "width": 20, "height": 360 },
+    { "type": "wall", "x": 870, "y": 80,  "width": 20, "height": 260 },
+    { "type": "wall", "x": 870, "y": 460, "width": 20, "height": 200 },
+    { "type": "laser","x": 500, "y": 140, "damage": 10 },
+    { "type": "wall", "x": 380, "y": 370, "width": 20, "height": 160 }
+  ],
+
+  "enemies": [
+    { "type": "guard",  "x": 450, "y": 330, "hp": 3, "weapon": "pistol", "patrol": true  },
+    { "type": "guard",  "x": 700, "y": 270, "hp": 3, "weapon": "pistol", "patrol": false },
+    { "type": "sniper", "x": 840, "y": 450, "hp": 2, "weapon": "sniper", "patrol": false },
+    { "type": "drone",  "x": 600, "y": 200, "hp": 2, "weapon": "pistol", "patrol": true  },
+    { "type": "guard",  "x": 980, "y": 310, "hp": 3, "weapon": "pistol", "patrol": false }
+  ],
+
+  "gasClouds": [
+    { "x": 340,  "y": 380, "radius": 42 },
+    { "x": 560,  "y": 290, "radius": 36, "vx": -16, "vy": 12 },
+    { "x": 750,  "y": 460, "radius": 55 },
+    { "x": 950,  "y": 200, "radius": 38, "vx": 20,  "vy": -8 },
+    { "x": 1100, "y": 500, "radius": 46 }
+  ],
+
+  "collectibles": [
+    { "id": "key1", "x": 320, "y": 220 },
+    { "id": "key2", "x": 720, "y": 420 }
+  ]
+}

@@ -1,0 +1,49 @@
+{
+  "level": 1,
+  "name": "Sector Alpha",
+  "lighting": "normal",
+  "worldWidth": 1280,
+  "worldHeight": 720,
+  "playerStart": { "x": 120, "y": 340 },
+  "timeLimit": 30,
+
+  "bases": [
+    { "id": "A", "x": 60,   "y": 290, "w": 120, "h": 120, "type": "safe",     "oxygen": 15, "final": false, "doors": ["right", "bottom"] },
+    { "id": "B", "x": 420,  "y": 120, "w": 110, "h": 110, "type": "standard", "oxygen": 10, "final": false, "doors": ["left", "right", "bottom"] },
+    { "id": "C", "x": 760,  "y": 200, "w": 110, "h": 110, "type": "standard", "oxygen": 8,  "final": false, "doors": ["left", "right"] },
+    { "id": "D", "x": 420,  "y": 490, "w": 110, "h": 110, "type": "standard", "oxygen": 12, "final": false, "doors": ["top", "right"] },
+    { "id": "E", "x": 1090, "y": 295, "w": 150, "h": 150, "type": "military", "oxygen": 30, "final": true,  "doors": ["left", "bottom"] }
+  ],
+
+  "correctPaths": [
+    ["A", "B", "C", "E"],
+    ["A", "D", "E"]
+  ],
+
+  "obstacles": [
+    { "type": "wall", "x": 260,  "y": 80,  "width": 20, "height": 400 },
+    { "type": "wall", "x": 660,  "y": 180, "width": 20, "height": 380 },
+    { "type": "wall", "x": 930,  "y": 80,  "width": 20, "height": 300 },
+    { "type": "wall", "x": 930,  "y": 460, "width": 20, "height": 200 },
+    { "type": "wall", "x": 420,  "y": 350, "width": 240, "height": 20 }
+  ],
+
+  "enemies": [
+    { "type": "guard",  "x": 480,  "y": 350, "hp": 3, "weapon": "pistol", "patrol": true  },
+    { "type": "guard",  "x": 820,  "y": 280, "hp": 3, "weapon": "pistol", "patrol": false },
+    { "type": "guard",  "x": 580,  "y": 550, "hp": 3, "weapon": "pistol", "patrol": true  },
+    { "type": "sniper", "x": 1000, "y": 300, "hp": 2, "weapon": "sniper", "patrol": false }
+  ],
+
+  "gasClouds": [
+    { "x": 360,  "y": 420, "radius": 44 },
+    { "x": 620,  "y": 310, "radius": 38, "vx": 14, "vy": -10 },
+    { "x": 860,  "y": 480, "radius": 50 },
+    { "x": 1050, "y": 520, "radius": 35, "vx": -18, "vy": 8 }
+  ],
+
+  "collectibles": [
+    { "id": "key1", "x": 300, "y": 200 },
+    { "id": "key2", "x": 700, "y": 400 }
+  ]
+}

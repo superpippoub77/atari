@@ -1,0 +1,255 @@
+{
+  "level": 10,
+  "name": "Sector Omega",
+  "playerStart": {
+    "x": 200,
+    "y": 360
+  },
+  "timeLimit": 12,
+  "bases": [
+    {
+      "id": "A",
+      "x": 88,
+      "y": 232,
+      "w": 152,
+      "h": 152,
+      "type": "safe",
+      "oxygen": 7,
+      "final": false
+    },
+    {
+      "id": "B",
+      "x": 400,
+      "y": 48,
+      "w": 136,
+      "h": 136,
+      "type": "standard",
+      "oxygen": 4,
+      "final": false
+    },
+    {
+      "id": "C",
+      "x": 740,
+      "y": 48,
+      "w": 136,
+      "h": 136,
+      "type": "standard",
+      "oxygen": 3,
+      "final": false
+    },
+    {
+      "id": "D",
+      "x": 400,
+      "y": 600,
+      "w": 136,
+      "h": 136,
+      "type": "standard",
+      "oxygen": 4,
+      "final": false
+    },
+    {
+      "id": "E",
+      "x": 740,
+      "y": 600,
+      "w": 136,
+      "h": 136,
+      "type": "standard",
+      "oxygen": 3,
+      "final": false
+    },
+    {
+      "id": "F",
+      "x": 1080,
+      "y": 360,
+      "w": 192,
+      "h": 192,
+      "type": "military",
+      "oxygen": 30,
+      "final": true
+    }
+  ],
+  "correctPaths": [
+    [
+      "A",
+      "B",
+      "C",
+      "F"
+    ],
+    [
+      "A",
+      "D",
+      "E",
+      "F"
+    ]
+  ],
+  "obstacles": [
+    {
+      "type": "wall",
+      "x": 312,
+      "y": 32,
+      "width": 32,
+      "height": 592
+    },
+    {
+      "type": "wall",
+      "x": 660,
+      "y": 32,
+      "width": 32,
+      "height": 592
+    },
+    {
+      "type": "wall",
+      "x": 312,
+      "y": 576,
+      "width": 232,
+      "height": 32
+    },
+    {
+      "type": "wall",
+      "x": 952,
+      "y": 180,
+      "width": 32,
+      "height": 360
+    },
+    {
+      "type": "laser",
+      "x": 488,
+      "y": 120,
+      "damage": 20
+    },
+    {
+      "type": "laser",
+      "x": 488,
+      "y": 600,
+      "damage": 20
+    },
+    {
+      "type": "laser",
+      "x": 816,
+      "y": 360,
+      "damage": 25
+    },
+    {
+      "type": "laser",
+      "x": 992,
+      "y": 220,
+      "damage": 28
+    },
+    {
+      "type": "laser",
+      "x": 992,
+      "y": 500,
+      "damage": 28
+    },
+    {
+      "type": "laser",
+      "x": 1060,
+      "y": 360,
+      "damage": 30
+    }
+  ],
+  "enemies": [
+    {
+      "type": "heavy",
+      "x": 328,
+      "y": 360,
+      "hp": 10,
+      "weapon": "pistol",
+      "patrol": true
+    },
+    {
+      "type": "heavy",
+      "x": 680,
+      "y": 360,
+      "hp": 10,
+      "weapon": "pistol",
+      "patrol": true
+    },
+    {
+      "type": "heavy",
+      "x": 952,
+      "y": 180,
+      "hp": 12,
+      "weapon": "pistol",
+      "patrol": false
+    },
+    {
+      "type": "heavy",
+      "x": 952,
+      "y": 520,
+      "hp": 12,
+      "weapon": "pistol",
+      "patrol": false
+    },
+    {
+      "type": "sniper",
+      "x": 420,
+      "y": 48,
+      "hp": 3,
+      "weapon": "sniper",
+      "patrol": false
+    },
+    {
+      "type": "sniper",
+      "x": 420,
+      "y": 600,
+      "hp": 3,
+      "weapon": "sniper",
+      "patrol": false
+    },
+    {
+      "type": "sniper",
+      "x": 760,
+      "y": 48,
+      "hp": 3,
+      "weapon": "sniper",
+      "patrol": false
+    },
+    {
+      "type": "sniper",
+      "x": 760,
+      "y": 600,
+      "hp": 3,
+      "weapon": "sniper",
+      "patrol": false
+    },
+    {
+      "type": "drone",
+      "x": 500,
+      "y": 360,
+      "hp": 3,
+      "weapon": "pistol",
+      "patrol": true
+    },
+    {
+      "type": "drone",
+      "x": 816,
+      "y": 220,
+      "hp": 3,
+      "weapon": "pistol",
+      "patrol": true
+    },
+    {
+      "type": "guard",
+      "x": 576,
+      "y": 180,
+      "hp": 4,
+      "weapon": "pistol",
+      "patrol": true
+    },
+    {
+      "type": "guard",
+      "x": 576,
+      "y": 520,
+      "hp": 4,
+      "weapon": "pistol",
+      "patrol": true
+    }
+  ],
+  "worldWidth": 1280,
+  "worldHeight": 720,
+  "collectibles": [
+    { "id": "key1", "x": 520, "y": 420 },
+    { "id": "key2", "x": 920, "y": 620 }
+  ]
+}
