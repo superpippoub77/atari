@@ -828,7 +828,9 @@ Recv    SUBROUTINE
 SetBall SUBROUTINE
         lda fT
         cmp #64
-        bne .no
+        beq .go
+        rts
+.go
         lda team
         asl
         tax                     ; la prima linea: l'alzatore palleggia
@@ -879,7 +881,19 @@ SetBall SUBROUTINE
 .t0     tay
         lda SetTX,y
         sta tx
-        lda #HITH
+        lda setType             ; 4 contro 4: se la prima linea si e' spostata per l'alzata,
+        cmp #2                  ; la palla va dove ora c'e' chi attacca (non dalla seconda linea)
+        bcs .nd
+        lda team
+        asl
+        tay
+        lda px,y
+        sec
+        sbc HomeX0,y
+        clc
+        adc tx
+        sta tx
+.nd     lda #HITH
         sta th
         pla
         tay
