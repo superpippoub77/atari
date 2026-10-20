@@ -115,11 +115,12 @@
    dim _Bit6_M0_Dir_Left = p
    dim _Bit7_M0_Dir_Right = p
 
-   ; muri spingibili (fino a 3 per livello, 255 = nessuno). _pushCol2/3 e i
-   ; contatori qui sotto usano variabili che servono solo durante il
-   ; caricamento del livello (w, x, j, r, n): vengono impostati dopo.
-   dim _pushCol2 = w
-   dim _pushCol3 = x
+   ; muri spingibili: vettore di 5 (var44-var47 e a; 255 = nessuno), colonna
+   ; del muro (+ 128 se sta sul piano). Nel livello della Bocca Gigante non ci
+   ; sono muri e var44-var47 servono agli sputi (wall_find non li guarda).
+   ; I contatori qui sotto usano variabili che servono solo durante il
+   ; caricamento del livello (j, r, n): vengono impostati dopo.
+   dim _wall = var44
    ; bocche uccise: frame che mancano alla ricomparsa (0 = bocca viva)
    dim _mouth0wait = j
    dim _mouth1wait = r
@@ -134,13 +135,12 @@
    dim _sfxId = i
    dim _sfxPos = q
    dim _sfxDur = z
-   dim _mouthIndex = a
+   dim _mouthIndex = s
    dim _mouth0x = f
    dim _mouth0y = h
    dim _mouth1x = l
    dim _mouth1y = o
    dim _attractTimer = s
-   dim _pushCol = s
    dim _ballx = u
    dim _attractDir = y
    dim _hitCooldown = v
@@ -421,8 +421,6 @@ __show_mouth1
    if _mouth1wait then player1y = 200
 __mouth_shown
 
-   COLUP1 = mouthcolors[_mouthIndex]
-
    goto __skip_bocche
 
    ; temp6 = bocca da muovere (0 o 1)
@@ -497,12 +495,26 @@ __sugar_index_ok
    temp5 = temp3/8
    missile1y = temp5*8+4
    if temp5 > 3 then missile1y = missile1y + 16
-   ; lo zuccherino 0 (dorato) e' giallo, l'1 (chiave) e' azzurro, gli
-   ; altri prendono il colore della bocca
-   if !temp4 then COLUP1 = $2E
-   if temp4 = 1 then COLUP1 = $9C
 
 __skip_all_sugar
+   ; colore della bocca e dello zuccherino (COLUP1, lo stesso registro): lo
+   ; zuccherino 0 (dorato) e' giallo, l'1 (chiave) e' azzurro, gli altri
+   ; prendono il colore della bocca (temp4 = 8: nessuno zuccherino). Al buio
+   ; tutto diventa scuro ma resta visibile (dimcol)
+   asm
+ ldx _mouthIndex
+ lda mouthcolors,x
+ ldy temp4
+ bne skc_1
+ lda #$2E
+skc_1
+ dey
+ bne skc_2
+ lda #$9C
+skc_2
+ jsr dimcol
+ sta COLUP1
+end
 
    ;*************************************************************************************************************************
    ; GOCCE (playfield dinamico, banco 2)
@@ -563,15 +575,15 @@ __bulb5
    pfcolors:
    $05
    $28
-   $24
-   $20
-   $24
+   $22
+   $22
+   $22
    $02
    $05
    $28
-   $24
-   $20
-   $24
+   $22
+   $22
+   $22
 end
 __bulb_done
 
@@ -612,16 +624,20 @@ __bulb_done
    if pfscore1 < 224 && _frame_counter < 24 then pfscorecolor = $64
    ; ---- 5 ----
    if !(_seconds_counter&7) then _b6_enableSlowMotion{6} = 0
-   ; ---- 6 ----
-   if !_b4_enableLight{4} then COLUP1 = $0
-   ; ---- 7 ----
-   if _b6_enableSlowMotion{6} then COLUP0 = $20 else COLUP0 = _P0_color
+   ; ---- 6 ---- al buio bocca e zuccherino sono scuri (vedi __skip_all_sugar)
+   ; ---- 7 ---- (colore del biscotto e del cioccolatino in temp5, poi dimcol)
+   if _b6_enableSlowMotion{6} then temp5 = $20 else temp5 = _P0_color
    ; super potere / invulnerabilita': il biscotto lampeggia, piu' veloce
    ; nell'ultimo secondo, con tre bip di avviso prima della fine
    temp1 = 4
    if _hitCooldown < 48 then temp1 = 2
    temp2 = _frame_counter & temp1
-   if _hitCooldown && temp2 then COLUP0 = $00
+   if _hitCooldown && temp2 then temp5 = $00
+   asm
+ lda temp5
+ jsr dimcol
+ sta COLUP0
+end
    if _hitCooldown >= 48 || _sfxId then goto __no_power_warn
    temp1 = _hitCooldown & 15
    if temp1 = 8 then AUDC0 = 4 : AUDF0 = 6 : AUDV0 = 8
@@ -707,9 +723,13 @@ __Skip_Fire
    if temp6 < 5 then temp1 = temp5 | 128 : goto __pw_check
    if temp6 < 6 then goto __not_push_wall
 __pw_check
-   if temp1 = _pushCol then goto __delete_missile
-   if temp1 = _pushCol2 then goto __delete_missile
-   if temp1 = _pushCol3 then goto __delete_missile
+   asm
+ lda temp1
+ jsr wall_find
+ bne pwc_no
+ jmp .__delete_missile
+pwc_no
+end
 __not_push_wall
 
    ; --- regola semplificata: solo la riga "in cima" di ogni gruppo è
@@ -875,8 +895,8 @@ __slow_sound_done
    ; muro davanti al biscotto? temp6 = colonna davanti, temp5 = riga della
    ; parte bassa del biscotto. Muri sul pavimento (righe 8-10): si spingono
    ; con la parte bassa nelle righe 8-10; muri sul piano (righe 2-4, colonna
-   ; + 128 in _pushCol): con la parte bassa nelle righe 2-4.
-   ; Ritorna temp2 = quale muro (0-2) o 255.
+   ; + 128 in _wall): con la parte bassa nelle righe 2-4.
+   ; Ritorna temp2 = quale muro (0-4) o 255.
 __wall_hit
    asm
    lda temp6
@@ -889,20 +909,43 @@ __wall_hit
    bcs .wh_none
    ora #128
 .wh_key
-   ldx #0
-   cmp _pushCol
-   beq .wh_done
-   inx
-   cmp _pushCol2
-   beq .wh_done
-   inx
-   cmp _pushCol3
-   beq .wh_done
+   jsr wall_find
+   .byte $2C
 .wh_none
    ldx #255
-.wh_done
    stx temp2
    rts
+; quale muro sta nella colonna A (+ 128 sul piano)? X = 0-4 e Z = 1, se no
+; X = 255 e Z = 0 (nel livello della Bocca Gigante mai: var44-47 sono gli sputi)
+wall_find
+ ldx _level
+ cpx #_Boss
+ beq wf_none
+ ldx #4
+wf_loop
+ cmp _wall,x
+ beq wf_done
+ dex
+ bpl wf_loop
+wf_none
+ ldx #255
+wf_done
+ rts
+; colore A al buio: stessa tinta, luminosita' 2 (scuro ma visibile); 0 resta nero
+dimcol
+ tax
+ beq dimcol_r
+ lda _b4_enableLight
+ and #%00010000
+ bne dimcol_lit
+ txa
+ and #$F0
+ ora #$02
+ rts
+dimcol_lit
+ txa
+dimcol_r
+ rts
 end
 
 __game_collision
@@ -1143,7 +1186,7 @@ __pf_colors
    ; righe 0-4 sopra il piano, 5 piano, 6-10 sotto. Dal livello 3 i colori
    ; del cioccolato; nei livelli 1, 2 e 5 le lampade (paralume grigio,
    ; lampadina gialla) sono sempre dello stesso colore. Al buio tutto
-   ; e' piu' scuro, senza lampeggi
+   ; e' piu' scuro, senza lampeggi (righe dei muri di un solo colore)
    if !_b4_enableLight{4} then goto __pfc_dark
    pfcolors:
    $28
@@ -1174,21 +1217,21 @@ end
    $26
 end
    goto __pfc_done
-   ; livello 5: lampade come nei primi livelli, muri mobili a blocchetti
-   ; di cioccolato (chiaro, scuro, chiaro: si vede che sono da spingere),
-   ; piu' scuri della lampadina gialla anche quando traballa
+   ; livello 5: lampade come nei primi livelli, muri mobili marroni di un
+   ; solo colore (barrette fisse, senza variazioni), piu' scuri della
+   ; lampadina gialla anche quando traballa
 __pfc_level5
    pfcolors:
    $05
    $2E
    $24
-   $20
+   $24
    $24
    $02
    $05
    $2E
    $24
-   $20
+   $24
    $24
 end
    goto __pfc_done
@@ -1197,13 +1240,13 @@ __pfc_dark
    $22
    $22
    $20
-   $22
+   $20
    $20
    $02
    $22
    $22
    $20
-   $22
+   $20
    $20
 end
 __pfc_done
@@ -1349,20 +1392,30 @@ __skip_tavoli
    ; e' alto 4 righe, barra dell'energia (8 pixel) sul pavimento ---
    if _level <> _Boss then goto __no_boss_setup
    _choco_bits = 255 : _b2_hasKey{2} = 1 : missile1height = 4
-   _mouth1y = 200 : _spit2y = 200
+   ; (var44-var47 servono anche al vettore dei muri: dopo un livello valgono
+   ; 255, qui si riazzerano come all'accensione)
+   _mouth1y = 200 : _spit2y = 200 : _spit2x = 0 : _spitDir = 0 : _spitTime = 0
    pfhline 12 10 19 on
 __no_boss_setup
 
    ; --- MURI SPINGIBILI (colonna 1 di objects) ---
    ; un muro per bit acceso, nella colonna sezione+1 (4, 11, 18, 25).
    ; Bit 4-7: sezioni basse, muro sul pavimento (righe 8-10). Al massimo
-   ; 3 muri in tutto. Una lampada
+   ; 5 muri in tutto. Una lampada
    ; bassa nella stessa sezione pende proprio sopra il muro (colonna
    ; sezione+1, righe 6-7): insieme chiudono la colonna dal piano al
    ; pavimento e per passare bisogna spingere il muro.
    ; Bit 0-3: muri sul piano nelle sezioni alte b0-b3 (righe 2-4, sotto
    ; una lampada appesa al soffitto), memorizzati come colonna + 128.
-   _pushCol = 255 : _pushCol2 = 255 : _pushCol3 = 255
+   if _level = _Boss then return otherbank
+   asm
+ lda #255
+ ldx #4
+wl_clear
+ sta _wall,x
+ dex
+ bpl wl_clear
+end
    temp2 = _current_object_level + 1
    temp4 = objects[temp2]
    temp5 = 4 : temp6 = 2
@@ -1373,9 +1426,17 @@ __wall_loop
    pfvline temp5 temp6 temp1 on
    temp1 = temp5
    if temp6 = 2 then temp1 = temp5 | 128
-   if _pushCol = 255 then _pushCol = temp1 : goto __wall_next
-   if _pushCol2 = 255 then _pushCol2 = temp1 : goto __wall_next
-   _pushCol3 = temp1
+   ; nel primo posto libero del vettore
+   asm
+ ldx #255
+wl_find
+ inx
+ lda _wall,x
+ cmp #255
+ bne wl_find
+ lda temp1
+ sta _wall,x
+end
 __wall_next
    temp4 = temp4 / 2
    temp5 = temp5 + 7
@@ -1842,7 +1903,7 @@ __bonus_wait
    ;*************************************************************************************************************************
    ; MURI SPINGIBILI
    ;_________________________________________________________________________________________________________________________
-   ; temp2 = quale muro (0, 1, 2)   temp4 = direzione (1 = destra, 255 = sinistra)
+   ; temp2 = quale muro (0-4)   temp4 = direzione (1 = destra, 255 = sinistra)
    ; Il muro (righe 8-10) si sposta di una colonna ogni 8 frame mentre il
    ; biscotto lo spinge, se la colonna successiva e' libera e dentro lo
    ; schermo. Spingere non attiva lo slow motion.
@@ -1854,9 +1915,7 @@ __bonus_wait
 __push_wall
    if _frame_counter & 7 then return otherbank
    temp6 = temp2
-   temp1 = _pushCol
-   if temp6 = 1 then temp1 = _pushCol2
-   if temp6 = 2 then temp1 = _pushCol3
+   temp1 = _wall[temp6]
    ; temp4 = valore vecchio, temp5 = nuovo (col + direzione; il bit 7 dei
    ; muri sul piano resta), temp6 = quale muro
    temp5 = temp1 + temp4
@@ -1917,9 +1976,7 @@ pw_out
 end
    return otherbank
 __pw_moved
-   if temp6 = 0 then _pushCol = temp5
-   if temp6 = 1 then _pushCol2 = temp5
-   if temp6 = 2 then _pushCol3 = temp5
+   _wall[temp6] = temp5
    asm
  ldx #2
  jsr sfx_go2
@@ -2112,11 +2169,13 @@ end
    ; Livello 2: una lampada bassa in b7; nelle sezioni con le tazze una
    ; lampada chiuderebbe la colonna dal piano al pavimento e taglierebbe
    ; in due la parte bassa (in b4 chiuderebbe il biscotto alla partenza).
-   ; Livello 5: tre muri spingibili sotto tre lampade basse (b5, b6, b7):
-   ; formano tre stanze sotto il piano. Nella stanza A (colonne 12-17)
-   ; si entra solo spingendo il primo muro; nella B (19-24) spingendo il
-   ; terzo muro dalla stanza C (aperta in alto a destra), oppure spingendo
-   ; il primo muro di 3-4 colonne, scavalcandolo e spingendo il secondo.
+   ; Livello 5: quattro muri spingibili, ognuno sotto la sua lampada: sul
+   ; piano in b2 (colonna 18), sul pavimento in b5, b6 e b7 (colonne 11,
+   ; 18 e 25). Servono almeno 3 spinte (tools/soluzione.py cerca la
+   ; soluzione con meno spinte). Un muro in piu' sul piano (colonna 25)
+   ; farebbe incastrare i due muri alti: niente piu' strada per il
+   ; sacchetto (provato con sequenze di spinte a caso). Cosi' invece
+   ; nessuna combinazione di spinte chiude per sempre la strada.
    ; Gocce nella parte alta (b1, b3).
    ; Livello 6 (PRESSE, parte al buio): solo presse. La colonna 3 (gocce)
    ; diventa di presse: 4 appese al soffitto e 4 al piano (colonne 3, 10,
@@ -2144,7 +2203,7 @@ end
    %01111111, %00000000, %00000000, %00000000, %10000000, %00000000, %00101011, 136,
    %00000000, %00000000, %00110111, %00000000, %00000000, %00000000, %00001011, 18,
    %00000000, %00000000, %00000000, %11111111, %00000000, %00000000, %00101011, 136,
-   %00000000, %01100100, %00000000, %00000000, %01100100, %00000000, %01111110, 136,
+   %00000000, %11100100, %00000000, %00000000, %11100100, %00000000, %01111110, 136,
    %00000000, %00000000, %00000000, %11111111, %00000000, %00000000, %00101011, 136,
    %00000000, %00000000, %00000000, %00000000, %00000000, %00000000, %01010101, 136,
 end

@@ -10,6 +10,7 @@ Uso:  python3 soluzione.py <cartella di uscita>
       -> mappe livelloN.png e il testo dei passi (soluzione.json)
 """
 import json
+from collections import deque
 import os
 import sys
 
@@ -130,52 +131,90 @@ def solve_level(level):
 
 
 def solve_level5(level, sugars):
-    """livello 5: per ogni zuccherino chiuso si cerca UNA spinta di un muro
-    che apra la strada (come fa il test), poi si va avanti."""
-    walls = list(model.wall_cols(level))
-    static = build(level) - model.wall_cells(walls)
-    pos = START
-    legs, pushes, total = [], [], 0
+    """livello 5 (muri spingibili): ricerca in ampiezza sugli stati (posizione
+    dei muri, prossimo obiettivo, zona del biscotto) con il minimo di spinte.
+    Spingendo n colonne il biscotto segue il muro; poi si va avanti."""
+    walls0 = tuple(model.wall_cols(level))
+    static = build(level) - model.wall_cells(walls0)
     bx = model.OBJECTS[level - 1][7]
     targets = [(v, sugar_goals(*sugar_xy(v))) for v in sugars] + [("sacchetto", ball_goals(bx))]
-    for v, goals in targets:
-        cells = static | model.wall_cells(walls)
-        g = Grid(cells)
-        p = g.path(pos, goals)
-        if p is None:
-            reach = g.reachable(pos)
-            plan = None
-            for wi, d, n, new in model.single_pushes(static, tuple(walls), reach):
-                g2 = Grid(static | model.wall_cells(new))
-                pushers = model.can_push(reach, walls[wi], d)
-                if g2.path(pos, goals) is None or not pushers:
-                    continue
-                to_push = g.path(pos, pushers)
-                if to_push is None:
-                    continue
-                plan = (wi, d, n, new, to_push)
-                break
-            assert plan, f"livello 5: nessuna spinta per {v}"
-            wi, d, n, new, to_push = plan
-            legs.append(to_push)
-            total += len(to_push) - 1
-            key = walls[wi]
-            pushes.append(dict(before=v, wall=key & 127, upper=bool(key & 128),
-                               dir="destra" if d == 1 else "sinistra", cols=n,
-                               at=to_push[-1]))
-            walls = list(new)
-            pos = to_push[-1]
-            # spingendo il biscotto segue il muro: lo si porta oltre
-            cells = static | model.wall_cells(walls)
-            g = Grid(cells)
-            p = g.path(pos, goals)
-            assert p, v
-        legs.append(p)
-        total += len(p) - 1
-        pos = p[-1]
+    grids, comps = {}, {}
+
+    def grid(ws):
+        if ws not in grids:
+            grids[ws] = Grid(static | model.wall_cells(ws))
+        return grids[ws]
+
+    def comp(ws, pos):
+        """zona raggiungibile (insieme) e suo rappresentante."""
+        for rep, (w2, cells) in comps.items():
+            if w2 == ws and pos in cells:
+                return rep, cells
+        cells = frozenset(grid(ws).reachable(pos))
+        rep = (ws, min(cells))
+        comps[rep] = (ws, cells)
+        return rep, cells
+
+    start_rep, _ = comp(walls0, START)
+    first = (walls0, 0, start_rep, START)
+    prev = {(walls0, 0, start_rep): None}
+    q = deque([first])
+    end = None
+    while q:
+        ws, k, rep, pos = q.popleft()
+        _, cells = comps[rep]
+        if k == len(targets):
+            end = (ws, k, rep)
+            break
+        hit = targets[k][1] & cells
+        if hit:
+            st = (ws, k + 1, rep)
+            if st not in prev:
+                prev[st] = ((ws, k, rep), ("prendi", k, min(hit)))
+                q.appendleft((ws, k + 1, rep, min(hit)))
+            continue
+        for wi, d, n, new in model.single_pushes(static, ws, cells):
+            pushers = model.can_push(cells, ws[wi], d)
+            at = min(pushers)
+            after = (at[0] + 4 * n * d, at[1])
+            if after not in grid(new).cells and not grid(new).moves(*after):
+                continue
+            rep2, _ = comp(new, after)
+            st = (new, k, rep2)
+            if st not in prev:
+                prev[st] = ((ws, k, rep), ("spingi", wi, d, n, at, ws[wi]))
+                q.append((new, k, rep2, after))
+    assert end, "livello 5: nessuna soluzione"
+    acts, st = [], end
+    while prev[st]:
+        st, a = prev[st]
+        acts.append((st, a))
+    acts.reverse()
+    # percorsi reali, tratto per tratto
+    pos, walls = START, walls0
+    legs, pushes, total = [], [], 0
+    for (ws, k, _), a in acts:
+        g = grid(walls)
+        if a[0] == "prendi":
+            p = g.path(pos, targets[k][1])
+            assert p, targets[k][0]
+            legs.append(p)
+            total += len(p) - 1
+            pos = p[-1]
+        else:
+            _, wi, d, n, at, key = a
+            p = g.path(pos, model.can_push(g.reachable(pos), key, d))
+            assert p, ("spinta", key)
+            legs.append(p)
+            total += len(p) - 1 + 4 * n
+            nxt = [v for v, _ in targets][k]
+            pushes.append(dict(before=nxt, wall=key & 127, upper=bool(key & 128),
+                               dir="destra" if d == 1 else "sinistra", cols=n, at=p[-1]))
+            walls = tuple(w if i != wi else (((key & 127) + d * n) | (key & 128)) for i, w in enumerate(walls))
+            pos = (p[-1][0] + 4 * n * d, p[-1][1])
     return dict(level=level, sugars=sugars, cells=sorted(build(level)), work=sorted(static | model.wall_cells(walls)),
                 legs=legs, length=total, trick=(None, None, 0), shoot=[], moving=False,
-                pushes=pushes, walls_end=walls)
+                pushes=pushes, walls_end=list(walls))
 
 
 def draw(sol, path_png):
