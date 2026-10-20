@@ -67,6 +67,7 @@
     <a href="?gioco=spike4k" data-g="spike4k">Spike Fever 4K</a>
     <a href="?gioco=spike8k" data-g="spike8k">Spike Fever 8K</a>
     <a href="?gioco=oxygen" data-g="oxygen">Oxygen</a>
+    <a href="?gioco=lineup" data-g="lineup">LineUp! ASM</a>
   </nav>
 </header>
 
@@ -126,7 +127,8 @@
       spike:    { rom: "spike_fever/spikefever2600.bin",             title: "Spike Fever 2600", sub: "Atari 2600 · ROM 16K NTSC · pallavolo 2 contro 2", page: "spike_fever/index.html" },
       spike4k:  { rom: "spike_fever/4k/sf4k.bin",                    title: "Spike Fever 2600", sub: "Atari 2600 · ROM 4K NTSC · pallavolo 4 contro 4", page: "spike_fever/4k/index.html" },
       spike8k:  { rom: "spike_fever/8k/sf8k.bin",                    title: "Spike Fever 2600", sub: "Atari 2600 · ROM 8K NTSC · pallavolo 4 contro 4, campionato contro 6 nazionali, fisica della palla", page: "spike_fever/8k/index.html" },
-      oxygen:   { rom: "release/oxygen/Oxygen.bin",                  title: "Oxygen 2600",      sub: "Atari 2600 · ROM 8K PAL · arriva alla base finale prima che finisca l'ossigeno", oxy: true }
+      oxygen:   { rom: "release/oxygen/Oxygen.bin",                  title: "Oxygen 2600",      sub: "Atari 2600 · ROM 8K PAL · arriva alla base finale prima che finisca l'ossigeno", oxy: true },
+      lineup:   { rom: "release/lineup/LineUpASM.bin",               title: "LineUp! 2600",     sub: "Atari 2600 · ROM 4K PAL · prototipo assembly: coppie di segmenti a tempo" }
     };
     var key = new URLSearchParams(location.search).get("gioco");
     if (!GAMES[key]) key = "snack";
@@ -142,6 +144,10 @@
       document.getElementById("comandi-oxy").hidden = false;
       var o = document.querySelectorAll(".snack-only");
       for (var k = 0; k < o.length; k++) o[k].hidden = true;
+    }
+    if (key === "lineup") {
+      var onlySnack = document.querySelectorAll(".snack-only");
+      for (var h = 0; h < onlySnack.length; h++) onlySnack[h].hidden = true;
     }
     if (g.page) {
       // Spike Fever: comandi suoi al posto di quelli di Snack 'n' Roll

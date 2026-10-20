@@ -14,6 +14,8 @@
 > 🫧 **Nuovo gioco:** [*OXYGEN 2600*](oxygen/README.md), dal gioco Phaser *OXYGEN*. Cartuccia 8K: attraversa 12 settori prima che finisca l'ossigeno, prendi le 2 chiavi e attiva l'interruttore nella base finale.
 
 > 🛡️ **Nuovo gioco:** [*Circular Defense*](circular_defense/README.md) per Atari 2600. Difendi 6 città con il paddle (o col joystick) in 8 livelli.
+
+> 📏 **Nuovo prototipo:** [*LineUp! 2600*](lineup_asm/README.md), puzzle arcade a tempo in assembly 6502: trova coppie di segmenti uguali prima che il tempo finisca.
 >
 > 🍪 **Versione 16K:** [`Snack and Roll 16K.bas`](snack_and_roll/Snack%20and%20Roll%2016K.bas), cartuccia da 16K con bankswitching F6, stessa partita della 8K con una grafica più ricca:
 > - titolo ad alta risoluzione: logo *SNACK 'N' ROLL* sfumato (le due L si piegano come alberi), scritta del livello scelto, biscotto con le gocce di cioccolato che gira, pavimento a scacchi;
@@ -162,4 +164,3 @@ Per completare un livello devi:
 
 *Buon divertimento con Snack 'n' Roll™!*  
 ---
-
