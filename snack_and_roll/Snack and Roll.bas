@@ -230,6 +230,16 @@ end
    $22
 end
 
+   ; GAME RESET durante la partita: si aspetta che il tasto venga rilasciato
+   ; (se no nel titolo farebbe ripartire subito la partita), poi il titolo
+__reset_title
+   gosub __wait_release
+   goto __game_start
+__wait_release
+   drawscreen
+   if switchreset then goto __wait_release
+   return
+
 __game_start
    ;flag
    ; se arriviamo qui da una partita vera, ridisegniamo tutto il titolo
@@ -256,8 +266,37 @@ __main_loop
    _frame_counter = _frame_counter + 1
    if _frame_counter > frame_limit then _frame_counter = 0 : _seconds_counter = _seconds_counter + 1
 
-   ;F2 (reset) inizia il gioco
-   if switchreset && !_b0_enableStart{0} then _b0_enableStart{0} = 1 : _level = _choco_count+1 : _lap = 0 : score = 0 : _music_index = 0 : goto __skip_to_change
+   ;F2 (reset) inizia il gioco; durante la partita torna al titolo (con la scelta del livello)
+   asm
+ lda SWCHB
+ lsr
+ bcs .__reset_done
+ lda _b0_enableStart
+ lsr
+ bcc .__reset_start
+ jmp .__reset_title
+end
+__reset_start
+   ; nuova partita dal livello scelto nel titolo (_choco_count), punti e giri a
+   ; zero: parte quando il tasto viene rilasciato (se no, ancora premuto, in
+   ; partita riporterebbe subito al titolo)
+   gosub __wait_release
+   asm
+ lda _b0_enableStart
+ ora #1
+ sta _b0_enableStart
+ ldx _choco_count
+ inx
+ stx _level
+ lda #0
+ sta _lap
+ sta score
+ sta score+1
+ sta score+2
+ sta _music_index
+ jmp .__skip_to_change
+end
+__reset_done
 
    ;!!!!!!!!!!!!!!!!!!! START !!!!!!!!!!!!!!!!!!!
    ;*************************************************************************************************************************
@@ -500,7 +539,7 @@ __skip_all_sugar
    ; colore della bocca e dello zuccherino (COLUP1, lo stesso registro): lo
    ; zuccherino 0 (dorato) e' giallo, l'1 (chiave) e' azzurro, gli altri
    ; prendono il colore della bocca (temp4 = 8: nessuno zuccherino). Al buio
-   ; tutto diventa scuro ma resta visibile (dimcol)
+   ; bocca e zuccherino sono neri (dark0)
    asm
  ldx _mouthIndex
  lda mouthcolors,x
@@ -512,7 +551,7 @@ skc_1
  bne skc_2
  lda #$9C
 skc_2
- jsr dimcol
+ jsr dark0
  sta COLUP1
 end
 
@@ -536,56 +575,6 @@ end
 
    ; colori del playfield (luce, buio, colori per livello): banco 2
    gosub __pf_colors bank2
-   ; lampadine dei lampadari (livelli 1, 2 e 5) che traballano: con la luce
-   ; accesa ogni tanto, a caso, un frame di giallo piu' scuro (bit del
-   ; contatore dei frame mescolati: circa un frame su quattro)
-   asm
- lda _b4_enableLight
- and #%00010000
- beq .__bulb_done
- lda _level
- cmp #5
- beq bulb_level_ok
- cmp #3
- bcs .__bulb_done
-bulb_level_ok
- lda _frame_counter
- lsr
- lsr
- eor _frame_counter
- and #5
- bne .__bulb_done
-end
-   if _level = 5 then goto __bulb5
-   pfcolors:
-   $05
-   $28
-   $0E
-   $24
-   $26
-   $02
-   $05
-   $28
-   $0E
-   $24
-   $26
-end
-   goto __bulb_done
-__bulb5
-   pfcolors:
-   $05
-   $28
-   $22
-   $22
-   $22
-   $02
-   $05
-   $28
-   $22
-   $22
-   $22
-end
-__bulb_done
 
    ;*************************************************************************************************************************
    ; CONTENITORE FINALE (BALL)
@@ -803,15 +792,24 @@ __skip_animation_player1
 
    temp5 = (player0x-10)/4 : temp6 = (player0y-5)/8
 
-   if temp5 < 31 then if pfread(temp5,temp6) then _b6_enableSlowMotion{6} =1 :goto __skip_up
-
-   temp4 = (player0x-17)/4
-
-   if temp4 < 31 then if pfread(temp4,temp6) then _b6_enableSlowMotion{6} =1 :goto __skip_up
-
-   temp3 = temp5 - 1
-
-   if temp3 < 31 then if pfread(temp3,temp6) then _b6_enableSlowMotion{6} =1 :goto __skip_up
+   ; ostacolo in una delle tre colonne del biscotto (pfhit, banco 1)
+   asm
+ lda temp5
+ jsr pfhit31
+ bcs .__skip_up
+ lda player0x
+ sec
+ sbc #17
+ lsr
+ lsr
+ jsr pfhit31
+ bcs .__skip_up
+ ldx temp5
+ dex
+ txa
+ jsr pfhit31
+ bcs .__skip_up
+end
 
    if _b6_enableSlowMotion{6} then if (_frame_counter & 3) <> 0 then goto __skip_up
    player0y = player0y - 1 : _Bit0_P0_Dir_Up{0} = 1
@@ -822,15 +820,24 @@ __skip_up
 
    temp5 = (player0x-10)/4 : temp6 = (player0y)/8
 
-   if temp5 < 31 then if pfread(temp5,temp6) then _b6_enableSlowMotion{6} = 1 :goto __skip_down
-
-   temp4 = (player0x-17)/4
-
-   if temp4 < 31 then if pfread(temp4,temp6) then _b6_enableSlowMotion{6} = 1 :goto __skip_down
-
-   temp3 = temp5 - 1
-
-   if temp3 < 31 then if pfread(temp3,temp6) then _b6_enableSlowMotion{6} = 1 :goto __skip_down
+   ; ostacolo in una delle tre colonne del biscotto (pfhit, banco 1)
+   asm
+ lda temp5
+ jsr pfhit31
+ bcs .__skip_down
+ lda player0x
+ sec
+ sbc #17
+ lsr
+ lsr
+ jsr pfhit31
+ bcs .__skip_down
+ ldx temp5
+ dex
+ txa
+ jsr pfhit31
+ bcs .__skip_down
+end
 
    if _b6_enableSlowMotion{6} then if (_frame_counter & 3) <> 0 then goto __skip_down
    player0y = player0y + 1 : _Bit1_P0_Dir_Down{1} = 1
@@ -848,9 +855,18 @@ __skip_down
    goto __skip_left
 __no_push_left
 
-   if temp6 < 32 then if pfread(temp6,temp5) then _b6_enableSlowMotion{6} = 1 : goto __skip_left
-
-   if temp6 < 32 then if pfread(temp6,temp3) then _b6_enableSlowMotion{6} = 1 : goto __skip_left
+   asm
+ lda temp5
+ sta temp4
+ lda temp6
+ jsr pfhit32
+ bcs .__skip_left
+ lda temp3
+ sta temp4
+ lda temp6
+ jsr pfhit32
+ bcs .__skip_left
+end
 
    if _b6_enableSlowMotion{6} then if (_frame_counter & 3) <> 0 then goto __skip_left
    player0x = player0x - 1 : _Bit2_P0_Dir_Left{2} = 1
@@ -869,9 +885,18 @@ __skip_left
 __no_push_right
 
    ; colonne 32-33 sono fuori dallo schermo: pfread leggerebbe la riga sotto
-   if temp6 < 32 then if pfread(temp6,temp5) then _b6_enableSlowMotion{6} = 1 : goto __skip_right
-
-   if temp6 < 32 then if pfread(temp6,temp3) then _b6_enableSlowMotion{6} = 1 : goto __skip_right
+   asm
+ lda temp5
+ sta temp4
+ lda temp6
+ jsr pfhit32
+ bcs .__skip_right
+ lda temp3
+ sta temp4
+ lda temp6
+ jsr pfhit32
+ bcs .__skip_right
+end
 
    if _b6_enableSlowMotion{6} then if (_frame_counter & 3) <> 0 then goto __skip_right
    player0x = player0x + 1 :  _Bit3_P0_Dir_Right{3} = 1
@@ -931,13 +956,59 @@ wf_none
  ldx #255
 wf_done
  rts
-; colore A al buio: stessa tinta, luminosita' 2 (scuro ma visibile); 0 resta nero
+; ostacolo nel playfield? pfhit31: A = colonna (solo se < 31), riga temp6;
+; pfhit32: A = colonna (solo se < 32), riga temp4. C = 1 se il pixel e' acceso
+; (e parte il rallentamento della scossa), C = 0 se no. pfread sta nel banco 2:
+; ci si arriva come fa batari Basic (BS_jsr, A = colonna, Y = riga)
+pfhit31
+ ldy temp6
+ cmp #31
+ bcs ph_no
+ bcc ph_rd
+pfhit32
+ ldy temp4
+ cmp #32
+ bcs ph_no
+ph_rd
+ sta temp7
+ lda #>(ph_ret-1)
+ pha
+ lda #<(ph_ret-1)
+ pha
+ lda #>(pfread-1)
+ pha
+ lda #<(pfread-1)
+ pha
+ lda temp7
+ pha
+ txa
+ pha
+ ldx #2
+ jmp BS_jsr
+ph_ret
+ bne ph_no
+ lda _b6_enableSlowMotion
+ ora #%01000000
+ sta _b6_enableSlowMotion
+ sec
+ rts
+ph_no
+ clc
+ rts
+; colore A al buio: dimcol stessa tinta con luminosita' 2 (biscotto e
+; cioccolatino, scuri ma visibili), dark0 nero (bocca e zuccherino)
+dark0
+ ldy #$00
+ .byte $2C
 dimcol
+ ldy #$02
  tax
  beq dimcol_r
  lda _b4_enableLight
  and #%00010000
  bne dimcol_lit
+ tya
+ beq dimcol_r
  txa
  and #$F0
  ora #$02
@@ -1000,12 +1071,53 @@ end
    gosub __kill_mouth
    goto __done
 
+   ; vita persa. Nel livello 5 i muri tornano al loro posto e il biscotto
+   ; riparte dall'inizio: se li hai spinti in modo da chiuderti la strada, alla
+   ; prossima vita persa il rompicapo ricomincia (non resti mai bloccato)
 __decrease_health_bar
   pfscore2=pfscore2/4
   pfscore1=%11111111
   _hitCooldown = 90
   if !pfscore2 then goto __game_start
+  if _level = 5 then gosub __walls_home
   goto __done
+
+   ;*************************************************************************************************************************
+   ; MURI DEL LIVELLO 5 AL LORO POSTO (vita persa)
+   ;*************************************************************************************************************************
+   ; Nel livello 5 i muri tornano al loro posto e il biscotto riparte
+   ; dall'inizio: se li hai spinti in modo da chiuderti la strada, alla
+   ; prossima vita persa il rompicapo ricomincia (non resti mai bloccato).
+__walls_home
+   player0x = 10 : player0y = 64
+   gosub __walls_reset bank2
+   return
+
+
+   ;*************************************************************************************************************************
+   ; BONUS TEMPO (chiamato da __change_level)
+   ;*************************************************************************************************************************
+   ; bonus tempo: ogni segmento rimasto della barra vale 20 punti, contati
+   ; uno alla volta con un tic
+__time_bonus
+   if !switchrightb then return
+   if !pfscore1 then return
+   pfscore1 = pfscore1 * 2 : score = score + 20
+   asm
+ lda #4
+ sta AUDC0
+ lda #8
+ sta AUDF0
+ sta AUDV0
+end
+   ; contatore: _mouthTick (drawscreen sovrascrive le variabili temp)
+   _mouthTick = 6
+__bonus_wait
+   drawscreen
+   if _mouthTick = 3 then AUDV0 = 0
+   _mouthTick = _mouthTick - 1
+   if _mouthTick then goto __bonus_wait
+   goto __time_bonus
 
    ; la bocca _mouthIndex sparisce e ricomparira' dopo _Mouth_Respawn frame
 __kill_mouth
@@ -1033,7 +1145,7 @@ __decrease_timer_bar
 
 __change_level
    ; bonus tempo (banco 2)
-   gosub __time_bonus bank2
+   gosub __time_bonus
    _sfxId = 0
    asm
  ldx #8
@@ -1185,24 +1297,28 @@ end
 __pf_colors
    ; righe 0-4 sopra il piano, 5 piano, 6-10 sotto. Dal livello 3 i colori
    ; del cioccolato; nei livelli 1, 2 e 5 le lampade (paralume grigio,
-   ; lampadina gialla) sono sempre dello stesso colore. Al buio tutto
-   ; e' piu' scuro, senza lampeggi (righe dei muri di un solo colore)
+   ; lampadina gialla) sono sempre dello stesso colore, e con la luce accesa
+   ; la lampadina traballa: ogni tanto, a caso, un frame di giallo piu' scuro
+   ; (bit del contatore dei frame mescolati: circa un frame su quattro).
+   ; Al buio tutto diventa quasi nero, senza lampeggi
    if !_b4_enableLight{4} then goto __pfc_dark
-   pfcolors:
-   $28
-   $26
-   $24
-   $26
-   $24
-   $02
-   $28
-   $26
-   $24
-   $26
-   $24
+   asm
+ lda _frame_counter
+ lsr
+ lsr
+ eor _frame_counter
+ and #5
+ sta temp6
 end
-   if _level = 5 then goto __pfc_level5
-   if _level > 2 then goto __pfc_done
+   asm
+ lda _level
+ cmp #5
+ beq .__pfc_level5
+ cmp #3
+ bcs .__pfc_choc
+ lda temp6
+ beq .__bulb12
+end
    pfcolors:
    $05
    $2E
@@ -1216,11 +1332,30 @@ end
    $24
    $26
 end
-   goto __pfc_done
+   return otherbank
+__bulb12
+   pfcolors:
+   $05
+   $28
+   $0E
+   $24
+   $26
+   $02
+   $05
+   $28
+   $0E
+   $24
+   $26
+end
+   return otherbank
    ; livello 5: lampade come nei primi livelli, muri mobili marroni di un
-   ; solo colore (barrette fisse, senza variazioni), piu' scuri della
-   ; lampadina gialla anche quando traballa
+   ; solo colore (barrette fisse, senza variazioni, anche quando la
+   ; lampadina traballa)
 __pfc_level5
+   asm
+ lda temp6
+ beq .__bulb5
+end
    pfcolors:
    $05
    $2E
@@ -1234,23 +1369,51 @@ __pfc_level5
    $24
    $24
 end
-   goto __pfc_done
+   return otherbank
+__bulb5
+   pfcolors:
+   $05
+   $28
+   $24
+   $24
+   $24
+   $02
+   $05
+   $28
+   $24
+   $24
+   $24
+end
+   return otherbank
+__pfc_choc
+   pfcolors:
+   $28
+   $26
+   $24
+   $26
+   $24
+   $02
+   $28
+   $26
+   $24
+   $26
+   $24
+end
+   return otherbank
 __pfc_dark
    pfcolors:
-   $22
-   $22
-   $20
-   $20
-   $20
    $02
-   $22
-   $22
-   $20
-   $20
-   $20
+   $02
+   $02
+   $02
+   $02
+   $02
+   $02
+   $02
+   $02
+   $02
+   $02
 end
-__pfc_done
-
    return otherbank
 
    ;*************************************************************************************************************************
@@ -1394,7 +1557,15 @@ __skip_tavoli
    _choco_bits = 255 : _b2_hasKey{2} = 1 : missile1height = 4
    ; (var44-var47 servono anche al vettore dei muri: dopo un livello valgono
    ; 255, qui si riazzerano come all'accensione)
-   _mouth1y = 200 : _spit2y = 200 : _spit2x = 0 : _spitDir = 0 : _spitTime = 0
+   asm
+ lda #200
+ sta _mouth1y
+ sta _spit2y
+ lda #0
+ sta _spit2x
+ sta _spitDir
+ sta _spitTime
+end
    pfhline 12 10 19 on
 __no_boss_setup
 
@@ -1408,6 +1579,33 @@ __no_boss_setup
    ; Bit 0-3: muri sul piano nelle sezioni alte b0-b3 (righe 2-4, sotto
    ; una lampada appesa al soffitto), memorizzati come colonna + 128.
    if _level = _Boss then return otherbank
+   gosub __place_walls
+   return otherbank
+   ; vita persa nel livello 5 (da __walls_home, banco 1): muri al loro posto
+__walls_reset
+   ; nel livello 5 le righe 2-4 e 8-10 contengono solo i muri: si svuotano
+   ; tutte e i muri si ridisegnano al loro posto
+   asm
+ lda #10
+ sta temp6
+wh_row
+ ldy temp6
+ lda #31
+ sta temp3
+ lda #0
+ ldx #1
+ jsr pfhline
+ dec temp6
+ lda temp6
+ cmp #7
+ bne wh_n
+ lda #4
+ sta temp6
+wh_n
+ cmp #1
+ bne wh_row
+end
+__place_walls
    asm
  lda #255
  ldx #4
@@ -1416,11 +1614,14 @@ wl_clear
  dex
  bpl wl_clear
 end
-   temp2 = _current_object_level + 1
+   ; (colonna 1 di objects del livello: _current_object_level vale solo durante
+   ; il caricamento, n serve anche alle bocche)
+   temp2 = _level * 8
+   temp2 = temp2 - 7
    temp4 = objects[temp2]
    temp5 = 4 : temp6 = 2
 __wall_loop
-   if !temp4 then return otherbank
+   if !temp4 then return
    if !(temp4 & 1) then goto __wall_next
    temp1 = temp6 + 2
    pfvline temp5 temp6 temp1 on
@@ -1832,18 +2033,6 @@ end
 
    ; colpo di cioccolatino alla Bocca Gigante: resta ferma dov'e' per un
    ; attimo (_hitCooldown), e intanto non si puo' colpire di nuovo
-__boss_hit
-   _choco_count = _choco_count + 1 : score = score + 40
-   temp5 = 20 - _choco_count
-   pfpixel temp5 10 off
-   _hitCooldown = 30
-   if _choco_count < 8 then return otherbank
-   score = score + 500
-   asm
- ldx #7
- jsr sfx_go2
-end
-   return otherbank
 
    ; effetto sonoro X (se ha priorita' maggiore o uguale a quello in corso)
    asm
@@ -1859,6 +2048,19 @@ sfx_go2_skip
 end
 
 
+
+__boss_hit
+   _choco_count = _choco_count + 1 : score = score + 40
+   temp5 = 20 - _choco_count
+   pfpixel temp5 10 off
+   _hitCooldown = 30
+   if _choco_count < 8 then return otherbank
+   score = score + 500
+   asm
+ ldx #7
+ jsr sfx_go2
+end
+   return otherbank
 
    ;*************************************************************************************************************************
    ; TRUCCO: PEZZO DI PIANO DI LAVORO (chiamato quando un cioccolatino lo colpisce)
@@ -1880,25 +2082,6 @@ __piano_hit
 end
    return otherbank
 
-
-   ;*************************************************************************************************************************
-   ; BONUS TEMPO (chiamato da __change_level)
-   ;*************************************************************************************************************************
-   ; bonus tempo: ogni segmento rimasto della barra vale 20 punti, contati
-   ; uno alla volta con un tic
-__time_bonus
-   if !switchrightb then return otherbank
-   if !pfscore1 then return otherbank
-   pfscore1 = pfscore1 * 2 : score = score + 20
-   AUDC0 = 4 : AUDF0 = 8 : AUDV0 = 8
-   ; contatore: _mouthTick (drawscreen sovrascrive le variabili temp)
-   _mouthTick = 6
-__bonus_wait
-   drawscreen
-   if _mouthTick = 3 then AUDV0 = 0
-   _mouthTick = _mouthTick - 1
-   if _mouthTick then goto __bonus_wait
-   goto __time_bonus
 
    ;*************************************************************************************************************************
    ; MURI SPINGIBILI
@@ -1928,6 +2111,22 @@ __push_wall
  and #127
  cmp #32
  bcs pw_out
+ ; muri sul piano (bit 7): solo nella corsia della loro sezione, colonne
+ ; s..s+4 (s = 3, 10, 17, 24): due muri alti non si toccano mai
+ bit temp5
+ bpl pw_lane
+ sec
+ sbc #3
+ bcc pw_out
+pw_mod
+ cmp #7
+ bcc pw_m
+ sbc #7
+ bcs pw_mod
+pw_m
+ cmp #5
+ bcs pw_out
+pw_lane
  lda #8
  bit temp5
  bpl pw_base
@@ -2169,13 +2368,13 @@ end
    ; Livello 2: una lampada bassa in b7; nelle sezioni con le tazze una
    ; lampada chiuderebbe la colonna dal piano al pavimento e taglierebbe
    ; in due la parte bassa (in b4 chiuderebbe il biscotto alla partenza).
-   ; Livello 5: quattro muri spingibili, ognuno sotto la sua lampada: sul
-   ; piano in b2 (colonna 18), sul pavimento in b5, b6 e b7 (colonne 11,
-   ; 18 e 25). Servono almeno 3 spinte (tools/soluzione.py cerca la
-   ; soluzione con meno spinte). Un muro in piu' sul piano (colonna 25)
-   ; farebbe incastrare i due muri alti: niente piu' strada per il
-   ; sacchetto (provato con sequenze di spinte a caso). Cosi' invece
-   ; nessuna combinazione di spinte chiude per sempre la strada.
+   ; Livello 5: cinque muri spingibili, ognuno sotto la sua lampada: sul
+   ; piano in b2 e b3 (colonne 18 e 25), sul pavimento in b5, b6 e b7
+   ; (colonne 11, 18 e 25). Servono almeno 4 spinte (tools/soluzione.py
+   ; cerca la soluzione con meno spinte). I muri sul piano scorrono solo
+   ; nella corsia della loro sezione (colonne s..s+4): i due muri alti non
+   ; si toccano mai. Se le spinte chiudono la strada, alla prossima vita
+   ; persa i muri tornano al loro posto (__walls_home).
    ; Gocce nella parte alta (b1, b3).
    ; Livello 6 (PRESSE, parte al buio): solo presse. La colonna 3 (gocce)
    ; diventa di presse: 4 appese al soffitto e 4 al piano (colonne 3, 10,
@@ -2203,7 +2402,7 @@ end
    %01111111, %00000000, %00000000, %00000000, %10000000, %00000000, %00101011, 136,
    %00000000, %00000000, %00110111, %00000000, %00000000, %00000000, %00001011, 18,
    %00000000, %00000000, %00000000, %11111111, %00000000, %00000000, %00101011, 136,
-   %00000000, %11100100, %00000000, %00000000, %11100100, %00000000, %01111110, 136,
+   %00000000, %11101100, %00000000, %00000000, %11101100, %00000000, %01111110, 136,
    %00000000, %00000000, %00000000, %11111111, %00000000, %00000000, %00101011, 136,
    %00000000, %00000000, %00000000, %00000000, %00000000, %00000000, %01010101, 136,
 end

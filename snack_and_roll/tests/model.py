@@ -6,7 +6,7 @@ OBJECTS = [
     [0b01111111, 0b00000000, 0b00000000, 0b00000000, 0b10000000, 0b00000000, 0b00101011, 136],
     [0b00000000, 0b00000000, 0b00110111, 0b00000000, 0b00000000, 0b00000000, 0b00001011, 18],
     [0b00000000, 0b00000000, 0b00000000, 0b11111111, 0b00000000, 0b00000000, 0b00101011, 136],
-    [0b00000000, 0b11100100, 0b00000000, 0b00000000, 0b11100100, 0b00000000, 0b01111110, 136],
+    [0b00000000, 0b11101100, 0b00000000, 0b00000000, 0b11101100, 0b00000000, 0b01111110, 136],
     [0b00000000, 0b00000000, 0b00000000, 0b11111111, 0b00000000, 0b00000000, 0b00101011, 136],
 ]
 # livello delle PRESSE (l'ultimo): la colonna 3 di objects sono presse, non gocce
@@ -310,6 +310,17 @@ def can_push(cells_reach, key, d):
     return {(x, y) for x, y in cells_reach if rows_ok(y) and ((x - 18) & 255) // 4 == col and x > 10}
 
 
+def lane_ok(key, dest):
+    """I muri sul piano (key + 128) scorrono solo nella corsia della loro
+    sezione: colonne s..s+4 (s = 3, 10, 17, 24; il muro parte in s+1). Tra due
+    corsie restano almeno 2 colonne libere: due muri alti non si toccano mai e
+    non si incastrano. I muri sul pavimento vanno ovunque nello schermo."""
+    col = key & 127
+    if not key & 128:
+        return 0 <= dest <= 31
+    return 3 <= dest <= 31 and (dest - 3) // 7 == (col - 3) // 7 and (dest - 3) % 7 <= 4
+
+
 def single_pushes(static, walls_now, reach, max_cols=8):
     """Tutti gli stati raggiungibili con UNA spinta di un muro (di 1..max_cols
     colonne). static = celle senza i muri. Ritorna [(muro, d, n, muri_nuovi)]."""
@@ -321,7 +332,7 @@ def single_pushes(static, walls_now, reach, max_cols=8):
             others = wall_cells(w for j, w in enumerate(walls_now) if j != i)
             for n in range(1, max_cols + 1):
                 dest = (k & 127) + d * n
-                if not 0 <= dest <= 31 or any((dest, rr) in static or (dest, rr) in others for rr in wall_rows(k)):
+                if not lane_ok(k, dest) or any((dest, rr) in static or (dest, rr) in others for rr in wall_rows(k)):
                     break
                 new = list(walls_now)
                 new[i] = dest | (k & 128)
