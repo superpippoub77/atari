@@ -55,9 +55,9 @@ emit("Gfx", gfx, 12)
 
 # colori NTSC: [squadra sinistra, squadra destra] x [palazzetto, spiaggia]
 SETS = [
-    dict(H=0xF2, S=0x3C, T=0x44, P=0x0E, L=0x3C, F=0x0E),   # palazzetto, sinistra: maglia rossa
+    dict(H=0xF2, S=0x3C, T=0x0E, P=0x84, L=0x3C, F=0x0E),   # palazzetto, sinistra: maglia bianca (rossa = comandato)
     dict(H=0x1C, S=0x3C, T=0x84, P=0x02, L=0x3C, F=0x0E),   # palazzetto, destra: maglia blu
-    dict(H=0x1E, S=0x3C, T=0x38, P=0x86, L=0x3C, F=0x3A),   # spiaggia, sinistra: canotta arancio, piedi nudi
+    dict(H=0x1E, S=0x3C, T=0x1C, P=0x86, L=0x3C, F=0x3A),   # spiaggia, sinistra: canotta gialla, piedi nudi
     dict(H=0xF2, S=0x2A, T=0xC8, P=0x56, L=0x2A, F=0x28),   # spiaggia, destra: canotta verde
 ]
 # colori in comune tra i fotogrammi: una tabella per le pose normali e una per quelle con le braccia in alto
@@ -82,7 +82,14 @@ for si, cs in enumerate(NATIONS):
     for k in CK:
         cols += [cs[c] for c in k]
     emit(f"Cols{4 + si}", cols, 12)
-NC = len(SETS) + len(NATIONS)
+# giocatore comandato dal joystick: maglia rossa (palazzetto, spiaggia)
+for si, base in enumerate((SETS[0], SETS[2])):
+    cs = dict(base, T=0x44)
+    cols = []
+    for k in CK:
+        cols += [cs[c] for c in k]
+    emit(f"Cols{10 + si}", cols, 12)
+NC = len(SETS) + len(NATIONS) + 2
 out.append("ColSetLo  .byte " + ",".join(f"<Cols{i}" for i in range(NC)))
 out.append("ColSetHi  .byte " + ",".join(f">Cols{i}" for i in range(NC)))
 out.append("FrameOfs  .byte " + ",".join(str(i * PH) for i in range(len(ORDER))))

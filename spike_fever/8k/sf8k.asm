@@ -447,6 +447,8 @@ Setup  SUBROUTINE
 
 ; puntatori di grafica e colori: X = giocatore (0-3), Y = sprite (0 = P0, 1 = P1)
 SetupPlayer  SUBROUTINE
+        txa                     ; (il giocatore, per il colore del comandato)
+        pha
         tya
         asl
         asl
@@ -482,7 +484,25 @@ SetupPlayer  SUBROUTINE
         sta P0Ptr+1,x
         pla
         sta temp2
-        ; colori: arena*2 + squadra
+        ; il giocatore comandato dal joystick (squadra di una persona) ha la maglia rossa
+        pla
+        sta temp4
+        lda demo
+        bne .nh
+        cpy #0
+        beq .hu
+        lda mode
+        and #2
+        beq .nh
+.hu     jsr Active
+        cmp temp4
+        bne .nh
+        lda mode
+        and #1
+        ora #10                 ; colori 10 (palazzetto) / 11 (spiaggia)
+        tax
+        bne .nc
+.nh     ; colori: arena*2 + squadra
         lda mode
         and #1
         asl
@@ -592,29 +612,64 @@ PosObject  SUBROUTINE
         rts
 
 Players  SUBROUTINE
-        ldx #3
+        ; alzata di una persona: un attimo prima del palleggio l'alzatore deve avere la palla sopra
+        ; le mani (con un margine di 10 pixel), se no niente alzata e la palla cade
+        lda next
+        cmp #NX_SET
+        bne .sok
+        lda fT
+        cmp #63
+        bne .sok
+        lda team
+        jsr Human
+        beq .sok
+        lda team
+        asl
+        tax
+        lda mode
+        and #4
+        beq .o4
+        lda #2                  ; 2 contro 2: mani a +2
+        .byte $2C
+.o4     lda #18                 ; 4 contro 4: l'alzatore e' la copia di mezzo
+        clc
+        adc px,x
+        sta temp4
+        lda bxh
+        sec
+        sbc temp4
+        bcs .dp
+        eor #$FF
+        adc #1
+.dp     cmp #11
+        bcc .sok
+        lda #NX_NONE
+        sta next
+.sok    ldx #3
 .loop   stx temp3
         jsr Target              ; A = x obiettivo
         ldx temp3
         sta tgt,x
         lda #0
         sta moved,x
-        ; persona: il ricevitore della squadra che deve ricevere si muove col joystick
+        ; persona: il giocatore comandato (Active) della squadra che deve toccare la palla si muove
+        ; col joystick: prima il ricevitore, dopo il bagher l'alzatore (che va portato sotto la palla)
         lda state
         cmp #ST_RALLY
         bne .auto
         lda next
-        cmp #NX_RECV
-        bne .auto
-        txa
-        and #1
-        beq .auto
+        cmp #NX_HIT
+        bcs .auto               ; (ricezione 0, alzata 1)
         txa
         lsr
         cmp team
         bne .auto
+        tay
         jsr Human
         beq .auto
+        jsr Active
+        cmp temp3
+        bne .auto
         ldx temp3
         txa
         lsr
@@ -676,21 +731,21 @@ StepLeft
         clc
         adc px,x
 ClampX  SUBROUTINE
-        cpx #2
-        bcs .cr
-        cmp #2
+        pha                     ; limiti per giocatore (+4 nel 2 contro 2): nel 4 contro 4 le copie della
+        lda mode                ; prima linea (x, x+16, x+32) non passano la rete
+        and #4
+        sta temp4
+        txa
+        ora temp4
+        tay
+        pla
+        cmp MinX,y
         bcs .c1
-        lda #2
-.c1     cmp #67
+        lda MinX,y
+.c1     cmp MaxX,y
         bcc .cd
-        lda #66
-        bne .cd
-.cr     cmp #84
-        bcs .c2
-        lda #84
-.c2     cmp #152
-        bcc .cd
-        lda #151
+        beq .cd
+        lda MaxX,y
 .cd     cmp px,x
         beq .nm
         inc moved,x
@@ -967,6 +1022,33 @@ NewGame lda #1                  ; (punteggi e posizioni nel banco 0)
         jmp NewGame
 .cdone  rts
 
+; giocatore comandato dal joystick nella squadra Y (A = 0-3): in battuta e ricezione il difensore,
+; dopo il bagher l'alzatore (prima linea), in attacco chi schiaccia, quando attaccano gli avversari
+; la prima linea (muro). Usa X; Y invariato
+Active  SUBROUTINE
+        tya
+        asl
+        ldx state
+        cpx #ST_RALLY
+        bne .back
+        ldx next
+        cpy team
+        bne .opp
+        cpx #NX_SET
+        beq .front
+        cpx #NX_HIT
+        bne .back
+        ldx setType
+        cpx #2
+        bcc .front
+.back   ora #1
+.front  rts
+.opp    cpx #NX_SET
+        bcc .back
+        cpx #NX_NONE
+        bcs .back
+        rts
+
 ; campionato? (bit 3 di mode, non in dimostrazione): C = 1 e A = livello (0-5); X e Y invariati
 Champ1  SUBROUTINE
         lda mode
@@ -1074,6 +1156,8 @@ BallLook  SUBROUTINE
 ; alzatore 100, schiacciatore 116); difensore da solo
 ;              1a linea sx, difensore sx, 1a linea dx, difensore dx
 NextMode1  .byte 5, 5, 6, 6, 5, 2, 7, 0   ; GAME SELECT (come NextMode0 nel banco 0)
+MinX       .byte 2, 2, 84, 84, 2, 2, 84, 84         ; limiti dei giocatori (4c4, poi 2c2)
+MaxX       .byte 36, 66, 112, 151, 66, 66, 151, 151
 HomeX      .byte 28,    12,    84,    140
            .byte 44,    12,    100,   140   ; 2 contro 2: l'alzatore al posto del palleggio
 Nusiz0     .byte $03, $20, $00, $20     ; P0: 3 copie (prima linea) / un giocatore + missile largo 4 (palla); 2c2
