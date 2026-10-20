@@ -1392,7 +1392,9 @@ __skip_tavoli
    ; e' alto 4 righe, barra dell'energia (8 pixel) sul pavimento ---
    if _level <> _Boss then goto __no_boss_setup
    _choco_bits = 255 : _b2_hasKey{2} = 1 : missile1height = 4
-   _mouth1y = 200 : _spit2y = 200
+   ; (var44-var47 servono anche al vettore dei muri: dopo un livello valgono
+   ; 255, qui si riazzerano come all'accensione)
+   _mouth1y = 200 : _spit2y = 200 : _spit2x = 0 : _spitDir = 0 : _spitTime = 0
    pfhline 12 10 19 on
 __no_boss_setup
 
