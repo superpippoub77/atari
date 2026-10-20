@@ -33,8 +33,7 @@ TitleEntry:
         sta frame
         sta REFP0
         sta sndT0
-        lda #0                  ; il pulsante deve essere rilasciato prima di partire
-        sta fireOld
+        sta fireOld             ; (A = 0) il pulsante deve essere rilasciato prima di partire
         lda #2
         sta selOld
 

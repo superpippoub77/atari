@@ -70,25 +70,8 @@ Logic  SUBROUTINE              ; (fotogramma, casuale, console e joystick: nel b
         lda #0
         sta req
         jmp B0Entry
-.play   ; (colore della palla nel banco 1 dopo il ritorno; i giocatori si muovono nel VBLANK: vedi Setup)
-        ; suoni
-        lda sndT0
-        beq .s0off
-        dec sndT0
-        bne .s1
-.s0off  lda #0
-        sta AUDV0
-.s1     lda sndT1
-        beq .s1off
-        dec sndT1
-        lda frame
-        and #2
-        lsr
-        adc #3
-        sta AUDF1
-        rts
-.s1off  lda #0
-        sta AUDV1
+.play   ; (colore della palla e durata dei suoni nel banco 1 dopo il ritorno: Overscan; i
+        ; giocatori si muovono nel VBLANK: vedi Setup)
         rts
 
 ; la squadra A è comandata da una persona? (Z = 0 sì)  usa temp4
@@ -621,8 +604,24 @@ Serve   sta temp3
 .ok     sta tx
         lda #FLOOR
         sta th
+        ; battuta in salto (SU, il computer una volta su due): il battitore salta e la palla
+        ; arriva in meta' tempo
         ldy #0
-        jsr Launch
+        lda server
+        jsr Human0
+        beq .aisv
+        lda joy,x               ; (SU = bit 4)
+        .byte $2C               ; (salta lda rand)
+.aisv   lda rand
+        and #$10
+        beq .ls
+        ldy #1
+        txa
+        asl
+        ora #1
+        tax
+        jsr Jump0
+.ls     jsr Launch
         lda #$FF                ; battuta: la palla non è ancora stata toccata (ace)
         sta setType
         lda #ST_RALLY
@@ -760,32 +759,48 @@ RallyState  SUBROUTINE
 Recv    SUBROUTINE
         lda byh
         cmp #DIGH+1
-        bcs .no
+        bcs .x
         lda bvyh
-        bpl .no
+        bpl .x
         lda team
         asl
         ora #1
         tax
         lda pz,x
-        bne .no
+        bne .x
         lda bxh
         sec
         sbc px,x
         sec
         sbc #2                  ; dx = centro palla - centro giocatore
         clc
-        adc #9
-        cmp #19
+        adc #17
+        cmp #35
         bcs .no
         sec
-        sbc #9                  ; dx con segno
+        sbc #17                 ; dx con segno
         bpl .pos
         eor #$FF
         clc
         adc #1
 .pos    sta temp                ; |dx|
-        lda #4
+        ; tuffo: palla fuori dalla portata del bagher (|dx| 9-17), il ricevitore si butta sotto la
+        ; palla (posa di caduta) e la prende di bagher, meno preciso; il computer una volta su due
+        ldy #4
+        cmp #9
+        bcc .bump
+        lda team
+        jsr Human0
+        bne .dv
+        lda rand
+        bpl .dv
+.x      rts
+.dv     lda bxh
+        sec
+        sbc #2
+        sta px,x
+        ldy #8
+.bump   tya
         jsr SetPose
         ldy team
         lda SetBallX,y
