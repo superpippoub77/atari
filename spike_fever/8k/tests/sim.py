@@ -22,6 +22,7 @@ class Mem:
         self.frame_starts = []
         self.fire = False
         self.reset = False
+        self.select = False
         self.vis = []
 
     def intim(self):
@@ -49,6 +50,8 @@ class Mem:
                 return 0xFF       # SWCHA
             if r == 2:
                 v = 0xFF
+                if self.select:
+                    v &= ~2
                 if self.reset:
                     v &= ~1
                 return v           # SWCHB
@@ -127,5 +130,8 @@ class Sim:
         return self.mem.ram[(self.sym[name] if isinstance(name, str) else name) & 0x7F]
     def __setitem__(self, name, v):
         self.mem.ram[(self.sym[name] if isinstance(name, str) else name) & 0x7F] = v & 255
+    def select(self, n=4):
+        self.mem.select = True; self.frames(n); self.mem.select = False; self.frames(4)
+
     def tap(self, n=4):
         self.mem.fire = True; self.frames(n); self.mem.fire = False; self.frames(2)

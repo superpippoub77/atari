@@ -23,7 +23,8 @@ Accanto alla 16K c'è la cartuccia da **4K**, giocabile da [`4k/index.html`](4k/
 ## Versione 8K: la 4K allargata (cartella [`8k/`](8k/))
 La cartuccia da **8K** (bankswitching F8, NTSC), giocabile da [`8k/index.html`](8k/index.html), è la 4K con un banco in più. Il banco 0 contiene il titolo e la logica della partita, il banco 1 il kernel e i giocatori.
 - **Titolo**: logo grande SPIKE / FEVER sfumato dal giallo al rosso (come la 16K). Sotto c'è un quadro animato: lo schiacciatore rincorre, salta e schiaccia, il muro salta contro di lui e la palla rotola. Il menu mostra la modalità scelta con GAME SELECT (persone, giocatori per squadra, arena) e PUSH FIRE lampeggia. Il pulsante o GAME RESET fa partire la partita; dopo una decina di secondi parte la dimostrazione.
-- **Campionato (WORLD CUP)**: in **1 PLAYER** affronti 6 nazionali in fila, come nella 16K.
+- **Modalità** (GAME SELECT): **1 PLAYER WORLD CUP** (campionato), **1 PLAYER BEACH** (partita singola 2 contro 2 sulla sabbia contro il computer), **2 PLAYERS** al palazzetto 4 contro 4 o 2 contro 2, e in spiaggia. In spiaggia si gioca sempre **2 contro 2**, come nel beach volley vero.
+- **Campionato (WORLD CUP)**: in **1 PLAYER** affronti 6 nazionali in fila, come nella 16K (4 contro 4 al palazzetto, 2 contro 2 nei livelli in spiaggia).
 
   | Livello | Avversario | Arena | Computer (almeno) |
   |---|---|---|---|
@@ -40,7 +41,7 @@ La cartuccia da **8K** (bankswitching F8, NTSC), giocabile da [`8k/index.html`](
   - Se perdi compare **GAME OVER**: col pulsante rigiochi lo stesso livello (CONTINUE), altrimenti si torna al titolo.
   - Vinto il sesto livello, sei **CHAMPIONS!**
   - Il computer è forte almeno quanto il livello; le levette di difficoltà possono solo renderlo più forte.
-  - GAME RESET riparte dal livello 1. Nel menu, con 1 PLAYER, al posto dell'arena compare WORLD CUP: l'arena la sceglie il livello.
+  - GAME RESET riparte dal livello 1. Nel menu WORLD CUP compare al posto dell'arena: l'arena la sceglie il livello.
 - **Scritte in inglese**: il menu (1 PLAYER, 4 VS 4, INDOOR / BEACH, WORLD CUP, PUSH FIRE). In partita, per un secondo al posto del punteggio, ci sono gli annunci come lo speaker del gioco completo: **SPIKE!**, **POWER HIT!**, **QUICK!**, **BACK SPIKE**, **DINK!**, **BLOCK!**, **NET!**, **OUT!**, **ACE!**, **GAME SET**.
 - **L'alzatore corre sotto la palla**: dopo la ricezione l'alzatore va dove arriva il bagher e palleggia lì (prima restava fermo al suo posto). Nel 4 contro 4 si sposta tutta la prima linea, senza passare la rete: centrale, alzatore e schiacciatore sono lo stesso sprite ripetuto 3 volte dal TIA, quindi si muovono e cambiano posa insieme. L'alzata segue lo spostamento, così la palla arriva sulle mani di chi attacca; dopo l'attacco la linea torna al suo posto.
 - **Più pose**:

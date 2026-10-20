@@ -76,7 +76,7 @@ NX_NONE = 3             ;                 nessuno (la palla cade)
         ORG $80
 frame   ds 1
 rand    ds 1
-mode    ds 1            ; bit0 = spiaggia, bit1 = due persone, bit2 = due contro due, bit4-6 = livello del campionato
+mode    ds 1            ; bit0 = spiaggia, bit1 = due persone, bit2 = due contro due, bit3 = campionato, bit4-6 = livello
 demo    ds 1            ; 1 = dimostrazione (computer contro computer, titolo in alto)
 state   ds 1
 stateT  ds 1
@@ -931,9 +931,16 @@ Console  SUBROUTINE
         bcs .noReset
 .start  lda #0
         sta demo
-        lda mode                ; il campionato riparte dal livello 1
+        lda mode                ; campionato in corso (bit 3): riparte dal livello 1
+        and #8
+        bne .ch
+        lda mode
         and #7
-        sta mode
+        tax
+        and #3                  ; 1 PLAYER al palazzetto: campionato
+        bne .nc
+.ch     ldx #8
+.nc     stx mode
 NewGame lda #1                  ; (punteggi e posizioni nel banco 0)
         sta req
         jmp ToBank0
@@ -948,15 +955,11 @@ NewGame lda #1                  ; (punteggi e posizioni nel banco 0)
         beq .cdone
         cpx #1
         bne .cdone
-        inc mode
-        lda mode
+        lda mode                ; modalita' successiva (in spiaggia sempre 2 contro 2)
         and #7
-        cmp #1                  ; 1 PLAYER in spiaggia si salta: nel campionato l'arena la sceglie il livello
-        beq .skip
-        cmp #5
-        bne .mok
-.skip   adc #0                  ; (C = 1: +1)
-.mok    sta mode
+        tax
+        lda NextMode1,x
+        sta mode
         lda #150
         sta showT
         lda #1
@@ -964,11 +967,12 @@ NewGame lda #1                  ; (punteggi e posizioni nel banco 0)
         jmp NewGame
 .cdone  rts
 
-; campionato? (1 PLAYER, non in dimostrazione): C = 1 e A = livello (0-5); X e Y invariati
+; campionato? (bit 3 di mode, non in dimostrazione): C = 1 e A = livello (0-5); X e Y invariati
 Champ1  SUBROUTINE
         lda mode
-        and #2
-        ora demo
+        and #8
+        beq .no
+        lda demo
         bne .no
         lda mode
         lsr
@@ -1069,6 +1073,7 @@ BallLook  SUBROUTINE
 ; prima linea: copie a x, x+16, x+32 (sinistra: schiacciatore 28, alzatore 44, centrale 60; destra: centrale 84,
 ; alzatore 100, schiacciatore 116); difensore da solo
 ;              1a linea sx, difensore sx, 1a linea dx, difensore dx
+NextMode1  .byte 5, 5, 6, 6, 5, 2, 7, 0   ; GAME SELECT (come NextMode0 nel banco 0)
 HomeX      .byte 28,    12,    84,    140
            .byte 44,    12,    100,   140   ; 2 contro 2: l'alzatore al posto del palleggio
 Nusiz0     .byte $03, $20, $00, $20     ; P0: 3 copie (prima linea) / un giocatore + missile largo 4 (palla); 2c2

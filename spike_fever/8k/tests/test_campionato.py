@@ -11,9 +11,24 @@ def check(name, ok, det=""):
     R.append(ok); print(("  ok   " if ok else "  FAIL ") + name + (f"  ({det})" if det else ""))
 s.frames(30)
 check("titolo: 1 PLAYER (mode 0)", s['mode'] == 0, s['mode'])
+# GAME SELECT: WORLD CUP, 1 PLAYER in spiaggia (2 contro 2), 2 PLAYERS 4c4, 2c2, in spiaggia (2c2)
+seq = []
+for _ in range(5):
+    s.select(); seq.append(s['mode'])
+check("Select: 1P spiaggia 2c2, 2P 4c4, 2P 2c2, 2P spiaggia 2c2, di nuovo WORLD CUP", seq == [5, 2, 6, 7, 0], str(seq))
+check("in spiaggia sempre 2 contro 2", all(m & 4 for m in seq if m & 1))
+s.select()
+s.tap(); s.frames(5)
+check("1 PLAYER in spiaggia: partita singola contro il computer, 2 contro 2 (niente campionato)",
+      s['demo'] == 0 and s['mode'] == 5 and s['msg'] == 0, f"mode={s['mode']:08b} msg={s['msg']}")
+s.mem.reset = True; s.frames(4); s.mem.reset = False; s.frames(4)
+check("Reset: si rigioca la partita in spiaggia", s['mode'] == 5 and s['demo'] == 0, f"mode={s['mode']:08b}")
+# campionato: da una nuova accensione (titolo con WORLD CUP)
+s = Sim(sys.argv[1], sys.argv[2])
+s.frames(30)
 s.tap(); s.frames(5)
 lv = lambda: s['mode'] >> 4
-check("parte la partita del livello 1 con LEVEL 1", s['demo'] == 0 and lv() == 0 and s['msg'] == 14, f"msg={s['msg']} mode={s['mode']:08b}")
+check("parte la partita del livello 1 con LEVEL 1 (campionato: bit 3)", s['demo'] == 0 and lv() == 0 and s['mode'] & 8 and s['msg'] == 14, f"msg={s['mode']:08b} mode={s['mode']:08b}")
 s.frames(105)
 check("poi VS CHINA", s['msg'] == 20, f"msg={s['msg']}")
 s.frames(70)
@@ -29,7 +44,7 @@ def win(team):
 win(0)
 check("vinta: YOU WIN!", s['state'] == 4 and s['msg'] == 13, f"state={s['state']} msg={s['msg']} winner={s['winner']}")
 s.frames(260)
-check("livello 2: BRAZIL in spiaggia, LEVEL 2", lv() == 1 and s['mode'] & 1 and s['msg'] == 15 and s['score'] == 0,
+check("livello 2: BRAZIL in spiaggia (2 contro 2), LEVEL 2", lv() == 1 and s['mode'] & 5 == 5 and s['msg'] == 15 and s['score'] == 0,
       f"mode={s['mode']:08b} msg={s['msg']} score={s['score']}")
 s.frames(110)
 check("VS BRAZIL", s['msg'] == 21, f"msg={s['msg']}")
@@ -45,6 +60,6 @@ check("livello 6: USSR", lv() == 5 and s['msg'] in (19, 25), f"mode={s['mode']:0
 win(0)
 check("vinto il livello 6: CHAMPIONS!", s['msg'] == 12, f"msg={s['msg']}")
 s.frames(270)
-check("poi il titolo con il livello azzerato", s['mode'] >> 4 == 0 and s['req'] == 0, f"mode={s['mode']:08b}")
+check("poi il titolo con il livello azzerato", s['mode'] >> 3 == 0 and s['req'] == 0, f"mode={s['mode']:08b}")
 check("stack sopra le variabili", s.minsp >= s.sym['RAMEND'] - 1, f"sp min={s.minsp:02X} RAMEND={s.sym['RAMEND']:02X}")
 print(f"{sum(R)}/{len(R)}")
