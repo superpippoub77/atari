@@ -575,15 +575,15 @@ __bulb5
    pfcolors:
    $05
    $28
-   $24
-   $20
-   $24
+   $22
+   $22
+   $22
    $02
    $05
    $28
-   $24
-   $20
-   $24
+   $22
+   $22
+   $22
 end
 __bulb_done
 
@@ -1186,7 +1186,7 @@ __pf_colors
    ; righe 0-4 sopra il piano, 5 piano, 6-10 sotto. Dal livello 3 i colori
    ; del cioccolato; nei livelli 1, 2 e 5 le lampade (paralume grigio,
    ; lampadina gialla) sono sempre dello stesso colore. Al buio tutto
-   ; e' piu' scuro, senza lampeggi
+   ; e' piu' scuro, senza lampeggi (righe dei muri di un solo colore)
    if !_b4_enableLight{4} then goto __pfc_dark
    pfcolors:
    $28
@@ -1217,21 +1217,21 @@ end
    $26
 end
    goto __pfc_done
-   ; livello 5: lampade come nei primi livelli, muri mobili a blocchetti
-   ; di cioccolato (chiaro, scuro, chiaro: si vede che sono da spingere),
-   ; piu' scuri della lampadina gialla anche quando traballa
+   ; livello 5: lampade come nei primi livelli, muri mobili marroni di un
+   ; solo colore (barrette fisse, senza variazioni), piu' scuri della
+   ; lampadina gialla anche quando traballa
 __pfc_level5
    pfcolors:
    $05
    $2E
    $24
-   $20
+   $24
    $24
    $02
    $05
    $2E
    $24
-   $20
+   $24
    $24
 end
    goto __pfc_done
@@ -1240,13 +1240,13 @@ __pfc_dark
    $22
    $22
    $20
-   $22
+   $20
    $20
    $02
    $22
    $22
    $20
-   $22
+   $20
    $20
 end
 __pfc_done

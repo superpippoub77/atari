@@ -52,7 +52,7 @@ SNR_CARD=2.5 SNR_OVER=3.4 xvfb-run -a -s "-screen 0 800x600x24" python3 test_all
   - la barra del tempo, le vite e il game over;
   - la selezione del livello con Select;
   - le presse del livello 6: stantuffi a T (perno continuo, testa larga in fondo) che si allungano e si ritirano; scendendo sul biscotto lo schiacciano (una vita), stando fermi a contatto col piano non succede niente; nei percorsi del test le presse si attraversano aspettando che risalgano;
-  - i muri spingibili (3 al livello 5, sopra e sotto il piano): si spostano spingendoli con la levetta nei due sensi, si fermano a fine corsia, non si distruggono e schiacciano le bocche; alla fine tornano al loro posto;
+  - i muri spingibili (5 al livello 5, sopra e sotto il piano; anche piu' spinte di fila per aprire la strada): si spostano spingendoli con la levetta nei due sensi, si fermano a fine corsia, non si distruggono e schiacciano le bocche; alla fine tornano al loro posto;
   - livello 5: gli zuccherini delle stanze chiuse non si raggiungono senza spingere un muro; il test trova la spinta giusta (`model.single_pushes`) e la esegue con la levetta;
   - una bocca uccisa (con un cioccolatino o schiacciata) sparisce e ricompare nel suo angolo dopo circa 4 secondi;
   - dopo il livello 6 arriva la Bocca Gigante: sputa mirando al biscotto (8 direzioni), dopo il quarto colpo lo sputo si divide in due, lo sputo toglie una vita, colpita resta ferma un attimo e intanto non si colpisce di nuovo, 8 colpi svuotano la barra dell'energia, alla sconfitta compare il sacchetto (+50 a colpo, +500 alla fine); non si sceglie con Select;
