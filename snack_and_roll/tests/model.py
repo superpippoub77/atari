@@ -382,15 +382,17 @@ def plan_pushes(static, walls0, start, goals, max_states=6000):
     return out[::-1]
 
 
-def push_reach(level, objects=OBJECTS, extra=()):
-    """Raggiungibile senza spingere e spingendo i muri (anche piu' volte)."""
+def push_reach(level, objects=OBJECTS, extra=(), max_states=300):
+    """Raggiungibile senza spingere e spingendo i muri (anche piu' volte).
+    I primi 300 stati (le spinte piu' vicine) bastano: con tutti (migliaia)
+    il risultato e' lo stesso, ma servono minuti e gigabyte di memoria."""
     walls_now = tuple(wall_cols(level, objects))
     cells = build(level, objects) | drop_cells(level, objects) | set(extra)
     static = cells - wall_cells(walls_now)
     reach0 = Grid(cells).reachable()
     if not walls_now:
         return reach0, set(reach0)
-    prev, zones, _ = push_states(static, walls_now, (10, 64))
+    prev, zones, _ = push_states(static, walls_now, (10, 64), max_states)
     union = set()
     for z in prev:
         union |= zones[z]
