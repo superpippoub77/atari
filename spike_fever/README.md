@@ -43,6 +43,10 @@ La cartuccia da **8K** (bankswitching F8, NTSC), giocabile da [`8k/index.html`](
   - Il computer è forte almeno quanto il livello; le levette di difficoltà possono solo renderlo più forte.
   - GAME RESET riparte dal livello 1. Nel menu WORLD CUP compare al posto dell'arena: l'arena la sceglie il livello.
 - **Scritte in inglese**: il menu (1 PLAYER, 4 VS 4, INDOOR / BEACH, WORLD CUP, PUSH FIRE). In partita, per un secondo al posto del punteggio, ci sono gli annunci come lo speaker del gioco completo: **SPIKE!**, **POWER HIT!**, **QUICK!**, **BACK SPIKE**, **DINK!**, **BLOCK!**, **NET!**, **OUT!**, **ACE!**, **GAME SET**.
+- **Colpi**:
+  - *battuta*: dall'alto, con la direzione (verso la rete corta, verso il fondo lunga); **in salto** tenendo SU (il battitore salta e la palla arriva in metà tempo; il computer una volta su due); fuori tempo una volta su due va in rete;
+  - *attacco*: schiacciata corta, media o lunga, **potente** in perfetto tempo, pallonetto (SU), primo tempo e seconda linea scelti con l'alzata;
+  - *difesa*: bagher, **tuffo** (la palla scende fuori portata ma vicina: il ricevitore si butta e la prende di bagher, meno preciso; il computer una volta su due), muro.
 - **Il joystick passa da un giocatore all'altro**: comandi sempre chi deve toccare la palla. In battuta e in ricezione il difensore; dopo il bagher il controllo passa all'alzatore, che va portato sotto la palla (se è lontano più di 10 pixel l'alzata non riesce e la palla cade); poi chi schiaccia, e quando attaccano gli avversari la prima linea (muro). Il giocatore comandato ha la **maglia rossa**; la tua squadra è bianca al palazzetto e gialla in spiaggia.
 - **L'alzatore del computer corre sotto la palla**: dopo la ricezione l'alzatore va dove arriva il bagher e palleggia lì (prima restava fermo al suo posto). Nel 4 contro 4 si sposta tutta la prima linea, senza passare la rete: centrale, alzatore e schiacciatore sono lo stesso sprite ripetuto 3 volte dal TIA, quindi si muovono e cambiano posa insieme. L'alzata segue lo spostamento, così la palla arriva sulle mani di chi attacca; dopo l'attacco la linea torna al suo posto.
 - **Più pose**:

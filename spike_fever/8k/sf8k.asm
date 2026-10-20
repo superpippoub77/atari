@@ -334,6 +334,24 @@ GameLoop:
         jmp FarLogic            ; logica nel banco 0, poi torna a Overscan
 Overscan
         jsr BallLook
+        ; durata dei suoni (canale 0 effetti, canale 1 fischio del punto che trilla)
+        lda sndT0
+        beq .s0off
+        dec sndT0
+        bne .s1
+.s0off  lda #0
+        sta AUDV0
+.s1     lda sndT1
+        beq .s1off
+        dec sndT1
+        lda frame
+        and #2
+        lsr
+        adc #3
+        sta AUDF1
+        bne .over
+.s1off  lda #0
+        sta AUDV1
 .over   lda INTIM
         bne .over
         jmp MainLoop
