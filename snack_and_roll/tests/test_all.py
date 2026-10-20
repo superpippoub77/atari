@@ -461,7 +461,9 @@ def push_open(s, level, goals, attempts=4):
         idx = [i for i, n in enumerate(WALL_NAMES) if r.v(n) != 255]
         ws = tuple(r.v(WALL_NAMES[i]) for i in idx)
         static = g.cells - model.wall_cells(ws)
-        plan = model.plan_pushes(static, ws, start, goals)
+        protect(s)                     # (Stella corre mentre si calcola il piano)
+        plan = model.plan_pushes(static, ws, start, goals, max_states=600)
+        protect(s)
         if not plan:
             return False, how
         for wi, d, n, new, _at in plan:

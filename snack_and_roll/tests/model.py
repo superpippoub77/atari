@@ -329,11 +329,12 @@ def single_pushes(static, walls_now, reach, max_cols=8):
     return out
 
 
-def push_states(static, walls0, start, max_states=6000):
+def push_states(static, walls0, start, max_states=6000, goals=None):
     """Tutti gli stati raggiungibili spingendo i muri, una spinta dopo l'altra
     (spingendo n colonne il biscotto segue il muro). Ritorna
     {(muri, zona): (precedente, (muro, d, n, muri_nuovi, punto di spinta))}
-    e le zone {zona: celle raggiungibili}; zona = (muri, cella minima)."""
+    e le zone {zona: celle raggiungibili}; zona = (muri, cella minima).
+    Con goals si ferma alla prima zona che ne contiene uno (la piu' vicina)."""
     zones = {}
 
     def zone(ws, pos):
@@ -347,6 +348,8 @@ def push_states(static, walls0, start, max_states=6000):
 
     z0 = zone(tuple(walls0), start)
     prev = {z0: None}
+    if goals is not None and zones[z0] & goals:
+        return prev, zones, z0
     q = deque([z0])
     while q and len(prev) < max_states:
         z = q.popleft()
@@ -359,20 +362,17 @@ def push_states(static, walls0, start, max_states=6000):
             z2 = zone(tuple(new), after)
             if z2 not in prev:
                 prev[z2] = (z, (wi, d, n, tuple(new), at))
+                if goals is not None and zones[z2] & goals:
+                    return prev, zones, z2
                 q.append(z2)
-    return prev, zones
+    return prev, zones, None
 
 
 def plan_pushes(static, walls0, start, goals, max_states=6000):
     """Spinte (in ordine) che portano a una zona da cui si raggiungono i goals:
     [(muro, d, n, muri_nuovi, punto di spinta)], [] se non serve, None se non
     si puo'."""
-    prev, zones = push_states(static, walls0, start, max_states)
-    best = None
-    for z in prev:          # in ordine di ampiezza: meno spinte prima
-        if zones[z] & goals:
-            best = z
-            break
+    prev, zones, best = push_states(static, walls0, start, max_states, goals)
     if best is None:
         return None
     out = []
@@ -390,7 +390,7 @@ def push_reach(level, objects=OBJECTS, extra=()):
     reach0 = Grid(cells).reachable()
     if not walls_now:
         return reach0, set(reach0)
-    prev, zones = push_states(static, walls_now, (10, 64))
+    prev, zones, _ = push_states(static, walls_now, (10, 64))
     union = set()
     for z in prev:
         union |= zones[z]
