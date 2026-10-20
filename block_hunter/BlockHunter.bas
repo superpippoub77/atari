@@ -472,6 +472,17 @@ gd_9
  sta pfscore2
  lda #$2A
  sta pfscorecolor
+ ; all'inizio del livello a sinistra il numero del livello (tacche azzurre)
+ lda phase
+ beq gd_10
+ cmp #3
+ bcs gd_10
+ ldx level
+ lda bars+1,x
+ sta pfscore1
+ lda #$9A
+ sta pfscorecolor
+gd_10
  lda #$0E
  sta scorecolor
  rts
@@ -2560,9 +2571,9 @@ de_off
 
 enemy_lo
  .byte <spr_bat0,<spr_bat1,<spr_spider0,<spr_spider1,<spr_snake0,<spr_snake1,<spr_ghost0,<spr_ghost1
-   ; pipistrello viola, ragno rosso, serpente verde, fantasma bianco
+   ; pipistrello viola, ragno azzurro, serpente verde, fantasma bianco
 ecolor
- .byte $AC,$66,$56,$0E
+ .byte $AC,$9E,$56,$0E
 
    ; tavolozza del livello; luce che traballa (ogni tanto resta solo la
    ; lampada); buio con la lampada intorno al giocatore e qualche lampo

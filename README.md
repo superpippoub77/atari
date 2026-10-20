@@ -9,9 +9,11 @@
 >
 > 📦 **Download** (Atari 2600 `.bin`, Windows, Linux, Android, Browser): cartella [`release/`](release/README.md).
 >
-> 🕹️ **Gioca subito nel browser**: [`index.html`](index.html) apre l'emulatore Atari 2600 (Javatari.js, in [`emulator/`](emulator/)) con la ROM già caricata; i pulsanti in alto passano a Snack 'n' Roll 16K, a Circular Defense a [*Spike Fever 2600*](spike_fever/README.md) e a [*OXYGEN 2600*](oxygen/README.md) (pallavolo in stile Power Spikes, 16K, 8K e 4K, preso dalla repository [spikeball](https://github.com/superpippoub77/spikeball)). Il workflow [`.github/workflows/main.yml`](.github/workflows/main.yml) la pubblica su Aruba (via FTP) a ogni push su `main`, in `www.filippomorano.com/projects/atari2600/`.
+> 🕹️ **Gioca subito nel browser**: [`index.html`](index.html) apre l'emulatore Atari 2600 (Javatari.js, in [`emulator/`](emulator/)) con la ROM già caricata; i pulsanti in alto passano a Snack 'n' Roll 16K, a Circular Defense, a [*Spike Fever 2600*](spike_fever/README.md) (pallavolo in stile Power Spikes, 16K, 8K e 4K, preso dalla repository [spikeball](https://github.com/superpippoub77/spikeball)), a [*OXYGEN 2600*](oxygen/README.md) e a [*BLOCK HUNTER 2600*](block_hunter/README.md). Il workflow [`.github/workflows/main.yml`](.github/workflows/main.yml) la pubblica su Aruba (via FTP) a ogni push su `main`, in `www.filippomorano.com/projects/atari2600/`.
 
-> 🫧 **Nuovo gioco:** [*OXYGEN 2600*](oxygen/README.md), dal gioco Phaser *OXYGEN*. Cartuccia 8K: attraversa 12 settori prima che finisca l'ossigeno, prendi le 2 chiavi e attiva l'interruttore nella base finale.
+> ⛏️ **Nuovo gioco:** [*BLOCK HUNTER 2600*](block_hunter/README.md), dal gioco HTML5 *Block Hunter*. Cartuccia 8K con Superchip: 6 livelli giù nella miniera tra buche, rocce che cadono, massi che rotolano, pipistrello, ragno, serpente e fantasma.
+>
+> 🫧 **Gioco precedente:** [*OXYGEN 2600*](oxygen/README.md), dal gioco Phaser *OXYGEN*. Cartuccia 8K: attraversa 12 settori prima che finisca l'ossigeno, prendi le 2 chiavi e attiva l'interruttore nella base finale.
 
 > 🛡️ **Nuovo gioco:** [*Circular Defense*](circular_defense/README.md) per Atari 2600. Difendi 6 città con il paddle (o col joystick) in 8 livelli.
 >
