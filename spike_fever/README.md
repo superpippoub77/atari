@@ -42,6 +42,7 @@ La cartuccia da **8K** (bankswitching F8, NTSC), giocabile da [`8k/index.html`](
   - Il computer è forte almeno quanto il livello; le levette di difficoltà possono solo renderlo più forte.
   - GAME RESET riparte dal livello 1. Nel menu, con 1 PLAYER, al posto dell'arena compare WORLD CUP: l'arena la sceglie il livello.
 - **Scritte in inglese**: il menu (1 PLAYER, 4 VS 4, INDOOR / BEACH, WORLD CUP, PUSH FIRE). In partita, per un secondo al posto del punteggio, ci sono gli annunci come lo speaker del gioco completo: **SPIKE!**, **POWER HIT!**, **QUICK!**, **BACK SPIKE**, **DINK!**, **BLOCK!**, **NET!**, **OUT!**, **ACE!**, **GAME SET**.
+- **L'alzatore corre sotto la palla**: dopo la ricezione l'alzatore va dove arriva il bagher e palleggia lì (prima restava fermo al suo posto). Nel 4 contro 4 si sposta tutta la prima linea, senza passare la rete: centrale, alzatore e schiacciatore sono lo stesso sprite ripetuto 3 volte dal TIA, quindi si muovono e cambiano posa insieme. L'alzata segue lo spostamento, così la palla arriva sulle mani di chi attacca; dopo l'attacco la linea torna al suo posto.
 - **Più pose**:
   - corsa a 4 passi;
   - salto con le braccia su e caduta a gambe raccolte;

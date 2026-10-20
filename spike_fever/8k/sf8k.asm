@@ -685,9 +685,9 @@ ClampX  SUBROUTINE
         bcc .cd
         lda #66
         bne .cd
-.cr     cmp #86
+.cr     cmp #84
         bcs .c2
-        lda #86
+        lda #84
 .c2     cmp #152
         bcc .cd
         lda #151
@@ -732,8 +732,46 @@ Target  SUBROUTINE
         rts
 .rally  txa
         and #1
-        beq .home               ; la prima linea resta al suo posto (salta a muro e in attacco)
+        bne .back
+        ; prima linea: dopo la ricezione l'alzatore corre sotto la palla (nel 4 contro 4 si sposta
+        ; tutta la linea, con l'alzatore nella copia di mezzo), durante l'attacco resta li', poi a casa
         txa
+        lsr
+        cmp team
+        bne .home
+        lda next
+        cmp #NX_HIT
+        bne .nh
+        lda px,x
+        rts
+.nh     cmp #NX_SET
+        bne .home
+        lda mode
+        and #4
+        bne .s2
+        lda tx                  ; 4 contro 4: copie a x, x+16, x+32 senza passare la rete
+        sec
+        sbc #18
+        bcs .f1
+        lda #0
+.f1     cpx #2
+        bcs .fr
+        cmp #36
+        bcc .fok
+        lda #36
+.fok    rts
+.fr     cmp #84
+        bcs .f3
+        lda #84
+.f3     cmp #112
+        bcc .fok
+        lda #112
+        rts
+.s2     lda tx                  ; 2 contro 2: l'alzatore da solo, con le mani sotto la palla
+        sec
+        sbc #2
+        rts
+.back   txa
         lsr
         cmp team
         bne .home               ; difensore della squadra senza palla: in difesa
