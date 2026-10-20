@@ -137,8 +137,8 @@ TitleLoop:
         jsr Text
         lda #1
         jsr Blank
-        lda mode                ; 1 PLAYER: WORLD CUP (campionato), 2 PLAYERS: INDOOR / BEACH, azzurro
-        and #2
+        lda mode                ; 1 PLAYER al palazzetto: WORLD CUP (campionato), se no INDOOR / BEACH, azzurro
+        and #3
         beq .wc
         lda mode
         and #1
@@ -195,7 +195,7 @@ NewGame0:
         bcc .nc
         tax
         lda mode
-        and #$FE
+        and #$FA                ; spiaggia: sempre 2 contro 2 (bit 0 e 2), se no 4 contro 4
         ora LevBeach,x
         sta mode
         txa
@@ -232,16 +232,11 @@ TitleLogic  SUBROUTINE
         beq .nsel
         txa
         bne .nsel
-        lda mode
-        clc
-        adc #1
+        lda mode                ; modalita' successiva (in spiaggia sempre 2 contro 2)
         and #7
-        cmp #1                  ; 1 PLAYER in spiaggia si salta: nel campionato l'arena la sceglie il livello
-        beq .skip
-        cmp #5
-        bne .mok
-.skip   adc #0                  ; (C = 1: +1)
-.mok    sta mode
+        tax
+        lda NextMode0,x
+        sta mode
         lda #0
         sta idle
 .nsel   ; pulsante (quando viene premuto, dopo un rilascio) o GAME RESET: partita
@@ -258,7 +253,12 @@ TitleLogic  SUBROUTINE
         bcs .nr
 .go     lda #0
         sta demo
-        jmp NewGame0
+        lda mode                ; 1 PLAYER al palazzetto: campionato (bit 3)
+        and #3
+        bne .nw
+        lda #8
+        sta mode
+.nw     jmp NewGame0
 .nr     ; dimostrazione dopo ~10 secondi
         lda idle
         cmp #10
@@ -614,6 +614,8 @@ LogoHi  .byte >LogoA, >LogoB
 LogoCLo .byte <LogoCol, <LogoCol2
 LogoCHi .byte >LogoCol, >LogoCol2
 HomeX0  .byte 28, 12, 84, 140
+; GAME SELECT: WORLD CUP (0), 1 PLAYER in spiaggia (5), 2 PLAYERS 4c4 (2), 2c2 (6), in spiaggia (7)
+NextMode0 .byte 5, 5, 6, 6, 5, 2, 7, 0
 
         include "title.inc"
         include "logic.asm"

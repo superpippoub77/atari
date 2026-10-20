@@ -653,8 +653,9 @@ Diff    SUBROUTINE
         and #3
         tay
         lda mode
-        and #2
-        ora demo
+        and #8
+        beq .d
+        lda demo
         bne .d
         sty temp4
         lda mode
@@ -677,11 +678,12 @@ SayX    stx msg
         stx showT
         rts
 
-; campionato? (1 PLAYER, non in dimostrazione): C = 1 e A = livello (0-5); X e Y invariati
+; campionato? (bit 3 di mode, non in dimostrazione): C = 1 e A = livello (0-5); X e Y invariati
 Champ0  SUBROUTINE
         lda mode
-        and #2
-        ora demo
+        and #8
+        beq .no
+        lda demo
         bne .no
         lda mode
         lsr
@@ -1192,7 +1194,7 @@ NetTX      .byte 70, 86
 SpikeMsg   .byte MSG_SPIKE, MSG_SPIKE+2, MSG_SPIKE+3, MSG_SPIKE   ; palla alta, primo tempo, seconda linea, 2c2
 ; campionato: CHINA, BRAZIL, USA, CUBA, JAPAN, USSR
 LevDiff    .byte 0, 1, 1, 2, 2, 3          ; livello minimo del computer
-LevBeach   .byte 0, 1, 0, 1, 0, 0          ; 1 = spiaggia
+LevBeach   .byte 0, 5, 0, 5, 0, 0          ; 5 = spiaggia (bit 0) e 2 contro 2 (bit 2)
 TargetPts  .byte 15, 21
 BlkCh      .byte 50, 80, 110, 140
 LShift     .byte 2, 3, 4
