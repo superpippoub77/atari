@@ -2167,12 +2167,13 @@ end
    ; Livello 2: una lampada bassa in b7; nelle sezioni con le tazze una
    ; lampada chiuderebbe la colonna dal piano al pavimento e taglierebbe
    ; in due la parte bassa (in b4 chiuderebbe il biscotto alla partenza).
-   ; Livello 5: cinque muri spingibili, ognuno sotto la sua lampada: sul
-   ; piano in b2 e b3 (colonne 18 e 25), sul pavimento in b5, b6 e b7
-   ; (colonne 11, 18 e 25). Le colonne 18 e 25 sono chiuse sopra e sotto:
-   ; il sacchetto e lo zuccherino in alto a destra si raggiungono solo
-   ; spostando il muro giusto. Servono almeno 4 spinte (tools/soluzione.py
-   ; cerca la soluzione con meno spinte).
+   ; Livello 5: quattro muri spingibili, ognuno sotto la sua lampada: sul
+   ; piano in b2 (colonna 18), sul pavimento in b5, b6 e b7 (colonne 11,
+   ; 18 e 25). Servono almeno 3 spinte (tools/soluzione.py cerca la
+   ; soluzione con meno spinte). Un muro in piu' sul piano (colonna 25)
+   ; farebbe incastrare i due muri alti: niente piu' strada per il
+   ; sacchetto (provato con sequenze di spinte a caso). Cosi' invece
+   ; nessuna combinazione di spinte chiude per sempre la strada.
    ; Gocce nella parte alta (b1, b3).
    ; Livello 6 (PRESSE, parte al buio): solo presse. La colonna 3 (gocce)
    ; diventa di presse: 4 appese al soffitto e 4 al piano (colonne 3, 10,
@@ -2200,7 +2201,7 @@ end
    %01111111, %00000000, %00000000, %00000000, %10000000, %00000000, %00101011, 136,
    %00000000, %00000000, %00110111, %00000000, %00000000, %00000000, %00001011, 18,
    %00000000, %00000000, %00000000, %11111111, %00000000, %00000000, %00101011, 136,
-   %00000000, %11101100, %00000000, %00000000, %11101100, %00000000, %01111110, 136,
+   %00000000, %11100100, %00000000, %00000000, %11100100, %00000000, %01111110, 136,
    %00000000, %00000000, %00000000, %11111111, %00000000, %00000000, %00101011, 136,
    %00000000, %00000000, %00000000, %00000000, %00000000, %00000000, %01010101, 136,
 end
