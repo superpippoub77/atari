@@ -68,6 +68,7 @@
     <a href="?gioco=spike8k" data-g="spike8k">Spike Fever 8K</a>
     <a href="?gioco=oxygen" data-g="oxygen">Oxygen</a>
     <a href="?gioco=lineup" data-g="lineup">LineUp! ASM</a>
+    <a href="?gioco=blockhunter" data-g="blockhunter">Block Hunter</a>
   </nav>
 </header>
 
@@ -86,6 +87,11 @@
       <h2>Comandi di Oxygen</h2>
       <p style="margin:0">Frecce = muovi, <kbd>Spazio</kbd> = spara nella direzione in cui cammini. <kbd>F12</kbd> o <kbd>Spazio</kbd> nel titolo = nuova partita. Levette <kbd>F4</kbd>/<kbd>F9</kbd>: B B normal, sinistra A hard, destra A beginner, A A expert.</p>
       <p style="margin:10px 0 0">Nelle basi l'ossigeno non cala; la bombola al centro lo ricarica. Prendi le 2 chiavi e tocca l'interruttore nella base finale. La barra dell'ossigeno è verde, gialla o rossa come la bussola dell'originale.</p>
+    </section>
+    <section class="card" id="comandi-bh" hidden>
+      <h2>Comandi di Block Hunter</h2>
+      <p style="margin:0">Frecce = muovi. <kbd>Spazio</kbd> con una freccia = salto di 2 caselle (sopra buche e rocce); <kbd>Spazio</kbd> da fermo = dinamite nella direzione in cui guardi. <kbd>F11</kbd> nel titolo = livello di partenza, <kbd>F12</kbd> = nuova partita.</p>
+      <p style="margin:10px 0 0">Prendi gli oggetti uno alla volta (gemme, chiave, dinamite, cuori, assi), poi corri all'uscita. Attento alle rocce che cadono (l'ombra lampeggia), ai massi che rotolano, alle buche e a pipistrello, ragno, serpente e fantasma. Barra sinistra: dinamite; destra: vite.</p>
     </section>
     <section class="card" id="comandi">
       <h2>Comandi</h2>
@@ -106,7 +112,7 @@
         <li class="snack-only"><a href="https://claude.ai/code/artifact/461c41f4-fddc-4602-a24b-4cb253a66f2d" target="_blank" rel="noopener">Manuale di istruzioni</a></li>
         <li class="snack-only"><a href="release/screenshots/01_livello1.png" target="_blank">Schermate</a> (titolo, livelli, Bocca Gigante)</li>
       </ul>
-      <p style="margin:10px 0 0;color:var(--muted)">Snack 'n' Roll, Circular Defense e Oxygen sono in formato PAL, Spike Fever in NTSC: l'emulatore riconosce da solo il formato.</p>
+      <p style="margin:10px 0 0;color:var(--muted)">Snack 'n' Roll, Circular Defense, Oxygen e Block Hunter sono in formato PAL, Spike Fever in NTSC: l'emulatore riconosce da solo il formato.</p>
     </section>
   </div>
 </main>
@@ -128,7 +134,8 @@
       spike4k:  { rom: "spike_fever/4k/sf4k.bin",                    title: "Spike Fever 2600", sub: "Atari 2600 · ROM 4K NTSC · pallavolo 4 contro 4", page: "spike_fever/4k/index.html" },
       spike8k:  { rom: "spike_fever/8k/sf8k.bin",                    title: "Spike Fever 2600", sub: "Atari 2600 · ROM 8K NTSC · pallavolo 4 contro 4, campionato contro 6 nazionali, fisica della palla", page: "spike_fever/8k/index.html" },
       oxygen:   { rom: "release/oxygen/Oxygen.bin",                  title: "Oxygen 2600",      sub: "Atari 2600 · ROM 8K PAL · arriva alla base finale prima che finisca l'ossigeno", oxy: true },
-      lineup:   { rom: "release/lineup/LineUpASM.bin",               title: "LineUp! 2600",     sub: "Atari 2600 · ROM 4K PAL · prototipo assembly: coppie di segmenti a tempo" }
+      lineup:   { rom: "release/lineup/LineUpASM.bin",               title: "LineUp! 2600",     sub: "Atari 2600 · ROM 4K PAL · prototipo assembly: coppie di segmenti a tempo" },
+      blockhunter: { rom: "release/block_hunter/BlockHunter.bin",    title: "Block Hunter 2600", sub: "Atari 2600 · ROM 8K + Superchip PAL · 6 livelli giù nella miniera", card: "comandi-bh" }
     };
     var key = new URLSearchParams(location.search).get("gioco");
     if (!GAMES[key]) key = "snack";
@@ -139,6 +146,12 @@
     document.getElementById("sub").textContent = g.sub;
     document.getElementById("dl").href = g.rom;
     if (key !== "snack" && key !== "snack16k") document.querySelector("h1").textContent = g.title;
+    if (g.card) {
+      document.getElementById("comandi").hidden = true;
+      document.getElementById(g.card).hidden = false;
+      var b = document.querySelectorAll(".snack-only");
+      for (var q = 0; q < b.length; q++) b[q].hidden = true;
+    }
     if (g.oxy) {
       document.getElementById("comandi").hidden = true;
       document.getElementById("comandi-oxy").hidden = false;
