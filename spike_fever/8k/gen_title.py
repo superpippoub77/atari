@@ -59,6 +59,9 @@ F3 = {
  'U': ["X.X", "X.X", "X.X", "X.X", "XXX"], 'V': ["X.X", "X.X", "X.X", "X.X", ".X."], 'Y': ["X.X", "X.X", ".X.", ".X.", ".X."],
  'Z': ["XXX", "..X", ".X.", "X..", "XXX"], ' ': ["...", "...", "...", "...", "..."],
  '1': [".X.", "XX.", ".X.", ".X.", "XXX"], '2': ["XXX", "..X", "XXX", "X..", "XXX"], '4': ["X.X", "X.X", "XXX", "..X", "..X"],
+ '3': ["XXX", "..X", ".XX", "..X", "XXX"], '5': ["XXX", "X..", "XXX", "..X", "XXX"], '6': ["XXX", "X..", "XXX", "X.X", "XXX"],
+ 'J': ["..X", "..X", "..X", "X.X", "XXX"], 'W': ["X.X", "X.X", "XXX", "XXX", "X.X"], 'Q': ["XXX", "X.X", "X.X", "XXX", "..X"],
+ '!': [".X.", ".X.", ".X.", "...", ".X."],
 }
 
 
@@ -72,7 +75,7 @@ def text_rows(s):
     return rows
 
 
-STRINGS = ["1 PLAYER", "2 PLAYERS", "4 VS 4", "2 VS 2", "PALAZZETTO", "SPIAGGIA", "PUSH FIRE"]
+STRINGS = ["1 PLAYER", "2 PLAYERS", "4 VS 4", "2 VS 2", "INDOOR", "BEACH", "PUSH FIRE", "WORLD CUP"]
 for i, st in enumerate(STRINGS):
     block(f"Str{i}", colmajor(text_rows(st)), 15, True)
 T.append("StrLo  .byte " + ",".join(f"<Str{i}" for i in range(len(STRINGS))))
@@ -127,3 +130,18 @@ block("PicPf2", pf2, 16, True)
 block("PicPfc", pfc, 16, True)
 
 open("title.inc", "w").write("\n".join(T) + "\n")
+
+# ---------------------------------------------------------------- scritte della partita (banco 1, al posto del punteggio)
+# come gli annunci del gioco completo; l'ordine corrisponde alle costanti MSG_* di sf8k.asm
+TEAMS = ["CHINA", "BRAZIL", "USA", "CUBA", "JAPAN", "USSR"]
+MSGS = [("SPIKE!", 0x1E), ("POWER HIT!", 0x3C), ("QUICK!", 0x1E), ("BACK SPIKE", 0x1E), ("DINK!", 0x9C),
+        ("BLOCK!", 0xCC), ("NET!", 0x0E), ("OUT!", 0x0E), ("ACE!", 0x3C), ("GAME SET", 0x1E), ("GAME OVER", 0x46),
+        ("CHAMPIONS!", 0x1E), ("YOU WIN!", 0x1E)]
+MSGS += [(f"LEVEL {i + 1}", 0x0E) for i in range(6)] + [("VS " + t, 0x9C) for t in TEAMS]
+T = []
+for i, (st, _) in enumerate(MSGS):
+    block(f"Msg{i + 1}", colmajor(text_rows(st)), 15, True)
+T.append("MsgLo  .byte 0," + ",".join(f"<Msg{i + 1}" for i in range(len(MSGS))))
+T.append("MsgHi  .byte 0," + ",".join(f">Msg{i + 1}" for i in range(len(MSGS))))
+T.append("MsgCol .byte 0," + ",".join(f"${c:02X}" for _, c in MSGS))
+open("msgs.inc", "w").write("\n".join(T) + "\n")

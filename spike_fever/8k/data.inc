@@ -23,8 +23,26 @@ Cols2
 Cols3
         .byte $28,$2A,$2A,$56,$C8,$C8,$C8,$C8,$2A,$2A,$2A,$F2
         .byte $28,$2A,$2A,$56,$C8,$C8,$C8,$C8,$2A,$2A,$F2,$2A
-ColSetLo  .byte <Cols0,<Cols1,<Cols2,<Cols3
-ColSetHi  .byte >Cols0,>Cols1,>Cols2,>Cols3
+Cols4
+        .byte $0E,$3C,$3C,$44,$1C,$1C,$1C,$1C,$3C,$3C,$3C,$00
+        .byte $0E,$3C,$3C,$44,$1C,$1C,$1C,$1C,$3C,$3C,$00,$3C
+Cols5
+        .byte $28,$2A,$2A,$C6,$1E,$1E,$1E,$1E,$2A,$2A,$2A,$00
+        .byte $28,$2A,$2A,$C6,$1E,$1E,$1E,$1E,$2A,$2A,$00,$2A
+Cols6
+        .byte $0E,$3C,$3C,$84,$0E,$0E,$0E,$0E,$3C,$3C,$3C,$1C
+        .byte $0E,$3C,$3C,$84,$0E,$0E,$0E,$0E,$3C,$3C,$1C,$3C
+Cols7
+        .byte $22,$24,$24,$0E,$86,$86,$86,$86,$24,$24,$24,$00
+        .byte $22,$24,$24,$0E,$86,$86,$86,$86,$24,$24,$00,$24
+Cols8
+        .byte $0E,$3C,$3C,$42,$0E,$0E,$0E,$0E,$3C,$3C,$3C,$00
+        .byte $0E,$3C,$3C,$42,$0E,$0E,$0E,$0E,$3C,$3C,$00,$3C
+Cols9
+        .byte $0E,$3C,$3C,$0E,$36,$36,$36,$36,$3C,$3C,$3C,$F2
+        .byte $0E,$3C,$3C,$0E,$36,$36,$36,$36,$3C,$3C,$F2,$3C
+ColSetLo  .byte <Cols0,<Cols1,<Cols2,<Cols3,<Cols4,<Cols5,<Cols6,<Cols7,<Cols8,<Cols9
+ColSetHi  .byte >Cols0,>Cols1,>Cols2,>Cols3,>Cols4,>Cols5,>Cols6,>Cols7,>Cols8,>Cols9
 FrameOfs  .byte 0,12,24,36,48,60,72,84,96,108,120,132
 ColOfs    .byte 0,0,0,12,0,12,0,0,0,0,12,12
 RunSeq    .byte 1, 2, 6, 7          ; corsa: 4 passi

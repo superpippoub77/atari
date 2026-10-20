@@ -51,6 +51,21 @@ ST_RALLY = 2
 ST_POINT = 3
 ST_OVER  = 4
 
+; scritte in alto (msgs.inc, generato da gen_title.py nello stesso ordine)
+MSG_SPIKE = 1
+MSG_POWER = 2
+MSG_DINK  = 5
+MSG_BLOCK = 6
+MSG_NET   = 7
+MSG_OUT   = 8
+MSG_ACE   = 9
+MSG_GAMESET = 10
+MSG_OVER  = 11
+MSG_CHAMP = 12
+MSG_WIN   = 13
+MSG_LEVEL = 14          ; LEVEL 1-6
+MSG_VS    = 20          ; VS CHINA ... VS USSR
+
 NX_RECV = 0             ; prossimo tocco: bagher della squadra "team"
 NX_SET  = 1             ;                 alzata
 NX_HIT  = 2             ;                 attacco
@@ -61,7 +76,7 @@ NX_NONE = 3             ;                 nessuno (la palla cade)
         ORG $80
 frame   ds 1
 rand    ds 1
-mode    ds 1            ; bit0 = spiaggia, bit1 = due persone, bit2 = due contro due
+mode    ds 1            ; bit0 = spiaggia, bit1 = due persone, bit2 = due contro due, bit4-6 = livello del campionato
 demo    ds 1            ; 1 = dimostrazione (computer contro computer, titolo in alto)
 state   ds 1
 stateT  ds 1
@@ -125,7 +140,7 @@ temp2   ds 1
 temp3   ds 1
 temp4   ds 1
 par     ds 1            ; parità del fotogramma (frame & 1)
-m4      ds 1            ; mode & 4: 4 = due contro due
+msg     ds 1            ; scritta in alto al posto del punteggio (0 = punteggio), per showT fotogrammi
 req     = tHit          ; banco 0: 0 = titolo, 1 = nuova partita (letto subito, all'ingresso nel banco 0)
 idle    = aiErr         ; titolo: tempo senza tasti (a passi di 64 fotogrammi); in partita si ricalcola
 RAMEND
@@ -173,6 +188,36 @@ MainLoop:
         sta PF1
         sta PF2
         sta WSYNC               ; riga 1 (la riga 2 resta vuota: la chiude il primo WSYNC del ciclo)
+        lda msg
+        beq .score
+; scritta (come il titolo: playfield asimmetrico, 5 righe da 4 linee; puntatori in ScoreGfx..temp2)
+        tay
+        lda MsgCol,y
+        sta COLUPF
+        lda #0
+        sta CTRLPF
+        tay
+.mrow   ldx #4
+.mline  sta WSYNC               ; 0
+        lda (ScoreGfx),y        ; 5
+        sta PF0                 ; 8
+        lda (ScoreGfx+2),y      ; 13
+        sta PF1                 ; 16
+        lda (ScoreGfx+4),y      ; 21
+        sta PF2                 ; 24
+        lda (ScoreGfx+6),y      ; 29
+        sta PF0                 ; 32
+        lda (ScoreGfx+8),y      ; 37
+        sta PF1                 ; 40
+        nop                     ; 42
+        lda (ScoreGfx+10),y     ; 47
+        sta PF2                 ; 50
+        dex
+        bne .mline
+        iny
+        cpy #5
+        bne .mrow
+        jmp .topDone
 ; punteggio: modo SCORE, metà sinistra col colore della squadra sinistra e viceversa
 .score  lda #2
         sta CTRLPF
@@ -275,8 +320,20 @@ GameLoop:
         sta PF2
         lda #35
         sta TIM64T
+        inc frame
+        lda frame
+        and #1
+        sta par
+        lda rand
+        lsr
+        bcc .noEor
+        eor #$B4
+.noEor  sta rand
+        jsr Console
+        jsr ReadInput
         jmp FarLogic            ; logica nel banco 0, poi torna a Overscan
 Overscan
+        jsr BallLook
 .over   lda INTIM
         bne .over
         jmp MainLoop
@@ -308,7 +365,8 @@ Setup  SUBROUTINE
         tax
         ldy #1
         jsr SetupPlayer
-        lda m4                  ; 2 contro 2: la prima linea è un giocatore solo (tabelle +2)
+        lda mode                ; 2 contro 2: la prima linea è un giocatore solo (tabelle +2)
+        and #4
         lsr
         ora par
         tax
@@ -322,8 +380,11 @@ Setup  SUBROUTINE
         sbc byh
         sta BlD
         ; punteggio: una squadra per fotogramma (si aggiorna in 2 fotogrammi, metà del tempo)
+        lda msg
+        bne .nsd
         ldx par
         jsr ScoreDigits
+.nsd
         lda mode
         and #1
         asl
@@ -342,6 +403,25 @@ Setup  SUBROUTINE
         lda #WHITE
         sta COLUP0,x
 .noBlink
+        ; scritta: 6 puntatori alle colonne (passo 5; le tabelle non attraversano pagine)
+        ldy msg
+        beq .nomsg
+        lda MsgHi,y
+        ldx #10
+.mh     sta ScoreGfx+1,x
+        dex
+        dex
+        bpl .mh
+        lda MsgLo,y
+        ldx #0
+.ml     sta ScoreGfx,x
+        clc
+        adc #5
+        inx
+        inx
+        cpx #12
+        bne .ml
+.nomsg
         ; posizioni orizzontali: P0, P1, segno (M0), palla (M1)
         ldx par
         lda px,x
@@ -410,7 +490,13 @@ SetupPlayer  SUBROUTINE
         tya
         ora temp4
         tax
-        lda ColSetLo,x
+        cpy #1                  ; campionato: la squadra destra ha i colori della nazionale del livello
+        bne .nc
+        jsr Champ1
+        bcc .nc
+        adc #3                  ; (C = 1: +4)
+        tax
+.nc     lda ColSetLo,x
         clc
         adc temp2
         sta temp4
@@ -439,7 +525,8 @@ ScoreDigits  SUBROUTINE
         lsr
         adc #1                  ; (C = 0 dopo lsr di 0 o 2)
         bne .val
-.tgt    lda m4
+.tgt    lda mode
+        and #4
         eor #4
         lsr
         adc #2
@@ -633,9 +720,15 @@ Target  SUBROUTINE
 .stay   lda px,x
         rts
 .home   txa
-        ora m4
         tay
-        lda HomeX,y
+        lda mode
+        and #4
+        beq .h4
+        iny
+        iny
+        iny
+        iny
+.h4     lda HomeX,y
         rts
 .rally  txa
         and #1
@@ -788,6 +881,151 @@ Physics SUBROUTINE
         rts
 
 
+; ---------------------------------------------------------------- console, joystick, colore della palla
+; GAME RESET e GAME SELECT
+Console  SUBROUTINE
+        lda demo                ; dimostrazione: il pulsante fa partire la partita
+        beq .nodemo
+        lda INPT4
+        bpl .start
+.nodemo lda SWCHB
+        lsr
+        bcs .noReset
+.start  lda #0
+        sta demo
+        lda mode                ; il campionato riparte dal livello 1
+        and #7
+        sta mode
+NewGame lda #1                  ; (punteggi e posizioni nel banco 0)
+        sta req
+        jmp ToBank0
+.noReset
+        lsr
+        lda #0
+        rol
+        eor #1
+        tax
+        cpx selOld
+        stx selOld
+        beq .cdone
+        cpx #1
+        bne .cdone
+        inc mode
+        lda mode
+        and #7
+        cmp #1                  ; 1 PLAYER in spiaggia si salta: nel campionato l'arena la sceglie il livello
+        beq .skip
+        cmp #5
+        bne .mok
+.skip   adc #0                  ; (C = 1: +1)
+.mok    sta mode
+        lda #150
+        sta showT
+        lda #1
+        sta demo
+        jmp NewGame
+.cdone  rts
+
+; campionato? (1 PLAYER, non in dimostrazione): C = 1 e A = livello (0-5); X e Y invariati
+Champ1  SUBROUTINE
+        lda mode
+        and #2
+        ora demo
+        bne .no
+        lda mode
+        lsr
+        lsr
+        lsr
+        lsr
+        sec
+        rts
+.no     clc
+        rts
+
+; joystick e pulsanti delle due squadre (la squadra destra usa il secondo joystick)
+ReadInput  SUBROUTINE
+        lda SWCHA
+        eor #$FF
+        and #$F0
+        sta joy
+        lda SWCHA
+        asl
+        asl
+        asl
+        asl
+        eor #$FF
+        and #$F0
+        sta joy+1
+        ldx #1
+.btn    lda INPT4,x
+        eor #$80
+        and #$80                ; $80 = premuto
+        tay
+        eor fireOld,x
+        and #$80
+        sta temp
+        tya
+        sta fireOld,x
+        and temp
+        sta press,x             ; $80 = appena premuto
+        dex
+        bpl .btn
+        rts
+
+; colore della palla: ROSSA quando una persona deve colpire (battuta o schiacciata); segno di caduta per chi riceve
+BallLook  SUBROUTINE
+        lda #WHITE
+        sta ballCol
+        lda state
+        cmp #ST_TOSS
+        bne .nt
+        lda server
+        jsr Human
+        beq .mark
+        lda bvyh
+        bpl .mark
+        lda byh
+        cmp #HAND+3
+        bcc .mark
+        cmp #HAND+10
+        bcs .mark
+        bcc .red
+.nt     cmp #ST_RALLY
+        bne .mark
+        lda next
+        cmp #NX_HIT
+        bne .mark
+        lda team
+        jsr Human
+        beq .mark
+        lda fT
+        clc
+        adc #6
+        sec
+        sbc tHit
+        cmp #11
+        bcs .mark
+.red    lda #RED
+        sta ballCol
+.mark   lda #0
+        sta MkD
+        lda state
+        cmp #ST_RALLY
+        bne .nm
+        lda next
+        cmp #NX_RECV
+        bne .nm
+        lda team
+        jsr Human
+        beq .nm
+        lda tx
+        sec
+        sbc #2
+        sta markX
+        lda #PAIRS-MARKROW
+        sta MkD
+.nm     rts
+
 ; ================================================================ dati
 ;                 alz.sx att.sx alz.dx att.dx
 ; prima linea: copie a x, x+16, x+32 (sinistra: schiacciatore 28, alzatore 44, centrale 60; destra: centrale 84,
@@ -804,6 +1042,7 @@ ArenaPtrs  .byte <BgI, >BgI, <Pf0I, >Pf0I, <Pf1I, >Pf1I, <Pf2I, >Pf2I, <PfcI, >P
 ShirtCol   .byte $44, $84, $38, $C8
 
         include "data.inc"
+        include "msgs.inc"
 
 ; passaggi tra i banchi (stessi indirizzi nei due banchi: lda $FFF8 / $FFF9 cambia banco e il
 ; programma continua all'istruzione dopo, nell'altro banco)

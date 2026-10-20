@@ -67,8 +67,24 @@ for si, cs in enumerate(SETS):
     for k in CK:
         cols += [cs[c] for c in k]
     emit(f"Cols{si}", cols, 12)
-out.append("ColSetLo  .byte <Cols0,<Cols1,<Cols2,<Cols3")
-out.append("ColSetHi  .byte >Cols0,>Cols1,>Cols2,>Cols3")
+# campionato (1 PLAYER): le 6 nazionali avversarie (squadra destra), nell'arena del loro livello
+# CHINA, BRAZIL (spiaggia), USA, CUBA (spiaggia), JAPAN, USSR
+NATIONS = [
+    dict(H=0x00, S=0x3C, T=0x1C, P=0x44, L=0x3C, F=0x0E),   # Cina: maglia gialla, pantaloncini rossi
+    dict(H=0x00, S=0x2A, T=0x1E, P=0xC6, L=0x2A, F=0x28),   # Brasile: canotta gialla, verde, piedi nudi
+    dict(H=0x1C, S=0x3C, T=0x0E, P=0x84, L=0x3C, F=0x0E),   # USA: bianco e blu
+    dict(H=0x00, S=0x24, T=0x86, P=0x0E, L=0x24, F=0x22),   # Cuba: canotta blu, piedi nudi
+    dict(H=0x00, S=0x3C, T=0x0E, P=0x42, L=0x3C, F=0x0E),   # Giappone: bianco e rosso
+    dict(H=0xF2, S=0x3C, T=0x36, P=0x0E, L=0x3C, F=0x0E),   # URSS: maglia rosso scuro, pantaloncini bianchi
+]
+for si, cs in enumerate(NATIONS):
+    cols = []
+    for k in CK:
+        cols += [cs[c] for c in k]
+    emit(f"Cols{4 + si}", cols, 12)
+NC = len(SETS) + len(NATIONS)
+out.append("ColSetLo  .byte " + ",".join(f"<Cols{i}" for i in range(NC)))
+out.append("ColSetHi  .byte " + ",".join(f">Cols{i}" for i in range(NC)))
 out.append("FrameOfs  .byte " + ",".join(str(i * PH) for i in range(len(ORDER))))
 out.append("ColOfs    .byte " + ",".join(str(PH if n in UP else 0) for n in ORDER))
 for n in ORDER[6:]:  # ogni posa nuova deve avere i tipi di colore di una delle due tabelle

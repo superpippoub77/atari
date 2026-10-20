@@ -2,22 +2,22 @@
 ;  Chiamata una volta per fotogramma dal banco 1 (FarLogic, nell'overscan): stati, battuta, bagher, alzata,
 ;  attacco, muro, fisica della palla, suoni. I giocatori (corsa, salto, animazione) restano nel banco 1.
 ; ================================================================ logica (overscan)
-Logic  SUBROUTINE
-        inc frame
-        lda frame
-        and #1
-        sta par
-        lda rand
-        lsr
-        bcc .noEor
-        eor #$B4
-.noEor  sta rand
-        jsr Console
+Logic  SUBROUTINE              ; (fotogramma, casuale, console e joystick: nel banco 1, prima di FarLogic)
         lda showT
         beq .nst
         dec showT
-.nst    jsr ReadInput
-        inc fT
+        bne .nst
+        lda msg                 ; finita la scritta: dopo LEVEL n viene VS squadra, poi il punteggio
+        cmp #MSG_LEVEL
+        bcc .clr
+        cmp #MSG_VS
+        bcs .clr
+        adc #MSG_VS-MSG_LEVEL   ; (C = 0)
+        jsr Say
+        bne .nst
+.clr    lda #0
+        sta msg
+.nst    inc fT
         lda state
         cmp #ST_SERVE
         bne .n0
@@ -41,13 +41,36 @@ Logic  SUBROUTINE
         bcc .play
         jsr AfterPoint
         jmp .play
-.n3     lda stateT              ; fine partita: dopo qualche secondo si torna al titolo
+.n3     ; fine partita. Campionato: vinto -> livello successivo, perso -> col pulsante si rigioca il
+        ; livello (CONTINUE), se no dopo qualche secondo il titolo (come alla fine delle altre partite)
+        jsr Champ0
+        bcc .wait
+        ldx winner
+        bne .lost
+        cmp #5
+        bcs .wait               ; campioni: titolo
+        lda press
+        bmi .next
+        lda stateT
+        cmp #250
+        bcc .play
+.next   lda mode
+        clc
+        adc #$10
+        sta mode
+        bne .again
+.lost   lda press
+        bpl .wait
+.again  lda #1
+        sta req
+        jmp B0Entry
+.wait   lda stateT
         cmp #250
         bcc .play
         lda #0
         sta req
         jmp B0Entry
-.play   jsr BallLook        ; (i giocatori si muovono nel VBLANK, dove c'è più tempo: vedi Setup)
+.play   ; (colore della palla nel banco 1 dopo il ritorno; i giocatori si muovono nel VBLANK: vedi Setup)
         ; suoni
         lda sndT0
         beq .s0off
@@ -68,36 +91,6 @@ Logic  SUBROUTINE
         sta AUDV1
         rts
 
-; joystick e pulsanti delle due squadre (la squadra destra usa il secondo joystick)
-ReadInput  SUBROUTINE
-        lda SWCHA
-        eor #$FF
-        and #$F0
-        sta joy
-        lda SWCHA
-        asl
-        asl
-        asl
-        asl
-        eor #$FF
-        and #$F0
-        sta joy+1
-        ldx #1
-.btn    lda INPT4,x
-        eor #$80
-        and #$80                ; $80 = premuto
-        tay
-        eor fireOld,x
-        and #$80
-        sta temp
-        tya
-        sta fireOld,x
-        and temp
-        sta press,x             ; $80 = appena premuto
-        dex
-        bpl .btn
-        rts
-
 ; la squadra A è comandata da una persona? (Z = 0 sì)  usa temp4
 Human0  SUBROUTINE
         sta temp4
@@ -112,44 +105,6 @@ Human0  SUBROUTINE
         rts
 .cpu    lda #0
         rts
-
-; GAME RESET e GAME SELECT
-Console  SUBROUTINE
-        lda demo                ; dimostrazione: il pulsante fa partire la partita
-        beq .nodemo
-        lda INPT4
-        bpl .start
-.nodemo lda SWCHB
-        lsr
-        bcs .noReset
-.start  lda #0
-        sta demo
-NewGame lda #1                  ; (punteggi e posizioni nel banco 0)
-        sta req
-        jmp B0Entry
-.noReset
-        lsr
-        lda #0
-        rol
-        eor #1
-        tax
-        cpx selOld
-        stx selOld
-        beq .cdone
-        cpx #1
-        bne .cdone
-        inc mode
-        lda mode
-        and #7
-        sta mode
-        and #4
-        sta m4
-        lda #150
-        sta showT
-        lda #1
-        sta demo
-        jmp NewGame
-.cdone  rts
 
 StartServe
         lda #ST_SERVE
@@ -190,6 +145,20 @@ AfterPoint  SUBROUTINE
         cmp #2
         bcc .goOn
         stx winner
+        ; scritta: GAME SET; nel campionato YOU WIN!, CHAMPIONS! dopo l'ultimo livello o GAME OVER
+        jsr Champ0
+        ldy #MSG_GAMESET
+        bcc .say2
+        ldy #MSG_OVER
+        cpx #0
+        bne .say2
+        ldy #MSG_WIN
+        cmp #5
+        bcc .say2
+        ldy #MSG_CHAMP
+.say2   sty msg
+        lda #250
+        sta showT
         lda #ST_OVER
         jmp Halt
 .goOn   jmp StartServe
@@ -302,6 +271,8 @@ BallStep
         bcc .inX
 .outP   lda lastSide
         eor #1
+        ldx #MSG_OUT
+        jsr SayX
         jmp Point
 .inX    ; a terra
         lda byh
@@ -318,18 +289,28 @@ BallStep
         bpl .sv
         lda lastSide
         eor #1
+        ldx #MSG_OUT
         ldy bxh
         cpy #3
-        bcc .pt                 ; oltre la linea di fondo: fuori
+        bcc .say                ; oltre la linea di fondo: fuori
         cpy #153
-        bcs .pt
+        bcs .say
         tya
         clc
         adc #2
         cmp #80
         lda #0
         rol
-        eor #1
+        eor #1                  ; A = squadra che fa il punto
+        cmp lastSide            ; ace: punto di chi batte, palla mai toccata (setType = $FF dalla battuta)
+        bne .pt
+        ldx next
+        bne .pt                 ; (NX_RECV = 0)
+        ldx setType
+        inx
+        bne .pt
+        ldx #MSG_ACE
+.say    jsr SayX
 .pt     jsr Point
         ldx #3
 .rs     lda temp,x
@@ -376,6 +357,8 @@ BallStep
         bcs .netDone
         dec bvyh
 .netDone
+        ldx #MSG_NET
+        jsr SayX
         lda #NX_NONE
         sta next
         lda #0
@@ -640,6 +623,8 @@ Serve   sta temp3
         sta th
         ldy #0
         jsr Launch
+        lda #$FF                ; battuta: la palla non è ancora stata toccata (ace)
+        sta setType
         lda #ST_RALLY
         sta state
         lda server
@@ -659,12 +644,53 @@ Serve   sta temp3
         jmp Sound
 
 ; livello del computer dalle levette di difficoltà: Y = 0 (B B), 1 (sinistra A), 2 (destra A), 3 (A A)
-Diff    lda SWCHB
+; livello del computer (Y = 0-3) dalle levette; nel campionato almeno quello del livello. Usa temp4
+Diff    SUBROUTINE
+        lda SWCHB
         asl
         rol
         rol
         and #3
         tay
+        lda mode
+        and #2
+        ora demo
+        bne .d
+        sty temp4
+        lda mode
+        lsr
+        lsr
+        lsr
+        lsr
+        tay
+        lda LevDiff,y
+        cmp temp4
+        bcs .k
+        lda temp4
+.k      tay
+.d      rts
+
+; scritta A per un secondo (Say) o X (SayX, A invariato); esce con Z = 0
+Say     tax
+SayX    stx msg
+        ldx #60
+        stx showT
+        rts
+
+; campionato? (1 PLAYER, non in dimostrazione): C = 1 e A = livello (0-5); X e Y invariati
+Champ0  SUBROUTINE
+        lda mode
+        and #2
+        ora demo
+        bne .no
+        lda mode
+        lsr
+        lsr
+        lsr
+        lsr
+        sec
+        rts
+.no     clc
         rts
 
 ; errore di piazzamento del computer in ricezione: +-16 pixel, dimezzato a ogni livello
@@ -808,7 +834,8 @@ SetBall SUBROUTINE
         tax                     ; la prima linea: l'alzatore palleggia
         lda #10
         jsr SetPose
-        lda m4                  ; 2 contro 2: alza sempre al difensore, che attacca a rete
+        lda mode                ; 2 contro 2: alza sempre al difensore, che attacca a rete
+        and #4
         beq .four
         lda #3
         bne .typ
@@ -986,7 +1013,9 @@ Attack  SUBROUTINE
         sta temp
         ldy #1
         bne .sp2
-.dink   ldy team
+.dink   lda #MSG_DINK
+        jsr Say
+        ldy team
         lda DinkTX,y
         sta tx
         ldy #1
@@ -994,15 +1023,18 @@ Attack  SUBROUTINE
         bne .launch
 ; schiacciata: A = 0 corta, 1 media, 2 lunga
 .spike  sta temp
-        ldy setType             ; primo tempo veloce (16 fotogrammi), palla alta e seconda linea 32
-        lda SpikeLT,y
-        tay
+        ldx setType             ; primo tempo veloce (16 fotogrammi), palla alta e seconda linea 32
+        ldy SpikeLT,x
+        lda SpikeMsg,x          ; SPIKE! / QUICK! / BACK SPIKE
         ; qualità del colpo (come nel gioco completo): in perfetto tempo la schiacciata è potente
-        ; (16 fotogrammi), al limite del tempo una volta su due finisce in rete
-        lda temp3
+        ; (16 fotogrammi, POWER HIT!), al limite del tempo una volta su due finisce in rete
+        ldx temp3
         bne .q1
         ldy #2
-.q1     cmp #4
+        lda #MSG_POWER
+.q1     jsr Say
+        lda temp3
+        cmp #4
         bne .sp2
         lda rand
         bpl .sp2
@@ -1088,6 +1120,8 @@ Attacker
 
 ; muro: la palla rimbalza nel campo di chi ha attaccato (che può ancora difenderla)
 Block   SUBROUTINE
+        lda #MSG_BLOCK
+        jsr Say
         lda #0
         sta blockPend
         lda team                ; "team" adesso è la squadra che mura
@@ -1113,60 +1147,6 @@ Block   SUBROUTINE
         jmp Sound
 
 ; ---------------------------------------------------------------- giocatori: obiettivi, movimento, salto, animazione
-
-; colore della palla: ROSSA quando una persona deve colpire (battuta o schiacciata); segno di caduta per chi riceve
-BallLook  SUBROUTINE
-        lda #WHITE
-        sta ballCol
-        lda state
-        cmp #ST_TOSS
-        bne .nt
-        lda server
-        jsr Human0
-        beq .mark
-        lda bvyh
-        bpl .mark
-        lda byh
-        cmp #HAND+3
-        bcc .mark
-        cmp #HAND+10
-        bcs .mark
-        bcc .red
-.nt     cmp #ST_RALLY
-        bne .mark
-        lda next
-        cmp #NX_HIT
-        bne .mark
-        lda team
-        jsr Human0
-        beq .mark
-        lda fT
-        clc
-        adc #6
-        sec
-        sbc tHit
-        cmp #11
-        bcs .mark
-.red    lda #RED
-        sta ballCol
-.mark   lda #0
-        sta MkD
-        lda state
-        cmp #ST_RALLY
-        bne .nm
-        lda next
-        cmp #NX_RECV
-        bne .nm
-        lda team
-        jsr Human0
-        beq .nm
-        lda tx
-        sec
-        sbc #2
-        sta markX
-        lda #PAIRS-MARKROW
-        sta MkD
-.nm     rts
 
 ; copia per il banco 0 di Jump (serve anche ai giocatori, nel banco 1)
 Jump0   SUBROUTINE
@@ -1195,6 +1175,10 @@ FreeTX     .byte 126, 30
 BlockTX    .byte 44, 112                      ; muro: dove ricade la palla (campo di chi attacca)
 ServeTX    .byte 100, 120, 144, 0, 56, 36, 12, 0
 NetTX      .byte 70, 86
+SpikeMsg   .byte MSG_SPIKE, MSG_SPIKE+2, MSG_SPIKE+3, MSG_SPIKE   ; palla alta, primo tempo, seconda linea, 2c2
+; campionato: CHINA, BRAZIL, USA, CUBA, JAPAN, USSR
+LevDiff    .byte 0, 1, 1, 2, 2, 3          ; livello minimo del computer
+LevBeach   .byte 0, 1, 0, 1, 0, 0          ; 1 = spiaggia
 TargetPts  .byte 15, 21
 BlkCh      .byte 50, 80, 110, 140
 LShift     .byte 2, 3, 4

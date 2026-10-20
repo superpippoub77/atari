@@ -23,6 +23,25 @@ Accanto alla 16K c'è la cartuccia da **4K**, giocabile da [`4k/index.html`](4k/
 ## Versione 8K: la 4K allargata (cartella [`8k/`](8k/))
 La cartuccia da **8K** (bankswitching F8, NTSC), giocabile da [`8k/index.html`](8k/index.html), è la 4K con un banco in più. Il banco 0 contiene il titolo e la logica della partita, il banco 1 il kernel e i giocatori.
 - **Titolo**: logo grande SPIKE / FEVER sfumato dal giallo al rosso (come la 16K). Sotto c'è un quadro animato: lo schiacciatore rincorre, salta e schiaccia, il muro salta contro di lui e la palla rotola. Il menu mostra la modalità scelta con GAME SELECT (persone, giocatori per squadra, arena) e PUSH FIRE lampeggia. Il pulsante o GAME RESET fa partire la partita; dopo una decina di secondi parte la dimostrazione.
+- **Campionato (WORLD CUP)**: in **1 PLAYER** affronti 6 nazionali in fila, come nella 16K.
+
+  | Livello | Avversario | Arena | Computer (almeno) |
+  |---|---|---|---|
+  | 1 | CHINA | palazzetto | livello 1 |
+  | 2 | BRAZIL | spiaggia | livello 2 |
+  | 3 | USA | palazzetto | livello 2 |
+  | 4 | CUBA | spiaggia | livello 3 |
+  | 5 | JAPAN | palazzetto | livello 3 |
+  | 6 | USSR | palazzetto | livello 4 |
+
+  - Ogni nazionale ha i suoi colori di maglia.
+  - A inizio partita compaiono **LEVEL n** e **VS** con il nome della squadra.
+  - Se vinci compare **YOU WIN!** e si passa al livello successivo (subito col pulsante, o dopo qualche secondo).
+  - Se perdi compare **GAME OVER**: col pulsante rigiochi lo stesso livello (CONTINUE), altrimenti si torna al titolo.
+  - Vinto il sesto livello, sei **CHAMPIONS!**
+  - Il computer è forte almeno quanto il livello; le levette di difficoltà possono solo renderlo più forte.
+  - GAME RESET riparte dal livello 1. Nel menu, con 1 PLAYER, al posto dell'arena compare WORLD CUP: l'arena la sceglie il livello.
+- **Scritte in inglese**: il menu (1 PLAYER, 4 VS 4, INDOOR / BEACH, WORLD CUP, PUSH FIRE). In partita, per un secondo al posto del punteggio, ci sono gli annunci come lo speaker del gioco completo: **SPIKE!**, **POWER HIT!**, **QUICK!**, **BACK SPIKE**, **DINK!**, **BLOCK!**, **NET!**, **OUT!**, **ACE!**, **GAME SET**.
 - **Più pose**:
   - corsa a 4 passi;
   - salto con le braccia su e caduta a gambe raccolte;
@@ -34,10 +53,11 @@ La cartuccia da **8K** (bankswitching F8, NTSC), giocabile da [`8k/index.html`](
   - **Rete**: smorza la palla (vx × −0,19, vy × 0,31 se scende) invece di respingerla sempre allo stesso modo.
   - **Qualità della schiacciata**: dipende dal tempo. In perfetto tempo la schiacciata è potente (arriva in metà tempo). Al limite della finestra, una volta su due finisce in rete. Anche il computer ogni tanto schiaccia forte.
   - **Ricezione del computer** (la penalità di velocità dell'originale): sulle palle veloci il suo errore di piazzamento cresce del 50%.
-- **Compilazione**: `cd 8k && python3 gen_data.py && node build.js`. `gen_data.py` scrive `data.inc` e `title.inc`; il risultato è `sf8k.bin`, 8192 byte.
+- **Compilazione**: `cd 8k && python3 gen_data.py && node build.js`. `gen_data.py` scrive `data.inc`, `title.inc` e `msgs.inc` (le scritte della partita); il risultato è `sf8k.bin`, 8192 byte.
 - **Controlli**:
   - `python3 check_banks.py sf8k.lst` controlla che nessun banco usi etichette dell'altro (i due banchi stanno agli stessi indirizzi, quindi dasm non se ne accorge);
-  - `python3 stack_depth.py sf8k.asm bank0.asm logic.asm` misura la profondità delle chiamate (lo stack ha 10 byte).
+  - `python3 stack_depth.py sf8k.asm bank0.asm logic.asm` misura la profondità delle chiamate (lo stack ha 10 byte);
+  - `python3 tests/test_campionato.py sf8k.bin sf8k.sym` gioca il campionato in un emulatore minimo (py65) e controlla scritte, livelli, GAME OVER con ripresa, CHAMPIONS! e stack.
 
 ## Modalità (versione 16K)
 - **1 PLAYER**: scegli la tua nazionale tra 10 (Italia, Francia, Germania, Spagna, Brasile, USA, Giappone, Cina, Cuba, URSS), poi affronti 6 livelli.

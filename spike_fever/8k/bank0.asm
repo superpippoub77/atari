@@ -23,6 +23,9 @@ ColdStart:
 TitleEntry:
         ldx #$FF
         txs
+        lda mode                ; nel titolo il campionato riparte dal livello 1
+        and #7
+        sta mode
         lda #0
         sta AUDV0
         sta AUDV1
@@ -134,11 +137,16 @@ TitleLoop:
         jsr Text
         lda #1
         jsr Blank
+        lda mode                ; 1 PLAYER: WORLD CUP (campionato), 2 PLAYERS: INDOOR / BEACH, azzurro
+        and #2
+        beq .wc
         lda mode
         and #1
         clc
         adc #4
-        ldy #3                  ; PALAZZETTO / SPIAGGIA, azzurro
+        .byte $2C               ; (salta lda #7)
+.wc     lda #7
+        ldy #3
         jsr Text
         lda #2
         jsr Blank
@@ -179,9 +187,23 @@ NewGame0:
         sta server
         sta AUDV0
         sta AUDV1
+        sta msg
         lda #$FF
         sta winner
-        ldx #3
+        ; campionato: arena del livello e scritta LEVEL n (poi VS squadra)
+        jsr Champ0
+        bcc .nc
+        tax
+        lda mode
+        and #$FE
+        ora LevBeach,x
+        sta mode
+        txa
+        adc #MSG_LEVEL-1        ; (C = 1)
+        sta msg
+        lda #100
+        sta showT
+.nc     ldx #3
 .pos    lda HomeX0,x
         sta px,x
         dex
@@ -214,9 +236,12 @@ TitleLogic  SUBROUTINE
         clc
         adc #1
         and #7
-        sta mode
-        and #4
-        sta m4
+        cmp #1                  ; 1 PLAYER in spiaggia si salta: nel campionato l'arena la sceglie il livello
+        beq .skip
+        cmp #5
+        bne .mok
+.skip   adc #0                  ; (C = 1: +1)
+.mok    sta mode
         lda #0
         sta idle
 .nsel   ; pulsante (quando viene premuto, dopo un rilascio) o GAME RESET: partita
