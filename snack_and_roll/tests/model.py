@@ -6,7 +6,7 @@ OBJECTS = [
     [0b01111111, 0b00000000, 0b00000000, 0b00000000, 0b10000000, 0b00000000, 0b00101011, 136],
     [0b00000000, 0b00000000, 0b00110111, 0b00000000, 0b00000000, 0b00000000, 0b00001011, 18],
     [0b00000000, 0b00000000, 0b00000000, 0b11111111, 0b00000000, 0b00000000, 0b00101011, 136],
-    [0b00000000, 0b01100100, 0b00000000, 0b00000000, 0b01100100, 0b00000000, 0b01111110, 136],
+    [0b00000000, 0b11101100, 0b00000000, 0b00000000, 0b11101100, 0b00000000, 0b01111110, 136],
     [0b00000000, 0b00000000, 0b00000000, 0b11111111, 0b00000000, 0b00000000, 0b00101011, 136],
 ]
 # livello delle PRESSE (l'ultimo): la colonna 3 di objects sono presse, non gocce
@@ -82,7 +82,7 @@ def wall_cols(level, objects=OBJECTS):
     bits = objects[level - 1][1]
     up = [(3 + 7 * k + 1) | 128 for k in range(4) if bits & (1 << k)]
     down = [3 + 7 * k + 1 for k in range(4) if bits & (16 << k)]
-    return (up + down)[:3]
+    return (up + down)[:5]
 
 
 def wall_rows(key):
@@ -329,13 +329,69 @@ def single_pushes(static, walls_now, reach, max_cols=8):
     return out
 
 
+def push_states(static, walls0, start, max_states=6000):
+    """Tutti gli stati raggiungibili spingendo i muri, una spinta dopo l'altra
+    (spingendo n colonne il biscotto segue il muro). Ritorna
+    {(muri, zona): (precedente, (muro, d, n, muri_nuovi, punto di spinta))}
+    e le zone {zona: celle raggiungibili}; zona = (muri, cella minima)."""
+    zones = {}
+
+    def zone(ws, pos):
+        for z, cells in zones.items():
+            if z[0] == ws and pos in cells:
+                return z
+        cells = frozenset(Grid(static | wall_cells(ws)).reachable(pos))
+        z = (ws, min(cells))
+        zones[z] = cells
+        return z
+
+    z0 = zone(tuple(walls0), start)
+    prev = {z0: None}
+    q = deque([z0])
+    while q and len(prev) < max_states:
+        z = q.popleft()
+        ws, cells = z[0], zones[z]
+        for wi, d, n, new in single_pushes(static, ws, cells):
+            at = min(can_push(cells, ws[wi], d))
+            after = (at[0] + 4 * n * d, at[1])
+            if not Grid(static | wall_cells(new)).moves(*after):
+                continue
+            z2 = zone(tuple(new), after)
+            if z2 not in prev:
+                prev[z2] = (z, (wi, d, n, tuple(new), at))
+                q.append(z2)
+    return prev, zones
+
+
+def plan_pushes(static, walls0, start, goals, max_states=6000):
+    """Spinte (in ordine) che portano a una zona da cui si raggiungono i goals:
+    [(muro, d, n, muri_nuovi, punto di spinta)], [] se non serve, None se non
+    si puo'."""
+    prev, zones = push_states(static, walls0, start, max_states)
+    best = None
+    for z in prev:          # in ordine di ampiezza: meno spinte prima
+        if zones[z] & goals:
+            best = z
+            break
+    if best is None:
+        return None
+    out = []
+    while prev[best]:
+        best, act = prev[best]
+        out.append(act)
+    return out[::-1]
+
+
 def push_reach(level, objects=OBJECTS, extra=()):
-    """Raggiungibile senza spingere e con una spinta di un muro."""
+    """Raggiungibile senza spingere e spingendo i muri (anche piu' volte)."""
     walls_now = tuple(wall_cols(level, objects))
     cells = build(level, objects) | drop_cells(level, objects) | set(extra)
     static = cells - wall_cells(walls_now)
     reach0 = Grid(cells).reachable()
-    union = set(reach0)
-    for _, _, _, ws in single_pushes(static, walls_now, reach0):
-        union |= Grid(static | wall_cells(ws)).reachable()
+    if not walls_now:
+        return reach0, set(reach0)
+    prev, zones = push_states(static, walls_now, (10, 64))
+    union = set()
+    for z in prev:
+        union |= zones[z]
     return reach0, union

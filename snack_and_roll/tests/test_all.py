@@ -79,7 +79,9 @@ PUSH_SUGARS = _push_sugars()   # {livello: zuccherini raggiungibili solo spingen
 
 def walls(ram):
     """Muri spingibili presenti (255 = nessuno): colonna, + 128 se sul piano."""
-    return [c for c in (ram.v("pushCol"), ram.v("pushCol2"), ram.v("pushCol3")) if c != 255]
+    if ram.v("level") == 7:      # Bocca Gigante: var44-var47 sono gli sputi
+        return []
+    return [c for c in (ram.v(n) for n in WALL_NAMES) if c != 255]
 
 
 def moving(level):
@@ -422,7 +424,7 @@ def open_way(s, level, goals, max_shots=30):
     return False, shots
 
 
-WALL_NAMES = ("pushCol", "pushCol2", "pushCol3")
+WALL_NAMES = ("wall0", "wall1", "wall2", "wall3", "wall4")
 
 
 def move_wall(s, k, target, max_time=25.0):
@@ -446,9 +448,9 @@ def move_wall(s, k, target, max_time=25.0):
 
 
 def push_open(s, level, goals, attempts=4):
-    """Se lo zuccherino non si raggiunge, cerca UNA spinta di un muro che
-    apra la strada (come farebbe il giocatore) e la esegue con i tasti.
-    Dopo ogni spinta ricontrolla e, se serve, ripianifica."""
+    """Se l'obiettivo non si raggiunge, cerca le spinte dei muri (anche piu'
+    d'una di fila, come farebbe il giocatore) che aprono la strada e le
+    esegue con i tasti. Dopo ogni giro ricontrolla e, se serve, ripianifica."""
     how = None
     for _ in range(attempts):
         r = s.save()
@@ -459,25 +461,23 @@ def push_open(s, level, goals, attempts=4):
         idx = [i for i, n in enumerate(WALL_NAMES) if r.v(n) != 255]
         ws = tuple(r.v(WALL_NAMES[i]) for i in idx)
         static = g.cells - model.wall_cells(ws)
-        reach = model.Grid(g.cells).reachable(start)
-        plan = None
-        for wi, d, n, new in model.single_pushes(static, ws, reach):
-            if model.Grid(static | model.wall_cells(new)).path(start, goals) is not None:
-                plan = (wi, d, n, new)
-                break
-        if plan is None:
+        plan = model.plan_pushes(static, ws, start, goals)
+        if not plan:
             return False, how
-        wi, d, n, new = plan
-        how = (idx[wi] + 1, "destra" if d == 1 else "sinistra", n)
-        walk_to(s, level, model.can_push(reach, ws[wi], d))
-        name, target = WALL_NAMES[idx[wi]], new[wi]
-        key = "Right" if d == 1 else "Left"
-        t0 = time.time()
-        while time.time() - t0 < 8:
+        for wi, d, n, new, _at in plan:
             r = s.save()
-            if ((r.v(name) & 127) - (target & 127)) * d >= 0:
-                break
-            s.hold([key], 0.05)
+            cur = tuple(r.v(WALL_NAMES[i]) for i in idx)
+            reach = model.Grid(static | model.wall_cells(cur)).reachable((r[PLAYER0X], r[PLAYER0Y]))
+            how = (idx[wi] + 1, "destra" if d == 1 else "sinistra", n)
+            walk_to(s, level, model.can_push(reach, cur[wi], d))
+            name, target = WALL_NAMES[idx[wi]], new[wi]
+            key = "Right" if d == 1 else "Left"
+            t0 = time.time()
+            while time.time() - t0 < 8:
+                r = s.save()
+                if ((r.v(name) & 127) - (target & 127)) * d >= 0:
+                    break
+                s.hold([key], 0.05)
     r = s.save()
     return Grid(r, level).path((r[PLAYER0X], r[PLAYER0Y]), goals) is not None and how is not None, how
 
@@ -727,7 +727,7 @@ def push_phase(s, level):
     check(level, "muri sia sopra sia sotto il piano",
           any(k & 128 for k in exp) and any(not k & 128 for k in exp))
     s.shot(f"{OUT}/atari_L{level}_muri.png")
-    names = ("pushCol", "pushCol2", "pushCol3")
+    names = WALL_NAMES
     for k, key in enumerate(keys):
         c, rows_k, y = key & 127, model.wall_rows(key), model.wall_y(key)
         where = "sul piano" if key & 128 else "sul pavimento"

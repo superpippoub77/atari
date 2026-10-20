@@ -30,14 +30,16 @@ SCORE = 0x93
 PFSCORE1, PFSCORE2 = 0xF2, 0xF3
 
 V = {
-    "mouthIndex": A["a"], "level": A["b"], "frame": A["c"], "seconds": A["d"],
+    "mouthIndex": A["s"], "level": A["b"], "frame": A["c"], "seconds": A["d"],
     "choco_bits": A["e"], "mouth0x": A["f"], "speed": A["g"], "mouth0y": A["h"],
     "sfxId": A["i"], "flags": A["k"], "mouth1x": A["l"], "music": A["m"],
-    "mouth1y": A["o"], "dir": A["p"], "sfxPos": A["q"], "pushCol": A["s"],
+    "mouth1y": A["o"], "dir": A["p"], "sfxPos": A["q"],
     "choco_count": A["t"], "ballx_var": A["u"], "hitCooldown": A["v"], "sfxDur": A["z"],
-    "pushCol2": A["w"], "pushCol3": A["x"], "mouth0wait": A["j"], "mouth1wait": A["r"],
+    "mouth0wait": A["j"], "mouth1wait": A["r"],
     "mouthTick": A["n"], "lap": A["y"],
     # Bocca Gigante (8K): secondo sputo, direzioni, strada fatta (var44-var47)
+    # muri spingibili (negli altri livelli): vettore var44-var47, a
+    "wall0": PLAYFIELD + 44, "wall1": PLAYFIELD + 45, "wall2": PLAYFIELD + 46, "wall3": PLAYFIELD + 47, "wall4": A["a"],
     "spit2x": PLAYFIELD + 44, "spit2y": PLAYFIELD + 45, "spitDir": PLAYFIELD + 46, "spitTime": PLAYFIELD + 47,
 }
 
