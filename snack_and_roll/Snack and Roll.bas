@@ -1575,117 +1575,85 @@ __pf_colors
    ; (bit del contatore dei frame mescolati: circa un frame su quattro).
    ; Al buio tutto diventa quasi nero, senza lampeggi
    if !_b4_enableLight{4} then goto __pfc_dark
+   ; (in assembly con le tavolozze qui sotto: 0 normale, 1 lampadina piu'
+   ; scura, 2 livello 5, 3 livello 5 con la lampadina scura, 4 cioccolato,
+   ; 5 buio; la riga 0 va in COLUPF, le righe 1-10 il kernel le legge dal
+   ; puntatore, a passi di 4 byte: 4 tavolozze intrecciate per blocco)
    asm
+ lda _level
+ cmp #5
+ beq pc_l5
+ ldx #4
+ cmp #3
+ bcs pc_set
+ ldx #0
+ .byte $2C
+pc_l5
+ ldx #2
  lda _frame_counter
  lsr
  lsr
  eor _frame_counter
  and #5
- sta temp6
-end
-   asm
- lda _level
- cmp #5
- beq .__pfc_level5
- cmp #3
- bcs .__pfc_choc
- lda temp6
- beq .__bulb12
-end
-   pfcolors:
-   $05
-   $2E
-   $0E
-   $24
-   $26
-   $02
-   $05
-   $2E
-   $0E
-   $24
-   $26
-end
-   return otherbank
-__bulb12
-   pfcolors:
-   $05
-   $28
-   $0E
-   $24
-   $26
-   $02
-   $05
-   $28
-   $0E
-   $24
-   $26
-end
-   return otherbank
-   ; livello 5: lampade come nei primi livelli, muri mobili marroni di un
-   ; solo colore (barrette fisse, senza variazioni, anche quando la
-   ; lampadina traballa)
-__pfc_level5
-   asm
- lda temp6
- beq .__bulb5
-end
-   pfcolors:
-   $05
-   $2E
-   $24
-   $24
-   $24
-   $02
-   $05
-   $2E
-   $24
-   $24
-   $24
-end
-   return otherbank
-__bulb5
-   pfcolors:
-   $05
-   $28
-   $24
-   $24
-   $24
-   $02
-   $05
-   $28
-   $24
-   $24
-   $24
-end
-   return otherbank
-__pfc_choc
-   pfcolors:
-   $28
-   $26
-   $24
-   $26
-   $24
-   $02
-   $28
-   $26
-   $24
-   $26
-   $24
+ bne pc_set
+ inx
+pc_set
+ lda pc_row0,x
+ sta COLUPF
+ lda pc_lo,x
+ sta pfcolortable
+ lda pc_hi,x
+ sta pfcolortable+1
 end
    return otherbank
 __pfc_dark
-   pfcolors:
-   $02
-   $02
-   $02
-   $02
-   $02
-   $02
-   $02
-   $02
-   $02
-   $02
-   $02
+   asm
+ ldx #5
+ bne pc_set
+pc_row0
+ .byte $05,$05,$05,$05,$28,$02
+pc_lo
+ .byte <(pc_tab0-84+0),<(pc_tab0-84+1),<(pc_tab0-84+2),<(pc_tab0-84+3),<(pc_tab1-84+0),<(pc_tab1-84+1)
+pc_hi
+ .byte >(pc_tab0-84),>(pc_tab0-84),>(pc_tab0-84),>(pc_tab0-84),>(pc_tab1-84),>(pc_tab1-84)
+   ; tavolozze intrecciate (il puntatore pc_tab-84+k non deve cambiare
+   ; pagina leggendo fino a +124: il blocco comincia fra 88 e 206)
+ if (<*) < 88
+ ds 88-(<*)
+ endif
+ if (<*) > 206
+ ds 256-(<*)+88
+ endif
+pc_tab0
+ .byte $2E,$28,$2E,$28
+ .byte $0E,$0E,$24,$24
+ .byte $24,$24,$24,$24
+ .byte $26,$26,$24,$24
+ .byte $02,$02,$02,$02
+ .byte $05,$05,$05,$05
+ .byte $2E,$28,$2E,$28
+ .byte $0E,$0E,$24,$24
+ .byte $24,$24,$24,$24
+ .byte $26,$26,$24,$24
+ if (<*) < 88
+ ds 88-(<*)
+ endif
+ if (<*) > 206
+ ds 256-(<*)+88
+ endif
+pc_tab1
+ .byte $26,$02,$00,$00
+ .byte $24,$02,$00,$00
+ .byte $26,$02,$00,$00
+ .byte $24,$02,$00,$00
+ .byte $02,$02,$00,$00
+ .byte $28,$02,$00,$00
+ .byte $26,$02,$00,$00
+ .byte $24,$02,$00,$00
+ .byte $26,$02,$00,$00
+ .byte $24,$02,$00,$00
+   ; (il kernel legge anche il byte dopo, nell'ultima linea: $FF come prima)
+ .byte $FF,$FF
 end
    return otherbank
 
@@ -1988,6 +1956,44 @@ tick16
  clc
  adc temp1
  rts
+
+   ; PRESSA DOPPIA (colonna 17, sopra il piano): un perno scende dal
+   ; soffitto e uno sale dal piano, con le teste larghe 3 colonne; le
+   ; teste stanno alla riga temp1 (0-2, la lunghezza delle altre presse
+   ; dimezzata) e 4 - temp1: chiusa, si uniscono alla riga 2. Si
+   ; ridisegnano le 5 righe (colonne 16-18 = bit 7-5 del byte 2 di ogni
+   ; riga del playfield): per riga d = distanza dal bordo (0 1 2 1 0),
+   ; perno se d < temp1, testa se d = temp1
+press_double
+ ldx #18
+pd_loop
+ txa
+ lsr
+ lsr
+ tay
+ lda pdist,y
+ ldy #0
+ cmp temp1
+ beq pd_head
+ bcs pd_set
+ ldy #$40
+ .byte $2C
+pd_head
+ ldy #$E0
+pd_set
+ sty temp2
+ lda playfield,x
+ and #$1F
+ ora temp2
+ sta playfield,x
+ txa
+ sec
+ sbc #4
+ tax
+ bcs pd_loop
+ jmp .__drop_next
+pdist
+ .byte 0,1,2,1,0
 end
    ; PRESSA (livello 6, al posto delle gocce): uno stantuffo a T, perno
    ; sottile (1 colonna) con la testa larga (3 colonne) in fondo, lungo
@@ -2012,6 +2018,17 @@ __press
  clc
  adc temp1
  tax
+ ; la pressa alta della colonna 17 e' doppia (vedi press_double)
+ lda temp6
+ bne pr_norm
+ lda temp5
+ cmp #17
+ bne pr_norm
+ lda presslen,x
+ lsr
+ sta temp1
+ jmp press_double
+pr_norm
  lda pressold,x
  clc
  adc temp6
@@ -2658,7 +2675,8 @@ end
    ; all'altra, e schiacciano il biscotto (una vita).
    ; Livello 7 (Bocca Gigante): arena vuota, il piano ha tre passaggi.
 
-   ; presse: su, su, scende, giu' di colpo (fino in fondo), giu', risale;
+   ; presse: su, su, scende, giu' di colpo (fino in fondo), giu', risale
+   ; (la pressa doppia della colonna 17 usa la meta' della lunghezza);
    ; la tabella e' periodica (9 valori = 6 + 3) per lo sfasamento 0-3
    ; gocce: scendono di 5 righe (fino al piano o al pavimento) e restano
    ; giu' un passo; periodica (9 valori = 6 + 3) per lo sfasamento 0-3

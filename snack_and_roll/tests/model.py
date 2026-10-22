@@ -11,6 +11,9 @@ OBJECTS = [
 ]
 # livello delle PRESSE (l'ultimo): la colonna 3 di objects sono presse, non gocce
 PRESS_LEVEL = 6
+# la pressa alta della colonna 17 (indice 2) e' doppia: un perno dal soffitto e uno dal
+# piano che si uniscono alla riga 2 (occupa le stesse celle di una pressa normale)
+DOUBLE_PRESS = 2
 LEVELS = len(OBJECTS)
 
 # collisione biscotto/zuccherino misurata in Stella (dx, dy rispetto allo zuccherino)
