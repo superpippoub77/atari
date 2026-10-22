@@ -218,12 +218,13 @@ __game_start
    ; se arriviamo qui da una partita vera, ridisegniamo tutto il titolo
    if !_b0_enableStart{0} then goto __skip_gameover_clear
    _b0_enableStart{0} = 0
-   missile1y = 200 : _choco_count = 0 : bally = 200 : missile0y = 200
+   ; (posizioni degli oggetti: le rimette il livello che parte, il titolo
+   ; ha il suo kernel)
+   _choco_count = 0
    ; silenzio sugli effetti, la musica del titolo riparte da capo
-   _sfxId = 0 : AUDV0 = 0 : _music_index = 0 : NUSIZ1 = 0
+   _sfxId = 0 : AUDV0 = 0 : _music_index = 0
    goto __draw_title
 __skip_gameover_clear
-   _b0_enableStart{0} = 0
    _b4_enableLight{4} = 1
 
    goto __done
@@ -328,9 +329,30 @@ __music_done
 __attract_mode
    ; selettore di livello iniziale con lo switch Select (6 scelte),
    ; indicatore a segmenti nella riga libera del titolo
-   if switchselect && !_b1_prevSelect{1} then _choco_count = _choco_count + 1 : if _choco_count >= _Levels then _choco_count = 0
-   _b1_prevSelect{1} = 0
-   if switchselect then _b1_prevSelect{1} = 1
+   ; (bit 1 di _b1_prevSelect: Select premuto nel frame prima)
+   asm
+ lda _b1_prevSelect
+ and #%11111101
+ tax
+ lda SWCHB
+ and #2
+ bne sel_up
+ txa
+ ora #2
+ cmp _b1_prevSelect
+ beq sel_up2
+ inc _choco_count
+ ldy _choco_count
+ cpy #_Levels
+ bcc sel_up2
+ ldy #0
+ sty _choco_count
+ bcs sel_up2
+sel_up
+ txa
+sel_up2
+ sta _b1_prevSelect
+end
    ; combinazione segreta: leva in su + fuoco = Bocca Gigante (si accende
    ; un 7o segnalino; Reset la fa partire, Select torna al livello 1)
    asm
@@ -1260,6 +1282,19 @@ tk_b
  sta COLUP1
  lda #$66
  sta COLUPF
+ ; animazioni: la bocca mastica (due disegni alternati ogni 8 frame), il
+ ; biscotto guarda a destra e a sinistra (specchiato a secondi alterni)
+ lda _frame_counter
+ and #8
+ ora #<tk_mouth
+ sta temp2
+ lda #>tk_mouth
+ sta temp3
+ lda _seconds_counter
+ asl
+ asl
+ asl
+ sta REFP0
  ; ---- ROLL: R e LL nel playfield (PF0 vuoto), sprite per riga ----
  ldx #55
 tk_c
@@ -1269,7 +1304,7 @@ tk_c
  lsr
  lsr
  tay
- lda tk_mouth,y
+ lda (temp2),y
  sta GRP1
  sta temp1
  lda #1
@@ -1308,8 +1343,7 @@ tk_c
  jsr tk_pos
  sta WSYNC
  sta HMOVE
- lda #$0A
- sta COLUP0
+ lda #$2C
  sta COLUP1
  ldx #10
  jsr tk_skip
@@ -1345,6 +1379,7 @@ tk_pfoff
  sta GRP0
  sta GRP1
  sta ENAM0
+ sta REFP0
  rts
 
    ; X linee vuote (esce con X = 0)
@@ -1377,6 +1412,17 @@ tk_p1
 TK_VBLANK = 86
 TK_OVERSCAN = 67
 
+   ; la bocca chiusa e' 8 byte dopo quella aperta: il kernel sceglie con
+   ; ORA #8, quindi il bit 3 dell'indirizzo deve essere 0 (e niente pagina
+   ; diversa)
+ if (<tk_mouth) & 8
+   echo "ERRORE: tk_mouth ha il bit 3 acceso"
+   err
+ endif
+ if >tk_mouth != >(tk_mouth+14)
+   echo "ERRORE: le due bocche attraversano una pagina"
+   err
+ endif
 ; ---- LOGO: generato da tools/title_logo.py, non modificare a mano ----
 sn0
  .byte $00,$E0,$00,$F0,$00,$E0,$00
@@ -1399,7 +1445,7 @@ ro5
 tk_cookie
  .byte $00,$3C,$7E,$EB,$EB,$7E,$3C
 tk_mouth
- .byte $7E,$BA,$82,$7C,$00,$00,$00
+ .byte $7E,$BA,$82,$7C,$00,$00,$00,$00,$7E,$FE,$7E,$00,$00,$00,$00
 tk_an
  .byte $A9,$A9,$EB,$AD,$49
 tk_d

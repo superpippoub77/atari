@@ -1248,9 +1248,10 @@ def main():
     s.down("Up", "space")
     s.wait(0.4)
     r = s.save()
-    # (16K: il titolo scrive BOSS! al posto del 7o segnalino)
-    shown = r.v("choco_count") == LEVELS if SIXTEEN else r.pf(13, 6)
-    check(BOSS, "su + fuoco nel titolo: scelta la Bocca Gigante (7o segnalino / BOSS!)",
+    # (16K: il titolo scrive BOSS! al posto del 7o segnalino; 8K: la gobba
+    # sul terreno va al 7o posto, la disegna il kernel del titolo)
+    shown = r.v("choco_count") == LEVELS
+    check(BOSS, "su + fuoco nel titolo: scelta la Bocca Gigante (7o posto / BOSS!)",
           r.flag(0) == 0 and shown, f"titolo={r.flag(0) == 0} scelta={r.v('choco_count')}")
     s.tap("F2", 0.15)
     s.up("Up", "space")

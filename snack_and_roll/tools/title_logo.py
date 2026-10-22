@@ -73,6 +73,10 @@ COOKIE = ["..XXXX..", ".XXXXXX.", "XXX.X.XX", "XXX.X.XX", ".XXXXXX.", "..XXXX.."
 # riga della bocca), acceso nelle 3 righe in basso
 MOUTH = ["........", "........", "........", ".XXXXX..", "X.....X.", "X.XXX.X.", ".XXXXXX."]
 CHOC = [2 if len(m) > 6 and m[6] == "X" else 0 for m in MOUTH]
+# secondo disegno della bocca (chiusa a meta'): stesso pixel 6, cosi' il
+# cioccolatino non cambia; il kernel lo legge 8 byte dopo il primo
+MOUTH2 = ["........", "........", "........", "........", ".XXXXXX.", "XXXXXXX.", ".XXXXXX."]
+assert [2 if m[6] == "X" else 0 for m in MOUTH2] == CHOC
 
 
 def pf_bytes(row):
@@ -96,7 +100,7 @@ def tables():
     for r in ro:
         assert r[0] == 0 and r[3] == 0, "ROLL non deve usare PF0"
     rows = lambda spr: [bits(x) for x in spr][::-1]
-    return sn, ro, rows(COOKIE), rows(MOUTH), CHOC[::-1], rows(AN), rows(D), LINE[::-1], rows(BY), rows(FM)
+    return sn, ro, rows(COOKIE), rows(MOUTH) + [0] + rows(MOUTH2), CHOC[::-1], rows(AN), rows(D), LINE[::-1], rows(BY), rows(FM)
 
 
 def asm():
