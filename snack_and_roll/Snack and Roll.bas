@@ -150,8 +150,7 @@
    dim _spit2y = var45
    dim _spitDir = var46
    dim _spitTime = var47
-   ; chiave (zuccherino 1) e stato dello slow motion nel frame precedente
-   dim _b2_hasKey = k
+   ; stato dello slow motion nel frame precedente
    dim _b3_prevSlow = k
 __inizialize
    ;*************************************************************************************************************************
@@ -461,7 +460,6 @@ __skip_bocche
    ; combo "partita perfetta": se nel livello non hai ancora perso una
    ; vita (barra delle vite ancora piena) lo zuccherino vale doppio
    if pfscore2 = %10101010 then score = score + 50
-   if temp2 = 2 then _b2_hasKey{2} = 1
    if temp2 = 1 then goto __golden_sugar
    asm
  ldx #5
@@ -499,8 +497,8 @@ __sugar_index_ok
 
 __skip_all_sugar
    ; colore della bocca e dello zuccherino (COLUP1, lo stesso registro): lo
-   ; zuccherino 0 (dorato) e' giallo, l'1 (chiave) e' azzurro, gli altri
-   ; prendono il colore della bocca (temp4 = 8: nessuno zuccherino). Al buio
+   ; zuccherino 0 (dorato) e' giallo, gli altri prendono il colore della
+   ; bocca (temp4 = 8: nessuno zuccherino). Al buio
    ; bocca e zuccherino sono neri (dark0)
    asm
  ldx _mouthIndex
@@ -509,10 +507,6 @@ __skip_all_sugar
  bne skc_1
  lda #$2E
 skc_1
- dey
- bne skc_2
- lda #$9C
-skc_2
  jsr dark0
  sta COLUP1
 end
@@ -542,13 +536,11 @@ end
    ; CONTENITORE FINALE (BALL)
    ;_________________________________________________________________________________________________________________________
    ; il sacchetto finale individuato come ball viene visualizzato solo dopo aver trovato gli 8 cioccolatini nel playfield
-   ; e la bocca è stata colpita (dal livello 4 serve anche la chiave)
+   ; e la bocca è stata colpita
    ; _ballx viene letto dalla colonna 7 di "objects" al caricamento del livello
    ; (il bit 0 ricorda il pezzo di piano tolto, vedi __piano_hit)
    ;*************************************************************************************************************************
-   temp4 = 1
-   if _level > 3 && !_b2_hasKey{2} then temp4 = 0
-   if _choco_count = 8 && !_b5_enablePalyer1{5} && temp4 then ballx = _ballx & 254 : bally = 28
+   if _choco_count = 8 && !_b5_enablePalyer1{5} then ballx = _ballx & 254 : bally = 28
 
    ;*************************************************************************************************************************
    ; CHECK
@@ -1128,7 +1120,7 @@ __skip_to_change
    _b5_enablePalyer1{5}=1
    _b7_gameMissile0Moving{7}=0
    _choco_count=0
-   _choco_bits=0 : _b2_hasKey{2}=0
+   _choco_bits=0
    ; ogni livello parte con la luce accesa, tranne l'ultimo che parte al buio
    _b4_enableLight{4}=1
    if _level=_Levels then _b4_enableLight{4}=0
@@ -1217,6 +1209,28 @@ tk_os
  lda #$20
  sta CTRLPF
  sta HMCLR
+ ; animazioni di ROLL (puntatori alle tabelle, 8 byte piu' avanti il
+ ; secondo disegno): la bocca mastica (ogni 8 frame), le due L ondeggiano
+ ; al vento (cime piegate per 16 frame su 48). Il puntatore della seconda
+ ; L sta in f-g (_mouth0x, _speed: nel titolo non servono, il livello li
+ ; rimette)
+ lda _frame_counter
+ and #8
+ ora #<tk_mouth
+ sta temp2
+ lda _frame_counter
+ and #16
+ lsr
+ tax
+ ora #<ro4
+ sta temp4
+ txa
+ ora #<ro5
+ sta f
+ lda #>tk_mouth
+ sta temp3
+ sta temp5
+ sta g
 tk_vb
  lda INTIM
  bne tk_vb
@@ -1282,14 +1296,7 @@ tk_b
  sta COLUP1
  lda #$66
  sta COLUPF
- ; animazioni: la bocca mastica (due disegni alternati ogni 8 frame), il
- ; biscotto guarda a destra e a sinistra (specchiato a secondi alterni)
- lda _frame_counter
- and #8
- ora #<tk_mouth
- sta temp2
- lda #>tk_mouth
- sta temp3
+ ; il biscotto guarda a destra e a sinistra (specchiato a secondi alterni)
  lda _seconds_counter
  asl
  asl
@@ -1313,12 +1320,12 @@ tk_c
  sta PF2
  lda tk_cookie,y
  sta GRP0
+ lda (temp4),y
+ sta PF1
+ lda (f),y
+ sta PF2
  lda temp1
  sta ENAM0
- lda ro4,y
- sta PF1
- lda ro5,y
- sta PF2
  dex
  bpl tk_c
  jsr tk_pfoff
@@ -1412,18 +1419,50 @@ tk_p1
 TK_VBLANK = 86
 TK_OVERSCAN = 67
 
-   ; la bocca chiusa e' 8 byte dopo quella aperta: il kernel sceglie con
-   ; ORA #8, quindi il bit 3 dell'indirizzo deve essere 0 (e niente pagina
-   ; diversa)
- if (<tk_mouth) & 8
+   ; la bocca chiusa e le L piegate sono 8 byte dopo i disegni normali: il
+   ; kernel sceglie con ORA #8, quindi il bit 3 dell'indirizzo deve essere
+   ; 0, e le tre tabelle (ro4, ro5, tk_mouth) stanno nella stessa pagina
+   ; (un solo byte alto); title_logo.py mette i byte di riempimento
+ if tk_mouth & 8
    echo "ERRORE: tk_mouth ha il bit 3 acceso"
    err
  endif
- if >tk_mouth != >(tk_mouth+14)
-   echo "ERRORE: le due bocche attraversano una pagina"
+ if (ro4 >> 8) != ((tk_mouth+14) >> 8)
+   echo "ERRORE: tk_mouth attraversa una pagina"
+   err
+ endif
+ if ro4 & 8
+   echo "ERRORE: ro4 ha il bit 3 acceso"
+   err
+ endif
+ if (ro4 >> 8) != ((ro4+14) >> 8)
+   echo "ERRORE: ro4 attraversa una pagina"
+   err
+ endif
+ if ro5 & 8
+   echo "ERRORE: ro5 ha il bit 3 acceso"
+   err
+ endif
+ if (ro5 >> 8) != ((ro5+14) >> 8)
+   echo "ERRORE: ro5 attraversa una pagina"
    err
  endif
 ; ---- LOGO: generato da tools/title_logo.py, non modificare a mano ----
+ if * & 8
+ ds 16 - (* & 15)
+ endif
+ro4
+ .byte $FB,$C3,$C3,$C3,$C3,$C3,$C3,$00,$FB,$C3,$C3,$C3,$61,$61,$30
+ if * & 8
+ ds 16 - (* & 15)
+ endif
+ro5
+ .byte $07,$00,$00,$00,$00,$00,$00,$00,$07,$00,$00,$00,$01,$01,$03
+ if * & 8
+ ds 16 - (* & 15)
+ endif
+tk_mouth
+ .byte $7E,$BA,$82,$7C,$00,$00,$00,$00,$7E,$FE,$7E,$00,$00,$00,$00
 sn0
  .byte $00,$E0,$00,$F0,$00,$E0,$00
 sn1
@@ -1438,14 +1477,8 @@ sn5
  .byte $02,$03,$01,$00,$01,$03,$02
 ro2
  .byte $09,$0D,$03,$07,$0D,$0D,$07
-ro4
- .byte $FB,$C3,$C3,$C3,$C3,$C3,$C3
-ro5
- .byte $07,$00,$00,$00,$00,$00,$00
 tk_cookie
  .byte $00,$3C,$7E,$EB,$EB,$7E,$3C
-tk_mouth
- .byte $7E,$BA,$82,$7C,$00,$00,$00,$00,$7E,$FE,$7E,$00,$00,$00,$00
 tk_an
  .byte $A9,$A9,$EB,$AD,$49
 tk_d
@@ -1808,10 +1841,10 @@ __skip_tavoli
    if !_playfield_up && _current_bit_object = 16 then _playfield_section = 3 : _playfield_up = 6 : _playfield_down = 8
    if _current_bit_object then goto __loop_objects
 
-   ; --- BOCCA GIGANTE: niente zuccherini (la chiave c'e' gia'), lo sputo
+   ; --- BOCCA GIGANTE: niente zuccherini, lo sputo
    ; e' alto 4 righe, barra dell'energia (8 pixel) sul pavimento ---
    if _level <> _Boss then goto __no_boss_setup
-   _choco_bits = 255 : _b2_hasKey{2} = 1 : missile1height = 4
+   _choco_bits = 255 : missile1height = 4
    ; (var44-var47 servono anche al vettore dei muri: dopo un livello valgono
    ; 255, qui si riazzerano come all'accensione)
    asm

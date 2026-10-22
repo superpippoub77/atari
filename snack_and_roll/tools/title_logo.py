@@ -60,6 +60,19 @@ for r, (c0, c1) in ((1, (1, 3)), (3, (0, 3)), (5, (1, 3))):
 
 ROLL = grid()
 place(ROLL, "RLL", [11, 24, 30])
+# le due L piegate dal vento: la base resta ferma, la cima (riga 0) va a
+# destra di 2 colonne, le righe 1-2 di 1 (verso sinistra non si puo': la
+# colonna 23 e' PF0, che il kernel di ROLL non scrive)
+ROLL_WIND = grid()
+place(ROLL_WIND, "R", [11])
+for r in range(7):
+    d = {0: 2, 1: 1, 2: 1}.get(r, 0)
+    for c in (24, 25, 30, 31):
+        ROLL_WIND[r][c + d] = "X"
+for c in range(24, 29):
+    ROLL_WIND[6][c] = "X"
+for c in range(30, 35):
+    ROLL_WIND[6][c] = "X"
 
 # sprite (8 pixel, larghi il doppio), una riga per riga del logo: dall'alto
 AN = [".X..X..X", "X.X.XX.X", "XXX.X.XX", "X.X.X..X", "X.X.X..X"]     # righe da 4 linee
@@ -97,26 +110,33 @@ def bits(s):
 def tables():
     sn = [pf_bytes(r) for r in SNACK][::-1]
     ro = [pf_bytes(r) for r in ROLL][::-1]
+    rw = [pf_bytes(r) for r in ROLL_WIND][::-1]
+    assert [r[:3] for r in rw] == [r[:3] for r in ro] and all(r[3] == 0 for r in rw)
     for r in ro:
         assert r[0] == 0 and r[3] == 0, "ROLL non deve usare PF0"
     rows = lambda spr: [bits(x) for x in spr][::-1]
-    return sn, ro, rows(COOKIE), rows(MOUTH) + [0] + rows(MOUTH2), CHOC[::-1], rows(AN), rows(D), LINE[::-1], rows(BY), rows(FM)
+    return sn, ro, rw, rows(COOKIE), rows(MOUTH) + [0] + rows(MOUTH2), CHOC[::-1], rows(AN), rows(D), LINE[::-1], rows(BY), rows(FM)
 
 
 def asm():
-    sn, ro, cookie, mouth, choc, an, d, ln, by, fm = tables()
+    sn, ro, rw, cookie, mouth, choc, an, d, ln, by, fm = tables()
 
     def line(label, vals):
         return f"{label}\n .byte " + ",".join(f"${v:02X}" for v in vals)
 
     out = ["; ---- LOGO: generato da tools/title_logo.py, non modificare a mano ----"]
+    pad = " if * & 8\n ds 16 - (* & 15)\n endif"
+    # disegni doppi (il secondo 8 byte dopo): indirizzo con il bit 3 a 0
+    for k, name in ((4, "ro4"), (5, "ro5")):
+        out.append(pad)
+        out.append(line(name, [r[k] for r in ro] + [0] + [r[k] for r in rw]))
+    out.append(pad)
+    out.append(line("tk_mouth", mouth))
     for k, name in enumerate(["sn0", "sn1", "sn2", "sn3", "sn4", "sn5"]):
         out.append(line(name, [r[k] for r in sn]))
     assert all(r[1] == 1 for r in ro), "PF1 sinistro di ROLL deve valere 1 (il kernel lo scrive fisso)"
-    for k, name in ((2, "ro2"), (4, "ro4"), (5, "ro5")):
-        out.append(line(name, [r[k] for r in ro]))
+    out.append(line("ro2", [r[2] for r in ro]))
     out.append(line("tk_cookie", cookie))
-    out.append(line("tk_mouth", mouth))
     out.append(line("tk_an", an))
     out.append(line("tk_d", d))
     out.append(line("tk_line", ln))
