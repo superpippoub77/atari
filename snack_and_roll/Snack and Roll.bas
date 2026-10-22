@@ -175,9 +175,8 @@ __inizialize
    missile1height = 1
    ballheight = 16
 
-   a = 0 : b = 0 : c = 0 : d = 0 : e = 0 : f = 0 : g = 3 : h = 3 : i = 0
-   j = 0 : k = 0 : l = 0 : m = 0 : n = 0 : o = 0 : p = 0 : q = 0 : r = 0
-   s = 0 : t = 0 : u = 0 : w = 0 : x = 0 : y = 0
+   ; (il resto della RAM l'ha gia' azzerato l'avvio di batari Basic)
+   g = 3 : h = 3
 
    ; Impostazione del timer iniziale e delle vite
    pfscore1 = %11111111 : pfscore2 = %10101010
@@ -203,32 +202,6 @@ __inizialize
    ...X...X.......X.....XX..X.X.... */
 
 __draw_title
-   playfield:
-   ................................
-   ...XXX..X..X...XX....XX...X..X..
-   ..X.....XX.X..X..X..X..X..X.X...
-   ...XX...X.XX..XXXX..X.....XX....
-   .....X..X..X..X..X..X..X..X.X...
-   ..XXX...X..X..X..X...XX...X..X..
-   ................................
-   X......X.X.X..XX..X.X...X...XXX.
-   ..X.XX...XX..X..X.X.X...XX.XX...
-   ..XX.X...X...X..X.X.X...X.X.XX..
-   ..X..X...X....XX..X.X...X...X...
-end
-   pfcolors:
-   $20
-   $21
-   $22
-   $23
-   $24
-   $20
-   $9E
-   $28
-   $26
-   $24
-   $22
-end
 
    ; GAME RESET durante la partita: si aspetta che il tasto venga rilasciato
    ; (se no nel titolo farebbe ripartire subito la partita), poi il titolo
@@ -353,16 +326,6 @@ __music_done
    goto __skip_attract
 
 __attract_mode
-   ; scorrimento continuo: il biscotto entra sempre da destra e attraversa
-   ; lo schermo verso sinistra inseguito dalla bocca, senza pause e senza
-   ; tornare indietro; uscito a sinistra rientra da destra
-   if !(_frame_counter&1) then player0x = player0x - 1
-   ; (sotto 0 si passa a 255: basta il controllo > 150)
-   if player0x > 150 then player0x = 150
-   player0y=53 : player1y=53 : player1x = player0x + 15 : COLUP1=_P1_color : COLUP0=_P0_color
-   ; la bocca, ancora fuori dallo schermo a destra, non si disegna
-   if player1x > 152 then player1y = 200
-
    ; selettore di livello iniziale con lo switch Select (6 scelte),
    ; indicatore a segmenti nella riga libera del titolo
    if switchselect && !_b1_prevSelect{1} then _choco_count = _choco_count + 1 : if _choco_count >= _Levels then _choco_count = 0
@@ -380,29 +343,6 @@ __attract_mode
  sta _choco_count
 no_boss
 end
-   pfhline 1 6 13 off
-   temp1=_choco_count*2+1
-   pfpixel temp1 6 on
-   ; le due "l" di Roll (colonne 18 e 20, righe 7-10) oscillano come due
-   ; alberi: la base (riga 10) resta ferma e le tre righe sopra si piegano
-   ; a scalare (cima di 2 colonne, righe 8-9 di 1) verso destra, poi
-   ; tornano dritte e la cima si piega a sinistra (di piu' toccherebbe la
-   ; "o"). Un passo ogni 8 frame, un ciclo al secondo. Colonne 16-23 delle
-   ; righe 7, 8, 9 = byte 30, 34, 38 del playfield (colonna 16 = bit 7,
-   ; la "o" nelle righe 8-9).
-   asm
- lda _frame_counter
- lsr
- lsr
- lsr
- tax
- lda rollsway,x
- sta playfield+30
- lda rollsway89,x
- sta playfield+34
- sta playfield+38
-end
-
    goto __skip_missile
 
 __skip_attract
@@ -1079,7 +1019,7 @@ __decrease_health_bar
   pfscore1=%11111111
   _hitCooldown = 90
   if !pfscore2 then goto __game_start
-  if _level = 5 then gosub __walls_home
+  if _level = 5 then gosub __walls_home bank2
   goto __done
 
    ;*************************************************************************************************************************
@@ -1088,10 +1028,6 @@ __decrease_health_bar
    ; Nel livello 5 i muri tornano al loro posto e il biscotto riparte
    ; dall'inizio: se li hai spinti in modo da chiuderti la strada, alla
    ; prossima vita persa il rompicapo ricomincia (non resti mai bloccato).
-__walls_home
-   player0x = 10 : player0y = 64
-   gosub __walls_reset bank2
-   return
 
 
    ;*************************************************************************************************************************
@@ -1189,9 +1125,293 @@ __skip_to_change
    _mouth0wait = 0 : _mouth1wait = 0 : _mouthTick = 0
 
 __done
-
+   ; nel titolo lo schermo lo disegna il kernel del logo (qui sotto)
+   asm
+ lda _b0_enableStart
+ lsr
+ bcs .__game_screen
+ jmp title_kernel
+end
+__game_screen
    drawscreen
    goto __main_loop
+
+   asm
+   ;*************************************************************************************************************************
+   ; KERNEL DEL TITOLO: il logo "SNACK and ROLL" con il playfield
+   ; asimmetrico (40 colonne, righe di 8 linee), i colori per riga e gli
+   ; sprite riposizionati a meta' schermo: "AND" bianco fra due righe rosse,
+   ; la O di ROLL e' il biscotto, a sinistra la bocca, a destra il
+   ; cioccolatino; sotto il terreno e le 7 tacche del livello di partenza
+   ; (la ball sopra quella scelta con Select) e la firma "by FM". Frame da
+   ; 312 linee come
+   ; quelli di drawscreen; la logica del titolo (musica, Select) gira
+   ; durante il tempo del timer di fine schermo.
+   ; Tabelle: tools/title_logo.py.
+   ;*************************************************************************************************************************
+title_kernel
+tk_os
+ lda INTIM
+ bmi tk_os
+ lda #2
+ sta WSYNC
+ sta VSYNC
+ sta WSYNC
+ sta WSYNC
+ lsr
+ sta WSYNC
+ sta VSYNC
+ sta VBLANK
+ lda #TK_VBLANK
+ sta TIM64T
+ ; P0 "AN" e poi il biscotto, P1 "D" (poi la bocca), M0 il cioccolatino,
+ ; la ball sul terreno alla colonna 13 + 2 * livello
+ ldx #0
+ stx VDELBL
+ lda #72
+ jsr tk_pos
+ inx
+ lda #88
+ jsr tk_pos
+ inx
+ lda #144
+ jsr tk_pos
+ lda _choco_count
+ asl
+ asl
+ asl
+ adc #52
+ ldx #4
+ jsr tk_pos
+ sta WSYNC
+ sta HMOVE
+ lda #$35
+ sta NUSIZ0
+ lda #$05
+ sta NUSIZ1
+ lda #$0E
+ sta COLUP0
+ sta COLUP1
+ lda #$20
+ sta CTRLPF
+ sta HMCLR
+tk_vb
+ lda INTIM
+ bne tk_vb
+ ; ---- SNACK: 7 righe da 8 linee, giallo piu' chiaro in alto ----
+ ldx #55
+tk_a
+ sta WSYNC
+ txa
+ lsr
+ lsr
+ lsr
+ tay
+ lda sn0,y
+ sta PF0
+ lda sn1,y
+ sta PF1
+ tya
+ ora #$28
+ sta COLUPF
+ lda sn2,y
+ sta PF2
+ lda sn3,y
+ sta PF0
+ lda sn4,y
+ sta PF1
+ lda sn5,y
+ sta PF2
+ dex
+ bpl tk_a
+ jsr tk_pfoff
+ ldx #6
+ jsr tk_skip
+ ; ---- AND: righe di 4 linee, le due righe rosse ripetute a destra ----
+ lda #$64
+ sta COLUPF
+ ldx #19
+tk_b
+ sta WSYNC
+ txa
+ lsr
+ lsr
+ tay
+ lda tk_an,y
+ sta GRP0
+ lda tk_d,y
+ sta GRP1
+ lda tk_line,y
+ sta PF1
+ and #7
+ sta PF2
+ dex
+ bpl tk_b
+ jsr tk_pfoff
+ ; la bocca a sinistra di ROLL
+ ldx #1
+ lda #16
+ jsr tk_pos
+ sta WSYNC
+ sta HMOVE
+ lda #$2C
+ sta COLUP0
+ lda #$48
+ sta COLUP1
+ lda #$66
+ sta COLUPF
+ ; ---- ROLL: R e LL nel playfield (PF0 vuoto), sprite per riga ----
+ ldx #55
+tk_c
+ sta WSYNC
+ txa
+ lsr
+ lsr
+ lsr
+ tay
+ lda tk_mouth,y
+ sta GRP1
+ sta temp1
+ lda #1
+ sta PF1
+ lda ro2,y
+ sta PF2
+ lda tk_cookie,y
+ sta GRP0
+ lda temp1
+ sta ENAM0
+ lda ro4,y
+ sta PF1
+ lda ro5,y
+ sta PF2
+ dex
+ bpl tk_c
+ jsr tk_pfoff
+ ; ---- terreno giallo, la ball sopra e' il livello scelto con Select ----
+ lda #$2A
+ sta COLUPF
+ lda #2
+ sta ENABL
+ ldx #3
+ jsr tk_skip
+ stx ENABL
+ dex
+ stx PF0
+ stx PF1
+ stx PF2
+ ldx #3
+ jsr tk_skip
+ jsr tk_pfoff
+ ; ---- firma "by FM" sotto il terreno (P1 di nuovo accanto a P0) ----
+ ldx #1
+ lda #92
+ jsr tk_pos
+ sta WSYNC
+ sta HMOVE
+ lda #$0A
+ sta COLUP0
+ sta COLUP1
+ ldx #10
+ jsr tk_skip
+ ldx #19
+tk_s
+ sta WSYNC
+ txa
+ lsr
+ lsr
+ tay
+ lda tk_by,y
+ sta GRP0
+ lda tk_fm,y
+ sta GRP1
+ dex
+ bpl tk_s
+ jsr tk_pfoff
+ ; fine dello schermo: timer per la logica del titolo, registri come li
+ ; vuole il kernel del gioco
+ lda #TK_OVERSCAN+128
+ sta TIM64T
+ lda #1
+ sta CTRLPF
+ lsr
+ sta NUSIZ0
+ jmp .__main_loop
+
+tk_pfoff
+ lda #0
+ sta PF0
+ sta PF1
+ sta PF2
+ sta GRP0
+ sta GRP1
+ sta ENAM0
+ rts
+
+   ; X linee vuote (esce con X = 0)
+tk_skip
+ sta WSYNC
+ dex
+ bne tk_skip
+ rts
+
+   ; oggetto X (0 P0, 1 P1, 2 M0, 4 ball) alla posizione A
+tk_pos
+ sta WSYNC
+ sec
+tk_p1
+ sbc #15
+ bcs tk_p1
+ eor #7
+ asl
+ asl
+ asl
+ asl
+ sta HMP0,x
+ sta RESP0,x
+ rts
+
+   ; timer (unita' di 64 cicli): il vblank copre anche le linee vuote in
+   ; alto e arriva a 0 (attesa di INTIM = 0); quello di fine schermo ha il
+   ; bit 7 acceso come in drawscreen (attesa finche' INTIM e' negativo):
+   ; quello delle linee vuote in basso, poi la logica del titolo
+TK_VBLANK = 86
+TK_OVERSCAN = 67
+
+; ---- LOGO: generato da tools/title_logo.py, non modificare a mano ----
+sn0
+ .byte $00,$E0,$00,$F0,$00,$E0,$00
+sn1
+ .byte $79,$0D,$0D,$39,$61,$61,$3D
+sn2
+ .byte $69,$69,$69,$ED,$6F,$6B,$C9
+sn3
+ .byte $30,$B0,$B0,$B0,$B0,$B0,$10
+sn4
+ .byte $F6,$86,$87,$87,$87,$86,$F6
+sn5
+ .byte $02,$03,$01,$00,$01,$03,$02
+ro2
+ .byte $09,$0D,$03,$07,$0D,$0D,$07
+ro4
+ .byte $FB,$C3,$C3,$C3,$C3,$C3,$C3
+ro5
+ .byte $07,$00,$00,$00,$00,$00,$00
+tk_cookie
+ .byte $00,$3C,$7E,$EB,$EB,$7E,$3C
+tk_mouth
+ .byte $7E,$BA,$82,$7C,$00,$00,$00
+tk_an
+ .byte $A9,$A9,$EB,$AD,$49
+tk_d
+ .byte $E0,$90,$90,$90,$E0
+tk_line
+ .byte $00,$00,$3F,$00,$00
+tk_by
+ .byte $E8,$A4,$EA,$8A,$80
+tk_fm
+ .byte $91,$91,$D5,$9B,$D1
+; ---- fine del logo ----
+end
 
 
    ;*************************************************************************************************************************
@@ -1200,15 +1420,6 @@ __done
    ; jingle => allegra
    ; melody => suspance
    ;*************************************************************************************************************************
-   ; due "l" del titolo: dritte, piegate a destra poco e tanto, poco,
-   ; dritte, cima a sinistra. Riga 7 (cima) e righe 8-9.
-   data rollsway
-   %00101000, %00010100, %00001010, %00010100, %00101000, %01010000
-end
-   data rollsway89
-   %10101000, %10101000, %10010100, %10101000, %10101000, %10101000
-end
-
    data mouthcolors
    $48, $6A
 end
@@ -1581,28 +1792,31 @@ __no_boss_setup
    if _level = _Boss then return otherbank
    gosub __place_walls
    return otherbank
-   ; vita persa nel livello 5 (da __walls_home, banco 1): muri al loro posto
-__walls_reset
+   ; vita persa nel livello 5 (dal banco 1): biscotto alla partenza e muri
+   ; al loro posto
+__walls_home
    ; nel livello 5 le righe 2-4 e 8-10 contengono solo i muri: si svuotano
-   ; tutte e i muri si ridisegnano al loro posto
+   ; tutte e i muri si ridisegnano al loro posto (__place_walls)
    asm
+ lda #64
+ sta player0y
  lda #10
- sta temp6
+ sta player0x
+ tay
 wh_row
- ldy temp6
+ sty temp6
  lda #31
  sta temp3
  lda #0
  ldx #1
  jsr pfhline
- dec temp6
- lda temp6
- cmp #7
+ ldy temp6
+ dey
+ cpy #7
  bne wh_n
- lda #4
- sta temp6
+ ldy #4
 wh_n
- cmp #1
+ cpy #1
  bne wh_row
 end
 __place_walls
