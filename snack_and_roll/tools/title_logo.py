@@ -125,12 +125,9 @@ def asm():
         return f"{label}\n .byte " + ",".join(f"${v:02X}" for v in vals)
 
     out = ["; ---- LOGO: generato da tools/title_logo.py, non modificare a mano ----"]
-    pad = " if * & 8\n ds 16 - (* & 15)\n endif"
-    # disegni doppi (il secondo 8 byte dopo): indirizzo con il bit 3 a 0
+    # disegni doppi (il secondo 8 byte dopo), di seguito nella stessa pagina
     for k, name in ((4, "ro4"), (5, "ro5")):
-        out.append(pad)
         out.append(line(name, [r[k] for r in ro] + [0] + [r[k] for r in rw]))
-    out.append(pad)
     out.append(line("tk_mouth", mouth))
     for k, name in enumerate(["sn0", "sn1", "sn2", "sn3", "sn4", "sn5"]):
         out.append(line(name, [r[k] for r in sn]))

@@ -1147,6 +1147,15 @@ __done
  jmp title_kernel
 end
 __game_screen
+   ; il sacchetto (ball) pulsa: largo 4 e 8 pixel a 8 frame alterni
+   ; (CTRLPF: bit 0 il playfield riflesso del kernel, bit 4-5 la ball)
+   asm
+ lda _frame_counter
+ and #8
+ asl
+ ora #$21
+ sta CTRLPF
+end
    drawscreen
    goto __main_loop
 
@@ -1216,16 +1225,17 @@ tk_os
  ; rimette)
  lda _frame_counter
  and #8
- ora #<tk_mouth
+ clc
+ adc #<tk_mouth
  sta temp2
  lda _frame_counter
  and #16
  lsr
  tax
- ora #<ro4
+ adc #<ro4
  sta temp4
  txa
- ora #<ro5
+ adc #<ro5
  sta f
  lda #>tk_mouth
  sta temp3
@@ -1419,48 +1429,18 @@ tk_p1
 TK_VBLANK = 86
 TK_OVERSCAN = 67
 
-   ; la bocca chiusa e le L piegate sono 8 byte dopo i disegni normali: il
-   ; kernel sceglie con ORA #8, quindi il bit 3 dell'indirizzo deve essere
-   ; 0, e le tre tabelle (ro4, ro5, tk_mouth) stanno nella stessa pagina
-   ; (un solo byte alto); title_logo.py mette i byte di riempimento
- if tk_mouth & 8
-   echo "ERRORE: tk_mouth ha il bit 3 acceso"
-   err
- endif
+   ; la bocca chiusa e le L piegate sono 8 byte dopo i disegni normali e le
+   ; tre tabelle (ro4, ro5, tk_mouth) stanno nella stessa pagina: il kernel
+   ; somma 0 o 8 al byte basso (senza riporto) e usa un solo byte alto
  if (ro4 >> 8) != ((tk_mouth+14) >> 8)
-   echo "ERRORE: tk_mouth attraversa una pagina"
-   err
- endif
- if ro4 & 8
-   echo "ERRORE: ro4 ha il bit 3 acceso"
-   err
- endif
- if (ro4 >> 8) != ((ro4+14) >> 8)
-   echo "ERRORE: ro4 attraversa una pagina"
-   err
- endif
- if ro5 & 8
-   echo "ERRORE: ro5 ha il bit 3 acceso"
-   err
- endif
- if (ro5 >> 8) != ((ro5+14) >> 8)
-   echo "ERRORE: ro5 attraversa una pagina"
+   echo "ERRORE: ro4, ro5 e tk_mouth non stanno nella stessa pagina"
    err
  endif
 ; ---- LOGO: generato da tools/title_logo.py, non modificare a mano ----
- if * & 8
- ds 16 - (* & 15)
- endif
 ro4
  .byte $FB,$C3,$C3,$C3,$C3,$C3,$C3,$00,$FB,$C3,$C3,$C3,$61,$61,$30
- if * & 8
- ds 16 - (* & 15)
- endif
 ro5
  .byte $07,$00,$00,$00,$00,$00,$00,$00,$07,$00,$00,$00,$01,$01,$03
- if * & 8
- ds 16 - (* & 15)
- endif
 tk_mouth
  .byte $7E,$BA,$82,$7C,$00,$00,$00,$00,$7E,$FE,$7E,$00,$00,$00,$00
 sn0
