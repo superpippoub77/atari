@@ -1147,13 +1147,16 @@ __done
  jmp title_kernel
 end
 __game_screen
-   ; il sacchetto (ball) pulsa: largo 4 e 8 pixel a 8 frame alterni
-   ; (CTRLPF: bit 0 il playfield riflesso del kernel, bit 4-5 la ball)
+   ; il sacchetto (ball) lampeggia: largo 8 pixel e quasi spento (1 pixel)
+   ; a 8 frame alterni (CTRLPF: bit 0 il playfield riflesso del kernel,
+   ; bit 4-5 la ball)
    asm
  lda _frame_counter
  and #8
- asl
- ora #$21
+ beq bag_1
+ lda #$30
+bag_1
+ ora #$01
  sta CTRLPF
 end
    drawscreen

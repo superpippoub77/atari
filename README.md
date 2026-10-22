@@ -44,7 +44,7 @@
 > - Zuccherini ben distribuiti: uno per ognuna delle 8 sezioni, su tutta la larghezza dello schermo, sopra e sotto il piano. Ognuno è fuori dagli oggetti indistruttibili oppure dentro una tazza o un muro di cioccolato, da bucare a colpi di cioccolatino.
 > - Si può sparare tenendo premuta una direzione.
 > - **Più suspense**:
->   - *fuga finale*: il sacchetto compare quando hai preso gli 8 zuccherini e colpito almeno una volta la bocca (anche prima); pulsa (largo 4 e 8 pixel) e da lì le bocche vanno al doppio della velocità e la musica raddoppia il ritmo;
+>   - *fuga finale*: il sacchetto compare quando hai preso gli 8 zuccherini e colpito almeno una volta la bocca (anche prima); lampeggia (largo 8 pixel e quasi spento) e da lì le bocche vanno al doppio della velocità e la musica raddoppia il ritmo;
 >   - *tempo in scadenza*: negli ultimi 2 segmenti la barra del tempo lampeggia in rosso, la musica accelera e si sente un battito del cuore;
 >   - *bonus tempo*: a fine livello ogni segmento di tempo rimasto vale 20 punti, contati uno alla volta;
 >   - *fine super potere*: nell'ultimo secondo il biscotto lampeggia più veloce e tre bip avvisano che sta finendo;
