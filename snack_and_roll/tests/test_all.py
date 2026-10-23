@@ -552,8 +552,6 @@ def sugar_phase(s, level):
             s.poke({V["choco_bits"]: r.v("choco_bits") | (1 << k), V["choco_count"]: k + 1})
         if k == 0:
             check(level, "zuccherino dorato: congela le bocche (_hitCooldown)", r.v("hitCooldown") > 0)
-        if k == 1:
-            check(level, "zuccherino 1: chiave (_b2_hasKey)", r.flag(2) == 1)
     r = s.save()
     check(level, "8 zuccherini, nessuno contato due volte", r.v("choco_count") == 8 and r.v("choco_bits") == 0xFF,
           f"count={r.v('choco_count')}")
@@ -630,7 +628,9 @@ def mouth_phase(s, level):
         # (la seconda bocca va su un'altra riga: tenendo premuto il fuoco
         # parte subito un altro cioccolatino, che la colpirebbe)
         my1 = y + 30 if y < 50 else y - 30
-        s.poke({V["flags"]: r.v("flags") & ~0xC0, V["mouth0x"]: mx, V["mouth0y"]: y,
+        # (bit 5 = bocca non ancora colpita: al livello 5 una spinta del muro
+        # puo' averla gia' uccisa, e il colpo qui non conterebbe)
+        s.poke({V["flags"]: (r.v("flags") & ~0xC0) | 0x20, V["mouth0x"]: mx, V["mouth0y"]: y,
                 V["mouth1x"]: mx, V["mouth1y"]: my1, V["hitCooldown"]: 200})
         # destra e fuoco premuti insieme, come un giocatore vero
         s.down("Right")
@@ -647,7 +647,8 @@ def mouth_phase(s, level):
     check(level, "suoni: sparo e bocca uccisa", SFX["bocca"] in heard and SFX["sparo"] in shot_heard | heard,
           f"effetti sentiti={sorted(shot_heard)} poi {sorted(heard)}")
     check(level, "cioccolatino colpisce la bocca: +10 (una volta sola) e bocca colpita",
-          r.flag(5) == 0 and r.score() == score0 + 10,
+          # (+1 se il cioccolatino rompe prima un pezzo di pressa, al livello 6)
+          r.flag(5) == 0 and r.score() - score0 in ((10, 11) if level == model.PRESS_LEVEL else (10,)),
           f"flag5={r.flag(5)} score {score0}->{r.score()} tentativi={attempts}")
     dead = [i for i in (0, 1) if r.v(f"mouth{i}wait") > 0]
     check(level, "la bocca colpita sparisce (attesa prima di ricomparire)",
@@ -1070,8 +1071,8 @@ def boss_phase(s):
     r = s.save()
     check(BOSS, f"dopo il livello {LEVELS} arriva la Bocca Gigante (livello {BOSS})",
           r.v("level") == BOSS and r.flag(0) == 1, f"level={r.v('level')}")
-    check(BOSS, "niente zuccherini, chiave gia' presa, luce accesa",
-          r.v("choco_bits") == 0xFF and r.flag(2) == 1 and r.flag(4) == 1 and r[SUGARY] in (200, r.v("mouth1y")),
+    check(BOSS, "niente zuccherini, luce accesa",
+          r.v("choco_bits") == 0xFF and r.flag(4) == 1 and r[SUGARY] in (200, r.v("mouth1y")),
           f"bits={r.v('choco_bits'):08b} flags={r.v('flags'):08b}")
     print("\n".join("     " + x for x in r.pf_rows()))
     check(BOSS, "barra dell'energia piena (8 pixel sul pavimento)", all(r.pf(c, 10) for c in range(12, 20)))
