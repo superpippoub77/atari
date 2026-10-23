@@ -210,7 +210,7 @@ __reset_title
 __wait_release
    drawscreen
    if switchreset then goto __wait_release
-   return
+   return thisbank
 
 __game_start
    ;flag
@@ -437,7 +437,7 @@ __move_mouth
 
    if !temp6 then _mouth0x=temp3 : _mouth0y=temp4
    if temp6 then _mouth1x=temp3 : _mouth1y=temp4
-   return
+   return thisbank
 __skip_bocche
 
    ;*************************************************************************************************************************
@@ -1050,8 +1050,8 @@ __decrease_health_bar
    ; bonus tempo: ogni segmento rimasto della barra vale 20 punti, contati
    ; uno alla volta con un tic
 __time_bonus
-   if !switchrightb then return
-   if !pfscore1 then return
+   if !switchrightb then return thisbank
+   if !pfscore1 then return thisbank
    pfscore1 = pfscore1 * 2 : score = score + 20
    asm
  lda #4
@@ -1073,7 +1073,7 @@ __bonus_wait
 __kill_mouth
    if !_mouthIndex then _mouth0wait = _Mouth_Respawn : _mouth0y = 200
    if _mouthIndex then _mouth1wait = _Mouth_Respawn : _mouth1y = 200
-   return
+   return thisbank
 
 
    ; effetto sonoro X (se ha priorita' maggiore o uguale a quello in corso)
@@ -1109,20 +1109,25 @@ end
 __skip_to_change
    ; un cioccolatino ancora in volo non passa al livello nuovo (colpirebbe
    ; il piano appena disegnato)
-   missile0y = 200 : _b7_gameMissile0Moving{7} = 0
+   ; (anche il sacchetto via; la bocca da colpire e la luce accesa: bit 5
+   ; e 4 di k, il bit 7 e' _b7_gameMissile0Moving)
+   asm
+ lda #200
+ sta missile0y
+ sta bally
+ lda k
+ and #$7F
+ ora #$30
+ sta k
+end
    pfscorecolor = $08
    scorecolor=(scorecolor + $10) & $F0
    pfscore1=%11111111
    pfscore2=%10101010
-   bally=200
-   missile0y=200
    player0x=10:player0y=64
-   _b5_enablePalyer1{5}=1
-   _b7_gameMissile0Moving{7}=0
    _choco_count=0
    _choco_bits=0
    ; ogni livello parte con la luce accesa, tranne l'ultimo che parte al buio
-   _b4_enableLight{4}=1
    if _level=_Levels then _b4_enableLight{4}=0
    _seconds_counter = 0
    ; velocita' delle bocche: frame per passo dalla tabella, -2 per ogni
@@ -1136,7 +1141,12 @@ __skip_to_change
    gosub __load_level bank2
    ; le variabili usate dal caricamento tornano a fare da contatori
    _mouth0x=20 : _mouth0y=8 : _mouth1x=140 : _mouth1y=90
-   _mouth0wait = 0 : _mouth1wait = 0 : _mouthTick = 0
+   asm
+ lda #0
+ sta _mouth0wait
+ sta _mouth1wait
+ sta _mouthTick
+end
 
 __done
    ; nel titolo lo schermo lo disegna il kernel del logo (qui sotto)
@@ -1190,14 +1200,15 @@ tk_os
  sta VBLANK
  lda #TK_VBLANK
  sta TIM64T
- ; P0 "AN" e poi il biscotto, P1 "D" (poi la bocca), M0 il cioccolatino,
+ ; P0 "A" e mezza N e poi il biscotto, P1 il resto di "AND" (poi la bocca),
+ ; M0 il cioccolatino,
  ; la ball sul terreno alla colonna 13 + 2 * livello
  ldx #0
  stx VDELBL
- lda #72
+ lda #68
  jsr tk_pos
  inx
- lda #88
+ lda #84
  jsr tk_pos
  inx
  lda #144
@@ -1222,27 +1233,30 @@ tk_os
  sta CTRLPF
  sta HMCLR
  ; animazioni di ROLL (puntatori alle tabelle, 8 byte piu' avanti il
- ; secondo disegno): la bocca mastica (ogni 8 frame), le due L ondeggiano
- ; al vento (cime piegate per 16 frame su 48). Il puntatore della seconda
- ; L sta in f-g (_mouth0x, _speed: nel titolo non servono, il livello li
- ; rimette)
+ ; secondo disegno): la bocca mastica (ogni 8 frame; i suoi colori per
+ ; riga 16 byte dopo il disegno), le due L ondeggiano al vento (cime
+ ; piegate per 16 frame su 48). Il puntatore della seconda L sta in f-g
+ ; (_mouth0x, _speed: nel titolo non servono, il livello li rimette)
  lda _frame_counter
  and #8
  clc
  adc #<tk_mouth
- sta temp2
+ sta temp1
+ adc #16
+ sta temp3
  lda _frame_counter
  and #16
  lsr
  tax
  adc #<ro4
- sta temp4
+ sta temp5
  txa
  adc #<ro5
  sta f
  lda #>tk_mouth
- sta temp3
- sta temp5
+ sta temp2
+ sta temp4
+ sta temp6
  sta g
 tk_vb
  lda INTIM
@@ -1305,8 +1319,6 @@ tk_b
  sta HMOVE
  lda #$2C
  sta COLUP0
- lda #$48
- sta COLUP1
  lda #$66
  sta COLUPF
  ; il biscotto guarda a destra e a sinistra (specchiato a secondi alterni)
@@ -1316,31 +1328,36 @@ tk_b
  asl
  sta REFP0
  ; ---- ROLL: R e LL nel playfield (PF0 vuoto), sprite per riga ----
- ldx #55
+ ; (Y la riga, X le 8 linee della riga; il colore della bocca cambia a
+ ; ogni riga; il cioccolatino nelle 3 righe in basso: con Y < 3 il
+ ; carry e' spento e 0 - 0 - 1 = $FF accende ENAM0)
+ ldy #6
+tk_c0
+ ldx #8
 tk_c
  sta WSYNC
- txa
- lsr
- lsr
- lsr
- tay
- lda (temp2),y
+ lda (temp3),y
+ sta COLUP1
+ lda (temp1),y
  sta GRP1
- sta temp1
  lda #1
  sta PF1
  lda ro2,y
  sta PF2
  lda tk_cookie,y
  sta GRP0
- lda (temp4),y
+ lda (temp5),y
  sta PF1
  lda (f),y
  sta PF2
- lda temp1
+ cpy #3
+ lda #0
+ sbc #0
  sta ENAM0
  dex
- bpl tk_c
+ bne tk_c
+ dey
+ bpl tk_c0
  jsr tk_pfoff
  ; ---- terreno giallo, la ball sopra e' il livello scelto con Select ----
  lda #$2A
@@ -1433,9 +1450,9 @@ TK_VBLANK = 86
 TK_OVERSCAN = 67
 
    ; la bocca chiusa e le L piegate sono 8 byte dopo i disegni normali e le
-   ; tre tabelle (ro4, ro5, tk_mouth) stanno nella stessa pagina: il kernel
+   ; tre tabelle (ro4, ro5, tk_mouth con i colori) stanno nella stessa pagina: il kernel
    ; somma 0 o 8 al byte basso (senza riporto) e usa un solo byte alto
- if (ro4 >> 8) != ((tk_mouth+14) >> 8)
+ if (ro4 >> 8) != ((tk_mouth+30) >> 8)
    echo "ERRORE: ro4, ro5 e tk_mouth non stanno nella stessa pagina"
    err
  endif
@@ -1445,7 +1462,7 @@ ro4
 ro5
  .byte $07,$00,$00,$00,$00,$00,$00,$00,$07,$00,$00,$00,$01,$01,$03
 tk_mouth
- .byte $7E,$BA,$82,$7C,$00,$00,$00,$00,$7E,$FE,$7E,$00,$00,$00,$00
+ .byte $7E,$FF,$24,$81,$5A,$FF,$66,$00,$00,$7E,$FF,$7E,$FF,$66,$00,$00,$4A,$4A,$0E,$4A,$0E,$4A,$4A,$00,$4A,$4A,$4A,$0E,$4A,$4A,$4A
 sn0
  .byte $00,$E0,$00,$F0,$00,$E0,$00
 sn1
@@ -1463,9 +1480,9 @@ ro2
 tk_cookie
  .byte $00,$3C,$7E,$EB,$EB,$7E,$3C
 tk_an
- .byte $A9,$A9,$EB,$AD,$49
+ .byte $A4,$A4,$E5,$A6,$44
 tk_d
- .byte $E0,$90,$90,$90,$E0
+ .byte $9C,$92,$92,$92,$9C
 tk_line
  .byte $00,$00,$3F,$00,$00
 tk_by

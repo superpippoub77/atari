@@ -6,7 +6,7 @@ a destra, senza riflesso) e scrive le tabelle per il kernel:
 
   SNACK   7 righe (8 linee ciascuna): 6 registri per riga, giallo sfumato,
           con le righe di velocita' a sinistra
-  AND     sprite bianchi (player 0 = "AN", player 1 = "D", larghi il
+  AND     sprite bianchi (player 0 = "A" e mezza N, player 1 il resto, larghi il
           doppio) fra due righe rosse del playfield
   ROLL    7 righe rosse: R e LL nel playfield, la O e' il biscotto
           (player 0), a sinistra la bocca (player 1), a destra il
@@ -75,21 +75,27 @@ for c in range(30, 35):
     ROLL_WIND[6][c] = "X"
 
 # sprite (8 pixel, larghi il doppio), una riga per riga del logo: dall'alto
-AN = [".X..X..X", "X.X.XX.X", "XXX.X.XX", "X.X.X..X", "X.X.X..X"]     # righe da 4 linee
-D = ["XXX.....", "X..X....", "X..X....", "X..X....", "XXX....."]
+# "AND" su 16 colonne (player 0 le prime 8, player 1 le altre, attaccati):
+# A, N e D separate da 2 colonne vuote
+AND = [".X...X..X..XXX..", "X.X..XX.X..X..X.", "XXX..X.XX..X..X.", "X.X..X..X..X..X.", "X.X..X..X..XXX.."]
+AN = [r[:8] for r in AND]     # righe da 4 linee
+D = [r[8:16] for r in AND]
 LINE = [0, 0, 0x3F, 0, 0]
 # firma sotto il terreno: "by" (player 0) e "FM" (player 1, la F larga 2)
 BY = ["X.......", "X...X.X.", "XXX.X.X.", "X.X..X..", "XXX.X..."]
 FM = ["XX.X...X", "X..XX.XX", "XX.X.X.X", "X..X...X", "X..X...X"]          # riga rossa (PF1; PF2 = PF1 & 7) a meta' di AND
 COOKIE = ["..XXXX..", ".XXXXXX.", "XXX.X.XX", "XXX.X.XX", ".XXXXXX.", "..XXXX..", "........"]
-# bocca: il pixel 6 (bit 1) fa anche da cioccolatino (ENAM0 = la stessa
-# riga della bocca), acceso nelle 3 righe in basso
-MOUTH = ["........", "........", "........", ".XXXXX..", "X.....X.", "X.XXX.X.", ".XXXXXX."]
-CHOC = [2 if len(m) > 6 and m[6] == "X" else 0 for m in MOUTH]
-# secondo disegno della bocca (chiusa a meta'): stesso pixel 6, cosi' il
-# cioccolatino non cambia; il kernel lo legge 8 byte dopo il primo
-MOUTH2 = ["........", "........", "........", "........", ".XXXXXX.", "XXXXXXX.", ".XXXXXX."]
-assert [2 if m[6] == "X" else 0 for m in MOUTH2] == CHOC
+# bocca come quella del gioco (labbro di sopra a cuore), piu' grande, con i
+# denti bianchi: un colore per riga (labbra arancioni come la bocca del
+# gioco, denti bianchi). Il cioccolatino (missile 0) e' acceso dal kernel
+# nelle 3 righe in basso
+LIP, TOOTH = 0x4A, 0x0E
+MOUTH = [".XX..XX.", "XXXXXXXX", ".X.XX.X.", "X......X", "..X..X..", "XXXXXXXX", ".XXXXXX."]
+MOUTH_COL = [LIP, LIP, TOOTH, LIP, TOOTH, LIP, LIP]
+# chiusa (mastica): le labbra si avvicinano e stringono i denti
+MOUTH2 = ["........", ".XX..XX.", "XXXXXXXX", ".XXXXXX.", "XXXXXXXX", ".XXXXXX.", "........"]
+MOUTH2_COL = [LIP, LIP, LIP, TOOTH, LIP, LIP, LIP]
+CHOC = [0, 0, 0, 0, 1, 1, 1]
 
 
 def pf_bytes(row):
@@ -115,7 +121,8 @@ def tables():
     for r in ro:
         assert r[0] == 0 and r[3] == 0, "ROLL non deve usare PF0"
     rows = lambda spr: [bits(x) for x in spr][::-1]
-    return sn, ro, rw, rows(COOKIE), rows(MOUTH) + [0] + rows(MOUTH2), CHOC[::-1], rows(AN), rows(D), LINE[::-1], rows(BY), rows(FM)
+    mouth = rows(MOUTH) + [0] + rows(MOUTH2) + [0] + MOUTH_COL[::-1] + [0] + MOUTH2_COL[::-1]
+    return sn, ro, rw, rows(COOKIE), mouth, CHOC[::-1], rows(AN), rows(D), LINE[::-1], rows(BY), rows(FM)
 
 
 def asm():
@@ -125,7 +132,8 @@ def asm():
         return f"{label}\n .byte " + ",".join(f"${v:02X}" for v in vals)
 
     out = ["; ---- LOGO: generato da tools/title_logo.py, non modificare a mano ----"]
-    # disegni doppi (il secondo 8 byte dopo), di seguito nella stessa pagina
+    # disegni doppi (il secondo 8 byte dopo), di seguito nella stessa pagina;
+    # la bocca ha poi i colori per riga (16 byte dopo i disegni)
     for k, name in ((4, "ro4"), (5, "ro5")):
         out.append(line(name, [r[k] for r in ro] + [0] + [r[k] for r in rw]))
     out.append(line("tk_mouth", mouth))
@@ -157,7 +165,7 @@ def preview(path):
             if SNACK[r][c] == "X":
                 d.rectangle([4 * c, y0 + r * L, 4 * c + 3, y0 + r * L + L - 1], fill=yel[r])
     y1 = y0 + 7 * L + 6
-    for spr, x in ((AN, 72), (D, 88)):
+    for spr, x in ((AN, 68), (D, 84)):
         for i, row in enumerate(spr):
             for k, ch in enumerate(row):
                 if ch == "X":
@@ -169,7 +177,8 @@ def preview(path):
         for c in range(40):
             if ROLL[r][c] == "X":
                 d.rectangle([4 * c, y2 + r * L, 4 * c + 3, y2 + r * L + L - 1], fill=red)
-        for spr, x, col in ((COOKIE, 72, cook), (MOUTH, 16, mouthc)):
+        tooth = MOUTH_COL[r] == TOOTH
+        for spr, x, col in ((COOKIE, 72, cook), (MOUTH, 16, white if tooth else mouthc)):
             for k, ch in enumerate(spr[r]):
                 if ch == "X":
                     d.rectangle([x + 2 * k, y2 + r * L, x + 2 * k + 1, y2 + r * L + L - 1], fill=col)
