@@ -3163,7 +3163,7 @@
    1864  13f3		       48		      pha
    1865  13f4		       a9 fd		      lda	#>(.__play_sfx-1)
    1866  13f6		       48		      pha
-   1867  13f7		       a9 5e		      lda	#<(.__play_sfx-1)
+   1867  13f7		       a9 64		      lda	#<(.__play_sfx-1)
    1868  13f9		       48		      pha
    1869  13fa		       a5 ee		      lda	temp7
    1870  13fc		       48		      pha
@@ -4012,7 +4012,7 @@
    2713  16dc		       48		      pha
    2714  16dd		       a9 fb		      lda	#>(.__piano_hit-1)
    2715  16df		       48		      pha
-   2716  16e0		       a9 d7		      lda	#<(.__piano_hit-1)
+   2716  16e0		       a9 dd		      lda	#<(.__piano_hit-1)
    2717  16e2		       48		      pha
    2718  16e3		       a5 ee		      lda	temp7
    2719  16e5		       48		      pha
@@ -4259,7 +4259,7 @@
    2960  17aa		       a5 d6		      LDA	_frame_counter
    2961  17ac		       f0 0c		      BEQ	.skipL0243
    2962  17ae				   .condpart105
-   2963  17ae		       a2 06		      LDX	#<player105then_0
+   2963  17ae		       a2 0c		      LDX	#<player105then_0
    2964  17b0		       86 8a		      STX	player0pointerlo
    2965  17b2		       a9 ff		      LDA	#>player105then_0
    2966  17b4		       85 8b		      STA	player0pointerhi
@@ -4305,7 +4305,7 @@
    3006  17dc		       29 07		      AND	#7
    3007  17de		       d0 0c		      BNE	.skipL0245
    3008  17e0				   .condpart111
-   3009  17e0		       a2 0a		      LDX	#<player111then_0
+   3009  17e0		       a2 10		      LDX	#<player111then_0
    3010  17e2		       86 8a		      STX	player0pointerlo
    3011  17e4		       a9 ff		      LDA	#>player111then_0
    3012  17e6		       85 8b		      STA	player0pointerhi
@@ -4344,7 +4344,7 @@
    3045  17fc		       29 07		      AND	#7
    3046  17fe		       d0 0c		      BNE	.skipL0247
    3047  1800				   .condpart114
-   3048  1800		       a2 0e		      LDX	#<player114then_1
+   3048  1800		       a2 14		      LDX	#<player114then_1
    3049  1802		       86 8c		      STX	player1pointerlo
    3050  1804		       a9 ff		      LDA	#>player114then_1
    3051  1806		       85 8d		      STA	player1pointerhi
@@ -4362,7 +4362,7 @@
    3063  1810		       c9 00		      CMP	#0
    3064  1812		       f0 0c		      BEQ	.skipL0248
    3065  1814				   .condpart115
-   3066  1814		       a2 12		      LDX	#<player115then_1
+   3066  1814		       a2 18		      LDX	#<player115then_1
    3067  1816		       86 8c		      STX	player1pointerlo
    3068  1818		       a9 ff		      LDA	#>player115then_1
    3069  181a		       85 8d		      STA	player1pointerhi
@@ -4671,7 +4671,7 @@
    3372  191c		       48		      pha
    3373  191d		       a9 fc		      lda	#>(.__push_wall-1)
    3374  191f		       48		      pha
-   3375  1920		       a9 25		      lda	#<(.__push_wall-1)
+   3375  1920		       a9 2b		      lda	#<(.__push_wall-1)
    3376  1922		       48		      pha
    3377  1923		       a5 ee		      lda	temp7
    3378  1925		       48		      pha
@@ -4812,7 +4812,7 @@
    3513  19a2		       48		      pha
    3514  19a3		       a9 fc		      lda	#>(.__push_wall-1)
    3515  19a5		       48		      pha
-   3516  19a6		       a9 25		      lda	#<(.__push_wall-1)
+   3516  19a6		       a9 2b		      lda	#<(.__push_wall-1)
    3517  19a8		       48		      pha
    3518  19a9		       a5 ee		      lda	temp7
    3519  19ab		       48		      pha
@@ -5344,7 +5344,7 @@
    4045  1af9		       48		      pha
    4046  1afa		       a9 fb		      lda	#>(.__boss_hit-1)
    4047  1afc		       48		      pha
-   4048  1afd		       a9 8c		      lda	#<(.__boss_hit-1)
+   4048  1afd		       a9 92		      lda	#<(.__boss_hit-1)
    4049  1aff		       48		      pha
    4050  1b00		       a5 ee		      lda	temp7
    4051  1b02		       48		      pha
@@ -8640,7 +8640,7 @@
    7180  24d8
    7181  24d8				   .L0365		;;line 1555;;	player1:
    7182  24d8
-   7183  24d8		       a2 16		      LDX	#<playerL0365_1
+   7183  24d8		       a2 1c		      LDX	#<playerL0365_1
    7184  24da		       86 8c		      STX	player1pointerlo
    7185  24dc		       a9 ff		      LDA	#>playerL0365_1
    7186  24de		       85 8d		      STA	player1pointerhi
@@ -8936,7 +8936,7 @@
    7476  25b1
    7477  25b1		       aa		      tax
    7478  25b2
-   7479  25b2		       bd ce fe 	      lda	objects,x
+   7479  25b2		       bd d4 fe 	      lda	objects,x
    7480  25b5
    7481  25b5		       25 e5		      and	_current_bit_object
    7482  25b7
@@ -9021,7 +9021,7 @@
    7561  25f0		       69 07		      ADC	#7
    7562  25f2		       85 9d		      STA	temp2
    7563  25f4		       a6 9d		      LDX	temp2
-   7564  25f6		       bd ce fe 	      LDA	objects,x
+   7564  25f6		       bd d4 fe 	      LDA	objects,x
    7565  25f9		       85 e8		      STA	_ballx
    7566  25fb				   .
    7567  25fb							;;line 1711;;
@@ -9036,7 +9036,7 @@
    7576  25fe		       69 06		      ADC	#6
    7577  2600		       85 9d		      STA	temp2
    7578  2602		       a6 9d		      LDX	temp2
-   7579  2604		       bd ce fe 	      LDA	objects,x
+   7579  2604		       bd d4 fe 	      LDA	objects,x
    7580  2607		       85 9f		      STA	temp4
    7581  2609				   .L0380		;;line 1714;;	callmacro divisor
    7582  2609
@@ -9676,7 +9676,7 @@
    8012  281a				   .L0419		;;line 1865;;	temp4 = objects[temp2]
    8013  281a
    8014  281a		       a6 9d		      LDX	temp2
-   8015  281c		       bd ce fe 	      LDA	objects,x
+   8015  281c		       bd d4 fe 	      LDA	objects,x
    8016  281f		       85 9f		      STA	temp4
    8017  2821				   .L0420		;;line 1866;;	temp5 = 4  :  temp6 = 2
    8018  2821
@@ -9822,7 +9822,7 @@
    8158  2893		       c9 07		      CMP	#_Boss
    8159  2895		       d0 03		      BNE	.skipL0432
    8160  2897				   .condpart176
-   8161  2897		       4c 03 fa 	      jmp	.__boss
+   8161  2897		       4c 09 fa 	      jmp	.__boss
    8162  289a				   .skipL0432
    8163  289a				   .
    8164  289a							;;line 1901;;
@@ -9858,7 +9858,7 @@
    8194  28af				   .L0436		;;line 1908;;	temp4 = objects[temp2]
    8195  28af
    8196  28af		       a6 9d		      LDX	temp2
-   8197  28b1		       bd ce fe 	      LDA	objects,x
+   8197  28b1		       bd d4 fe 	      LDA	objects,x
    8198  28b4		       85 9f		      STA	temp4
    8199  28b6				   .L0437		;;line 1909;;	temp5 = 3  :  temp6 = 0
    8200  28b6
@@ -9883,7 +9883,7 @@
    8219  28c7		       29 01		      AND	#1
    8220  28c9		       d0 03		      BNE	.skipL0439
    8221  28cb				   .condpart178
-   8222  28cb		       4c e6 f9 	      jmp	.__drop_next
+   8222  28cb		       4c ec f9 	      jmp	.__drop_next
    8223  28ce				   .skipL0439
    8224  28ce				   .L0440		;;line 1913;;	asm
    8225  28ce
@@ -9897,7 +9897,7 @@
    8233  28d6
    8234  28d6		       f0 03		      beq	drop_turn
    8235  28d8
-   8236  28d8		       4c e6 f9 	      jmp	.__drop_next
+   8236  28d8		       4c ec f9 	      jmp	.__drop_next
    8237  28db
    8238  28db				   drop_turn
    8239  28db
@@ -9907,7 +9907,7 @@
    8243  28dd		       c9 06		      CMP	#_Levels
    8244  28df		       d0 03		      BNE	.skipL0441
    8245  28e1				   .condpart179
-   8246  28e1		       4c 61 f9 	      jmp	.__press
+   8246  28e1		       4c 67 f9 	      jmp	.__press
    8247  28e4				   .skipL0441
    8248  28e4				   .L0442		;;line 1923;;	temp1 = temp6  +  4
    8249  28e4
@@ -9947,7 +9947,7 @@
    8283  2906
    8284  2906		       aa		      tax
    8285  2907
-   8286  2907		       bd aa fe 	      lda	dropy,x
+   8286  2907		       bd b0 fe 	      lda	dropy,x
    8287  290a
    8288  290a		       85 9c		      sta	temp1
    8289  290c
@@ -9965,7 +9965,7 @@
    8301  2919		       20 bb f2 	      jsr	pfpixel
    8302  291c				   .L0447		;;line 1941;;	goto __drop_next
    8303  291c
-   8304  291c		       4c e6 f9 	      jmp	.__drop_next
+   8304  291c		       4c ec f9 	      jmp	.__drop_next
    8305  291f				   .
    8306  291f							;;line 1942;;
    8307  291f
@@ -10032,7 +10032,7 @@
    8368  2937
    8369  2937		       a8		      tay
    8370  2938
-   8371  2938		       b9 5c f9 	      lda	pdist,y
+   8371  2938		       b9 62 f9 	      lda	pdist,y
    8372  293b
    8373  293b		       a0 00		      ldy	#0
    8374  293d
@@ -10040,7 +10040,7 @@
    8376  293f
    8377  293f		       f0 05		      beq	pd_head
    8378  2941
-   8379  2941		       b0 05		      bcs	pd_set
+   8379  2941		       b0 0b		      bcs	pd_set
    8380  2943
    8381  2943		       a0 40		      ldy	#$40
    8382  2945
@@ -10050,2453 +10050,2459 @@
    8386  2946
    8387  2946		       a0 e0		      ldy	#$E0
    8388  2948
-   8389  2948				   pd_set
-   8390  2948
-   8391  2948		       84 9d		      sty	temp2
-   8392  294a
-   8393  294a		       b5 a4		      lda	playfield,x
-   8394  294c
-   8395  294c		       29 1f		      and	#$1F
+   8389  2948		       e0 12		      cpx	#18
+   8390  294a
+   8391  294a		       d0 02		      bne	pd_set
+   8392  294c
+   8393  294c		       a0 40		      ldy	#$40
+   8394  294e
+   8395  294e				   pd_set
    8396  294e
-   8397  294e		       05 9d		      ora	temp2
+   8397  294e		       84 9d		      sty	temp2
    8398  2950
-   8399  2950		       95 a4		      sta	playfield,x
+   8399  2950		       b5 a4		      lda	playfield,x
    8400  2952
-   8401  2952		       8a		      txa
-   8402  2953
-   8403  2953		       38		      sec
-   8404  2954
-   8405  2954		       e9 04		      sbc	#4
-   8406  2956
-   8407  2956		       aa		      tax
-   8408  2957
-   8409  2957		       b0 db		      bcs	pd_loop
-   8410  2959
-   8411  2959		       4c e6 f9 	      jmp	.__drop_next
+   8401  2952		       29 1f		      and	#$1F
+   8402  2954
+   8403  2954		       05 9d		      ora	temp2
+   8404  2956
+   8405  2956		       95 a4		      sta	playfield,x
+   8406  2958
+   8407  2958		       8a		      txa
+   8408  2959
+   8409  2959		       38		      sec
+   8410  295a
+   8411  295a		       e9 04		      sbc	#4
    8412  295c
-   8413  295c				   pdist
-   8414  295c
-   8415  295c		       00 01 02 01*	      .byte.b	0,1,2,1,0
-   8416  2961
-   8417  2961				   .
-   8418  2961							;;line 1998;;
-   8419  2961
-   8420  2961				   .
-   8421  2961							;;line 1999;;
-   8422  2961
-   8423  2961				   .
-   8424  2961							;;line 2000;;
-   8425  2961
-   8426  2961				   .
-   8427  2961							;;line 2001;;
-   8428  2961
-   8429  2961				   .
-   8430  2961							;;line 2002;;
-   8431  2961
-   8432  2961				   .
-   8433  2961							;;line 2003;;
-   8434  2961
-   8435  2961				   .
-   8436  2961							;;line 2004;;
-   8437  2961
-   8438  2961				   .
-   8439  2961							;;line 2005;;
-   8440  2961
-   8441  2961				   .
-   8442  2961							;;line 2006;;
-   8443  2961
-   8444  2961				   .
-   8445  2961							;;line 2007;;
-   8446  2961
-   8447  2961				   .
-   8448  2961							;;line 2008;;
-   8449  2961
-   8450  2961				   .
-   8451  2961							;;line 2009;;
-   8452  2961
-   8453  2961				   .
-   8454  2961							;;line 2010;;
-   8455  2961
-   8456  2961				   .__press
-   8457  2961							;;line 2011;; __press
-   8458  2961
-   8459  2961				   .L0449		;;line 2012;;	asm
-   8460  2961
-   8461  2961		       a9 01		      lda	#1
-   8462  2963
-   8463  2963		       20 1f f9 	      jsr	tick16
-   8464  2966
-   8465  2966		       85 9c		      sta	temp1
-   8466  2968
-   8467  2968		       a5 a0		      lda	temp5
-   8468  296a
-   8469  296a		       29 03		      and	#3
+   8413  295c		       aa		      tax
+   8414  295d
+   8415  295d		       b0 d5		      bcs	pd_loop
+   8416  295f
+   8417  295f		       4c ec f9 	      jmp	.__drop_next
+   8418  2962
+   8419  2962				   pdist
+   8420  2962
+   8421  2962		       00 01 02 01*	      .byte.b	0,1,2,1,0
+   8422  2967
+   8423  2967				   .
+   8424  2967							;;line 2001;;
+   8425  2967
+   8426  2967				   .
+   8427  2967							;;line 2002;;
+   8428  2967
+   8429  2967				   .
+   8430  2967							;;line 2003;;
+   8431  2967
+   8432  2967				   .
+   8433  2967							;;line 2004;;
+   8434  2967
+   8435  2967				   .
+   8436  2967							;;line 2005;;
+   8437  2967
+   8438  2967				   .
+   8439  2967							;;line 2006;;
+   8440  2967
+   8441  2967				   .
+   8442  2967							;;line 2007;;
+   8443  2967
+   8444  2967				   .
+   8445  2967							;;line 2008;;
+   8446  2967
+   8447  2967				   .
+   8448  2967							;;line 2009;;
+   8449  2967
+   8450  2967				   .
+   8451  2967							;;line 2010;;
+   8452  2967
+   8453  2967				   .
+   8454  2967							;;line 2011;;
+   8455  2967
+   8456  2967				   .
+   8457  2967							;;line 2012;;
+   8458  2967
+   8459  2967				   .
+   8460  2967							;;line 2013;;
+   8461  2967
+   8462  2967				   .__press
+   8463  2967							;;line 2014;; __press
+   8464  2967
+   8465  2967				   .L0449		;;line 2015;;	asm
+   8466  2967
+   8467  2967		       a9 01		      lda	#1
+   8468  2969
+   8469  2969		       20 1f f9 	      jsr	tick16
    8470  296c
-   8471  296c		       18		      clc
-   8472  296d
-   8473  296d		       65 9c		      adc	temp1
-   8474  296f
-   8475  296f		       aa		      tax
-   8476  2970
-   8477  2970
-   8478  2970
-   8479  2970		       a5 a1		      lda	temp6
-   8480  2972
-   8481  2972		       d0 0f		      bne	pr_norm
-   8482  2974
-   8483  2974		       a5 a0		      lda	temp5
+   8471  296c		       85 9c		      sta	temp1
+   8472  296e
+   8473  296e		       a5 a0		      lda	temp5
+   8474  2970
+   8475  2970		       29 03		      and	#3
+   8476  2972
+   8477  2972		       18		      clc
+   8478  2973
+   8479  2973		       65 9c		      adc	temp1
+   8480  2975
+   8481  2975		       aa		      tax
+   8482  2976
+   8483  2976
    8484  2976
-   8485  2976		       c9 11		      cmp	#17
+   8485  2976		       a5 a1		      lda	temp6
    8486  2978
-   8487  2978		       d0 09		      bne	pr_norm
+   8487  2978		       d0 0f		      bne	pr_norm
    8488  297a
-   8489  297a		       bd b6 fe 	      lda	presslen,x
-   8490  297d
-   8491  297d		       4a		      lsr
+   8489  297a		       a5 a0		      lda	temp5
+   8490  297c
+   8491  297c		       c9 11		      cmp	#17
    8492  297e
-   8493  297e		       85 9c		      sta	temp1
+   8493  297e		       d0 09		      bne	pr_norm
    8494  2980
-   8495  2980		       4c 32 f9 	      jmp	press_double
+   8495  2980		       bd bc fe 	      lda	presslen,x
    8496  2983
-   8497  2983				   pr_norm
-   8498  2983
-   8499  2983		       bd c2 fe 	      lda	pressold,x
+   8497  2983		       4a		      lsr
+   8498  2984
+   8499  2984		       85 9c		      sta	temp1
    8500  2986
-   8501  2986		       18		      clc
-   8502  2987
-   8503  2987		       65 a1		      adc	temp6
+   8501  2986		       4c 32 f9 	      jmp	press_double
+   8502  2989
+   8503  2989				   pr_norm
    8504  2989
-   8505  2989		       48		      pha
-   8506  298a
-   8507  298a		       bd b6 fe 	      lda	presslen,x
+   8505  2989		       bd c8 fe 	      lda	pressold,x
+   8506  298c
+   8507  298c		       18		      clc
    8508  298d
-   8509  298d		       18		      clc
-   8510  298e
-   8511  298e		       65 a1		      adc	temp6
+   8509  298d		       65 a1		      adc	temp6
+   8510  298f
+   8511  298f		       48		      pha
    8512  2990
-   8513  2990		       48		      pha
-   8514  2991
-   8515  2991		       ba		      tsx
-   8516  2992
-   8517  2992		       dd 02 01 	      cmp	$0102,x
-   8518  2995
-   8519  2995		       f0 4d		      beq	press_done
+   8513  2990		       bd bc fe 	      lda	presslen,x
+   8514  2993
+   8515  2993		       18		      clc
+   8516  2994
+   8517  2994		       65 a1		      adc	temp6
+   8518  2996
+   8519  2996		       48		      pha
    8520  2997
-   8521  2997		       bd 02 01 	      lda	$0102,x
-   8522  299a
-   8523  299a		       a8		      tay
+   8521  2997		       ba		      tsx
+   8522  2998
+   8523  2998		       dd 02 01 	      cmp	$0102,x
    8524  299b
-   8525  299b		       a6 a0		      ldx	temp5
+   8525  299b		       f0 4d		      beq	press_done
    8526  299d
-   8527  299d		       e8		      inx
-   8528  299e
-   8529  299e		       86 9e		      stx	temp3
-   8530  29a0
-   8531  29a0		       a2 01		      ldx	#1
-   8532  29a2
-   8533  29a2		       a5 a0		      lda	temp5
+   8527  299d		       bd 02 01 	      lda	$0102,x
+   8528  29a0
+   8529  29a0		       a8		      tay
+   8530  29a1
+   8531  29a1		       a6 a0		      ldx	temp5
+   8532  29a3
+   8533  29a3		       e8		      inx
    8534  29a4
-   8535  29a4		       38		      sec
-   8536  29a5
-   8537  29a5		       e9 01		      sbc	#1
-   8538  29a7
-   8539  29a7		       20 eb f2 	      jsr	pfhline
+   8535  29a4		       86 9e		      stx	temp3
+   8536  29a6
+   8537  29a6		       a2 01		      ldx	#1
+   8538  29a8
+   8539  29a8		       a5 a0		      lda	temp5
    8540  29aa
-   8541  29aa		       ba		      tsx
+   8541  29aa		       38		      sec
    8542  29ab
-   8543  29ab		       bd 01 01 	      lda	$0101,x
-   8544  29ae
-   8545  29ae		       dd 02 01 	      cmp	$0102,x
-   8546  29b1
-   8547  29b1		       90 0e		      bcc	press_up
-   8548  29b3
-   8549  29b3		       85 9e		      sta	temp3
-   8550  29b5
-   8551  29b5		       a4 a1		      ldy	temp6
+   8543  29ab		       e9 01		      sbc	#1
+   8544  29ad
+   8545  29ad		       20 eb f2 	      jsr	pfhline
+   8546  29b0
+   8547  29b0		       ba		      tsx
+   8548  29b1
+   8549  29b1		       bd 01 01 	      lda	$0101,x
+   8550  29b4
+   8551  29b4		       dd 02 01 	      cmp	$0102,x
    8552  29b7
-   8553  29b7		       a2 00		      ldx	#0
+   8553  29b7		       90 0e		      bcc	press_up
    8554  29b9
-   8555  29b9		       a5 a0		      lda	temp5
+   8555  29b9		       85 9e		      sta	temp3
    8556  29bb
-   8557  29bb		       20 02 f3 	      jsr	pfvline
-   8558  29be
-   8559  29be		       4c d1 f9 	      jmp	press_head
-   8560  29c1
-   8561  29c1				   press_up
+   8557  29bb		       a4 a1		      ldy	temp6
+   8558  29bd
+   8559  29bd		       a2 00		      ldx	#0
+   8560  29bf
+   8561  29bf		       a5 a0		      lda	temp5
    8562  29c1
-   8563  29c1		       bd 02 01 	      lda	$0102,x
+   8563  29c1		       20 02 f3 	      jsr	pfvline
    8564  29c4
-   8565  29c4		       85 9e		      sta	temp3
-   8566  29c6
-   8567  29c6		       bc 01 01 	      ldy	$0101,x
-   8568  29c9
-   8569  29c9		       c8		      iny
+   8565  29c4		       4c d7 f9 	      jmp	press_head
+   8566  29c7
+   8567  29c7				   press_up
+   8568  29c7
+   8569  29c7		       bd 02 01 	      lda	$0102,x
    8570  29ca
-   8571  29ca		       a2 01		      ldx	#1
+   8571  29ca		       85 9e		      sta	temp3
    8572  29cc
-   8573  29cc		       a5 a0		      lda	temp5
-   8574  29ce
-   8575  29ce		       20 02 f3 	      jsr	pfvline
-   8576  29d1
-   8577  29d1				   press_head
-   8578  29d1
-   8579  29d1		       ba		      tsx
-   8580  29d2
-   8581  29d2		       bc 01 01 	      ldy	$0101,x
-   8582  29d5
-   8583  29d5		       a6 a0		      ldx	temp5
+   8573  29cc		       bc 01 01 	      ldy	$0101,x
+   8574  29cf
+   8575  29cf		       c8		      iny
+   8576  29d0
+   8577  29d0		       a2 01		      ldx	#1
+   8578  29d2
+   8579  29d2		       a5 a0		      lda	temp5
+   8580  29d4
+   8581  29d4		       20 02 f3 	      jsr	pfvline
+   8582  29d7
+   8583  29d7				   press_head
    8584  29d7
-   8585  29d7		       e8		      inx
+   8585  29d7		       ba		      tsx
    8586  29d8
-   8587  29d8		       86 9e		      stx	temp3
-   8588  29da
-   8589  29da		       a2 00		      ldx	#0
-   8590  29dc
-   8591  29dc		       a5 a0		      lda	temp5
+   8587  29d8		       bc 01 01 	      ldy	$0101,x
+   8588  29db
+   8589  29db		       a6 a0		      ldx	temp5
+   8590  29dd
+   8591  29dd		       e8		      inx
    8592  29de
-   8593  29de		       38		      sec
-   8594  29df
-   8595  29df		       e9 01		      sbc	#1
-   8596  29e1
-   8597  29e1		       20 eb f2 	      jsr	pfhline
+   8593  29de		       86 9e		      stx	temp3
+   8594  29e0
+   8595  29e0		       a2 00		      ldx	#0
+   8596  29e2
+   8597  29e2		       a5 a0		      lda	temp5
    8598  29e4
-   8599  29e4				   press_done
-   8600  29e4
-   8601  29e4		       68		      pla
-   8602  29e5
-   8603  29e5		       68		      pla
-   8604  29e6
-   8605  29e6				   press_skip
-   8606  29e6
-   8607  29e6				   .__drop_next
-   8608  29e6							;;line 2087;; __drop_next
-   8609  29e6
-   8610  29e6				   .L0450		;;line 2088;;	temp4 = temp4  /  2
-   8611  29e6
-   8612  29e6		       a5 9f		      LDA	temp4
-   8613  29e8		       4a		      lsr
-   8614  29e9		       85 9f		      STA	temp4
-   8615  29eb				   .L0451		;;line 2089;;	temp5 = temp5  +  7
-   8616  29eb
-   8617  29eb		       a5 a0		      LDA	temp5
-   8618  29ed		       18		      CLC
-   8619  29ee		       69 07		      ADC	#7
-   8620  29f0		       85 a0		      STA	temp5
-   8621  29f2				   .L0452		;;line 2090;;	if temp5 = 31 then temp5 = 3  :  temp6 = 6
-   8622  29f2
-   8623  29f2		       a5 a0		      LDA	temp5
-   8624  29f4		       c9 1f		      CMP	#31
-   8625  29f6		       d0 08		      BNE	.skipL0452
-   8626  29f8				   .condpart180
-   8627  29f8		       a9 03		      LDA	#3
-   8628  29fa		       85 a0		      STA	temp5
-   8629  29fc		       a9 06		      LDA	#6
-   8630  29fe		       85 a1		      STA	temp6
-   8631  2a00				   .skipL0452
-   8632  2a00				   .L0453		;;line 2091;;	goto __drop_loop
-   8633  2a00
-   8634  2a00		       4c be f8 	      jmp	.__drop_loop
-   8635  2a03				   .
-   8636  2a03							;;line 2092;;
-   8637  2a03
-   8638  2a03				   .
-   8639  2a03							;;line 2093;;
-   8640  2a03
-   8641  2a03				   .
-   8642  2a03							;;line 2094;;
-   8643  2a03
-   8644  2a03				   .
-   8645  2a03							;;line 2095;;
-   8646  2a03
-   8647  2a03				   .
-   8648  2a03							;;line 2096;;
-   8649  2a03
-   8650  2a03				   .
-   8651  2a03							;;line 2097;;
-   8652  2a03
-   8653  2a03				   .
-   8654  2a03							;;line 2098;;
-   8655  2a03
-   8656  2a03				   .
-   8657  2a03							;;line 2099;;
-   8658  2a03
-   8659  2a03				   .
-   8660  2a03							;;line 2100;;
-   8661  2a03
-   8662  2a03				   .
-   8663  2a03							;;line 2101;;
-   8664  2a03
-   8665  2a03				   .
-   8666  2a03							;;line 2102;;
-   8667  2a03
-   8668  2a03				   .
-   8669  2a03							;;line 2103;;
-   8670  2a03
-   8671  2a03				   .__boss
-   8672  2a03							;;line 2104;; __boss
-   8673  2a03
-   8674  2a03				   .L0454		;;line 2105;;	if _choco_count  <  8 then goto __boss_alive
-   8675  2a03
-   8676  2a03		       a5 e7		      LDA	_choco_count
-   8677  2a05		       c9 08		      CMP	#8
-   8678  2a07		       b0 03		      BCS	.skipL0454
-   8679  2a09				   .condpart181
-   8680  2a09		       4c 19 fa 	      jmp	.__boss_alive
-   8681  2a0c				   .skipL0454
-   8682  2a0c				   .L0455		;;line 2106;;	_mouth0wait = 250  :  _mouth0y = 200  :  missile1y = 200
-   8683  2a0c
-   8684  2a0c		       a9 fa		      LDA	#250
-   8685  2a0e		       85 dd		      STA	_mouth0wait
-   8686  2a10		       a9 c8		      LDA	#200
-   8687  2a12		       85 db		      STA	_mouth0y
-   8688  2a14		       85 88		      STA	missile1y
-   8689  2a16				   .L0456		;;line 2107;;	return otherbank
-   8690  2a16
-   8691  2a16		       4c dd ff 	      JMP	BS_return
-   8692  2a19				   .__boss_alive
-   8693  2a19							;;line 2108;; __boss_alive
-   8694  2a19
-   8695  2a19				   .L0457		;;line 2109;;	gosub __boss_gfx
-   8696  2a19
-   8697  2a19		       20 d8 f4 	      jsr	.__boss_gfx
-   8698  2a1c				   .
-   8699  2a1c							;;line 2110;;
-   8700  2a1c
-   8701  2a1c				   .L0458		;;line 2111;;	asm
-   8702  2a1c
-   8703  2a1c		       a5 d6		      lda	_frame_counter
-   8704  2a1e
-   8705  2a1e		       29 04		      and	#4
-   8706  2a20
-   8707  2a20		       f0 0e		      beq	boss_noflash
+   8599  29e4		       38		      sec
+   8600  29e5
+   8601  29e5		       e9 01		      sbc	#1
+   8602  29e7
+   8603  29e7		       20 eb f2 	      jsr	pfhline
+   8604  29ea
+   8605  29ea				   press_done
+   8606  29ea
+   8607  29ea		       68		      pla
+   8608  29eb
+   8609  29eb		       68		      pla
+   8610  29ec
+   8611  29ec				   press_skip
+   8612  29ec
+   8613  29ec				   .__drop_next
+   8614  29ec							;;line 2090;; __drop_next
+   8615  29ec
+   8616  29ec				   .L0450		;;line 2091;;	temp4 = temp4  /  2
+   8617  29ec
+   8618  29ec		       a5 9f		      LDA	temp4
+   8619  29ee		       4a		      lsr
+   8620  29ef		       85 9f		      STA	temp4
+   8621  29f1				   .L0451		;;line 2092;;	temp5 = temp5  +  7
+   8622  29f1
+   8623  29f1		       a5 a0		      LDA	temp5
+   8624  29f3		       18		      CLC
+   8625  29f4		       69 07		      ADC	#7
+   8626  29f6		       85 a0		      STA	temp5
+   8627  29f8				   .L0452		;;line 2093;;	if temp5 = 31 then temp5 = 3  :  temp6 = 6
+   8628  29f8
+   8629  29f8		       a5 a0		      LDA	temp5
+   8630  29fa		       c9 1f		      CMP	#31
+   8631  29fc		       d0 08		      BNE	.skipL0452
+   8632  29fe				   .condpart180
+   8633  29fe		       a9 03		      LDA	#3
+   8634  2a00		       85 a0		      STA	temp5
+   8635  2a02		       a9 06		      LDA	#6
+   8636  2a04		       85 a1		      STA	temp6
+   8637  2a06				   .skipL0452
+   8638  2a06				   .L0453		;;line 2094;;	goto __drop_loop
+   8639  2a06
+   8640  2a06		       4c be f8 	      jmp	.__drop_loop
+   8641  2a09				   .
+   8642  2a09							;;line 2095;;
+   8643  2a09
+   8644  2a09				   .
+   8645  2a09							;;line 2096;;
+   8646  2a09
+   8647  2a09				   .
+   8648  2a09							;;line 2097;;
+   8649  2a09
+   8650  2a09				   .
+   8651  2a09							;;line 2098;;
+   8652  2a09
+   8653  2a09				   .
+   8654  2a09							;;line 2099;;
+   8655  2a09
+   8656  2a09				   .
+   8657  2a09							;;line 2100;;
+   8658  2a09
+   8659  2a09				   .
+   8660  2a09							;;line 2101;;
+   8661  2a09
+   8662  2a09				   .
+   8663  2a09							;;line 2102;;
+   8664  2a09
+   8665  2a09				   .
+   8666  2a09							;;line 2103;;
+   8667  2a09
+   8668  2a09				   .
+   8669  2a09							;;line 2104;;
+   8670  2a09
+   8671  2a09				   .
+   8672  2a09							;;line 2105;;
+   8673  2a09
+   8674  2a09				   .
+   8675  2a09							;;line 2106;;
+   8676  2a09
+   8677  2a09				   .__boss
+   8678  2a09							;;line 2107;; __boss
+   8679  2a09
+   8680  2a09				   .L0454		;;line 2108;;	if _choco_count  <  8 then goto __boss_alive
+   8681  2a09
+   8682  2a09		       a5 e7		      LDA	_choco_count
+   8683  2a0b		       c9 08		      CMP	#8
+   8684  2a0d		       b0 03		      BCS	.skipL0454
+   8685  2a0f				   .condpart181
+   8686  2a0f		       4c 1f fa 	      jmp	.__boss_alive
+   8687  2a12				   .skipL0454
+   8688  2a12				   .L0455		;;line 2109;;	_mouth0wait = 250  :  _mouth0y = 200  :  missile1y = 200
+   8689  2a12
+   8690  2a12		       a9 fa		      LDA	#250
+   8691  2a14		       85 dd		      STA	_mouth0wait
+   8692  2a16		       a9 c8		      LDA	#200
+   8693  2a18		       85 db		      STA	_mouth0y
+   8694  2a1a		       85 88		      STA	missile1y
+   8695  2a1c				   .L0456		;;line 2110;;	return otherbank
+   8696  2a1c
+   8697  2a1c		       4c dd ff 	      JMP	BS_return
+   8698  2a1f				   .__boss_alive
+   8699  2a1f							;;line 2111;; __boss_alive
+   8700  2a1f
+   8701  2a1f				   .L0457		;;line 2112;;	gosub __boss_gfx
+   8702  2a1f
+   8703  2a1f		       20 d8 f4 	      jsr	.__boss_gfx
+   8704  2a22				   .
+   8705  2a22							;;line 2113;;
+   8706  2a22
+   8707  2a22				   .L0458		;;line 2114;;	asm
    8708  2a22
-   8709  2a22		       a5 e9		      lda	_hitCooldown
+   8709  2a22		       a5 d6		      lda	_frame_counter
    8710  2a24
-   8711  2a24		       d0 06		      bne	boss_flash
+   8711  2a24		       29 04		      and	#4
    8712  2a26
-   8713  2a26		       a5 e7		      lda	_choco_count
+   8713  2a26		       f0 0e		      beq	boss_noflash
    8714  2a28
-   8715  2a28		       c9 05		      cmp	#5
+   8715  2a28		       a5 e9		      lda	_hitCooldown
    8716  2a2a
-   8717  2a2a		       90 04		      bcc	boss_noflash
+   8717  2a2a		       d0 06		      bne	boss_flash
    8718  2a2c
-   8719  2a2c				   boss_flash
-   8720  2a2c
-   8721  2a2c		       a9 0e		      lda	#$0E
-   8722  2a2e
-   8723  2a2e		       85 07		      sta	COLUP1
-   8724  2a30
-   8725  2a30				   boss_noflash
-   8726  2a30
-   8727  2a30				   .
-   8728  2a30							;;line 2125;;
-   8729  2a30
-   8730  2a30				   .L0459		;;line 2126;;	_speed = 10  -	_choco_count
-   8731  2a30
-   8732  2a30		       a9 0a		      LDA	#10
-   8733  2a32		       38		      SEC
-   8734  2a33		       e5 e7		      SBC	_choco_count
-   8735  2a35		       85 da		      STA	_speed
-   8736  2a37				   .
-   8737  2a37							;;line 2127;;
-   8738  2a37
-   8739  2a37				   .
-   8740  2a37							;;line 2128;;
-   8741  2a37
-   8742  2a37				   .
-   8743  2a37							;;line 2129;;
-   8744  2a37
-   8745  2a37				   .
-   8746  2a37							;;line 2130;;
-   8747  2a37
-   8748  2a37				   .L0460		;;line 2131;;	asm
-   8749  2a37
-   8750  2a37		       a5 e2		      lda	_mouth1y
-   8751  2a39
-   8752  2a39		       c9 c8		      cmp	#200
-   8753  2a3b
-   8754  2a3b		       b0 03		      bcs	spit_new
+   8719  2a2c		       a5 e7		      lda	_choco_count
+   8720  2a2e
+   8721  2a2e		       c9 05		      cmp	#5
+   8722  2a30
+   8723  2a30		       90 04		      bcc	boss_noflash
+   8724  2a32
+   8725  2a32				   boss_flash
+   8726  2a32
+   8727  2a32		       a9 0e		      lda	#$0E
+   8728  2a34
+   8729  2a34		       85 07		      sta	COLUP1
+   8730  2a36
+   8731  2a36				   boss_noflash
+   8732  2a36
+   8733  2a36				   .
+   8734  2a36							;;line 2128;;
+   8735  2a36
+   8736  2a36				   .L0459		;;line 2129;;	_speed = 10  -	_choco_count
+   8737  2a36
+   8738  2a36		       a9 0a		      LDA	#10
+   8739  2a38		       38		      SEC
+   8740  2a39		       e5 e7		      SBC	_choco_count
+   8741  2a3b		       85 da		      STA	_speed
+   8742  2a3d				   .
+   8743  2a3d							;;line 2130;;
+   8744  2a3d
+   8745  2a3d				   .
+   8746  2a3d							;;line 2131;;
+   8747  2a3d
+   8748  2a3d				   .
+   8749  2a3d							;;line 2132;;
+   8750  2a3d
+   8751  2a3d				   .
+   8752  2a3d							;;line 2133;;
+   8753  2a3d
+   8754  2a3d				   .L0460		;;line 2134;;	asm
    8755  2a3d
-   8756  2a3d		       4c a8 fa 	      jmp	spit_move
-   8757  2a40
-   8758  2a40				   spit_new
-   8759  2a40
-   8760  2a40		       a5 e7		      lda	_choco_count
-   8761  2a42
-   8762  2a42		       c9 04		      cmp	#4
-   8763  2a44
-   8764  2a44		       a5 d6		      lda	_frame_counter
+   8756  2a3d		       a5 e2		      lda	_mouth1y
+   8757  2a3f
+   8758  2a3f		       c9 c8		      cmp	#200
+   8759  2a41
+   8760  2a41		       b0 03		      bcs	spit_new
+   8761  2a43
+   8762  2a43		       4c ae fa 	      jmp	spit_move
+   8763  2a46
+   8764  2a46				   spit_new
    8765  2a46
-   8766  2a46		       90 02		      bcc	spit_rate
+   8766  2a46		       a5 e7		      lda	_choco_count
    8767  2a48
-   8768  2a48		       29 0f		      and	#15
+   8768  2a48		       c9 04		      cmp	#4
    8769  2a4a
-   8770  2a4a				   spit_rate
-   8771  2a4a
-   8772  2a4a		       f0 03		      beq	spit_fire
-   8773  2a4c
-   8774  2a4c		       4c fb fa 	      jmp	spit2
-   8775  2a4f
-   8776  2a4f				   spit_fire
-   8777  2a4f
-   8778  2a4f		       a5 d9		      lda	_mouth0x
-   8779  2a51
-   8780  2a51		       18		      clc
-   8781  2a52
-   8782  2a52		       69 0e		      adc	#14
-   8783  2a54
-   8784  2a54		       85 df		      sta	_mouth1x
-   8785  2a56
-   8786  2a56		       a5 db		      lda	_mouth0y
+   8770  2a4a		       a5 d6		      lda	_frame_counter
+   8771  2a4c
+   8772  2a4c		       90 02		      bcc	spit_rate
+   8773  2a4e
+   8774  2a4e		       29 0f		      and	#15
+   8775  2a50
+   8776  2a50				   spit_rate
+   8777  2a50
+   8778  2a50		       f0 03		      beq	spit_fire
+   8779  2a52
+   8780  2a52		       4c 01 fb 	      jmp	spit2
+   8781  2a55
+   8782  2a55				   spit_fire
+   8783  2a55
+   8784  2a55		       a5 d9		      lda	_mouth0x
+   8785  2a57
+   8786  2a57		       18		      clc
    8787  2a58
-   8788  2a58		       38		      sec
-   8789  2a59
-   8790  2a59		       e9 02		      sbc	#2
-   8791  2a5b
-   8792  2a5b		       85 e2		      sta	_mouth1y
-   8793  2a5d
-   8794  2a5d		       a9 00		      lda	#0
+   8788  2a58		       69 0e		      adc	#14
+   8789  2a5a
+   8790  2a5a		       85 df		      sta	_mouth1x
+   8791  2a5c
+   8792  2a5c		       a5 db		      lda	_mouth0y
+   8793  2a5e
+   8794  2a5e		       38		      sec
    8795  2a5f
-   8796  2a5f		       85 d3		      sta	_spitTime
+   8796  2a5f		       e9 02		      sbc	#2
    8797  2a61
-   8798  2a61		       a2 01		      ldx	#1
+   8798  2a61		       85 e2		      sta	_mouth1y
    8799  2a63
-   8800  2a63		       a5 d9		      lda	_mouth0x
+   8800  2a63		       a9 00		      lda	#0
    8801  2a65
-   8802  2a65		       18		      clc
-   8803  2a66
-   8804  2a66		       69 14		      adc	#20
-   8805  2a68
-   8806  2a68		       c5 80		      cmp	player0x
-   8807  2a6a
-   8808  2a6a		       b0 02		      bcs	spit_h1
+   8802  2a65		       85 d3		      sta	_spitTime
+   8803  2a67
+   8804  2a67		       a2 01		      ldx	#1
+   8805  2a69
+   8806  2a69		       a5 d9		      lda	_mouth0x
+   8807  2a6b
+   8808  2a6b		       18		      clc
    8809  2a6c
-   8810  2a6c		       a2 02		      ldx	#2
+   8810  2a6c		       69 14		      adc	#20
    8811  2a6e
-   8812  2a6e				   spit_h1
-   8813  2a6e
-   8814  2a6e		       a5 d9		      lda	_mouth0x
-   8815  2a70
-   8816  2a70		       18		      clc
-   8817  2a71
-   8818  2a71		       69 04		      adc	#4
-   8819  2a73
-   8820  2a73		       85 9f		      sta	temp4
-   8821  2a75
-   8822  2a75		       a5 80		      lda	player0x
+   8812  2a6e		       c5 80		      cmp	player0x
+   8813  2a70
+   8814  2a70		       b0 02		      bcs	spit_h1
+   8815  2a72
+   8816  2a72		       a2 02		      ldx	#2
+   8817  2a74
+   8818  2a74				   spit_h1
+   8819  2a74
+   8820  2a74		       a5 d9		      lda	_mouth0x
+   8821  2a76
+   8822  2a76		       18		      clc
    8823  2a77
-   8824  2a77		       c5 9f		      cmp	temp4
+   8824  2a77		       69 04		      adc	#4
    8825  2a79
-   8826  2a79		       b0 02		      bcs	spit_h2
+   8826  2a79		       85 9f		      sta	temp4
    8827  2a7b
-   8828  2a7b		       a2 00		      ldx	#0
+   8828  2a7b		       a5 80		      lda	player0x
    8829  2a7d
-   8830  2a7d				   spit_h2
-   8831  2a7d
-   8832  2a7d		       a5 db		      lda	_mouth0y
-   8833  2a7f
-   8834  2a7f		       18		      clc
-   8835  2a80
-   8836  2a80		       69 04		      adc	#4
-   8837  2a82
-   8838  2a82		       c5 85		      cmp	player0y
-   8839  2a84
-   8840  2a84		       b0 08		      bcs	spit_v1
+   8830  2a7d		       c5 9f		      cmp	temp4
+   8831  2a7f
+   8832  2a7f		       b0 02		      bcs	spit_h2
+   8833  2a81
+   8834  2a81		       a2 00		      ldx	#0
+   8835  2a83
+   8836  2a83				   spit_h2
+   8837  2a83
+   8838  2a83		       a5 db		      lda	_mouth0y
+   8839  2a85
+   8840  2a85		       18		      clc
    8841  2a86
-   8842  2a86		       e8		      inx
-   8843  2a87
-   8844  2a87		       e8		      inx
-   8845  2a88
-   8846  2a88		       e8		      inx
-   8847  2a89
-   8848  2a89		       e8		      inx
-   8849  2a8a
-   8850  2a8a		       e8		      inx
-   8851  2a8b
-   8852  2a8b		       e8		      inx
-   8853  2a8c
-   8854  2a8c		       d0 0c		      bne	spit_v3
-   8855  2a8e
-   8856  2a8e				   spit_v1
-   8857  2a8e
-   8858  2a8e		       a5 85		      lda	player0y
-   8859  2a90
-   8860  2a90		       18		      clc
-   8861  2a91
-   8862  2a91		       69 08		      adc	#8
-   8863  2a93
-   8864  2a93		       c5 db		      cmp	_mouth0y
-   8865  2a95
-   8866  2a95		       90 03		      bcc	spit_v3
+   8842  2a86		       69 04		      adc	#4
+   8843  2a88
+   8844  2a88		       c5 85		      cmp	player0y
+   8845  2a8a
+   8846  2a8a		       b0 08		      bcs	spit_v1
+   8847  2a8c
+   8848  2a8c		       e8		      inx
+   8849  2a8d
+   8850  2a8d		       e8		      inx
+   8851  2a8e
+   8852  2a8e		       e8		      inx
+   8853  2a8f
+   8854  2a8f		       e8		      inx
+   8855  2a90
+   8856  2a90		       e8		      inx
+   8857  2a91
+   8858  2a91		       e8		      inx
+   8859  2a92
+   8860  2a92		       d0 0c		      bne	spit_v3
+   8861  2a94
+   8862  2a94				   spit_v1
+   8863  2a94
+   8864  2a94		       a5 85		      lda	player0y
+   8865  2a96
+   8866  2a96		       18		      clc
    8867  2a97
-   8868  2a97		       e8		      inx
-   8869  2a98
-   8870  2a98		       e8		      inx
-   8871  2a99
-   8872  2a99		       e8		      inx
-   8873  2a9a
-   8874  2a9a				   spit_v3
-   8875  2a9a
-   8876  2a9a		       a5 d2		      lda	_spitDir
-   8877  2a9c
-   8878  2a9c		       29 f0		      and	#$F0
-   8879  2a9e
-   8880  2a9e		       1d 77 fb 	      ora	spitdx+16,x
-   8881  2aa1
-   8882  2aa1		       85 d2		      sta	_spitDir
-   8883  2aa3
-   8884  2aa3				   .L0461		;;line 2200;;	asm
-   8885  2aa3
-   8886  2aa3		       a2 01		      ldx	#1
-   8887  2aa5
-   8888  2aa5		       20 80 fb 	      jsr	sfx_go2
-   8889  2aa8
-   8890  2aa8				   .
-   8891  2aa8							;;line 2204;;
-   8892  2aa8
-   8893  2aa8				   .
-   8894  2aa8							;;line 2205;;
-   8895  2aa8
-   8896  2aa8				   .L0462		;;line 2206;;	asm
-   8897  2aa8
-   8898  2aa8				   spit_move
-   8899  2aa8
-   8900  2aa8		       a5 d2		      lda	_spitDir
-   8901  2aaa
-   8902  2aaa		       29 07		      and	#7
-   8903  2aac
-   8904  2aac		       aa		      tax
-   8905  2aad
-   8906  2aad		       a5 df		      lda	_mouth1x
-   8907  2aaf
-   8908  2aaf		       18		      clc
-   8909  2ab0
-   8910  2ab0		       7d 67 fb 	      adc	spitdx,x
+   8868  2a97		       69 08		      adc	#8
+   8869  2a99
+   8870  2a99		       c5 db		      cmp	_mouth0y
+   8871  2a9b
+   8872  2a9b		       90 03		      bcc	spit_v3
+   8873  2a9d
+   8874  2a9d		       e8		      inx
+   8875  2a9e
+   8876  2a9e		       e8		      inx
+   8877  2a9f
+   8878  2a9f		       e8		      inx
+   8879  2aa0
+   8880  2aa0				   spit_v3
+   8881  2aa0
+   8882  2aa0		       a5 d2		      lda	_spitDir
+   8883  2aa2
+   8884  2aa2		       29 f0		      and	#$F0
+   8885  2aa4
+   8886  2aa4		       1d 7d fb 	      ora	spitdx+16,x
+   8887  2aa7
+   8888  2aa7		       85 d2		      sta	_spitDir
+   8889  2aa9
+   8890  2aa9				   .L0461		;;line 2203;;	asm
+   8891  2aa9
+   8892  2aa9		       a2 01		      ldx	#1
+   8893  2aab
+   8894  2aab		       20 86 fb 	      jsr	sfx_go2
+   8895  2aae
+   8896  2aae				   .
+   8897  2aae							;;line 2207;;
+   8898  2aae
+   8899  2aae				   .
+   8900  2aae							;;line 2208;;
+   8901  2aae
+   8902  2aae				   .L0462		;;line 2209;;	asm
+   8903  2aae
+   8904  2aae				   spit_move
+   8905  2aae
+   8906  2aae		       a5 d2		      lda	_spitDir
+   8907  2ab0
+   8908  2ab0		       29 07		      and	#7
+   8909  2ab2
+   8910  2ab2		       aa		      tax
    8911  2ab3
-   8912  2ab3		       85 df		      sta	_mouth1x
+   8912  2ab3		       a5 df		      lda	_mouth1x
    8913  2ab5
-   8914  2ab5		       c9 97		      cmp	#151
-   8915  2ab7
-   8916  2ab7		       b0 3e		      bcs	spit_kill1
+   8914  2ab5		       18		      clc
+   8915  2ab6
+   8916  2ab6		       7d 6d fb 	      adc	spitdx,x
    8917  2ab9
-   8918  2ab9		       a5 e2		      lda	_mouth1y
+   8918  2ab9		       85 df		      sta	_mouth1x
    8919  2abb
-   8920  2abb		       18		      clc
-   8921  2abc
-   8922  2abc		       7d 6f fb 	      adc	spitdx+8,x
+   8920  2abb		       c9 97		      cmp	#151
+   8921  2abd
+   8922  2abd		       b0 3e		      bcs	spit_kill1
    8923  2abf
-   8924  2abf		       85 e2		      sta	_mouth1y
+   8924  2abf		       a5 e2		      lda	_mouth1y
    8925  2ac1
-   8926  2ac1		       c9 5d		      cmp	#93
-   8927  2ac3
-   8928  2ac3		       b0 32		      bcs	spit_kill1
+   8926  2ac1		       18		      clc
+   8927  2ac2
+   8928  2ac2		       7d 75 fb 	      adc	spitdx+8,x
    8929  2ac5
-   8930  2ac5		       e6 d3		      inc	_spitTime
+   8930  2ac5		       85 e2		      sta	_mouth1y
    8931  2ac7
-   8932  2ac7		       a5 e7		      lda	_choco_count
+   8932  2ac7		       c9 5d		      cmp	#93
    8933  2ac9
-   8934  2ac9		       c9 04		      cmp	#4
+   8934  2ac9		       b0 32		      bcs	spit_kill1
    8935  2acb
-   8936  2acb		       90 2e		      bcc	spit2
+   8936  2acb		       e6 d3		      inc	_spitTime
    8937  2acd
-   8938  2acd		       a5 d3		      lda	_spitTime
+   8938  2acd		       a5 e7		      lda	_choco_count
    8939  2acf
-   8940  2acf		       c9 0e		      cmp	#14
+   8940  2acf		       c9 04		      cmp	#4
    8941  2ad1
-   8942  2ad1		       d0 28		      bne	spit2
+   8942  2ad1		       90 2e		      bcc	spit2
    8943  2ad3
-   8944  2ad3		       a5 d1		      lda	_spit2y
+   8944  2ad3		       a5 d3		      lda	_spitTime
    8945  2ad5
-   8946  2ad5		       c9 c8		      cmp	#200
+   8946  2ad5		       c9 0e		      cmp	#14
    8947  2ad7
-   8948  2ad7		       90 22		      bcc	spit2
+   8948  2ad7		       d0 28		      bne	spit2
    8949  2ad9
-   8950  2ad9		       a5 df		      lda	_mouth1x
+   8950  2ad9		       a5 d1		      lda	_spit2y
    8951  2adb
-   8952  2adb		       85 d0		      sta	_spit2x
+   8952  2adb		       c9 c8		      cmp	#200
    8953  2add
-   8954  2add		       a5 e2		      lda	_mouth1y
+   8954  2add		       90 22		      bcc	spit2
    8955  2adf
-   8956  2adf		       85 d1		      sta	_spit2y
+   8956  2adf		       a5 df		      lda	_mouth1x
    8957  2ae1
-   8958  2ae1		       e8		      inx
-   8959  2ae2
-   8960  2ae2		       8a		      txa
-   8961  2ae3
-   8962  2ae3		       29 07		      and	#7
-   8963  2ae5
-   8964  2ae5		       0a		      asl
-   8965  2ae6
-   8966  2ae6		       0a		      asl
-   8967  2ae7
-   8968  2ae7		       0a		      asl
-   8969  2ae8
-   8970  2ae8		       0a		      asl
-   8971  2ae9
-   8972  2ae9		       85 9e		      sta	temp3
-   8973  2aeb
-   8974  2aeb		       ca		      dex
-   8975  2aec
-   8976  2aec		       ca		      dex
-   8977  2aed
-   8978  2aed		       8a		      txa
-   8979  2aee
-   8980  2aee		       29 07		      and	#7
-   8981  2af0
-   8982  2af0		       05 9e		      ora	temp3
-   8983  2af2
-   8984  2af2		       85 d2		      sta	_spitDir
+   8958  2ae1		       85 d0		      sta	_spit2x
+   8959  2ae3
+   8960  2ae3		       a5 e2		      lda	_mouth1y
+   8961  2ae5
+   8962  2ae5		       85 d1		      sta	_spit2y
+   8963  2ae7
+   8964  2ae7		       e8		      inx
+   8965  2ae8
+   8966  2ae8		       8a		      txa
+   8967  2ae9
+   8968  2ae9		       29 07		      and	#7
+   8969  2aeb
+   8970  2aeb		       0a		      asl
+   8971  2aec
+   8972  2aec		       0a		      asl
+   8973  2aed
+   8974  2aed		       0a		      asl
+   8975  2aee
+   8976  2aee		       0a		      asl
+   8977  2aef
+   8978  2aef		       85 9e		      sta	temp3
+   8979  2af1
+   8980  2af1		       ca		      dex
+   8981  2af2
+   8982  2af2		       ca		      dex
+   8983  2af3
+   8984  2af3		       8a		      txa
    8985  2af4
-   8986  2af4		       4c fb fa 	      jmp	spit2
-   8987  2af7
-   8988  2af7				   spit_kill1
-   8989  2af7
-   8990  2af7		       a9 c8		      lda	#200
-   8991  2af9
-   8992  2af9		       85 e2		      sta	_mouth1y
-   8993  2afb
-   8994  2afb				   spit2
-   8995  2afb
-   8996  2afb		       a5 d1		      lda	_spit2y
-   8997  2afd
-   8998  2afd		       c9 c8		      cmp	#200
-   8999  2aff
-   9000  2aff		       b0 23		      bcs	spit_hit
+   8986  2af4		       29 07		      and	#7
+   8987  2af6
+   8988  2af6		       05 9e		      ora	temp3
+   8989  2af8
+   8990  2af8		       85 d2		      sta	_spitDir
+   8991  2afa
+   8992  2afa		       4c 01 fb 	      jmp	spit2
+   8993  2afd
+   8994  2afd				   spit_kill1
+   8995  2afd
+   8996  2afd		       a9 c8		      lda	#200
+   8997  2aff
+   8998  2aff		       85 e2		      sta	_mouth1y
+   8999  2b01
+   9000  2b01				   spit2
    9001  2b01
-   9002  2b01		       a5 d2		      lda	_spitDir
+   9002  2b01		       a5 d1		      lda	_spit2y
    9003  2b03
-   9004  2b03		       4a		      lsr
-   9005  2b04
-   9006  2b04		       4a		      lsr
-   9007  2b05
-   9008  2b05		       4a		      lsr
-   9009  2b06
-   9010  2b06		       4a		      lsr
-   9011  2b07
-   9012  2b07		       aa		      tax
-   9013  2b08
-   9014  2b08		       a5 d0		      lda	_spit2x
-   9015  2b0a
-   9016  2b0a		       18		      clc
-   9017  2b0b
-   9018  2b0b		       7d 67 fb 	      adc	spitdx,x
+   9004  2b03		       c9 c8		      cmp	#200
+   9005  2b05
+   9006  2b05		       b0 23		      bcs	spit_hit
+   9007  2b07
+   9008  2b07		       a5 d2		      lda	_spitDir
+   9009  2b09
+   9010  2b09		       4a		      lsr
+   9011  2b0a
+   9012  2b0a		       4a		      lsr
+   9013  2b0b
+   9014  2b0b		       4a		      lsr
+   9015  2b0c
+   9016  2b0c		       4a		      lsr
+   9017  2b0d
+   9018  2b0d		       aa		      tax
    9019  2b0e
-   9020  2b0e		       85 d0		      sta	_spit2x
+   9020  2b0e		       a5 d0		      lda	_spit2x
    9021  2b10
-   9022  2b10		       c9 97		      cmp	#151
-   9023  2b12
-   9024  2b12		       b0 0c		      bcs	spit_kill2
+   9022  2b10		       18		      clc
+   9023  2b11
+   9024  2b11		       7d 6d fb 	      adc	spitdx,x
    9025  2b14
-   9026  2b14		       a5 d1		      lda	_spit2y
+   9026  2b14		       85 d0		      sta	_spit2x
    9027  2b16
-   9028  2b16		       18		      clc
-   9029  2b17
-   9030  2b17		       7d 6f fb 	      adc	spitdx+8,x
+   9028  2b16		       c9 97		      cmp	#151
+   9029  2b18
+   9030  2b18		       b0 0c		      bcs	spit_kill2
    9031  2b1a
-   9032  2b1a		       85 d1		      sta	_spit2y
+   9032  2b1a		       a5 d1		      lda	_spit2y
    9033  2b1c
-   9034  2b1c		       c9 5d		      cmp	#93
-   9035  2b1e
-   9036  2b1e		       90 04		      bcc	spit_hit
+   9034  2b1c		       18		      clc
+   9035  2b1d
+   9036  2b1d		       7d 75 fb 	      adc	spitdx+8,x
    9037  2b20
-   9038  2b20				   spit_kill2
-   9039  2b20
-   9040  2b20		       a9 c8		      lda	#200
-   9041  2b22
-   9042  2b22		       85 d1		      sta	_spit2y
-   9043  2b24
-   9044  2b24				   spit_hit
-   9045  2b24
-   9046  2b24
-   9047  2b24
-   9048  2b24		       24 01		      bit	CXM1P
-   9049  2b26
-   9050  2b26		       10 18		      bpl	.__spit_show
-   9051  2b28
-   9052  2b28		       a9 c8		      lda	#200
+   9038  2b20		       85 d1		      sta	_spit2y
+   9039  2b22
+   9040  2b22		       c9 5d		      cmp	#93
+   9041  2b24
+   9042  2b24		       90 04		      bcc	spit_hit
+   9043  2b26
+   9044  2b26				   spit_kill2
+   9045  2b26
+   9046  2b26		       a9 c8		      lda	#200
+   9047  2b28
+   9048  2b28		       85 d1		      sta	_spit2y
+   9049  2b2a
+   9050  2b2a				   spit_hit
+   9051  2b2a
+   9052  2b2a
    9053  2b2a
-   9054  2b2a		       85 e2		      sta	_mouth1y
+   9054  2b2a		       24 01		      bit	CXM1P
    9055  2b2c
-   9056  2b2c		       85 d1		      sta	_spit2y
+   9056  2b2c		       10 18		      bpl	.__spit_show
    9057  2b2e
-   9058  2b2e		       a5 e9		      lda	_hitCooldown
+   9058  2b2e		       a9 c8		      lda	#200
    9059  2b30
-   9060  2b30		       d0 0e		      bne	.__spit_show
+   9060  2b30		       85 e2		      sta	_mouth1y
    9061  2b32
-   9062  2b32				   .L0463		;;line 2290;;	pfscore2 = pfscore2  /	4  :  pfscore1 = 255  :  _hitCooldown = 90
-   9063  2b32
-   9064  2b32		       a5 f3		      LDA	pfscore2
-   9065  2b34		       4a		      lsr
-   9066  2b35		       4a		      lsr
-   9067  2b36		       85 f3		      STA	pfscore2
-   9068  2b38		       a9 ff		      LDA	#255
-   9069  2b3a		       85 f2		      STA	pfscore1
-   9070  2b3c		       a9 5a		      LDA	#90
-   9071  2b3e		       85 e9		      STA	_hitCooldown
-   9072  2b40				   .__spit_show
-   9073  2b40							;;line 2291;; __spit_show
-   9074  2b40
-   9075  2b40				   .
-   9076  2b40							;;line 2292;;
-   9077  2b40
-   9078  2b40				   .L0464		;;line 2293;;	asm
-   9079  2b40
-   9080  2b40		       a5 df		      lda	_mouth1x
-   9081  2b42
-   9082  2b42		       85 83		      sta	missile1x
-   9083  2b44
-   9084  2b44		       a5 e2		      lda	_mouth1y
+   9062  2b32		       85 d1		      sta	_spit2y
+   9063  2b34
+   9064  2b34		       a5 e9		      lda	_hitCooldown
+   9065  2b36
+   9066  2b36		       d0 0e		      bne	.__spit_show
+   9067  2b38
+   9068  2b38				   .L0463		;;line 2293;;	pfscore2 = pfscore2  /	4  :  pfscore1 = 255  :  _hitCooldown = 90
+   9069  2b38
+   9070  2b38		       a5 f3		      LDA	pfscore2
+   9071  2b3a		       4a		      lsr
+   9072  2b3b		       4a		      lsr
+   9073  2b3c		       85 f3		      STA	pfscore2
+   9074  2b3e		       a9 ff		      LDA	#255
+   9075  2b40		       85 f2		      STA	pfscore1
+   9076  2b42		       a9 5a		      LDA	#90
+   9077  2b44		       85 e9		      STA	_hitCooldown
+   9078  2b46				   .__spit_show
+   9079  2b46							;;line 2294;; __spit_show
+   9080  2b46
+   9081  2b46				   .
+   9082  2b46							;;line 2295;;
+   9083  2b46
+   9084  2b46				   .L0464		;;line 2296;;	asm
    9085  2b46
-   9086  2b46		       85 88		      sta	missile1y
+   9086  2b46		       a5 df		      lda	_mouth1x
    9087  2b48
-   9088  2b48		       a5 d1		      lda	_spit2y
+   9088  2b48		       85 83		      sta	missile1x
    9089  2b4a
-   9090  2b4a		       c9 c8		      cmp	#200
+   9090  2b4a		       a5 e2		      lda	_mouth1y
    9091  2b4c
-   9092  2b4c		       b0 13		      bcs	spit_done
+   9092  2b4c		       85 88		      sta	missile1y
    9093  2b4e
-   9094  2b4e		       a5 e2		      lda	_mouth1y
+   9094  2b4e		       a5 d1		      lda	_spit2y
    9095  2b50
    9096  2b50		       c9 c8		      cmp	#200
    9097  2b52
-   9098  2b52		       b0 05		      bcs	spit_show2
+   9098  2b52		       b0 13		      bcs	spit_done
    9099  2b54
-   9100  2b54		       a5 d6		      lda	_frame_counter
+   9100  2b54		       a5 e2		      lda	_mouth1y
    9101  2b56
-   9102  2b56		       4a		      lsr
-   9103  2b57
-   9104  2b57		       b0 08		      bcs	spit_done
-   9105  2b59
-   9106  2b59				   spit_show2
-   9107  2b59
-   9108  2b59		       a5 d0		      lda	_spit2x
-   9109  2b5b
-   9110  2b5b		       85 83		      sta	missile1x
-   9111  2b5d
-   9112  2b5d		       a5 d1		      lda	_spit2y
+   9102  2b56		       c9 c8		      cmp	#200
+   9103  2b58
+   9104  2b58		       b0 05		      bcs	spit_show2
+   9105  2b5a
+   9106  2b5a		       a5 d6		      lda	_frame_counter
+   9107  2b5c
+   9108  2b5c		       4a		      lsr
+   9109  2b5d
+   9110  2b5d		       b0 08		      bcs	spit_done
+   9111  2b5f
+   9112  2b5f				   spit_show2
    9113  2b5f
-   9114  2b5f		       85 88		      sta	missile1y
+   9114  2b5f		       a5 d0		      lda	_spit2x
    9115  2b61
-   9116  2b61				   spit_done
-   9117  2b61
-   9118  2b61				   .L0465		;;line 2314;;	return otherbank
-   9119  2b61
-   9120  2b61		       4c dd ff 	      JMP	BS_return
-   9121  2b64				   .
-   9122  2b64							;;line 2315;;
-   9123  2b64
-   9124  2b64				   .
-   9125  2b64							;;line 2316;;
-   9126  2b64
-   9127  2b64				   .
-   9128  2b64							;;line 2317;;
-   9129  2b64
-   9130  2b64				   .
-   9131  2b64							;;line 2318;;
-   9132  2b64
-   9133  2b64				   .
-   9134  2b64							;;line 2319;;
-   9135  2b64
-   9136  2b64				   .
-   9137  2b64							;;line 2320;;
-   9138  2b64
-   9139  2b64				   .L0466		;;line 2321;;	data spitdx
-   9140  2b64
-   9141  2b64		       4c 80 fb 	      JMP	.skipL0466
-   9142  2b67				   spitdx
-   9143  2b67		       00 02 02 02*	      .byte.b	0, 2, 2, 2, 0, 254, 254, 254
-   9144  2b6f
-   9145  2b6f		       fe fe 00 02*	      .byte.b	254, 254, 0, 2, 2, 2, 0, 254
-   9146  2b77
-   9147  2b77		       07 00 01 06*	      .byte.b	7, 0, 1, 6, 4, 2, 5, 4, 3
-   9148  2b80
-   9149  2b80				   .skipL0466
-   9150  2b80				   .
-   9151  2b80							;;line 2326;;
-   9152  2b80
-   9153  2b80				   .
-   9154  2b80							;;line 2327;;
-   9155  2b80
-   9156  2b80				   .
-   9157  2b80							;;line 2328;;
-   9158  2b80
-   9159  2b80				   .
-   9160  2b80							;;line 2329;;
-   9161  2b80
-   9162  2b80				   .
-   9163  2b80							;;line 2330;;
-   9164  2b80
-   9165  2b80				   .L0467		;;line 2331;;	asm
-   9166  2b80
-   9167  2b80				   sfx_go2
-   9168  2b80
-   9169  2b80		       e4 dc		      cpx	_sfxId
-   9170  2b82
-   9171  2b82		       90 08		      bcc	sfx_go2_skip
-   9172  2b84
-   9173  2b84		       86 dc		      stx	_sfxId
+   9116  2b61		       85 83		      sta	missile1x
+   9117  2b63
+   9118  2b63		       a5 d1		      lda	_spit2y
+   9119  2b65
+   9120  2b65		       85 88		      sta	missile1y
+   9121  2b67
+   9122  2b67				   spit_done
+   9123  2b67
+   9124  2b67				   .L0465		;;line 2317;;	return otherbank
+   9125  2b67
+   9126  2b67		       4c dd ff 	      JMP	BS_return
+   9127  2b6a				   .
+   9128  2b6a							;;line 2318;;
+   9129  2b6a
+   9130  2b6a				   .
+   9131  2b6a							;;line 2319;;
+   9132  2b6a
+   9133  2b6a				   .
+   9134  2b6a							;;line 2320;;
+   9135  2b6a
+   9136  2b6a				   .
+   9137  2b6a							;;line 2321;;
+   9138  2b6a
+   9139  2b6a				   .
+   9140  2b6a							;;line 2322;;
+   9141  2b6a
+   9142  2b6a				   .
+   9143  2b6a							;;line 2323;;
+   9144  2b6a
+   9145  2b6a				   .L0466		;;line 2324;;	data spitdx
+   9146  2b6a
+   9147  2b6a		       4c 86 fb 	      JMP	.skipL0466
+   9148  2b6d				   spitdx
+   9149  2b6d		       00 02 02 02*	      .byte.b	0, 2, 2, 2, 0, 254, 254, 254
+   9150  2b75
+   9151  2b75		       fe fe 00 02*	      .byte.b	254, 254, 0, 2, 2, 2, 0, 254
+   9152  2b7d
+   9153  2b7d		       07 00 01 06*	      .byte.b	7, 0, 1, 6, 4, 2, 5, 4, 3
+   9154  2b86
+   9155  2b86				   .skipL0466
+   9156  2b86				   .
+   9157  2b86							;;line 2329;;
+   9158  2b86
+   9159  2b86				   .
+   9160  2b86							;;line 2330;;
+   9161  2b86
+   9162  2b86				   .
+   9163  2b86							;;line 2331;;
+   9164  2b86
+   9165  2b86				   .
+   9166  2b86							;;line 2332;;
+   9167  2b86
+   9168  2b86				   .
+   9169  2b86							;;line 2333;;
+   9170  2b86
+   9171  2b86				   .L0467		;;line 2334;;	asm
+   9172  2b86
+   9173  2b86				   sfx_go2
    9174  2b86
-   9175  2b86		       a9 00		      lda	#0
+   9175  2b86		       e4 dc		      cpx	_sfxId
    9176  2b88
-   9177  2b88		       85 e4		      sta	_sfxPos
+   9177  2b88		       90 08		      bcc	sfx_go2_skip
    9178  2b8a
-   9179  2b8a		       85 ed		      sta	_sfxDur
+   9179  2b8a		       86 dc		      stx	_sfxId
    9180  2b8c
-   9181  2b8c				   sfx_go2_skip
-   9182  2b8c
-   9183  2b8c		       60		      rts
-   9184  2b8d
-   9185  2b8d				   .
-   9186  2b8d							;;line 2342;;
-   9187  2b8d
-   9188  2b8d				   .
-   9189  2b8d							;;line 2343;;
-   9190  2b8d
-   9191  2b8d				   .
-   9192  2b8d							;;line 2344;;
-   9193  2b8d
-   9194  2b8d				   .__boss_hit
-   9195  2b8d							;;line 2345;; __boss_hit
-   9196  2b8d
-   9197  2b8d				   .L0468		;;line 2346;;	_choco_count = _choco_count  +	1  :  score = score  +	40
-   9198  2b8d
-   9199  2b8d		       e6 e7		      INC	_choco_count
-   9200  2b8f		       f8		      SED
-   9201  2b90		       18		      CLC
-   9202  2b91		       a5 95		      LDA	score+2
-   9203  2b93		       69 40		      ADC	#$40
-   9204  2b95		       85 95		      STA	score+2
-   9205  2b97		       a5 94		      LDA	score+1
-   9206  2b99		       69 00		      ADC	#$00
-   9207  2b9b		       85 94		      STA	score+1
-   9208  2b9d		       a5 93		      LDA	score
-   9209  2b9f		       69 00		      ADC	#$00
-   9210  2ba1		       85 93		      STA	score
-   9211  2ba3		       d8		      CLD
-   9212  2ba4				   .L0469		;;line 2347;;	temp5 = 20  -  _choco_count
-   9213  2ba4
-   9214  2ba4		       a9 14		      LDA	#20
-   9215  2ba6		       38		      SEC
-   9216  2ba7		       e5 e7		      SBC	_choco_count
-   9217  2ba9		       85 a0		      STA	temp5
-   9218  2bab				   .L0470		;;line 2348;;	pfpixel temp5 10 off
-   9219  2bab
-   9220  2bab		       a2 01		      LDX	#1
-   9221  2bad		       a0 0a		      LDY	#10
-   9222  2baf		       a5 a0		      LDA	temp5
-   9223  2bb1		       20 bb f2 	      jsr	pfpixel
-   9224  2bb4				   .L0471		;;line 2349;;	_hitCooldown = 30
-   9225  2bb4
-   9226  2bb4		       a9 1e		      LDA	#30
-   9227  2bb6		       85 e9		      STA	_hitCooldown
-   9228  2bb8				   .L0472		;;line 2350;;	if _choco_count  <  8 then return otherbank
-   9229  2bb8
-   9230  2bb8		       a5 e7		      LDA	_choco_count
-   9231  2bba		       c9 08		      CMP	#8
-   9232  2bbc		       b0 03		      BCS	.skipL0472
-   9233  2bbe				   .condpart182
-   9234  2bbe		       4c dd ff 	      JMP	BS_return
-   9235  2bc1				   .skipL0472
-   9236  2bc1				   .L0473		;;line 2351;;	score = score  +  500
-   9237  2bc1
-   9238  2bc1		       f8		      SED
-   9239  2bc2		       18		      CLC
-   9240  2bc3		       a5 94		      LDA	score+1
-   9241  2bc5		       69 05		      ADC	#$05
-   9242  2bc7		       85 94		      STA	score+1
-   9243  2bc9		       a5 93		      LDA	score
-   9244  2bcb		       69 00		      ADC	#$00
-   9245  2bcd		       85 93		      STA	score
-   9246  2bcf		       d8		      CLD
-   9247  2bd0				   .L0474		;;line 2352;;	asm
-   9248  2bd0
-   9249  2bd0		       a2 07		      ldx	#7
-   9250  2bd2
-   9251  2bd2		       20 80 fb 	      jsr	sfx_go2
-   9252  2bd5
-   9253  2bd5				   .L0475		;;line 2356;;	return otherbank
-   9254  2bd5
-   9255  2bd5		       4c dd ff 	      JMP	BS_return
-   9256  2bd8				   .
-   9257  2bd8							;;line 2357;;
-   9258  2bd8
-   9259  2bd8				   .
-   9260  2bd8							;;line 2358;;
-   9261  2bd8
-   9262  2bd8				   .
-   9263  2bd8							;;line 2359;;
-   9264  2bd8
-   9265  2bd8				   .
-   9266  2bd8							;;line 2360;;
-   9267  2bd8
-   9268  2bd8				   .
-   9269  2bd8							;;line 2361;;
-   9270  2bd8
-   9271  2bd8				   .
-   9272  2bd8							;;line 2362;;
-   9273  2bd8
-   9274  2bd8				   .
-   9275  2bd8							;;line 2363;;
-   9276  2bd8
-   9277  2bd8				   .
-   9278  2bd8							;;line 2364;;
-   9279  2bd8
-   9280  2bd8				   .__piano_hit
-   9281  2bd8							;;line 2365;; __piano_hit
-   9282  2bd8
-   9283  2bd8				   .L0476		;;line 2366;;	if _ballx  &  1 then return
-   9284  2bd8
-   9285  2bd8		       a5 e8		      LDA	_ballx
-   9286  2bda		       29 01		      AND	#1
-   9287  2bdc		       f0 0d		      BEQ	.skipL0476
-   9288  2bde				   .condpart183
-   9289  2bde		       ba		      tsx
-   9290  2bdf		       b5 02		      lda	2,x	; check return address
-   9291  2be1		       49 fb		      eor	#(>*)	; vs. current PCH
-   9292  2be3		       29 e0		      and	#$E0	;  mask off all but top 3 bits
-   9293  2be5		       f0 03		      beq	*+5	; if equal, do normal return
-   9294  2be7		       4c dd ff 	      JMP	BS_return
-   9295  2bea		       60		      RTS
-   9296  2beb				   .skipL0476
-   9297  2beb				   .L0477		;;line 2367;;	_ballx = _ballx  |  1
-   9298  2beb
-   9299  2beb		       a5 e8		      LDA	_ballx
-   9300  2bed		       09 01		      ORA	#1
-   9301  2bef		       85 e8		      STA	_ballx
-   9302  2bf1				   .L0478		;;line 2368;;	temp1 = temp5  -  1  :	temp2 = temp5  +  2
-   9303  2bf1
-   9304  2bf1		       a5 a0		      LDA	temp5
-   9305  2bf3		       38		      SEC
-   9306  2bf4		       e9 01		      SBC	#1
-   9307  2bf6		       85 9c		      STA	temp1
-   9308  2bf8		       a5 a0		      LDA	temp5
-   9309  2bfa		       18		      CLC
-   9310  2bfb		       69 02		      ADC	#2
-   9311  2bfd		       85 9d		      STA	temp2
-   9312  2bff				   .L0479		;;line 2369;;	if !temp5 then temp1 = 0
-   9313  2bff
-   9314  2bff		       a5 a0		      LDA	temp5
-   9315  2c01		       d0 04		      BNE	.skipL0479
-   9316  2c03				   .condpart184
-   9317  2c03		       a9 00		      LDA	#0
-   9318  2c05		       85 9c		      STA	temp1
-   9319  2c07				   .skipL0479
-   9320  2c07				   .L0480		;;line 2370;;	if temp2  >  31 then temp2 = 31
-   9321  2c07
-   9322  2c07		       a9 1f		      LDA	#31
-   9323  2c09		       c5 9d		      CMP	temp2
-   9324  2c0b		       b0 04		      BCS	.skipL0480
-   9325  2c0d				   .condpart185
-   9326  2c0d		       a9 1f		      LDA	#31
-   9327  2c0f		       85 9d		      STA	temp2
-   9328  2c11				   .skipL0480
-   9329  2c11				   .L0481		;;line 2371;;	pfhline temp1 5 temp2 off
-   9330  2c11
-   9331  2c11		       a2 01		      LDX	#1
-   9332  2c13		       a5 9d		      LDA	temp2
-   9333  2c15		       85 9e		      STA	temp3
-   9334  2c17		       a0 05		      LDY	#5
-   9335  2c19		       a5 9c		      LDA	temp1
-   9336  2c1b		       20 eb f2 	      jsr	pfhline
-   9337  2c1e				   .L0482		;;line 2372;;	asm
-   9338  2c1e
-   9339  2c1e		       a2 04		      ldx	#4
-   9340  2c20
-   9341  2c20		       20 80 fb 	      jsr	sfx_go2
-   9342  2c23
-   9343  2c23				   .L0483		;;line 2376;;	return otherbank
-   9344  2c23
-   9345  2c23		       4c dd ff 	      JMP	BS_return
-   9346  2c26				   .
-   9347  2c26							;;line 2377;;
-   9348  2c26
-   9349  2c26				   .
-   9350  2c26							;;line 2378;;
-   9351  2c26
-   9352  2c26				   .
-   9353  2c26							;;line 2379;;
-   9354  2c26
-   9355  2c26				   .
-   9356  2c26							;;line 2380;;
-   9357  2c26
-   9358  2c26				   .
-   9359  2c26							;;line 2381;;
-   9360  2c26
-   9361  2c26				   .
-   9362  2c26							;;line 2382;;
-   9363  2c26
-   9364  2c26				   .
-   9365  2c26							;;line 2383;;
-   9366  2c26
-   9367  2c26				   .
-   9368  2c26							;;line 2384;;
-   9369  2c26
-   9370  2c26				   .
-   9371  2c26							;;line 2385;;
-   9372  2c26
-   9373  2c26				   .
-   9374  2c26							;;line 2386;;
-   9375  2c26
-   9376  2c26				   .
-   9377  2c26							;;line 2387;;
-   9378  2c26
-   9379  2c26				   .
-   9380  2c26							;;line 2388;;
-   9381  2c26
-   9382  2c26				   .
-   9383  2c26							;;line 2389;;
-   9384  2c26
-   9385  2c26				   .
-   9386  2c26							;;line 2390;;
-   9387  2c26
-   9388  2c26				   .__push_wall
-   9389  2c26							;;line 2391;; __push_wall
-   9390  2c26
-   9391  2c26				   .L0484		;;line 2392;;	if _frame_counter  &  7 then return otherbank
-   9392  2c26
-   9393  2c26		       a5 d6		      LDA	_frame_counter
-   9394  2c28		       29 07		      AND	#7
-   9395  2c2a		       f0 03		      BEQ	.skipL0484
-   9396  2c2c				   .condpart186
-   9397  2c2c		       4c dd ff 	      JMP	BS_return
-   9398  2c2f				   .skipL0484
-   9399  2c2f				   .L0485		;;line 2393;;	temp6 = temp2
-   9400  2c2f
-   9401  2c2f		       a5 9d		      LDA	temp2
-   9402  2c31		       85 a1		      STA	temp6
-   9403  2c33				   .L0486		;;line 2394;;	temp1 = _wall[temp6]
-   9404  2c33
-   9405  2c33		       a6 a1		      LDX	temp6
-   9406  2c35		       b5 d0		      LDA	_wall,x
-   9407  2c37		       85 9c		      STA	temp1
-   9408  2c39				   .
-   9409  2c39							;;line 2395;;
+   9181  2b8c		       a9 00		      lda	#0
+   9182  2b8e
+   9183  2b8e		       85 e4		      sta	_sfxPos
+   9184  2b90
+   9185  2b90		       85 ed		      sta	_sfxDur
+   9186  2b92
+   9187  2b92				   sfx_go2_skip
+   9188  2b92
+   9189  2b92		       60		      rts
+   9190  2b93
+   9191  2b93				   .
+   9192  2b93							;;line 2345;;
+   9193  2b93
+   9194  2b93				   .
+   9195  2b93							;;line 2346;;
+   9196  2b93
+   9197  2b93				   .
+   9198  2b93							;;line 2347;;
+   9199  2b93
+   9200  2b93				   .__boss_hit
+   9201  2b93							;;line 2348;; __boss_hit
+   9202  2b93
+   9203  2b93				   .L0468		;;line 2349;;	_choco_count = _choco_count  +	1  :  score = score  +	40
+   9204  2b93
+   9205  2b93		       e6 e7		      INC	_choco_count
+   9206  2b95		       f8		      SED
+   9207  2b96		       18		      CLC
+   9208  2b97		       a5 95		      LDA	score+2
+   9209  2b99		       69 40		      ADC	#$40
+   9210  2b9b		       85 95		      STA	score+2
+   9211  2b9d		       a5 94		      LDA	score+1
+   9212  2b9f		       69 00		      ADC	#$00
+   9213  2ba1		       85 94		      STA	score+1
+   9214  2ba3		       a5 93		      LDA	score
+   9215  2ba5		       69 00		      ADC	#$00
+   9216  2ba7		       85 93		      STA	score
+   9217  2ba9		       d8		      CLD
+   9218  2baa				   .L0469		;;line 2350;;	temp5 = 20  -  _choco_count
+   9219  2baa
+   9220  2baa		       a9 14		      LDA	#20
+   9221  2bac		       38		      SEC
+   9222  2bad		       e5 e7		      SBC	_choco_count
+   9223  2baf		       85 a0		      STA	temp5
+   9224  2bb1				   .L0470		;;line 2351;;	pfpixel temp5 10 off
+   9225  2bb1
+   9226  2bb1		       a2 01		      LDX	#1
+   9227  2bb3		       a0 0a		      LDY	#10
+   9228  2bb5		       a5 a0		      LDA	temp5
+   9229  2bb7		       20 bb f2 	      jsr	pfpixel
+   9230  2bba				   .L0471		;;line 2352;;	_hitCooldown = 30
+   9231  2bba
+   9232  2bba		       a9 1e		      LDA	#30
+   9233  2bbc		       85 e9		      STA	_hitCooldown
+   9234  2bbe				   .L0472		;;line 2353;;	if _choco_count  <  8 then return otherbank
+   9235  2bbe
+   9236  2bbe		       a5 e7		      LDA	_choco_count
+   9237  2bc0		       c9 08		      CMP	#8
+   9238  2bc2		       b0 03		      BCS	.skipL0472
+   9239  2bc4				   .condpart182
+   9240  2bc4		       4c dd ff 	      JMP	BS_return
+   9241  2bc7				   .skipL0472
+   9242  2bc7				   .L0473		;;line 2354;;	score = score  +  500
+   9243  2bc7
+   9244  2bc7		       f8		      SED
+   9245  2bc8		       18		      CLC
+   9246  2bc9		       a5 94		      LDA	score+1
+   9247  2bcb		       69 05		      ADC	#$05
+   9248  2bcd		       85 94		      STA	score+1
+   9249  2bcf		       a5 93		      LDA	score
+   9250  2bd1		       69 00		      ADC	#$00
+   9251  2bd3		       85 93		      STA	score
+   9252  2bd5		       d8		      CLD
+   9253  2bd6				   .L0474		;;line 2355;;	asm
+   9254  2bd6
+   9255  2bd6		       a2 07		      ldx	#7
+   9256  2bd8
+   9257  2bd8		       20 86 fb 	      jsr	sfx_go2
+   9258  2bdb
+   9259  2bdb				   .L0475		;;line 2359;;	return otherbank
+   9260  2bdb
+   9261  2bdb		       4c dd ff 	      JMP	BS_return
+   9262  2bde				   .
+   9263  2bde							;;line 2360;;
+   9264  2bde
+   9265  2bde				   .
+   9266  2bde							;;line 2361;;
+   9267  2bde
+   9268  2bde				   .
+   9269  2bde							;;line 2362;;
+   9270  2bde
+   9271  2bde				   .
+   9272  2bde							;;line 2363;;
+   9273  2bde
+   9274  2bde				   .
+   9275  2bde							;;line 2364;;
+   9276  2bde
+   9277  2bde				   .
+   9278  2bde							;;line 2365;;
+   9279  2bde
+   9280  2bde				   .
+   9281  2bde							;;line 2366;;
+   9282  2bde
+   9283  2bde				   .
+   9284  2bde							;;line 2367;;
+   9285  2bde
+   9286  2bde				   .__piano_hit
+   9287  2bde							;;line 2368;; __piano_hit
+   9288  2bde
+   9289  2bde				   .L0476		;;line 2369;;	if _ballx  &  1 then return
+   9290  2bde
+   9291  2bde		       a5 e8		      LDA	_ballx
+   9292  2be0		       29 01		      AND	#1
+   9293  2be2		       f0 0d		      BEQ	.skipL0476
+   9294  2be4				   .condpart183
+   9295  2be4		       ba		      tsx
+   9296  2be5		       b5 02		      lda	2,x	; check return address
+   9297  2be7		       49 fb		      eor	#(>*)	; vs. current PCH
+   9298  2be9		       29 e0		      and	#$E0	;  mask off all but top 3 bits
+   9299  2beb		       f0 03		      beq	*+5	; if equal, do normal return
+   9300  2bed		       4c dd ff 	      JMP	BS_return
+   9301  2bf0		       60		      RTS
+   9302  2bf1				   .skipL0476
+   9303  2bf1				   .L0477		;;line 2370;;	_ballx = _ballx  |  1
+   9304  2bf1
+   9305  2bf1		       a5 e8		      LDA	_ballx
+   9306  2bf3		       09 01		      ORA	#1
+   9307  2bf5		       85 e8		      STA	_ballx
+   9308  2bf7				   .L0478		;;line 2371;;	temp1 = temp5  -  1  :	temp2 = temp5  +  2
+   9309  2bf7
+   9310  2bf7		       a5 a0		      LDA	temp5
+   9311  2bf9		       38		      SEC
+   9312  2bfa		       e9 01		      SBC	#1
+   9313  2bfc		       85 9c		      STA	temp1
+   9314  2bfe		       a5 a0		      LDA	temp5
+   9315  2c00		       18		      CLC
+   9316  2c01		       69 02		      ADC	#2
+   9317  2c03		       85 9d		      STA	temp2
+   9318  2c05				   .L0479		;;line 2372;;	if !temp5 then temp1 = 0
+   9319  2c05
+   9320  2c05		       a5 a0		      LDA	temp5
+   9321  2c07		       d0 04		      BNE	.skipL0479
+   9322  2c09				   .condpart184
+   9323  2c09		       a9 00		      LDA	#0
+   9324  2c0b		       85 9c		      STA	temp1
+   9325  2c0d				   .skipL0479
+   9326  2c0d				   .L0480		;;line 2373;;	if temp2  >  31 then temp2 = 31
+   9327  2c0d
+   9328  2c0d		       a9 1f		      LDA	#31
+   9329  2c0f		       c5 9d		      CMP	temp2
+   9330  2c11		       b0 04		      BCS	.skipL0480
+   9331  2c13				   .condpart185
+   9332  2c13		       a9 1f		      LDA	#31
+   9333  2c15		       85 9d		      STA	temp2
+   9334  2c17				   .skipL0480
+   9335  2c17				   .L0481		;;line 2374;;	pfhline temp1 5 temp2 off
+   9336  2c17
+   9337  2c17		       a2 01		      LDX	#1
+   9338  2c19		       a5 9d		      LDA	temp2
+   9339  2c1b		       85 9e		      STA	temp3
+   9340  2c1d		       a0 05		      LDY	#5
+   9341  2c1f		       a5 9c		      LDA	temp1
+   9342  2c21		       20 eb f2 	      jsr	pfhline
+   9343  2c24				   .L0482		;;line 2375;;	asm
+   9344  2c24
+   9345  2c24		       a2 04		      ldx	#4
+   9346  2c26
+   9347  2c26		       20 86 fb 	      jsr	sfx_go2
+   9348  2c29
+   9349  2c29				   .L0483		;;line 2379;;	return otherbank
+   9350  2c29
+   9351  2c29		       4c dd ff 	      JMP	BS_return
+   9352  2c2c				   .
+   9353  2c2c							;;line 2380;;
+   9354  2c2c
+   9355  2c2c				   .
+   9356  2c2c							;;line 2381;;
+   9357  2c2c
+   9358  2c2c				   .
+   9359  2c2c							;;line 2382;;
+   9360  2c2c
+   9361  2c2c				   .
+   9362  2c2c							;;line 2383;;
+   9363  2c2c
+   9364  2c2c				   .
+   9365  2c2c							;;line 2384;;
+   9366  2c2c
+   9367  2c2c				   .
+   9368  2c2c							;;line 2385;;
+   9369  2c2c
+   9370  2c2c				   .
+   9371  2c2c							;;line 2386;;
+   9372  2c2c
+   9373  2c2c				   .
+   9374  2c2c							;;line 2387;;
+   9375  2c2c
+   9376  2c2c				   .
+   9377  2c2c							;;line 2388;;
+   9378  2c2c
+   9379  2c2c				   .
+   9380  2c2c							;;line 2389;;
+   9381  2c2c
+   9382  2c2c				   .
+   9383  2c2c							;;line 2390;;
+   9384  2c2c
+   9385  2c2c				   .
+   9386  2c2c							;;line 2391;;
+   9387  2c2c
+   9388  2c2c				   .
+   9389  2c2c							;;line 2392;;
+   9390  2c2c
+   9391  2c2c				   .
+   9392  2c2c							;;line 2393;;
+   9393  2c2c
+   9394  2c2c				   .__push_wall
+   9395  2c2c							;;line 2394;; __push_wall
+   9396  2c2c
+   9397  2c2c				   .L0484		;;line 2395;;	if _frame_counter  &  7 then return otherbank
+   9398  2c2c
+   9399  2c2c		       a5 d6		      LDA	_frame_counter
+   9400  2c2e		       29 07		      AND	#7
+   9401  2c30		       f0 03		      BEQ	.skipL0484
+   9402  2c32				   .condpart186
+   9403  2c32		       4c dd ff 	      JMP	BS_return
+   9404  2c35				   .skipL0484
+   9405  2c35				   .L0485		;;line 2396;;	temp6 = temp2
+   9406  2c35
+   9407  2c35		       a5 9d		      LDA	temp2
+   9408  2c37		       85 a1		      STA	temp6
+   9409  2c39				   .L0486		;;line 2397;;	temp1 = _wall[temp6]
    9410  2c39
-   9411  2c39				   .
-   9412  2c39							;;line 2396;;
-   9413  2c39
-   9414  2c39				   .L0487		;;line 2397;;	temp5 = temp1  +  temp4
-   9415  2c39
-   9416  2c39		       a5 9c		      LDA	temp1
-   9417  2c3b		       18		      CLC
-   9418  2c3c		       65 9f		      ADC	temp4
-   9419  2c3e		       85 a0		      STA	temp5
-   9420  2c40				   .L0488		;;line 2398;;	temp4 = temp1
-   9421  2c40
-   9422  2c40		       a5 9c		      LDA	temp1
-   9423  2c42		       85 9f		      STA	temp4
-   9424  2c44				   .
-   9425  2c44							;;line 2399;;
-   9426  2c44
-   9427  2c44				   .
-   9428  2c44							;;line 2400;;
-   9429  2c44
-   9430  2c44				   .
-   9431  2c44							;;line 2401;;
-   9432  2c44
-   9433  2c44				   .L0489		;;line 2402;;	asm
-   9434  2c44
-   9435  2c44		       a5 a0		      lda	temp5
-   9436  2c46
-   9437  2c46		       29 7f		      and	#127
-   9438  2c48
-   9439  2c48		       c9 20		      cmp	#32
+   9411  2c39		       a6 a1		      LDX	temp6
+   9412  2c3b		       b5 d0		      LDA	_wall,x
+   9413  2c3d		       85 9c		      STA	temp1
+   9414  2c3f				   .
+   9415  2c3f							;;line 2398;;
+   9416  2c3f
+   9417  2c3f				   .
+   9418  2c3f							;;line 2399;;
+   9419  2c3f
+   9420  2c3f				   .L0487		;;line 2400;;	temp5 = temp1  +  temp4
+   9421  2c3f
+   9422  2c3f		       a5 9c		      LDA	temp1
+   9423  2c41		       18		      CLC
+   9424  2c42		       65 9f		      ADC	temp4
+   9425  2c44		       85 a0		      STA	temp5
+   9426  2c46				   .L0488		;;line 2401;;	temp4 = temp1
+   9427  2c46
+   9428  2c46		       a5 9c		      LDA	temp1
+   9429  2c48		       85 9f		      STA	temp4
+   9430  2c4a				   .
+   9431  2c4a							;;line 2402;;
+   9432  2c4a
+   9433  2c4a				   .
+   9434  2c4a							;;line 2403;;
+   9435  2c4a
+   9436  2c4a				   .
+   9437  2c4a							;;line 2404;;
+   9438  2c4a
+   9439  2c4a				   .L0489		;;line 2405;;	asm
    9440  2c4a
-   9441  2c4a		       b0 69		      bcs	pw_out
+   9441  2c4a		       a5 a0		      lda	temp5
    9442  2c4c
-   9443  2c4c
-   9444  2c4c
-   9445  2c4c
-   9446  2c4c
-   9447  2c4c		       24 a0		      bit	temp5
-   9448  2c4e
-   9449  2c4e		       10 11		      bpl	pw_lane
-   9450  2c50
-   9451  2c50		       38		      sec
-   9452  2c51
-   9453  2c51		       e9 03		      sbc	#3
-   9454  2c53
-   9455  2c53		       90 60		      bcc	pw_out
-   9456  2c55
-   9457  2c55				   pw_mod
-   9458  2c55
-   9459  2c55		       c9 07		      cmp	#7
-   9460  2c57
-   9461  2c57		       90 04		      bcc	pw_m
-   9462  2c59
-   9463  2c59		       e9 07		      sbc	#7
+   9443  2c4c		       29 7f		      and	#127
+   9444  2c4e
+   9445  2c4e		       c9 20		      cmp	#32
+   9446  2c50
+   9447  2c50		       b0 69		      bcs	pw_out
+   9448  2c52
+   9449  2c52
+   9450  2c52
+   9451  2c52
+   9452  2c52
+   9453  2c52		       24 a0		      bit	temp5
+   9454  2c54
+   9455  2c54		       10 11		      bpl	pw_lane
+   9456  2c56
+   9457  2c56		       38		      sec
+   9458  2c57
+   9459  2c57		       e9 03		      sbc	#3
+   9460  2c59
+   9461  2c59		       90 60		      bcc	pw_out
+   9462  2c5b
+   9463  2c5b				   pw_mod
    9464  2c5b
-   9465  2c5b		       b0 f8		      bcs	pw_mod
+   9465  2c5b		       c9 07		      cmp	#7
    9466  2c5d
-   9467  2c5d				   pw_m
-   9468  2c5d
-   9469  2c5d		       c9 05		      cmp	#5
-   9470  2c5f
-   9471  2c5f		       b0 54		      bcs	pw_out
-   9472  2c61
-   9473  2c61				   pw_lane
-   9474  2c61
-   9475  2c61		       a9 08		      lda	#8
-   9476  2c63
-   9477  2c63		       24 a0		      bit	temp5
-   9478  2c65
-   9479  2c65		       10 02		      bpl	pw_base
+   9467  2c5d		       90 04		      bcc	pw_m
+   9468  2c5f
+   9469  2c5f		       e9 07		      sbc	#7
+   9470  2c61
+   9471  2c61		       b0 f8		      bcs	pw_mod
+   9472  2c63
+   9473  2c63				   pw_m
+   9474  2c63
+   9475  2c63		       c9 05		      cmp	#5
+   9476  2c65
+   9477  2c65		       b0 54		      bcs	pw_out
+   9478  2c67
+   9479  2c67				   pw_lane
    9480  2c67
-   9481  2c67		       a9 02		      lda	#2
+   9481  2c67		       a9 08		      lda	#8
    9482  2c69
-   9483  2c69				   pw_base
-   9484  2c69
-   9485  2c69		       48		      pha
-   9486  2c6a
-   9487  2c6a		       20 a6 fc 	      jsr	pw_read
-   9488  2c6d
-   9489  2c6d		       f0 45		      beq	pw_busy
+   9483  2c69		       24 a0		      bit	temp5
+   9484  2c6b
+   9485  2c6b		       10 02		      bpl	pw_base
+   9486  2c6d
+   9487  2c6d		       a9 02		      lda	#2
+   9488  2c6f
+   9489  2c6f				   pw_base
    9490  2c6f
-   9491  2c6f		       20 a6 fc 	      jsr	pw_read
-   9492  2c72
-   9493  2c72		       f0 40		      beq	pw_busy
-   9494  2c74
-   9495  2c74		       20 a6 fc 	      jsr	pw_read
-   9496  2c77
-   9497  2c77		       f0 3b		      beq	pw_busy
-   9498  2c79
-   9499  2c79		       ba		      tsx
+   9491  2c6f		       48		      pha
+   9492  2c70
+   9493  2c70		       20 ac fc 	      jsr	pw_read
+   9494  2c73
+   9495  2c73		       f0 45		      beq	pw_busy
+   9496  2c75
+   9497  2c75		       20 ac fc 	      jsr	pw_read
+   9498  2c78
+   9499  2c78		       f0 40		      beq	pw_busy
    9500  2c7a
-   9501  2c7a		       de 01 01 	      dec	$0101,x
+   9501  2c7a		       20 ac fc 	      jsr	pw_read
    9502  2c7d
-   9503  2c7d		       bd 01 01 	      lda	$0101,x
-   9504  2c80
-   9505  2c80		       85 9e		      sta	temp3
-   9506  2c82
-   9507  2c82		       38		      sec
+   9503  2c7d		       f0 3b		      beq	pw_busy
+   9504  2c7f
+   9505  2c7f		       ba		      tsx
+   9506  2c80
+   9507  2c80		       de 01 01 	      dec	$0101,x
    9508  2c83
-   9509  2c83		       e9 02		      sbc	#2
-   9510  2c85
-   9511  2c85		       a8		      tay
-   9512  2c86
-   9513  2c86		       a5 9f		      lda	temp4
-   9514  2c88
-   9515  2c88		       29 7f		      and	#127
-   9516  2c8a
-   9517  2c8a		       a2 01		      ldx	#1
+   9509  2c83		       bd 01 01 	      lda	$0101,x
+   9510  2c86
+   9511  2c86		       85 9e		      sta	temp3
+   9512  2c88
+   9513  2c88		       38		      sec
+   9514  2c89
+   9515  2c89		       e9 02		      sbc	#2
+   9516  2c8b
+   9517  2c8b		       a8		      tay
    9518  2c8c
-   9519  2c8c		       20 02 f3 	      jsr	pfvline
-   9520  2c8f
-   9521  2c8f		       ba		      tsx
+   9519  2c8c		       a5 9f		      lda	temp4
+   9520  2c8e
+   9521  2c8e		       29 7f		      and	#127
    9522  2c90
-   9523  2c90		       bd 01 01 	      lda	$0101,x
-   9524  2c93
-   9525  2c93		       85 9e		      sta	temp3
+   9523  2c90		       a2 01		      ldx	#1
+   9524  2c92
+   9525  2c92		       20 02 f3 	      jsr	pfvline
    9526  2c95
-   9527  2c95		       38		      sec
+   9527  2c95		       ba		      tsx
    9528  2c96
-   9529  2c96		       e9 02		      sbc	#2
-   9530  2c98
-   9531  2c98		       a8		      tay
-   9532  2c99
-   9533  2c99		       a5 a0		      lda	temp5
-   9534  2c9b
-   9535  2c9b		       29 7f		      and	#127
-   9536  2c9d
-   9537  2c9d		       a2 00		      ldx	#0
+   9529  2c96		       bd 01 01 	      lda	$0101,x
+   9530  2c99
+   9531  2c99		       85 9e		      sta	temp3
+   9532  2c9b
+   9533  2c9b		       38		      sec
+   9534  2c9c
+   9535  2c9c		       e9 02		      sbc	#2
+   9536  2c9e
+   9537  2c9e		       a8		      tay
    9538  2c9f
-   9539  2c9f		       20 02 f3 	      jsr	pfvline
-   9540  2ca2
-   9541  2ca2		       68		      pla
+   9539  2c9f		       a5 a0		      lda	temp5
+   9540  2ca1
+   9541  2ca1		       29 7f		      and	#127
    9542  2ca3
-   9543  2ca3		       4c b8 fc 	      jmp	.__pw_moved
-   9544  2ca6
-   9545  2ca6				   pw_read
-   9546  2ca6
-   9547  2ca6		       ba		      tsx
-   9548  2ca7
-   9549  2ca7		       bc 03 01 	      ldy	$0103,x
-   9550  2caa
-   9551  2caa		       fe 03 01 	      inc	$0103,x
-   9552  2cad
-   9553  2cad		       a5 a0		      lda	temp5
-   9554  2caf
-   9555  2caf		       29 7f		      and	#127
-   9556  2cb1
-   9557  2cb1		       4c ac f2 	      jmp	pfread
-   9558  2cb4
-   9559  2cb4				   pw_busy
-   9560  2cb4
-   9561  2cb4		       68		      pla
-   9562  2cb5
-   9563  2cb5				   pw_out
-   9564  2cb5
-   9565  2cb5				   .L0490		;;line 2469;;	return otherbank
-   9566  2cb5
-   9567  2cb5		       4c dd ff 	      JMP	BS_return
-   9568  2cb8				   .__pw_moved
-   9569  2cb8							;;line 2470;; __pw_moved
-   9570  2cb8
-   9571  2cb8				   .L0491		;;line 2471;;	_wall[temp6] = temp5
-   9572  2cb8
-   9573  2cb8		       a5 a0		      LDA	temp5
-   9574  2cba		       a6 a1		      LDX	temp6
-   9575  2cbc		       95 d0		      STA	_wall,x
-   9576  2cbe				   .L0492		;;line 2472;;	asm
-   9577  2cbe
-   9578  2cbe		       a2 02		      ldx	#2
-   9579  2cc0
-   9580  2cc0		       20 80 fb 	      jsr	sfx_go2
-   9581  2cc3
-   9582  2cc3				   .
-   9583  2cc3							;;line 2476;;
-   9584  2cc3
-   9585  2cc3				   .L0493		;;line 2477;;	if temp5  >=  128 then return otherbank
-   9586  2cc3
-   9587  2cc3		       a5 a0		      LDA	temp5
-   9588  2cc5		       c9 80		      CMP	#128
-   9589  2cc7		       90 03		      BCC	.skipL0493
-   9590  2cc9				   .condpart187
-   9591  2cc9		       4c dd ff 	      JMP	BS_return
-   9592  2ccc				   .skipL0493
-   9593  2ccc				   .
-   9594  2ccc							;;line 2478;;
-   9595  2ccc
-   9596  2ccc				   .
-   9597  2ccc							;;line 2479;;
-   9598  2ccc
-   9599  2ccc				   .
-   9600  2ccc							;;line 2480;;
-   9601  2ccc
-   9602  2ccc				   .L0494		;;line 2481;;	temp4 = temp5  *  4
-   9603  2ccc
-   9604  2ccc		       a5 a0		      LDA	temp5
-   9605  2cce		       0a		      asl
-   9606  2ccf		       0a		      asl
-   9607  2cd0		       85 9f		      STA	temp4
-   9608  2cd2				   .L0495		;;line 2482;;	temp4 = temp4  +  17
+   9543  2ca3		       a2 00		      ldx	#0
+   9544  2ca5
+   9545  2ca5		       20 02 f3 	      jsr	pfvline
+   9546  2ca8
+   9547  2ca8		       68		      pla
+   9548  2ca9
+   9549  2ca9		       4c be fc 	      jmp	.__pw_moved
+   9550  2cac
+   9551  2cac				   pw_read
+   9552  2cac
+   9553  2cac		       ba		      tsx
+   9554  2cad
+   9555  2cad		       bc 03 01 	      ldy	$0103,x
+   9556  2cb0
+   9557  2cb0		       fe 03 01 	      inc	$0103,x
+   9558  2cb3
+   9559  2cb3		       a5 a0		      lda	temp5
+   9560  2cb5
+   9561  2cb5		       29 7f		      and	#127
+   9562  2cb7
+   9563  2cb7		       4c ac f2 	      jmp	pfread
+   9564  2cba
+   9565  2cba				   pw_busy
+   9566  2cba
+   9567  2cba		       68		      pla
+   9568  2cbb
+   9569  2cbb				   pw_out
+   9570  2cbb
+   9571  2cbb				   .L0490		;;line 2472;;	return otherbank
+   9572  2cbb
+   9573  2cbb		       4c dd ff 	      JMP	BS_return
+   9574  2cbe				   .__pw_moved
+   9575  2cbe							;;line 2473;; __pw_moved
+   9576  2cbe
+   9577  2cbe				   .L0491		;;line 2474;;	_wall[temp6] = temp5
+   9578  2cbe
+   9579  2cbe		       a5 a0		      LDA	temp5
+   9580  2cc0		       a6 a1		      LDX	temp6
+   9581  2cc2		       95 d0		      STA	_wall,x
+   9582  2cc4				   .L0492		;;line 2475;;	asm
+   9583  2cc4
+   9584  2cc4		       a2 02		      ldx	#2
+   9585  2cc6
+   9586  2cc6		       20 86 fb 	      jsr	sfx_go2
+   9587  2cc9
+   9588  2cc9				   .
+   9589  2cc9							;;line 2479;;
+   9590  2cc9
+   9591  2cc9				   .L0493		;;line 2480;;	if temp5  >=  128 then return otherbank
+   9592  2cc9
+   9593  2cc9		       a5 a0		      LDA	temp5
+   9594  2ccb		       c9 80		      CMP	#128
+   9595  2ccd		       90 03		      BCC	.skipL0493
+   9596  2ccf				   .condpart187
+   9597  2ccf		       4c dd ff 	      JMP	BS_return
+   9598  2cd2				   .skipL0493
+   9599  2cd2				   .
+   9600  2cd2							;;line 2481;;
+   9601  2cd2
+   9602  2cd2				   .
+   9603  2cd2							;;line 2482;;
+   9604  2cd2
+   9605  2cd2				   .
+   9606  2cd2							;;line 2483;;
+   9607  2cd2
+   9608  2cd2				   .L0494		;;line 2484;;	temp4 = temp5  *  4
    9609  2cd2
-   9610  2cd2		       a5 9f		      LDA	temp4
-   9611  2cd4		       18		      CLC
-   9612  2cd5		       69 11		      ADC	#17
-   9613  2cd7		       85 9f		      STA	temp4
-   9614  2cd9				   .
-   9615  2cd9							;;line 2483;;
-   9616  2cd9
-   9617  2cd9				   .L0496		;;line 2484;;	temp3 = 7
-   9618  2cd9
-   9619  2cd9		       a9 07		      LDA	#7
-   9620  2cdb		       85 9e		      STA	temp3
-   9621  2cdd				   .L0497		;;line 2485;;	if _level  >  3 then temp3 = 15
-   9622  2cdd
-   9623  2cdd		       a9 03		      LDA	#3
-   9624  2cdf		       c5 d5		      CMP	_level
-   9625  2ce1		       b0 04		      BCS	.skipL0497
-   9626  2ce3				   .condpart188
-   9627  2ce3		       a9 0f		      LDA	#15
-   9628  2ce5		       85 9e		      STA	temp3
-   9629  2ce7				   .skipL0497
-   9630  2ce7				   .
-   9631  2ce7							;;line 2486;;
-   9632  2ce7
-   9633  2ce7				   .
-   9634  2ce7							;;line 2487;;
-   9635  2ce7
-   9636  2ce7				   .L0498		;;line 2488;;	asm
-   9637  2ce7
-   9638  2ce7		       a6 d9		      ldx	_mouth0x
-   9639  2ce9
-   9640  2ce9		       a4 db		      ldy	_mouth0y
-   9641  2ceb
-   9642  2ceb		       a5 dd		      lda	_mouth0wait
+   9610  2cd2		       a5 a0		      LDA	temp5
+   9611  2cd4		       0a		      asl
+   9612  2cd5		       0a		      asl
+   9613  2cd6		       85 9f		      STA	temp4
+   9614  2cd8				   .L0495		;;line 2485;;	temp4 = temp4  +  17
+   9615  2cd8
+   9616  2cd8		       a5 9f		      LDA	temp4
+   9617  2cda		       18		      CLC
+   9618  2cdb		       69 11		      ADC	#17
+   9619  2cdd		       85 9f		      STA	temp4
+   9620  2cdf				   .
+   9621  2cdf							;;line 2486;;
+   9622  2cdf
+   9623  2cdf				   .L0496		;;line 2487;;	temp3 = 7
+   9624  2cdf
+   9625  2cdf		       a9 07		      LDA	#7
+   9626  2ce1		       85 9e		      STA	temp3
+   9627  2ce3				   .L0497		;;line 2488;;	if _level  >  3 then temp3 = 15
+   9628  2ce3
+   9629  2ce3		       a9 03		      LDA	#3
+   9630  2ce5		       c5 d5		      CMP	_level
+   9631  2ce7		       b0 04		      BCS	.skipL0497
+   9632  2ce9				   .condpart188
+   9633  2ce9		       a9 0f		      LDA	#15
+   9634  2ceb		       85 9e		      STA	temp3
+   9635  2ced				   .skipL0497
+   9636  2ced				   .
+   9637  2ced							;;line 2489;;
+   9638  2ced
+   9639  2ced				   .
+   9640  2ced							;;line 2490;;
+   9641  2ced
+   9642  2ced				   .L0498		;;line 2491;;	asm
    9643  2ced
-   9644  2ced		       20 45 fd 	      jsr	pw_hit
-   9645  2cf0
-   9646  2cf0		       66 a0		      ror	temp5
-   9647  2cf2
-   9648  2cf2		       a5 d5		      lda	_level
-   9649  2cf4
-   9650  2cf4		       c9 04		      cmp	#4
+   9644  2ced		       a6 d9		      ldx	_mouth0x
+   9645  2cef
+   9646  2cef		       a4 db		      ldy	_mouth0y
+   9647  2cf1
+   9648  2cf1		       a5 dd		      lda	_mouth0wait
+   9649  2cf3
+   9650  2cf3		       20 4b fd 	      jsr	pw_hit
    9651  2cf6
-   9652  2cf6		       90 09		      bcc	pw_m1
+   9652  2cf6		       66 a0		      ror	temp5
    9653  2cf8
-   9654  2cf8		       a6 df		      ldx	_mouth1x
+   9654  2cf8		       a5 d5		      lda	_level
    9655  2cfa
-   9656  2cfa		       a4 e2		      ldy	_mouth1y
+   9656  2cfa		       c9 04		      cmp	#4
    9657  2cfc
-   9658  2cfc		       a5 e5		      lda	_mouth1wait
+   9658  2cfc		       90 09		      bcc	pw_m1
    9659  2cfe
-   9660  2cfe		       20 45 fd 	      jsr	pw_hit
-   9661  2d01
-   9662  2d01				   pw_m1
-   9663  2d01
-   9664  2d01		       66 a1		      ror	temp6
-   9665  2d03
-   9666  2d03				   .L0499		;;line 2504;;	if temp5{7} then _mouth0wait = _Mouth_Respawn  :  _mouth0y = 200  :  gosub __crushed
-   9667  2d03
-   9668  2d03		       24 a0		      BIT	temp5
-   9669  2d05		       10 0b		      BPL	.skipL0499
-   9670  2d07				   .condpart189
-   9671  2d07		       a9 c8		      LDA	#_Mouth_Respawn
-   9672  2d09		       85 dd		      STA	_mouth0wait
-   9673  2d0b		       a9 c8		      LDA	#200
-   9674  2d0d		       85 db		      STA	_mouth0y
-   9675  2d0f		       20 24 fd 	      jsr	.__crushed
-   9676  2d12				   .skipL0499
-   9677  2d12				   .L0500		;;line 2505;;	if temp6{7} then _mouth1wait = _Mouth_Respawn  :  _mouth1y = 200  :  gosub __crushed
-   9678  2d12
-   9679  2d12		       24 a1		      BIT	temp6
-   9680  2d14		       10 0b		      BPL	.skipL0500
-   9681  2d16				   .condpart190
-   9682  2d16		       a9 c8		      LDA	#_Mouth_Respawn
-   9683  2d18		       85 e5		      STA	_mouth1wait
-   9684  2d1a		       a9 c8		      LDA	#200
-   9685  2d1c		       85 e2		      STA	_mouth1y
-   9686  2d1e		       20 24 fd 	      jsr	.__crushed
-   9687  2d21				   .skipL0500
-   9688  2d21				   .L0501		;;line 2506;;	return otherbank
-   9689  2d21
-   9690  2d21		       4c dd ff 	      JMP	BS_return
-   9691  2d24				   .__crushed
-   9692  2d24							;;line 2507;; __crushed
-   9693  2d24
-   9694  2d24				   .L0502		;;line 2508;;	score = score  +  10  :  _b5_enablePalyer1{5} = 0
-   9695  2d24
-   9696  2d24		       f8		      SED
-   9697  2d25		       18		      CLC
-   9698  2d26		       a5 95		      LDA	score+2
-   9699  2d28		       69 10		      ADC	#$10
-   9700  2d2a		       85 95		      STA	score+2
-   9701  2d2c		       a5 94		      LDA	score+1
-   9702  2d2e		       69 00		      ADC	#$00
-   9703  2d30		       85 94		      STA	score+1
-   9704  2d32		       a5 93		      LDA	score
-   9705  2d34		       69 00		      ADC	#$00
-   9706  2d36		       85 93		      STA	score
-   9707  2d38		       d8		      CLD
-   9708  2d39		       a5 de		      LDA	_b5_enablePalyer1
-   9709  2d3b		       29 df		      AND	#223
-   9710  2d3d		       85 de		      STA	_b5_enablePalyer1
-   9711  2d3f				   .L0503		;;line 2509;;	asm
-   9712  2d3f
-   9713  2d3f		       a2 06		      ldx	#6
-   9714  2d41
-   9715  2d41		       20 80 fb 	      jsr	sfx_go2
-   9716  2d44
-   9717  2d44				   .L0504		;;line 2513;;	return thisbank
-   9718  2d44
-   9719  2d44		       60		      RTS
-   9720  2d45				   .
-   9721  2d45							;;line 2514;;
-   9722  2d45
-   9723  2d45				   .L0505		;;line 2515;;	asm
-   9724  2d45
-   9725  2d45				   pw_hit
-   9726  2d45
-   9727  2d45		       d0 16		      bne	pw_no
-   9728  2d47
-   9729  2d47		       c0 41		      cpy	#65
-   9730  2d49
-   9731  2d49		       90 12		      bcc	pw_no
+   9660  2cfe		       a6 df		      ldx	_mouth1x
+   9661  2d00
+   9662  2d00		       a4 e2		      ldy	_mouth1y
+   9663  2d02
+   9664  2d02		       a5 e5		      lda	_mouth1wait
+   9665  2d04
+   9666  2d04		       20 4b fd 	      jsr	pw_hit
+   9667  2d07
+   9668  2d07				   pw_m1
+   9669  2d07
+   9670  2d07		       66 a1		      ror	temp6
+   9671  2d09
+   9672  2d09				   .L0499		;;line 2507;;	if temp5{7} then _mouth0wait = _Mouth_Respawn  :  _mouth0y = 200  :  gosub __crushed
+   9673  2d09
+   9674  2d09		       24 a0		      BIT	temp5
+   9675  2d0b		       10 0b		      BPL	.skipL0499
+   9676  2d0d				   .condpart189
+   9677  2d0d		       a9 c8		      LDA	#_Mouth_Respawn
+   9678  2d0f		       85 dd		      STA	_mouth0wait
+   9679  2d11		       a9 c8		      LDA	#200
+   9680  2d13		       85 db		      STA	_mouth0y
+   9681  2d15		       20 2a fd 	      jsr	.__crushed
+   9682  2d18				   .skipL0499
+   9683  2d18				   .L0500		;;line 2508;;	if temp6{7} then _mouth1wait = _Mouth_Respawn  :  _mouth1y = 200  :  gosub __crushed
+   9684  2d18
+   9685  2d18		       24 a1		      BIT	temp6
+   9686  2d1a		       10 0b		      BPL	.skipL0500
+   9687  2d1c				   .condpart190
+   9688  2d1c		       a9 c8		      LDA	#_Mouth_Respawn
+   9689  2d1e		       85 e5		      STA	_mouth1wait
+   9690  2d20		       a9 c8		      LDA	#200
+   9691  2d22		       85 e2		      STA	_mouth1y
+   9692  2d24		       20 2a fd 	      jsr	.__crushed
+   9693  2d27				   .skipL0500
+   9694  2d27				   .L0501		;;line 2509;;	return otherbank
+   9695  2d27
+   9696  2d27		       4c dd ff 	      JMP	BS_return
+   9697  2d2a				   .__crushed
+   9698  2d2a							;;line 2510;; __crushed
+   9699  2d2a
+   9700  2d2a				   .L0502		;;line 2511;;	score = score  +  10  :  _b5_enablePalyer1{5} = 0
+   9701  2d2a
+   9702  2d2a		       f8		      SED
+   9703  2d2b		       18		      CLC
+   9704  2d2c		       a5 95		      LDA	score+2
+   9705  2d2e		       69 10		      ADC	#$10
+   9706  2d30		       85 95		      STA	score+2
+   9707  2d32		       a5 94		      LDA	score+1
+   9708  2d34		       69 00		      ADC	#$00
+   9709  2d36		       85 94		      STA	score+1
+   9710  2d38		       a5 93		      LDA	score
+   9711  2d3a		       69 00		      ADC	#$00
+   9712  2d3c		       85 93		      STA	score
+   9713  2d3e		       d8		      CLD
+   9714  2d3f		       a5 de		      LDA	_b5_enablePalyer1
+   9715  2d41		       29 df		      AND	#223
+   9716  2d43		       85 de		      STA	_b5_enablePalyer1
+   9717  2d45				   .L0503		;;line 2512;;	asm
+   9718  2d45
+   9719  2d45		       a2 06		      ldx	#6
+   9720  2d47
+   9721  2d47		       20 86 fb 	      jsr	sfx_go2
+   9722  2d4a
+   9723  2d4a				   .L0504		;;line 2516;;	return thisbank
+   9724  2d4a
+   9725  2d4a		       60		      RTS
+   9726  2d4b				   .
+   9727  2d4b							;;line 2517;;
+   9728  2d4b
+   9729  2d4b				   .L0505		;;line 2518;;	asm
+   9730  2d4b
+   9731  2d4b				   pw_hit
    9732  2d4b
-   9733  2d4b		       86 9c		      stx	temp1
+   9733  2d4b		       d0 16		      bne	pw_no
    9734  2d4d
-   9735  2d4d		       18		      clc
-   9736  2d4e
-   9737  2d4e		       a5 9f		      lda	temp4
-   9738  2d50
-   9739  2d50		       69 03		      adc	#3
-   9740  2d52
-   9741  2d52		       c5 9c		      cmp	temp1
+   9735  2d4d		       c0 41		      cpy	#65
+   9736  2d4f
+   9737  2d4f		       90 12		      bcc	pw_no
+   9738  2d51
+   9739  2d51		       86 9c		      stx	temp1
+   9740  2d53
+   9741  2d53		       18		      clc
    9742  2d54
-   9743  2d54		       90 07		      bcc	pw_no
+   9743  2d54		       a5 9f		      lda	temp4
    9744  2d56
-   9745  2d56		       18		      clc
-   9746  2d57
-   9747  2d57		       8a		      txa
-   9748  2d58
-   9749  2d58		       65 9e		      adc	temp3
-   9750  2d5a
-   9751  2d5a		       c5 9f		      cmp	temp4
-   9752  2d5c
-   9753  2d5c		       60		      rts
-   9754  2d5d
-   9755  2d5d				   pw_no
-   9756  2d5d
-   9757  2d5d		       18		      clc
-   9758  2d5e
-   9759  2d5e		       60		      rts
-   9760  2d5f
-   9761  2d5f				   .
-   9762  2d5f							;;line 2535;;
-   9763  2d5f
-   9764  2d5f				   .
-   9765  2d5f							;;line 2536;;
-   9766  2d5f
-   9767  2d5f				   .
-   9768  2d5f							;;line 2537;;
-   9769  2d5f
-   9770  2d5f				   .
-   9771  2d5f							;;line 2538;;
-   9772  2d5f
-   9773  2d5f				   .
-   9774  2d5f							;;line 2539;;
-   9775  2d5f
-   9776  2d5f				   .
-   9777  2d5f							;;line 2540;;
-   9778  2d5f
-   9779  2d5f				   .
-   9780  2d5f							;;line 2541;;
-   9781  2d5f
-   9782  2d5f				   .
-   9783  2d5f							;;line 2542;;
-   9784  2d5f
-   9785  2d5f				   .
-   9786  2d5f							;;line 2543;;
-   9787  2d5f
-   9788  2d5f				   .
-   9789  2d5f							;;line 2544;;
-   9790  2d5f
-   9791  2d5f				   .
-   9792  2d5f							;;line 2545;;
-   9793  2d5f
-   9794  2d5f				   .
-   9795  2d5f							;;line 2546;;
-   9796  2d5f
-   9797  2d5f				   .
-   9798  2d5f							;;line 2547;;
-   9799  2d5f
-   9800  2d5f				   .
-   9801  2d5f							;;line 2548;;
-   9802  2d5f
-   9803  2d5f				   .
-   9804  2d5f							;;line 2549;;
-   9805  2d5f
-   9806  2d5f				   .
-   9807  2d5f							;;line 2550;;
-   9808  2d5f
-   9809  2d5f				   .
-   9810  2d5f							;;line 2551;;
-   9811  2d5f
-   9812  2d5f				   .
-   9813  2d5f							;;line 2552;;
-   9814  2d5f
-   9815  2d5f				   .
-   9816  2d5f							;;line 2553;;
-   9817  2d5f
-   9818  2d5f				   .__play_sfx
-   9819  2d5f							;;line 2554;; __play_sfx
-   9820  2d5f
-   9821  2d5f				   .L0506		;;line 2555;;	asm
-   9822  2d5f
-   9823  2d5f		       a5 dc		      lda	_sfxId
-   9824  2d61
-   9825  2d61		       f0 3c		      beq	sfx_done
-   9826  2d63
-   9827  2d63		       a5 ed		      lda	_sfxDur
+   9745  2d56		       69 03		      adc	#3
+   9746  2d58
+   9747  2d58		       c5 9c		      cmp	temp1
+   9748  2d5a
+   9749  2d5a		       90 07		      bcc	pw_no
+   9750  2d5c
+   9751  2d5c		       18		      clc
+   9752  2d5d
+   9753  2d5d		       8a		      txa
+   9754  2d5e
+   9755  2d5e		       65 9e		      adc	temp3
+   9756  2d60
+   9757  2d60		       c5 9f		      cmp	temp4
+   9758  2d62
+   9759  2d62		       60		      rts
+   9760  2d63
+   9761  2d63				   pw_no
+   9762  2d63
+   9763  2d63		       18		      clc
+   9764  2d64
+   9765  2d64		       60		      rts
+   9766  2d65
+   9767  2d65				   .
+   9768  2d65							;;line 2538;;
+   9769  2d65
+   9770  2d65				   .
+   9771  2d65							;;line 2539;;
+   9772  2d65
+   9773  2d65				   .
+   9774  2d65							;;line 2540;;
+   9775  2d65
+   9776  2d65				   .
+   9777  2d65							;;line 2541;;
+   9778  2d65
+   9779  2d65				   .
+   9780  2d65							;;line 2542;;
+   9781  2d65
+   9782  2d65				   .
+   9783  2d65							;;line 2543;;
+   9784  2d65
+   9785  2d65				   .
+   9786  2d65							;;line 2544;;
+   9787  2d65
+   9788  2d65				   .
+   9789  2d65							;;line 2545;;
+   9790  2d65
+   9791  2d65				   .
+   9792  2d65							;;line 2546;;
+   9793  2d65
+   9794  2d65				   .
+   9795  2d65							;;line 2547;;
+   9796  2d65
+   9797  2d65				   .
+   9798  2d65							;;line 2548;;
+   9799  2d65
+   9800  2d65				   .
+   9801  2d65							;;line 2549;;
+   9802  2d65
+   9803  2d65				   .
+   9804  2d65							;;line 2550;;
+   9805  2d65
+   9806  2d65				   .
+   9807  2d65							;;line 2551;;
+   9808  2d65
+   9809  2d65				   .
+   9810  2d65							;;line 2552;;
+   9811  2d65
+   9812  2d65				   .
+   9813  2d65							;;line 2553;;
+   9814  2d65
+   9815  2d65				   .
+   9816  2d65							;;line 2554;;
+   9817  2d65
+   9818  2d65				   .
+   9819  2d65							;;line 2555;;
+   9820  2d65
+   9821  2d65				   .
+   9822  2d65							;;line 2556;;
+   9823  2d65
+   9824  2d65				   .__play_sfx
+   9825  2d65							;;line 2557;; __play_sfx
+   9826  2d65
+   9827  2d65				   .L0506		;;line 2558;;	asm
    9828  2d65
-   9829  2d65		       f0 05		      beq	sfx_next
+   9829  2d65		       a5 dc		      lda	_sfxId
    9830  2d67
-   9831  2d67		       c6 ed		      dec	_sfxDur
+   9831  2d67		       f0 3c		      beq	sfx_done
    9832  2d69
-   9833  2d69		       4c 9f fd 	      jmp	sfx_done
-   9834  2d6c
-   9835  2d6c				   sfx_next
-   9836  2d6c
-   9837  2d6c		       a6 dc		      ldx	_sfxId
-   9838  2d6e
-   9839  2d6e		       bd 96 fe 	      lda	sfx_lo-1,x
-   9840  2d71
-   9841  2d71		       85 9c		      sta	temp1
-   9842  2d73
-   9843  2d73		       bd 9e fe 	      lda	sfx_hi-1,x
-   9844  2d76
-   9845  2d76		       85 9d		      sta	temp2
-   9846  2d78
-   9847  2d78		       a4 e4		      ldy	_sfxPos
-   9848  2d7a
-   9849  2d7a		       b1 9c		      lda	(temp1),y
+   9833  2d69		       a5 ed		      lda	_sfxDur
+   9834  2d6b
+   9835  2d6b		       f0 05		      beq	sfx_next
+   9836  2d6d
+   9837  2d6d		       c6 ed		      dec	_sfxDur
+   9838  2d6f
+   9839  2d6f		       4c a5 fd 	      jmp	sfx_done
+   9840  2d72
+   9841  2d72				   sfx_next
+   9842  2d72
+   9843  2d72		       a6 dc		      ldx	_sfxId
+   9844  2d74
+   9845  2d74		       bd 9c fe 	      lda	sfx_lo-1,x
+   9846  2d77
+   9847  2d77		       85 9c		      sta	temp1
+   9848  2d79
+   9849  2d79		       bd a4 fe 	      lda	sfx_hi-1,x
    9850  2d7c
-   9851  2d7c		       c9 ff		      cmp	#255
+   9851  2d7c		       85 9d		      sta	temp2
    9852  2d7e
-   9853  2d7e		       d0 08		      bne	sfx_play
+   9853  2d7e		       a4 e4		      ldy	_sfxPos
    9854  2d80
-   9855  2d80		       a9 00		      lda	#0
+   9855  2d80		       b1 9c		      lda	(temp1),y
    9856  2d82
-   9857  2d82		       85 dc		      sta	_sfxId
+   9857  2d82		       c9 ff		      cmp	#255
    9858  2d84
-   9859  2d84		       85 19		      sta	AUDV0
+   9859  2d84		       d0 08		      bne	sfx_play
    9860  2d86
-   9861  2d86		       f0 17		      beq	sfx_done
+   9861  2d86		       a9 00		      lda	#0
    9862  2d88
-   9863  2d88				   sfx_play
-   9864  2d88
-   9865  2d88		       85 15		      sta	AUDC0
-   9866  2d8a
-   9867  2d8a		       4a		      lsr
-   9868  2d8b
-   9869  2d8b		       4a		      lsr
-   9870  2d8c
-   9871  2d8c		       4a		      lsr
-   9872  2d8d
-   9873  2d8d		       4a		      lsr
-   9874  2d8e
-   9875  2d8e		       85 19		      sta	AUDV0
-   9876  2d90
-   9877  2d90		       c8		      iny
-   9878  2d91
-   9879  2d91		       b1 9c		      lda	(temp1),y
-   9880  2d93
-   9881  2d93		       85 17		      sta	AUDF0
-   9882  2d95
-   9883  2d95		       c8		      iny
-   9884  2d96
-   9885  2d96		       b1 9c		      lda	(temp1),y
-   9886  2d98
-   9887  2d98		       85 ed		      sta	_sfxDur
-   9888  2d9a
-   9889  2d9a		       c6 ed		      dec	_sfxDur
+   9863  2d88		       85 dc		      sta	_sfxId
+   9864  2d8a
+   9865  2d8a		       85 19		      sta	AUDV0
+   9866  2d8c
+   9867  2d8c		       f0 17		      beq	sfx_done
+   9868  2d8e
+   9869  2d8e				   sfx_play
+   9870  2d8e
+   9871  2d8e		       85 15		      sta	AUDC0
+   9872  2d90
+   9873  2d90		       4a		      lsr
+   9874  2d91
+   9875  2d91		       4a		      lsr
+   9876  2d92
+   9877  2d92		       4a		      lsr
+   9878  2d93
+   9879  2d93		       4a		      lsr
+   9880  2d94
+   9881  2d94		       85 19		      sta	AUDV0
+   9882  2d96
+   9883  2d96		       c8		      iny
+   9884  2d97
+   9885  2d97		       b1 9c		      lda	(temp1),y
+   9886  2d99
+   9887  2d99		       85 17		      sta	AUDF0
+   9888  2d9b
+   9889  2d9b		       c8		      iny
    9890  2d9c
-   9891  2d9c		       c8		      iny
-   9892  2d9d
-   9893  2d9d		       84 e4		      sty	_sfxPos
-   9894  2d9f
-   9895  2d9f				   sfx_done
-   9896  2d9f
-   9897  2d9f				   .L0507		;;line 2594;;	return otherbank
-   9898  2d9f
-   9899  2d9f		       4c dd ff 	      JMP	BS_return
-   9900  2da2				   .
-   9901  2da2							;;line 2595;;
-   9902  2da2
-   9903  2da2				   .
-   9904  2da2							;;line 2596;;
-   9905  2da2
-   9906  2da2				   .L0508		;;line 2597;;	data sfx_shot
-   9907  2da2
-   9908  2da2		       4c c4 fd 	      JMP	.skipL0508
-   9909  2da5				   sfx_shot
-   9910  2da5		       f4 1c 02 b4*	      .byte.b	244, 28, 2, 180, 9, 2, 236, 4, 2, 244, 25, 2, 84, 7, 2, 100, 13, 2
-   9911  2db7
-   9912  2db7		       64 18 02 34*	      .byte.b	100, 24, 2, 52, 30, 2, 52, 9, 2, 44, 4, 2, 255
-   9913  2dc4
-   9914  2dc4				   .skipL0508
-   9915  2dc4				   .
-   9916  2dc4							;;line 2601;;
-   9917  2dc4
-   9918  2dc4				   .
-   9919  2dc4							;;line 2602;;
-   9920  2dc4
-   9921  2dc4				   .L0509		;;line 2603;;	data sfx_push
-   9922  2dc4
-   9923  2dc4		       4c d1 fd 	      JMP	.skipL0509
-   9924  2dc7				   sfx_push
-   9925  2dc7		       27 1c 02 98*	      .byte.b	39, 28, 2, 152, 30, 6, 55, 14, 2, 255
-   9926  2dd1
-   9927  2dd1				   .skipL0509
-   9928  2dd1				   .
-   9929  2dd1							;;line 2606;;
-   9930  2dd1
-   9931  2dd1				   .
-   9932  2dd1							;;line 2607;;
-   9933  2dd1
-   9934  2dd1				   .L0510		;;line 2608;;	data sfx_slow
-   9935  2dd1
-   9936  2dd1		       4c ed fd 	      JMP	.skipL0510
-   9937  2dd4				   sfx_slow
-   9938  2dd4		       a8 08 02 ac*	      .byte.b	168, 8, 2, 172, 8, 2, 166, 8, 2, 174, 8, 2, 134, 8, 4, 110, 8, 2
-   9939  2de6
-   9940  2de6		       46 08 02 26*	      .byte.b	70, 8, 2, 38, 8, 2, 255
-   9941  2ded
-   9942  2ded				   .skipL0510
-   9943  2ded				   .
-   9944  2ded							;;line 2612;;
-   9945  2ded
-   9946  2ded				   .
-   9947  2ded							;;line 2613;;
-   9948  2ded
-   9949  2ded				   .L0511		;;line 2614;;	data sfx_block
-   9950  2ded
-   9951  2ded		       4c 00 fe 	      JMP	.skipL0511
-   9952  2df0				   sfx_block
-   9953  2df0		       48 07 02 88*	      .byte.b	72, 7, 2, 136, 7, 2, 168, 12, 4, 136, 13, 2, 72, 9, 2, 255
-   9954  2e00
-   9955  2e00				   .skipL0511
-   9956  2e00				   .
-   9957  2e00							;;line 2617;;
-   9958  2e00
-   9959  2e00				   .
-   9960  2e00							;;line 2618;;
-   9961  2e00
-   9962  2e00				   .L0512		;;line 2619;;	data sfx_sugar
-   9963  2e00
-   9964  2e00		       4c 1f fe 	      JMP	.skipL0512
-   9965  2e03				   sfx_sugar
-   9966  2e03		       fc 04 02 e4*	      .byte.b	252, 4, 2, 228, 10, 2, 244, 10, 2, 148, 10, 2, 132, 10, 2, 100, 10, 2
-   9967  2e15
-   9968  2e15		       34 0a 02 94*	      .byte.b	52, 10, 2, 148, 10, 2, 20, 10, 7, 255
-   9969  2e1f
-   9970  2e1f				   .skipL0512
-   9971  2e1f				   .
-   9972  2e1f							;;line 2623;;
-   9973  2e1f
-   9974  2e1f				   .
-   9975  2e1f							;;line 2624;;
-   9976  2e1f
-   9977  2e1f				   .L0513		;;line 2625;;	data sfx_mouth
-   9978  2e1f
-   9979  2e1f		       4c 44 fe 	      JMP	.skipL0513
-   9980  2e22				   sfx_mouth
-   9981  2e22		       28 01 04 f6*	      .byte.b	40, 1, 4, 246, 9, 4, 70, 9, 4, 54, 10, 4, 110, 4, 4, 102, 8, 4
-   9982  2e34
-   9983  2e34		       56 06 04 36*	      .byte.b	86, 6, 4, 54, 15, 8, 102, 12, 4, 70, 10, 4, 54, 14, 2, 255
-   9984  2e44
-   9985  2e44				   .skipL0513
-   9986  2e44				   .
-   9987  2e44							;;line 2629;;
-   9988  2e44
-   9989  2e44				   .
-   9990  2e44							;;line 2630;;
-   9991  2e44
-   9992  2e44				   .L0514		;;line 2631;;	data sfx_power
-   9993  2e44
-   9994  2e44		       4c 6f fe 	      JMP	.skipL0514
-   9995  2e47				   sfx_power
-   9996  2e47		       f6 1e 04 fc*	      .byte.b	246, 30, 4, 252, 12, 4, 116, 18, 4, 132, 18, 4, 204, 11, 4, 156, 7, 4
-   9997  2e59
-   9998  2e59		       ac 07 04 4c*	      .byte.b	172, 7, 4, 76, 3, 8, 212, 30, 4, 132, 21, 4, 124, 6, 4, 68, 10, 4
-   9999  2e6b
-  10000  2e6b		       34 0a 01 ff	      .byte.b	52, 10, 1, 255
-  10001  2e6f
-  10002  2e6f				   .skipL0514
-  10003  2e6f				   .
-  10004  2e6f							;;line 2636;;
-  10005  2e6f
-  10006  2e6f				   .
-  10007  2e6f							;;line 2637;;
-  10008  2e6f
-  10009  2e6f				   .L0515		;;line 2638;;	data sfx_level
-  10010  2e6f
-  10011  2e6f		       4c 97 fe 	      JMP	.skipL0515
-  10012  2e72				   sfx_level
-  10013  2e72		       f4 16 04 24*	      .byte.b	244, 22, 4, 36, 19, 4, 244, 18, 4, 20, 16, 4, 6, 30, 4, 132, 13, 4
-  10014  2e84
-  10015  2e84		       06 1e 04 44*	      .byte.b	6, 30, 4, 68, 12, 4, 6, 30, 4, 36, 9, 4, 68, 9, 8, 36, 1, 2
-  10016  2e96
-  10017  2e96		       ff		      .byte.b	255
-  10018  2e97
-  10019  2e97				   .skipL0515
-  10020  2e97				   .
-  10021  2e97							;;line 2643;;
-  10022  2e97
-  10023  2e97				   .L0516		;;line 2644;;	asm
-  10024  2e97
-  10025  2e97				   sfx_lo
-  10026  2e97
-  10027  2e97		       a5 c7 d4 f0*	      .byte.b	<sfx_shot, <sfx_push, <sfx_slow, <sfx_block, <sfx_sugar, <sfx_mouth, <sfx_power, <sfx_level
-  10028  2e9f
-  10029  2e9f				   sfx_hi
-  10030  2e9f
-  10031  2e9f		       fd fd fd fd*	      .byte.b	>sfx_shot, >sfx_push, >sfx_slow, >sfx_block, >sfx_sugar, >sfx_mouth, >sfx_power, >sfx_level
-  10032  2ea7
-  10033  2ea7				   .
-  10034  2ea7							;;line 2650;;
-  10035  2ea7
-  10036  2ea7				   .
-  10037  2ea7							;;line 2651;;
-  10038  2ea7
-  10039  2ea7				   .
-  10040  2ea7							;;line 2652;;
-  10041  2ea7
-  10042  2ea7				   .
-  10043  2ea7							;;line 2653;;
-  10044  2ea7
-  10045  2ea7				   .
-  10046  2ea7							;;line 2654;;
-  10047  2ea7
-  10048  2ea7				   .
-  10049  2ea7							;;line 2655;;
-  10050  2ea7
-  10051  2ea7				   .
-  10052  2ea7							;;line 2656;;
-  10053  2ea7
-  10054  2ea7				   .
-  10055  2ea7							;;line 2657;;
-  10056  2ea7
-  10057  2ea7				   .
-  10058  2ea7							;;line 2658;;
-  10059  2ea7
-  10060  2ea7				   .
-  10061  2ea7							;;line 2659;;
-  10062  2ea7
-  10063  2ea7				   .
-  10064  2ea7							;;line 2660;;
-  10065  2ea7
-  10066  2ea7				   .
-  10067  2ea7							;;line 2661;;
-  10068  2ea7
-  10069  2ea7				   .
-  10070  2ea7							;;line 2662;;
-  10071  2ea7
-  10072  2ea7				   .
-  10073  2ea7							;;line 2663;;
-  10074  2ea7
-  10075  2ea7				   .
-  10076  2ea7							;;line 2664;;
-  10077  2ea7
-  10078  2ea7				   .
-  10079  2ea7							;;line 2665;;
-  10080  2ea7
-  10081  2ea7				   .
-  10082  2ea7							;;line 2666;;
-  10083  2ea7
-  10084  2ea7				   .
-  10085  2ea7							;;line 2667;;
-  10086  2ea7
-  10087  2ea7				   .
-  10088  2ea7							;;line 2668;;
-  10089  2ea7
-  10090  2ea7				   .
-  10091  2ea7							;;line 2669;;
-  10092  2ea7
-  10093  2ea7				   .
-  10094  2ea7							;;line 2670;;
-  10095  2ea7
-  10096  2ea7				   .
-  10097  2ea7							;;line 2671;;
-  10098  2ea7
-  10099  2ea7				   .
-  10100  2ea7							;;line 2672;;
-  10101  2ea7
-  10102  2ea7				   .
-  10103  2ea7							;;line 2673;;
-  10104  2ea7
-  10105  2ea7				   .
-  10106  2ea7							;;line 2674;;
-  10107  2ea7
-  10108  2ea7				   .
-  10109  2ea7							;;line 2675;;
-  10110  2ea7
-  10111  2ea7				   .
-  10112  2ea7							;;line 2676;;
-  10113  2ea7
-  10114  2ea7				   .
-  10115  2ea7							;;line 2677;;
-  10116  2ea7
-  10117  2ea7				   .
-  10118  2ea7							;;line 2678;;
-  10119  2ea7
-  10120  2ea7				   .
-  10121  2ea7							;;line 2679;;
-  10122  2ea7
-  10123  2ea7				   .
-  10124  2ea7							;;line 2680;;
-  10125  2ea7
-  10126  2ea7				   .
-  10127  2ea7							;;line 2681;;
-  10128  2ea7
-  10129  2ea7				   .
-  10130  2ea7							;;line 2682;;
-  10131  2ea7
-  10132  2ea7				   .L0517		;;line 2683;;	data dropy
-  10133  2ea7
-  10134  2ea7		       4c b3 fe 	      JMP	.skipL0517
-  10135  2eaa				   dropy
-  10136  2eaa		       00 01 02 03*	      .byte.b	0, 1, 2, 3, 4, 4, 0, 1, 2
-  10137  2eb3
-  10138  2eb3				   .skipL0517
-  10139  2eb3				   .L0518		;;line 2686;;	data presslen
-  10140  2eb3
-  10141  2eb3		       4c bf fe 	      JMP	.skipL0518
-  10142  2eb6				   presslen
-  10143  2eb6		       00 00 01 04*	      .byte.b	0, 0, 1, 4, 4, 2, 0, 0, 1
-  10144  2ebf
-  10145  2ebf				   .skipL0518
-  10146  2ebf				   .L0519		;;line 2689;;	data pressold
-  10147  2ebf
-  10148  2ebf		       4c cb fe 	      JMP	.skipL0519
-  10149  2ec2				   pressold
-  10150  2ec2		       02 00 00 01*	      .byte.b	2, 0, 0, 1, 4, 4, 2, 0, 0
-  10151  2ecb
-  10152  2ecb				   .skipL0519
-  10153  2ecb				   .
-  10154  2ecb							;;line 2692;;
-  10155  2ecb
-  10156  2ecb				   .L0520		;;line 2693;;	data objects
-  10157  2ecb
-  10158  2ecb		       4c 06 ff 	      JMP	.skipL0520
-  10159  2ece				   objects
-  10160  2ece		       00 00 00 00*	      .byte.b	%00000000, %00000000, %00000000, %00000000, %10101010, %01111010, %00100010, 18
-  10161  2ed6
-  10162  2ed6		       7f 00 00 00*	      .byte.b	%01111111, %00000000, %00000000, %00000000, %10000000, %00000000, %00101011, 136
-  10163  2ede
-  10164  2ede		       00 00 37 00*	      .byte.b	%00000000, %00000000, %00110111, %00000000, %00000000, %00000000, %00001011, 18
-  10165  2ee6
-  10166  2ee6		       00 00 00 ff*	      .byte.b	%00000000, %00000000, %00000000, %11111111, %00000000, %00000000, %00101011, 136
-  10167  2eee
-  10168  2eee		       00 ec 00 00*	      .byte.b	%00000000, %11101100, %00000000, %00000000, %11101100, %00000000, %01111110, 136
-  10169  2ef6
-  10170  2ef6		       00 00 00 ff*	      .byte.b	%00000000, %00000000, %00000000, %11111111, %00000000, %00000000, %00101011, 136
-  10171  2efe
-  10172  2efe		       00 00 00 00*	      .byte.b	%00000000, %00000000, %00000000, %00000000, %00000000, %00000000, %01010101, 136
-  10173  2f06
-  10174  2f06				   .skipL0520
-  10175  2f06				   .
-  10176  2f06							;;line 2703;;
-  10177  2f06
-  10178  2f06				   .
-  10179  2f06							;;line 2704;;
-  10180  2f06
-  10181  2f06				   .
-  10182  2f06							;;line 2705;;
-  10183  2f06
-  10184  2f06				   .
-  10185  2f06							;;line 2706;;
-  10186  2f06
-  10187  2f06				   .
-  10188  2f06							;;line 2707;;
-  10189  2f06
-  10190  2f06				   .
-  10191  2f06							;;line 2708;;
-  10192  2f06
-  10193  2f06				   .L0521		;;line 2709;;	macro cup
-  10194  2f06
-  10195  2f06					      MAC	cup
-  10196  2f06				   .L0522		;;line 2710;;	temp6 = {2}  +	2
-  10197  2f06
-  10198  2f06					      LDA	{2}
-  10199  2f06					      CLC
-  10200  2f06					      ADC	#2
-  10201  2f06					      STA	temp6
-  10202  2f06				   .L0523		;;line 2711;;	temp5 = {1}  +	4
-  10203  2f06
-  10204  2f06					      LDA	{1}
-  10205  2f06					      CLC
-  10206  2f06					      ADC	#4
-  10207  2f06					      STA	temp5
-  10208  2f06				   .L0524		;;line 2712;;	for temp4 = {2} to temp6
-  10209  2f06
-  10210  2f06					      LDA	{2}
-  10211  2f06					      STA	temp4
-  10212  2f06				   .L0524fortemp4
-  10213  2f06				   .L0525		;;line 2713;;	pfhline {1} temp4 temp5 on
-  10214  2f06
-  10215  2f06					      LDX	#0
-  10216  2f06					      LDA	temp5
-  10217  2f06					      STA	temp3
-  10218  2f06					      LDY	temp4
-  10219  2f06					      LDA	{1}
-  10220  2f06					      jsr	pfhline
-  10221  2f06				   .L0526		;;line 2714;;	next
-  10222  2f06
-  10223  2f06					      LDA	temp4
-  10224  2f06					      CMP	temp6
-  10225  2f06					      INC	temp4
-  10226  2f06					      bcc	.L0524fortemp4
-  10227  2f06					      if	( (((((#>*)&$1f)*256)|(#<.L0524fortemp4))>=bankswitch_hotspot) && (((((#>*)&$1f)*256)|(#<.L0524fortemp4))<=(bankswitch_hotspot+bs_mask)) )
-  10228  2f06					      echo	"WARNING: branch near the end of bank 2 may accidentally trigger a bankswitch. Reposition code there if bad things happen."
-  10229  2f06					      endif
-  10230  2f06				   .L0527		;;line 2715;;	pfpixel temp5 temp6 off
-  10231  2f06
-  10232  2f06					      LDX	#1
-  10233  2f06					      LDY	temp6
-  10234  2f06					      LDA	temp5
-  10235  2f06					      jsr	pfpixel
-  10236  2f06					      ENDM
-  10237  2f06				   .
-  10238  2f06							;;line 2717;;
-  10239  2f06
-  10240  2f06				   .
-  10241  2f06							;;line 2718;;
-  10242  2f06
-  10243  2f06				   .
-  10244  2f06							;;line 2719;;
-  10245  2f06
-  10246  2f06				   .L0528		;;line 2720;;	macro chocolate
-  10247  2f06
-  10248  2f06					      MAC	chocolate
-  10249  2f06				   .L0529		;;line 2721;;	temp6 = {2}  +	2
-  10250  2f06
-  10251  2f06					      LDA	{2}
-  10252  2f06					      CLC
-  10253  2f06					      ADC	#2
-  10254  2f06					      STA	temp6
-  10255  2f06				   .L0530		;;line 2722;;	pfvline {1} {2} temp6 on
-  10256  2f06
-  10257  2f06					      LDX	#0
-  10258  2f06					      LDA	temp6
-  10259  2f06					      STA	temp3
-  10260  2f06					      LDY	{2}
-  10261  2f06					      LDA	{1}
-  10262  2f06					      jsr	pfvline
-  10263  2f06				   .L0531		;;line 2723;;	temp5 = {1}  +	4
-  10264  2f06
-  10265  2f06					      LDA	{1}
-  10266  2f06					      CLC
-  10267  2f06					      ADC	#4
-  10268  2f06					      STA	temp5
-  10269  2f06				   .L0532		;;line 2724;;	temp6 = {2}  -	2
-  10270  2f06
-  10271  2f06					      LDA	{2}
-  10272  2f06					      SEC
-  10273  2f06					      SBC	#2
-  10274  2f06					      STA	temp6
-  10275  2f06				   .L0533		;;line 2725;;	pfvline temp5 temp6 {2} on
-  10276  2f06
-  10277  2f06					      LDX	#0
-  10278  2f06					      LDA	{2}
-  10279  2f06					      STA	temp3
-  10280  2f06					      LDY	temp6
-  10281  2f06					      LDA	temp5
-  10282  2f06					      jsr	pfvline
-  10283  2f06					      ENDM
-  10284  2f06				   .
-  10285  2f06							;;line 2727;;
-  10286  2f06
-  10287  2f06				   .
-  10288  2f06							;;line 2728;;
-  10289  2f06
-  10290  2f06				   .L0534		;;line 2729;;	macro lamp
-  10291  2f06
-  10292  2f06					      MAC	lamp
-  10293  2f06				   .L0535		;;line 2730;;	temp5 = {1}  +	2
-  10294  2f06
-  10295  2f06					      LDA	{1}
-  10296  2f06					      CLC
-  10297  2f06					      ADC	#2
-  10298  2f06					      STA	temp5
-  10299  2f06				   .L0536		;;line 2731;;	pfhline {1} {2} temp5 on
-  10300  2f06
-  10301  2f06					      LDX	#0
-  10302  2f06					      LDA	temp5
-  10303  2f06					      STA	temp3
-  10304  2f06					      LDY	{2}
-  10305  2f06					      LDA	{1}
-  10306  2f06					      jsr	pfhline
-  10307  2f06				   .L0537		;;line 2732;;	temp5 = {1}  +	1
-  10308  2f06
-  10309  2f06					      LDA	{1}
-  10310  2f06					      CLC
-  10311  2f06					      ADC	#1
-  10312  2f06					      STA	temp5
-  10313  2f06				   .L0538		;;line 2733;;	temp6 = {2}  +	1
-  10314  2f06
-  10315  2f06					      LDA	{2}
-  10316  2f06					      CLC
-  10317  2f06					      ADC	#1
-  10318  2f06					      STA	temp6
-  10319  2f06				   .L0539		;;line 2734;;	pfpixel temp5 temp6 on
-  10320  2f06
-  10321  2f06					      LDX	#0
-  10322  2f06					      LDY	temp6
-  10323  2f06					      LDA	temp5
-  10324  2f06					      jsr	pfpixel
-  10325  2f06					      ENDM
-  10326  2f06				   .
-  10327  2f06							;;line 2736;;
-  10328  2f06
-  10329  2f06				   .
-  10330  2f06							;;line 2737;;
-  10331  2f06
-  10332  2f06				   .L0540		;;line 2738;;	macro table
-  10333  2f06
-  10334  2f06					      MAC	table
-  10335  2f06				   .L0541		;;line 2739;;	temp5 = {1}  +	2
-  10336  2f06
-  10337  2f06					      LDA	{1}
-  10338  2f06					      CLC
-  10339  2f06					      ADC	#2
-  10340  2f06					      STA	temp5
-  10341  2f06				   .L0542		;;line 2740;;	temp6 = {2}  +	1
-  10342  2f06
-  10343  2f06					      LDA	{2}
-  10344  2f06					      CLC
-  10345  2f06					      ADC	#1
-  10346  2f06					      STA	temp6
-  10347  2f06				   .L0543		;;line 2741;;	pfhline {1} temp6 temp5 on
-  10348  2f06
-  10349  2f06					      LDX	#0
-  10350  2f06					      LDA	temp5
-  10351  2f06					      STA	temp3
-  10352  2f06					      LDY	temp6
-  10353  2f06					      LDA	{1}
-  10354  2f06					      jsr	pfhline
-  10355  2f06				   .L0544		;;line 2742;;	temp6 = temp6  +  1
-  10356  2f06
-  10357  2f06					      INC	temp6
-  10358  2f06				   .L0545		;;line 2743;;	pfpixel {1} temp6 on
-  10359  2f06
-  10360  2f06					      LDX	#0
-  10361  2f06					      LDY	temp6
-  10362  2f06					      LDA	{1}
-  10363  2f06					      jsr	pfpixel
-  10364  2f06				   .L0546		;;line 2744;;	pfpixel temp5 temp6 on
-  10365  2f06
-  10366  2f06					      LDX	#0
-  10367  2f06					      LDY	temp6
-  10368  2f06					      LDA	temp5
-  10369  2f06					      jsr	pfpixel
-  10370  2f06				   .L0547		;;line 2745;;	temp5 = {1}  +	4
-  10371  2f06
-  10372  2f06					      LDA	{1}
-  10373  2f06					      CLC
-  10374  2f06					      ADC	#4
-  10375  2f06					      STA	temp5
-  10376  2f06				   .L0548		;;line 2746;;	pfpixel temp5 temp6 on
-  10377  2f06
-  10378  2f06					      LDX	#0
-  10379  2f06					      LDY	temp6
-  10380  2f06					      LDA	temp5
-  10381  2f06					      jsr	pfpixel
-  10382  2f06					      ENDM
-  10383  2f06				   .
-  10384  2f06							;;line 2748;;
-  10385  2f06
-  10386  2f06				   .
-  10387  2f06							;;line 2749;;
-  10388  2f06
-  10389  2f06				   .L0549		;;line 2750;;	macro piano
-  10390  2f06
-  10391  2f06					      MAC	piano
-  10392  2f06				   .L0550		;;line 2751;;	temp5 = {1}  +	{2}
-  10393  2f06
-  10394  2f06					      LDA	{1}
-  10395  2f06					      CLC
-  10396  2f06					      ADC	{2}
-  10397  2f06					      STA	temp5
-  10398  2f06				   .L0551		;;line 2752;;	pfhline {1} 5 temp5 on
-  10399  2f06
-  10400  2f06					      LDX	#0
-  10401  2f06					      LDA	temp5
-  10402  2f06					      STA	temp3
-  10403  2f06					      LDY	#5
-  10404  2f06					      LDA	{1}
-  10405  2f06					      jsr	pfhline
-  10406  2f06					      ENDM
-  10407  2f06				   .
-  10408  2f06							;;line 2754;;
-  10409  2f06
-  10410  2f06				   .
-  10411  2f06							;;line 2755;;
-  10412  2f06
-  10413  2f06				   .L0552		;;line 2756;;	macro divisor
-  10414  2f06
-  10415  2f06					      MAC	divisor
-  10416  2f06				   .
-  10417  2f06							;;line 2757;;
-  10418  2f06
-  10419  2f06				   .L0553		;;line 2758;;	asm
-  10420  2f06
-  10421  2f06					      lda	#0
-  10422  2f06
-  10423  2f06					      sta	temp5
-  10424  2f06
-  10425  2f06					      lda	#7
-  10426  2f06
-  10427  2f06					      sta	temp6
-  10428  2f06
-  10429  2f06				   div_loop
-  10430  2f06
-  10431  2f06					      lsr	temp4
-  10432  2f06
-  10433  2f06					      bcc	div_skip
-  10434  2f06
-  10435  2f06					      lda	temp6
-  10436  2f06
-  10437  2f06					      sta	temp3
-  10438  2f06
-  10439  2f06					      lda	temp5
-  10440  2f06
-  10441  2f06					      ldy	#5
-  10442  2f06
-  10443  2f06					      ldx	#0
-  10444  2f06
-  10445  2f06					      jsr	pfhline
-  10446  2f06
-  10447  2f06				   div_skip
-  10448  2f06
-  10449  2f06					      lda	temp5
-  10450  2f06
-  10451  2f06					      clc
-  10452  2f06
-  10453  2f06					      adc	#4
-  10454  2f06
-  10455  2f06					      sta	temp5
-  10456  2f06
-  10457  2f06					      adc	#4
-  10458  2f06
-  10459  2f06					      sta	temp6
-  10460  2f06
-  10461  2f06					      lda	temp5
-  10462  2f06
-  10463  2f06					      cmp	#28
-  10464  2f06
-  10465  2f06					      bcc	div_loop
-  10466  2f06
-  10467  2f06					      ENDM
-  10468  2f06				  -	      if	(<*) > (<(*+3))
-  10469  2f06				  -	      repeat	($100-<*)
-  10470  2f06				  -	      .byte	0
-  10471  2f06				  -	      repend
-  10472  2f06					      endif
-  10473  2f06				   player105then_0
-  10474  2f06		       24		      .byte.b	%00100100
-  10475  2f07		       bd		      .byte.b	%10111101
-  10476  2f08		       5a		      .byte.b	%01011010
-  10477  2f09		       7e		      .byte.b	%01111110
-  10478  2f0a				  -	      if	(<*) > (<(*+3))
-  10479  2f0a				  -	      repeat	($100-<*)
-  10480  2f0a				  -	      .byte	0
-  10481  2f0a				  -	      repend
-  10482  2f0a					      endif
-  10483  2f0a				   player111then_0
-  10484  2f0a		       18		      .byte.b	%00011000
-  10485  2f0b		       bd		      .byte.b	%10111101
-  10486  2f0c		       5a		      .byte.b	%01011010
-  10487  2f0d		       7e		      .byte.b	%01111110
-  10488  2f0e				  -	      if	(<*) > (<(*+3))
-  10489  2f0e				  -	      repeat	($100-<*)
-  10490  2f0e				  -	      .byte	0
-  10491  2f0e				  -	      repend
-  10492  2f0e					      endif
-  10493  2f0e				   player114then_1
-  10494  2f0e		       7e		      .byte.b	%01111110
-  10495  2f0f		       81		      .byte.b	%10000001
-  10496  2f10		       99		      .byte.b	%10011001
-  10497  2f11		       66		      .byte.b	%01100110
-  10498  2f12				  -	      if	(<*) > (<(*+3))
-  10499  2f12				  -	      repeat	($100-<*)
-  10500  2f12				  -	      .byte	0
-  10501  2f12				  -	      repend
-  10502  2f12					      endif
-  10503  2f12				   player115then_1
-  10504  2f12		       7e		      .byte.b	%01111110
-  10505  2f13		       ff		      .byte.b	%11111111
-  10506  2f14		       ff		      .byte.b	%11111111
-  10507  2f15		       66		      .byte.b	%01100110
-  10508  2f16				  -	      if	(<*) > (<(*+7))
-  10509  2f16				  -	      repeat	($100-<*)
-  10510  2f16				  -	      .byte	0
-  10511  2f16				  -	      repend
-  10512  2f16					      endif
-  10513  2f16				   playerL0365_1
-  10514  2f16		       3c		      .byte.b	%00111100
-  10515  2f17		       7e		      .byte.b	%01111110
-  10516  2f18		       ff		      .byte.b	%11111111
-  10517  2f19		       a5		      .byte.b	%10100101
-  10518  2f1a		       81		      .byte.b	%10000001
-  10519  2f1b		       a5		      .byte.b	%10100101
-  10520  2f1c		       ff		      .byte.b	%11111111
+   9891  2d9c		       b1 9c		      lda	(temp1),y
+   9892  2d9e
+   9893  2d9e		       85 ed		      sta	_sfxDur
+   9894  2da0
+   9895  2da0		       c6 ed		      dec	_sfxDur
+   9896  2da2
+   9897  2da2		       c8		      iny
+   9898  2da3
+   9899  2da3		       84 e4		      sty	_sfxPos
+   9900  2da5
+   9901  2da5				   sfx_done
+   9902  2da5
+   9903  2da5				   .L0507		;;line 2597;;	return otherbank
+   9904  2da5
+   9905  2da5		       4c dd ff 	      JMP	BS_return
+   9906  2da8				   .
+   9907  2da8							;;line 2598;;
+   9908  2da8
+   9909  2da8				   .
+   9910  2da8							;;line 2599;;
+   9911  2da8
+   9912  2da8				   .L0508		;;line 2600;;	data sfx_shot
+   9913  2da8
+   9914  2da8		       4c ca fd 	      JMP	.skipL0508
+   9915  2dab				   sfx_shot
+   9916  2dab		       f4 1c 02 b4*	      .byte.b	244, 28, 2, 180, 9, 2, 236, 4, 2, 244, 25, 2, 84, 7, 2, 100, 13, 2
+   9917  2dbd
+   9918  2dbd		       64 18 02 34*	      .byte.b	100, 24, 2, 52, 30, 2, 52, 9, 2, 44, 4, 2, 255
+   9919  2dca
+   9920  2dca				   .skipL0508
+   9921  2dca				   .
+   9922  2dca							;;line 2604;;
+   9923  2dca
+   9924  2dca				   .
+   9925  2dca							;;line 2605;;
+   9926  2dca
+   9927  2dca				   .L0509		;;line 2606;;	data sfx_push
+   9928  2dca
+   9929  2dca		       4c d7 fd 	      JMP	.skipL0509
+   9930  2dcd				   sfx_push
+   9931  2dcd		       27 1c 02 98*	      .byte.b	39, 28, 2, 152, 30, 6, 55, 14, 2, 255
+   9932  2dd7
+   9933  2dd7				   .skipL0509
+   9934  2dd7				   .
+   9935  2dd7							;;line 2609;;
+   9936  2dd7
+   9937  2dd7				   .
+   9938  2dd7							;;line 2610;;
+   9939  2dd7
+   9940  2dd7				   .L0510		;;line 2611;;	data sfx_slow
+   9941  2dd7
+   9942  2dd7		       4c f3 fd 	      JMP	.skipL0510
+   9943  2dda				   sfx_slow
+   9944  2dda		       a8 08 02 ac*	      .byte.b	168, 8, 2, 172, 8, 2, 166, 8, 2, 174, 8, 2, 134, 8, 4, 110, 8, 2
+   9945  2dec
+   9946  2dec		       46 08 02 26*	      .byte.b	70, 8, 2, 38, 8, 2, 255
+   9947  2df3
+   9948  2df3				   .skipL0510
+   9949  2df3				   .
+   9950  2df3							;;line 2615;;
+   9951  2df3
+   9952  2df3				   .
+   9953  2df3							;;line 2616;;
+   9954  2df3
+   9955  2df3				   .L0511		;;line 2617;;	data sfx_block
+   9956  2df3
+   9957  2df3		       4c 06 fe 	      JMP	.skipL0511
+   9958  2df6				   sfx_block
+   9959  2df6		       48 07 02 88*	      .byte.b	72, 7, 2, 136, 7, 2, 168, 12, 4, 136, 13, 2, 72, 9, 2, 255
+   9960  2e06
+   9961  2e06				   .skipL0511
+   9962  2e06				   .
+   9963  2e06							;;line 2620;;
+   9964  2e06
+   9965  2e06				   .
+   9966  2e06							;;line 2621;;
+   9967  2e06
+   9968  2e06				   .L0512		;;line 2622;;	data sfx_sugar
+   9969  2e06
+   9970  2e06		       4c 25 fe 	      JMP	.skipL0512
+   9971  2e09				   sfx_sugar
+   9972  2e09		       fc 04 02 e4*	      .byte.b	252, 4, 2, 228, 10, 2, 244, 10, 2, 148, 10, 2, 132, 10, 2, 100, 10, 2
+   9973  2e1b
+   9974  2e1b		       34 0a 02 94*	      .byte.b	52, 10, 2, 148, 10, 2, 20, 10, 7, 255
+   9975  2e25
+   9976  2e25				   .skipL0512
+   9977  2e25				   .
+   9978  2e25							;;line 2626;;
+   9979  2e25
+   9980  2e25				   .
+   9981  2e25							;;line 2627;;
+   9982  2e25
+   9983  2e25				   .L0513		;;line 2628;;	data sfx_mouth
+   9984  2e25
+   9985  2e25		       4c 4a fe 	      JMP	.skipL0513
+   9986  2e28				   sfx_mouth
+   9987  2e28		       28 01 04 f6*	      .byte.b	40, 1, 4, 246, 9, 4, 70, 9, 4, 54, 10, 4, 110, 4, 4, 102, 8, 4
+   9988  2e3a
+   9989  2e3a		       56 06 04 36*	      .byte.b	86, 6, 4, 54, 15, 8, 102, 12, 4, 70, 10, 4, 54, 14, 2, 255
+   9990  2e4a
+   9991  2e4a				   .skipL0513
+   9992  2e4a				   .
+   9993  2e4a							;;line 2632;;
+   9994  2e4a
+   9995  2e4a				   .
+   9996  2e4a							;;line 2633;;
+   9997  2e4a
+   9998  2e4a				   .L0514		;;line 2634;;	data sfx_power
+   9999  2e4a
+  10000  2e4a		       4c 75 fe 	      JMP	.skipL0514
+  10001  2e4d				   sfx_power
+  10002  2e4d		       f6 1e 04 fc*	      .byte.b	246, 30, 4, 252, 12, 4, 116, 18, 4, 132, 18, 4, 204, 11, 4, 156, 7, 4
+  10003  2e5f
+  10004  2e5f		       ac 07 04 4c*	      .byte.b	172, 7, 4, 76, 3, 8, 212, 30, 4, 132, 21, 4, 124, 6, 4, 68, 10, 4
+  10005  2e71
+  10006  2e71		       34 0a 01 ff	      .byte.b	52, 10, 1, 255
+  10007  2e75
+  10008  2e75				   .skipL0514
+  10009  2e75				   .
+  10010  2e75							;;line 2639;;
+  10011  2e75
+  10012  2e75				   .
+  10013  2e75							;;line 2640;;
+  10014  2e75
+  10015  2e75				   .L0515		;;line 2641;;	data sfx_level
+  10016  2e75
+  10017  2e75		       4c 9d fe 	      JMP	.skipL0515
+  10018  2e78				   sfx_level
+  10019  2e78		       f4 16 04 24*	      .byte.b	244, 22, 4, 36, 19, 4, 244, 18, 4, 20, 16, 4, 6, 30, 4, 132, 13, 4
+  10020  2e8a
+  10021  2e8a		       06 1e 04 44*	      .byte.b	6, 30, 4, 68, 12, 4, 6, 30, 4, 36, 9, 4, 68, 9, 8, 36, 1, 2
+  10022  2e9c
+  10023  2e9c		       ff		      .byte.b	255
+  10024  2e9d
+  10025  2e9d				   .skipL0515
+  10026  2e9d				   .
+  10027  2e9d							;;line 2646;;
+  10028  2e9d
+  10029  2e9d				   .L0516		;;line 2647;;	asm
+  10030  2e9d
+  10031  2e9d				   sfx_lo
+  10032  2e9d
+  10033  2e9d		       ab cd da f6*	      .byte.b	<sfx_shot, <sfx_push, <sfx_slow, <sfx_block, <sfx_sugar, <sfx_mouth, <sfx_power, <sfx_level
+  10034  2ea5
+  10035  2ea5				   sfx_hi
+  10036  2ea5
+  10037  2ea5		       fd fd fd fd*	      .byte.b	>sfx_shot, >sfx_push, >sfx_slow, >sfx_block, >sfx_sugar, >sfx_mouth, >sfx_power, >sfx_level
+  10038  2ead
+  10039  2ead				   .
+  10040  2ead							;;line 2653;;
+  10041  2ead
+  10042  2ead				   .
+  10043  2ead							;;line 2654;;
+  10044  2ead
+  10045  2ead				   .
+  10046  2ead							;;line 2655;;
+  10047  2ead
+  10048  2ead				   .
+  10049  2ead							;;line 2656;;
+  10050  2ead
+  10051  2ead				   .
+  10052  2ead							;;line 2657;;
+  10053  2ead
+  10054  2ead				   .
+  10055  2ead							;;line 2658;;
+  10056  2ead
+  10057  2ead				   .
+  10058  2ead							;;line 2659;;
+  10059  2ead
+  10060  2ead				   .
+  10061  2ead							;;line 2660;;
+  10062  2ead
+  10063  2ead				   .
+  10064  2ead							;;line 2661;;
+  10065  2ead
+  10066  2ead				   .
+  10067  2ead							;;line 2662;;
+  10068  2ead
+  10069  2ead				   .
+  10070  2ead							;;line 2663;;
+  10071  2ead
+  10072  2ead				   .
+  10073  2ead							;;line 2664;;
+  10074  2ead
+  10075  2ead				   .
+  10076  2ead							;;line 2665;;
+  10077  2ead
+  10078  2ead				   .
+  10079  2ead							;;line 2666;;
+  10080  2ead
+  10081  2ead				   .
+  10082  2ead							;;line 2667;;
+  10083  2ead
+  10084  2ead				   .
+  10085  2ead							;;line 2668;;
+  10086  2ead
+  10087  2ead				   .
+  10088  2ead							;;line 2669;;
+  10089  2ead
+  10090  2ead				   .
+  10091  2ead							;;line 2670;;
+  10092  2ead
+  10093  2ead				   .
+  10094  2ead							;;line 2671;;
+  10095  2ead
+  10096  2ead				   .
+  10097  2ead							;;line 2672;;
+  10098  2ead
+  10099  2ead				   .
+  10100  2ead							;;line 2673;;
+  10101  2ead
+  10102  2ead				   .
+  10103  2ead							;;line 2674;;
+  10104  2ead
+  10105  2ead				   .
+  10106  2ead							;;line 2675;;
+  10107  2ead
+  10108  2ead				   .
+  10109  2ead							;;line 2676;;
+  10110  2ead
+  10111  2ead				   .
+  10112  2ead							;;line 2677;;
+  10113  2ead
+  10114  2ead				   .
+  10115  2ead							;;line 2678;;
+  10116  2ead
+  10117  2ead				   .
+  10118  2ead							;;line 2679;;
+  10119  2ead
+  10120  2ead				   .
+  10121  2ead							;;line 2680;;
+  10122  2ead
+  10123  2ead				   .
+  10124  2ead							;;line 2681;;
+  10125  2ead
+  10126  2ead				   .
+  10127  2ead							;;line 2682;;
+  10128  2ead
+  10129  2ead				   .
+  10130  2ead							;;line 2683;;
+  10131  2ead
+  10132  2ead				   .
+  10133  2ead							;;line 2684;;
+  10134  2ead
+  10135  2ead				   .
+  10136  2ead							;;line 2685;;
+  10137  2ead
+  10138  2ead				   .L0517		;;line 2686;;	data dropy
+  10139  2ead
+  10140  2ead		       4c b9 fe 	      JMP	.skipL0517
+  10141  2eb0				   dropy
+  10142  2eb0		       00 01 02 03*	      .byte.b	0, 1, 2, 3, 4, 4, 0, 1, 2
+  10143  2eb9
+  10144  2eb9				   .skipL0517
+  10145  2eb9				   .L0518		;;line 2689;;	data presslen
+  10146  2eb9
+  10147  2eb9		       4c c5 fe 	      JMP	.skipL0518
+  10148  2ebc				   presslen
+  10149  2ebc		       00 00 01 04*	      .byte.b	0, 0, 1, 4, 4, 2, 0, 0, 1
+  10150  2ec5
+  10151  2ec5				   .skipL0518
+  10152  2ec5				   .L0519		;;line 2692;;	data pressold
+  10153  2ec5
+  10154  2ec5		       4c d1 fe 	      JMP	.skipL0519
+  10155  2ec8				   pressold
+  10156  2ec8		       02 00 00 01*	      .byte.b	2, 0, 0, 1, 4, 4, 2, 0, 0
+  10157  2ed1
+  10158  2ed1				   .skipL0519
+  10159  2ed1				   .
+  10160  2ed1							;;line 2695;;
+  10161  2ed1
+  10162  2ed1				   .L0520		;;line 2696;;	data objects
+  10163  2ed1
+  10164  2ed1		       4c 0c ff 	      JMP	.skipL0520
+  10165  2ed4				   objects
+  10166  2ed4		       00 00 00 00*	      .byte.b	%00000000, %00000000, %00000000, %00000000, %10101010, %01111010, %00100010, 18
+  10167  2edc
+  10168  2edc		       7f 00 00 00*	      .byte.b	%01111111, %00000000, %00000000, %00000000, %10000000, %00000000, %00101011, 136
+  10169  2ee4
+  10170  2ee4		       00 00 37 00*	      .byte.b	%00000000, %00000000, %00110111, %00000000, %00000000, %00000000, %00001011, 18
+  10171  2eec
+  10172  2eec		       00 00 00 ff*	      .byte.b	%00000000, %00000000, %00000000, %11111111, %00000000, %00000000, %00101011, 136
+  10173  2ef4
+  10174  2ef4		       00 ec 00 00*	      .byte.b	%00000000, %11101100, %00000000, %00000000, %11101100, %00000000, %01111110, 136
+  10175  2efc
+  10176  2efc		       00 00 00 ff*	      .byte.b	%00000000, %00000000, %00000000, %11111111, %00000000, %00000000, %00101011, 136
+  10177  2f04
+  10178  2f04		       00 00 00 00*	      .byte.b	%00000000, %00000000, %00000000, %00000000, %00000000, %00000000, %01010101, 136
+  10179  2f0c
+  10180  2f0c				   .skipL0520
+  10181  2f0c				   .
+  10182  2f0c							;;line 2706;;
+  10183  2f0c
+  10184  2f0c				   .
+  10185  2f0c							;;line 2707;;
+  10186  2f0c
+  10187  2f0c				   .
+  10188  2f0c							;;line 2708;;
+  10189  2f0c
+  10190  2f0c				   .
+  10191  2f0c							;;line 2709;;
+  10192  2f0c
+  10193  2f0c				   .
+  10194  2f0c							;;line 2710;;
+  10195  2f0c
+  10196  2f0c				   .
+  10197  2f0c							;;line 2711;;
+  10198  2f0c
+  10199  2f0c				   .L0521		;;line 2712;;	macro cup
+  10200  2f0c
+  10201  2f0c					      MAC	cup
+  10202  2f0c				   .L0522		;;line 2713;;	temp6 = {2}  +	2
+  10203  2f0c
+  10204  2f0c					      LDA	{2}
+  10205  2f0c					      CLC
+  10206  2f0c					      ADC	#2
+  10207  2f0c					      STA	temp6
+  10208  2f0c				   .L0523		;;line 2714;;	temp5 = {1}  +	4
+  10209  2f0c
+  10210  2f0c					      LDA	{1}
+  10211  2f0c					      CLC
+  10212  2f0c					      ADC	#4
+  10213  2f0c					      STA	temp5
+  10214  2f0c				   .L0524		;;line 2715;;	for temp4 = {2} to temp6
+  10215  2f0c
+  10216  2f0c					      LDA	{2}
+  10217  2f0c					      STA	temp4
+  10218  2f0c				   .L0524fortemp4
+  10219  2f0c				   .L0525		;;line 2716;;	pfhline {1} temp4 temp5 on
+  10220  2f0c
+  10221  2f0c					      LDX	#0
+  10222  2f0c					      LDA	temp5
+  10223  2f0c					      STA	temp3
+  10224  2f0c					      LDY	temp4
+  10225  2f0c					      LDA	{1}
+  10226  2f0c					      jsr	pfhline
+  10227  2f0c				   .L0526		;;line 2717;;	next
+  10228  2f0c
+  10229  2f0c					      LDA	temp4
+  10230  2f0c					      CMP	temp6
+  10231  2f0c					      INC	temp4
+  10232  2f0c					      bcc	.L0524fortemp4
+  10233  2f0c					      if	( (((((#>*)&$1f)*256)|(#<.L0524fortemp4))>=bankswitch_hotspot) && (((((#>*)&$1f)*256)|(#<.L0524fortemp4))<=(bankswitch_hotspot+bs_mask)) )
+  10234  2f0c					      echo	"WARNING: branch near the end of bank 2 may accidentally trigger a bankswitch. Reposition code there if bad things happen."
+  10235  2f0c					      endif
+  10236  2f0c				   .L0527		;;line 2718;;	pfpixel temp5 temp6 off
+  10237  2f0c
+  10238  2f0c					      LDX	#1
+  10239  2f0c					      LDY	temp6
+  10240  2f0c					      LDA	temp5
+  10241  2f0c					      jsr	pfpixel
+  10242  2f0c					      ENDM
+  10243  2f0c				   .
+  10244  2f0c							;;line 2720;;
+  10245  2f0c
+  10246  2f0c				   .
+  10247  2f0c							;;line 2721;;
+  10248  2f0c
+  10249  2f0c				   .
+  10250  2f0c							;;line 2722;;
+  10251  2f0c
+  10252  2f0c				   .L0528		;;line 2723;;	macro chocolate
+  10253  2f0c
+  10254  2f0c					      MAC	chocolate
+  10255  2f0c				   .L0529		;;line 2724;;	temp6 = {2}  +	2
+  10256  2f0c
+  10257  2f0c					      LDA	{2}
+  10258  2f0c					      CLC
+  10259  2f0c					      ADC	#2
+  10260  2f0c					      STA	temp6
+  10261  2f0c				   .L0530		;;line 2725;;	pfvline {1} {2} temp6 on
+  10262  2f0c
+  10263  2f0c					      LDX	#0
+  10264  2f0c					      LDA	temp6
+  10265  2f0c					      STA	temp3
+  10266  2f0c					      LDY	{2}
+  10267  2f0c					      LDA	{1}
+  10268  2f0c					      jsr	pfvline
+  10269  2f0c				   .L0531		;;line 2726;;	temp5 = {1}  +	4
+  10270  2f0c
+  10271  2f0c					      LDA	{1}
+  10272  2f0c					      CLC
+  10273  2f0c					      ADC	#4
+  10274  2f0c					      STA	temp5
+  10275  2f0c				   .L0532		;;line 2727;;	temp6 = {2}  -	2
+  10276  2f0c
+  10277  2f0c					      LDA	{2}
+  10278  2f0c					      SEC
+  10279  2f0c					      SBC	#2
+  10280  2f0c					      STA	temp6
+  10281  2f0c				   .L0533		;;line 2728;;	pfvline temp5 temp6 {2} on
+  10282  2f0c
+  10283  2f0c					      LDX	#0
+  10284  2f0c					      LDA	{2}
+  10285  2f0c					      STA	temp3
+  10286  2f0c					      LDY	temp6
+  10287  2f0c					      LDA	temp5
+  10288  2f0c					      jsr	pfvline
+  10289  2f0c					      ENDM
+  10290  2f0c				   .
+  10291  2f0c							;;line 2730;;
+  10292  2f0c
+  10293  2f0c				   .
+  10294  2f0c							;;line 2731;;
+  10295  2f0c
+  10296  2f0c				   .L0534		;;line 2732;;	macro lamp
+  10297  2f0c
+  10298  2f0c					      MAC	lamp
+  10299  2f0c				   .L0535		;;line 2733;;	temp5 = {1}  +	2
+  10300  2f0c
+  10301  2f0c					      LDA	{1}
+  10302  2f0c					      CLC
+  10303  2f0c					      ADC	#2
+  10304  2f0c					      STA	temp5
+  10305  2f0c				   .L0536		;;line 2734;;	pfhline {1} {2} temp5 on
+  10306  2f0c
+  10307  2f0c					      LDX	#0
+  10308  2f0c					      LDA	temp5
+  10309  2f0c					      STA	temp3
+  10310  2f0c					      LDY	{2}
+  10311  2f0c					      LDA	{1}
+  10312  2f0c					      jsr	pfhline
+  10313  2f0c				   .L0537		;;line 2735;;	temp5 = {1}  +	1
+  10314  2f0c
+  10315  2f0c					      LDA	{1}
+  10316  2f0c					      CLC
+  10317  2f0c					      ADC	#1
+  10318  2f0c					      STA	temp5
+  10319  2f0c				   .L0538		;;line 2736;;	temp6 = {2}  +	1
+  10320  2f0c
+  10321  2f0c					      LDA	{2}
+  10322  2f0c					      CLC
+  10323  2f0c					      ADC	#1
+  10324  2f0c					      STA	temp6
+  10325  2f0c				   .L0539		;;line 2737;;	pfpixel temp5 temp6 on
+  10326  2f0c
+  10327  2f0c					      LDX	#0
+  10328  2f0c					      LDY	temp6
+  10329  2f0c					      LDA	temp5
+  10330  2f0c					      jsr	pfpixel
+  10331  2f0c					      ENDM
+  10332  2f0c				   .
+  10333  2f0c							;;line 2739;;
+  10334  2f0c
+  10335  2f0c				   .
+  10336  2f0c							;;line 2740;;
+  10337  2f0c
+  10338  2f0c				   .L0540		;;line 2741;;	macro table
+  10339  2f0c
+  10340  2f0c					      MAC	table
+  10341  2f0c				   .L0541		;;line 2742;;	temp5 = {1}  +	2
+  10342  2f0c
+  10343  2f0c					      LDA	{1}
+  10344  2f0c					      CLC
+  10345  2f0c					      ADC	#2
+  10346  2f0c					      STA	temp5
+  10347  2f0c				   .L0542		;;line 2743;;	temp6 = {2}  +	1
+  10348  2f0c
+  10349  2f0c					      LDA	{2}
+  10350  2f0c					      CLC
+  10351  2f0c					      ADC	#1
+  10352  2f0c					      STA	temp6
+  10353  2f0c				   .L0543		;;line 2744;;	pfhline {1} temp6 temp5 on
+  10354  2f0c
+  10355  2f0c					      LDX	#0
+  10356  2f0c					      LDA	temp5
+  10357  2f0c					      STA	temp3
+  10358  2f0c					      LDY	temp6
+  10359  2f0c					      LDA	{1}
+  10360  2f0c					      jsr	pfhline
+  10361  2f0c				   .L0544		;;line 2745;;	temp6 = temp6  +  1
+  10362  2f0c
+  10363  2f0c					      INC	temp6
+  10364  2f0c				   .L0545		;;line 2746;;	pfpixel {1} temp6 on
+  10365  2f0c
+  10366  2f0c					      LDX	#0
+  10367  2f0c					      LDY	temp6
+  10368  2f0c					      LDA	{1}
+  10369  2f0c					      jsr	pfpixel
+  10370  2f0c				   .L0546		;;line 2747;;	pfpixel temp5 temp6 on
+  10371  2f0c
+  10372  2f0c					      LDX	#0
+  10373  2f0c					      LDY	temp6
+  10374  2f0c					      LDA	temp5
+  10375  2f0c					      jsr	pfpixel
+  10376  2f0c				   .L0547		;;line 2748;;	temp5 = {1}  +	4
+  10377  2f0c
+  10378  2f0c					      LDA	{1}
+  10379  2f0c					      CLC
+  10380  2f0c					      ADC	#4
+  10381  2f0c					      STA	temp5
+  10382  2f0c				   .L0548		;;line 2749;;	pfpixel temp5 temp6 on
+  10383  2f0c
+  10384  2f0c					      LDX	#0
+  10385  2f0c					      LDY	temp6
+  10386  2f0c					      LDA	temp5
+  10387  2f0c					      jsr	pfpixel
+  10388  2f0c					      ENDM
+  10389  2f0c				   .
+  10390  2f0c							;;line 2751;;
+  10391  2f0c
+  10392  2f0c				   .
+  10393  2f0c							;;line 2752;;
+  10394  2f0c
+  10395  2f0c				   .L0549		;;line 2753;;	macro piano
+  10396  2f0c
+  10397  2f0c					      MAC	piano
+  10398  2f0c				   .L0550		;;line 2754;;	temp5 = {1}  +	{2}
+  10399  2f0c
+  10400  2f0c					      LDA	{1}
+  10401  2f0c					      CLC
+  10402  2f0c					      ADC	{2}
+  10403  2f0c					      STA	temp5
+  10404  2f0c				   .L0551		;;line 2755;;	pfhline {1} 5 temp5 on
+  10405  2f0c
+  10406  2f0c					      LDX	#0
+  10407  2f0c					      LDA	temp5
+  10408  2f0c					      STA	temp3
+  10409  2f0c					      LDY	#5
+  10410  2f0c					      LDA	{1}
+  10411  2f0c					      jsr	pfhline
+  10412  2f0c					      ENDM
+  10413  2f0c				   .
+  10414  2f0c							;;line 2757;;
+  10415  2f0c
+  10416  2f0c				   .
+  10417  2f0c							;;line 2758;;
+  10418  2f0c
+  10419  2f0c				   .L0552		;;line 2759;;	macro divisor
+  10420  2f0c
+  10421  2f0c					      MAC	divisor
+  10422  2f0c				   .
+  10423  2f0c							;;line 2760;;
+  10424  2f0c
+  10425  2f0c				   .L0553		;;line 2761;;	asm
+  10426  2f0c
+  10427  2f0c					      lda	#0
+  10428  2f0c
+  10429  2f0c					      sta	temp5
+  10430  2f0c
+  10431  2f0c					      lda	#7
+  10432  2f0c
+  10433  2f0c					      sta	temp6
+  10434  2f0c
+  10435  2f0c				   div_loop
+  10436  2f0c
+  10437  2f0c					      lsr	temp4
+  10438  2f0c
+  10439  2f0c					      bcc	div_skip
+  10440  2f0c
+  10441  2f0c					      lda	temp6
+  10442  2f0c
+  10443  2f0c					      sta	temp3
+  10444  2f0c
+  10445  2f0c					      lda	temp5
+  10446  2f0c
+  10447  2f0c					      ldy	#5
+  10448  2f0c
+  10449  2f0c					      ldx	#0
+  10450  2f0c
+  10451  2f0c					      jsr	pfhline
+  10452  2f0c
+  10453  2f0c				   div_skip
+  10454  2f0c
+  10455  2f0c					      lda	temp5
+  10456  2f0c
+  10457  2f0c					      clc
+  10458  2f0c
+  10459  2f0c					      adc	#4
+  10460  2f0c
+  10461  2f0c					      sta	temp5
+  10462  2f0c
+  10463  2f0c					      adc	#4
+  10464  2f0c
+  10465  2f0c					      sta	temp6
+  10466  2f0c
+  10467  2f0c					      lda	temp5
+  10468  2f0c
+  10469  2f0c					      cmp	#28
+  10470  2f0c
+  10471  2f0c					      bcc	div_loop
+  10472  2f0c
+  10473  2f0c					      ENDM
+  10474  2f0c				  -	      if	(<*) > (<(*+3))
+  10475  2f0c				  -	      repeat	($100-<*)
+  10476  2f0c				  -	      .byte	0
+  10477  2f0c				  -	      repend
+  10478  2f0c					      endif
+  10479  2f0c				   player105then_0
+  10480  2f0c		       24		      .byte.b	%00100100
+  10481  2f0d		       bd		      .byte.b	%10111101
+  10482  2f0e		       5a		      .byte.b	%01011010
+  10483  2f0f		       7e		      .byte.b	%01111110
+  10484  2f10				  -	      if	(<*) > (<(*+3))
+  10485  2f10				  -	      repeat	($100-<*)
+  10486  2f10				  -	      .byte	0
+  10487  2f10				  -	      repend
+  10488  2f10					      endif
+  10489  2f10				   player111then_0
+  10490  2f10		       18		      .byte.b	%00011000
+  10491  2f11		       bd		      .byte.b	%10111101
+  10492  2f12		       5a		      .byte.b	%01011010
+  10493  2f13		       7e		      .byte.b	%01111110
+  10494  2f14				  -	      if	(<*) > (<(*+3))
+  10495  2f14				  -	      repeat	($100-<*)
+  10496  2f14				  -	      .byte	0
+  10497  2f14				  -	      repend
+  10498  2f14					      endif
+  10499  2f14				   player114then_1
+  10500  2f14		       7e		      .byte.b	%01111110
+  10501  2f15		       81		      .byte.b	%10000001
+  10502  2f16		       99		      .byte.b	%10011001
+  10503  2f17		       66		      .byte.b	%01100110
+  10504  2f18				  -	      if	(<*) > (<(*+3))
+  10505  2f18				  -	      repeat	($100-<*)
+  10506  2f18				  -	      .byte	0
+  10507  2f18				  -	      repend
+  10508  2f18					      endif
+  10509  2f18				   player115then_1
+  10510  2f18		       7e		      .byte.b	%01111110
+  10511  2f19		       ff		      .byte.b	%11111111
+  10512  2f1a		       ff		      .byte.b	%11111111
+  10513  2f1b		       66		      .byte.b	%01100110
+  10514  2f1c				  -	      if	(<*) > (<(*+7))
+  10515  2f1c				  -	      repeat	($100-<*)
+  10516  2f1c				  -	      .byte	0
+  10517  2f1c				  -	      repend
+  10518  2f1c					      endif
+  10519  2f1c				   playerL0365_1
+  10520  2f1c		       3c		      .byte.b	%00111100
   10521  2f1d		       7e		      .byte.b	%01111110
-  10522  2f1e					      if	ECHOFIRST
-      86 bytes of ROM space left in bank 2
-  10523  2f1e					      echo	"    ",[(scoretable - *)]d , "bytes of ROM space left in bank 2")
-  10524  2f1e					      endif
-  10525  2f1e		       00 01	   ECHOFIRST  =	1
-  10526  2f1e
-  10527  2f1e
-  10528  2f1e							; Provided under the CC0 license. See the included LICENSE.txt for details.
-  10529  2f1e							; font equates
-  10530  2f1e		       00 01	   .21stcentury =	1
-  10531  2f1e		       00 02	   alarmclock =	2
-  10532  2f1e		       00 03	   handwritten =	3
-  10533  2f1e		       00 04	   interrupted =	4
-  10534  2f1e		       00 05	   retroputer =	5
-  10535  2f1e		       00 06	   whimsey    =	6
-  10536  2f1e		       00 07	   tiny       =	7
-  10537  2f1e		       00 08	   hex	      =	8
-  10538  2f1e
-  10539  2f1e							; feel free to modify the score graphics - just keep each digit 8 high
-  10540  2f1e							; and keep the conditional compilation stuff intact
-  10541  2f1e					      ifnconst	PXE
-  10542  2f1e				  -	      ifconst	ROM2k
-  10543  2f1e				  -	      ORG	$F7AC-8
-  10544  2f1e					      else
-  10545  2f1e					      ifconst	bankswitch
-  10546  2f1e					      if	bankswitch == 8
-  10547  2f74					      ORG	$2F94-bscode_length
-  10548  2f74					      RORG	$FF94-bscode_length
-  10549  2f74					      endif
-  10550  2f74				  -	      if	bankswitch == 16
-  10551  2f74				  -	      ORG	$4F94-bscode_length
-  10552  2f74				  -	      RORG	$FF94-bscode_length
-  10553  2f74					      endif
-  10554  2f74				  -	      if	bankswitch == 32
-  10555  2f74				  -	      ORG	$8F94-bscode_length
-  10556  2f74				  -	      RORG	$FF94-bscode_length
-  10557  2f74					      endif
-  10558  2f74				  -	      if	bankswitch == 64
-  10559  2f74				  -	      ORG	$10F80-bscode_length
-  10560  2f74				  -	      RORG	$1FF80-bscode_length
-  10561  2f74					      endif
-  10562  2f74				  -	      else
-  10563  2f74				  -	      ORG	$FF9C
-  10564  2f74					      endif
-  10565  2f74					      endif
-  10566  2f74
-  10567  2f74
-  10568  2f74				  -	      ifconst	font
-  10569  2f74				  -	      if	font == hex
-  10570  2f74				  -	      ORG	. - 48
-  10571  2f74				  -	      endif
-  10572  2f74					      endif
-  10573  2f74					      endif
-  10574  2f74
-  10575  2f74				   scoretable
-  10576  2f74
-  10577  2f74				  -	      ifconst	font
-  10578  2f74				  -	      if	font == .21stcentury
-  10579  2f74				  -	      include	"score_graphics.asm.21stcentury"
-  10580  2f74				  -	      endif
-  10581  2f74				  -	      if	font == alarmclock
-  10582  2f74				  -	      include	"score_graphics.asm.alarmclock"
-  10583  2f74				  -	      endif
-  10584  2f74				  -	      if	font == handwritten
-  10585  2f74				  -	      include	"score_graphics.asm.handwritten"
+  10522  2f1e		       ff		      .byte.b	%11111111
+  10523  2f1f		       a5		      .byte.b	%10100101
+  10524  2f20		       81		      .byte.b	%10000001
+  10525  2f21		       a5		      .byte.b	%10100101
+  10526  2f22		       ff		      .byte.b	%11111111
+  10527  2f23		       7e		      .byte.b	%01111110
+  10528  2f24					      if	ECHOFIRST
+      80 bytes of ROM space left in bank 2
+  10529  2f24					      echo	"    ",[(scoretable - *)]d , "bytes of ROM space left in bank 2")
+  10530  2f24					      endif
+  10531  2f24		       00 01	   ECHOFIRST  =	1
+  10532  2f24
+  10533  2f24
+  10534  2f24							; Provided under the CC0 license. See the included LICENSE.txt for details.
+  10535  2f24							; font equates
+  10536  2f24		       00 01	   .21stcentury =	1
+  10537  2f24		       00 02	   alarmclock =	2
+  10538  2f24		       00 03	   handwritten =	3
+  10539  2f24		       00 04	   interrupted =	4
+  10540  2f24		       00 05	   retroputer =	5
+  10541  2f24		       00 06	   whimsey    =	6
+  10542  2f24		       00 07	   tiny       =	7
+  10543  2f24		       00 08	   hex	      =	8
+  10544  2f24
+  10545  2f24							; feel free to modify the score graphics - just keep each digit 8 high
+  10546  2f24							; and keep the conditional compilation stuff intact
+  10547  2f24					      ifnconst	PXE
+  10548  2f24				  -	      ifconst	ROM2k
+  10549  2f24				  -	      ORG	$F7AC-8
+  10550  2f24					      else
+  10551  2f24					      ifconst	bankswitch
+  10552  2f24					      if	bankswitch == 8
+  10553  2f74					      ORG	$2F94-bscode_length
+  10554  2f74					      RORG	$FF94-bscode_length
+  10555  2f74					      endif
+  10556  2f74				  -	      if	bankswitch == 16
+  10557  2f74				  -	      ORG	$4F94-bscode_length
+  10558  2f74				  -	      RORG	$FF94-bscode_length
+  10559  2f74					      endif
+  10560  2f74				  -	      if	bankswitch == 32
+  10561  2f74				  -	      ORG	$8F94-bscode_length
+  10562  2f74				  -	      RORG	$FF94-bscode_length
+  10563  2f74					      endif
+  10564  2f74				  -	      if	bankswitch == 64
+  10565  2f74				  -	      ORG	$10F80-bscode_length
+  10566  2f74				  -	      RORG	$1FF80-bscode_length
+  10567  2f74					      endif
+  10568  2f74				  -	      else
+  10569  2f74				  -	      ORG	$FF9C
+  10570  2f74					      endif
+  10571  2f74					      endif
+  10572  2f74
+  10573  2f74
+  10574  2f74				  -	      ifconst	font
+  10575  2f74				  -	      if	font == hex
+  10576  2f74				  -	      ORG	. - 48
+  10577  2f74				  -	      endif
+  10578  2f74					      endif
+  10579  2f74					      endif
+  10580  2f74
+  10581  2f74				   scoretable
+  10582  2f74
+  10583  2f74				  -	      ifconst	font
+  10584  2f74				  -	      if	font == .21stcentury
+  10585  2f74				  -	      include	"score_graphics.asm.21stcentury"
   10586  2f74				  -	      endif
-  10587  2f74				  -	      if	font == interrupted
-  10588  2f74				  -	      include	"score_graphics.asm.interrupted"
+  10587  2f74				  -	      if	font == alarmclock
+  10588  2f74				  -	      include	"score_graphics.asm.alarmclock"
   10589  2f74				  -	      endif
-  10590  2f74				  -	      if	font == retroputer
-  10591  2f74				  -	      include	"score_graphics.asm.retroputer"
+  10590  2f74				  -	      if	font == handwritten
+  10591  2f74				  -	      include	"score_graphics.asm.handwritten"
   10592  2f74				  -	      endif
-  10593  2f74				  -	      if	font == whimsey
-  10594  2f74				  -	      include	"score_graphics.asm.whimsey"
+  10593  2f74				  -	      if	font == interrupted
+  10594  2f74				  -	      include	"score_graphics.asm.interrupted"
   10595  2f74				  -	      endif
-  10596  2f74				  -	      if	font == tiny
-  10597  2f74				  -	      include	"score_graphics.asm.tiny"
+  10596  2f74				  -	      if	font == retroputer
+  10597  2f74				  -	      include	"score_graphics.asm.retroputer"
   10598  2f74				  -	      endif
-  10599  2f74				  -	      if	font == hex
-  10600  2f74				  -	      include	"score_graphics.asm.hex"
+  10599  2f74				  -	      if	font == whimsey
+  10600  2f74				  -	      include	"score_graphics.asm.whimsey"
   10601  2f74				  -	      endif
-  10602  2f74					      else		; default font
-  10603  2f74
-  10604  2f74		       3c		      .byte.b	%00111100
-  10605  2f75		       66		      .byte.b	%01100110
-  10606  2f76		       66		      .byte.b	%01100110
-  10607  2f77		       66		      .byte.b	%01100110
-  10608  2f78		       66		      .byte.b	%01100110
-  10609  2f79		       66		      .byte.b	%01100110
-  10610  2f7a		       66		      .byte.b	%01100110
-  10611  2f7b		       3c		      .byte.b	%00111100
-  10612  2f7c
-  10613  2f7c		       7e		      .byte.b	%01111110
-  10614  2f7d		       18		      .byte.b	%00011000
-  10615  2f7e		       18		      .byte.b	%00011000
-  10616  2f7f		       18		      .byte.b	%00011000
-  10617  2f80		       18		      .byte.b	%00011000
-  10618  2f81		       38		      .byte.b	%00111000
-  10619  2f82		       18		      .byte.b	%00011000
-  10620  2f83		       08		      .byte.b	%00001000
-  10621  2f84
-  10622  2f84		       7e		      .byte.b	%01111110
-  10623  2f85		       60		      .byte.b	%01100000
-  10624  2f86		       60		      .byte.b	%01100000
-  10625  2f87		       3c		      .byte.b	%00111100
-  10626  2f88		       06		      .byte.b	%00000110
-  10627  2f89		       06		      .byte.b	%00000110
-  10628  2f8a		       46		      .byte.b	%01000110
-  10629  2f8b		       3c		      .byte.b	%00111100
-  10630  2f8c
-  10631  2f8c		       3c		      .byte.b	%00111100
-  10632  2f8d		       46		      .byte.b	%01000110
-  10633  2f8e		       06		      .byte.b	%00000110
-  10634  2f8f		       06		      .byte.b	%00000110
-  10635  2f90		       1c		      .byte.b	%00011100
-  10636  2f91		       06		      .byte.b	%00000110
-  10637  2f92		       46		      .byte.b	%01000110
-  10638  2f93		       3c		      .byte.b	%00111100
-  10639  2f94
-  10640  2f94		       0c		      .byte.b	%00001100
-  10641  2f95		       0c		      .byte.b	%00001100
-  10642  2f96		       7e		      .byte.b	%01111110
-  10643  2f97		       4c		      .byte.b	%01001100
-  10644  2f98		       4c		      .byte.b	%01001100
-  10645  2f99		       2c		      .byte.b	%00101100
-  10646  2f9a		       1c		      .byte.b	%00011100
-  10647  2f9b		       0c		      .byte.b	%00001100
-  10648  2f9c
-  10649  2f9c		       3c		      .byte.b	%00111100
-  10650  2f9d		       46		      .byte.b	%01000110
-  10651  2f9e		       06		      .byte.b	%00000110
-  10652  2f9f		       06		      .byte.b	%00000110
-  10653  2fa0		       3c		      .byte.b	%00111100
-  10654  2fa1		       60		      .byte.b	%01100000
-  10655  2fa2		       60		      .byte.b	%01100000
-  10656  2fa3		       7e		      .byte.b	%01111110
-  10657  2fa4
-  10658  2fa4		       3c		      .byte.b	%00111100
-  10659  2fa5		       66		      .byte.b	%01100110
-  10660  2fa6		       66		      .byte.b	%01100110
-  10661  2fa7		       66		      .byte.b	%01100110
-  10662  2fa8		       7c		      .byte.b	%01111100
-  10663  2fa9		       60		      .byte.b	%01100000
-  10664  2faa		       62		      .byte.b	%01100010
-  10665  2fab		       3c		      .byte.b	%00111100
-  10666  2fac
-  10667  2fac		       30		      .byte.b	%00110000
-  10668  2fad		       30		      .byte.b	%00110000
-  10669  2fae		       30		      .byte.b	%00110000
-  10670  2faf		       18		      .byte.b	%00011000
-  10671  2fb0		       0c		      .byte.b	%00001100
-  10672  2fb1		       06		      .byte.b	%00000110
-  10673  2fb2		       42		      .byte.b	%01000010
-  10674  2fb3		       3e		      .byte.b	%00111110
-  10675  2fb4
-  10676  2fb4		       3c		      .byte.b	%00111100
-  10677  2fb5		       66		      .byte.b	%01100110
-  10678  2fb6		       66		      .byte.b	%01100110
-  10679  2fb7		       66		      .byte.b	%01100110
-  10680  2fb8		       3c		      .byte.b	%00111100
-  10681  2fb9		       66		      .byte.b	%01100110
-  10682  2fba		       66		      .byte.b	%01100110
-  10683  2fbb		       3c		      .byte.b	%00111100
-  10684  2fbc
-  10685  2fbc		       3c		      .byte.b	%00111100
-  10686  2fbd		       46		      .byte.b	%01000110
-  10687  2fbe		       06		      .byte.b	%00000110
-  10688  2fbf		       3e		      .byte.b	%00111110
-  10689  2fc0		       66		      .byte.b	%01100110
-  10690  2fc1		       66		      .byte.b	%01100110
-  10691  2fc2		       66		      .byte.b	%01100110
-  10692  2fc3		       3c		      .byte.b	%00111100
-  10693  2fc4
-  10694  2fc4					      ifnconst	DPC_kernel_options
-  10695  2fc4
-  10696  2fc4		       00		      .byte.b	%00000000
-  10697  2fc5		       00		      .byte.b	%00000000
-  10698  2fc6		       00		      .byte.b	%00000000
-  10699  2fc7		       00		      .byte.b	%00000000
-  10700  2fc8		       00		      .byte.b	%00000000
-  10701  2fc9		       00		      .byte.b	%00000000
-  10702  2fca		       00		      .byte.b	%00000000
-  10703  2fcb		       00		      .byte.b	%00000000
-  10704  2fcc
-  10705  2fcc					      endif
-  10706  2fcc
-  10707  2fcc					      endif
-  10708  2fcc
-  10709  2fcc					      ifnconst	PXE
-  10710  2fcc				  -	      ifconst	ROM2k
-  10711  2fcc				  -	      ORG	$F7FC
-  10712  2fcc					      else
-  10713  2fcc					      ifconst	bankswitch
-  10714  2fcc					      if	bankswitch == 8
-  10715  2fd4					      ORG	$2FF4-bscode_length
-  10716  2fd4					      RORG	$FFF4-bscode_length
-  10717  2fd4					      endif
-  10718  2fd4				  -	      if	bankswitch == 16
-  10719  2fd4				  -	      ORG	$4FF4-bscode_length
-  10720  2fd4				  -	      RORG	$FFF4-bscode_length
-  10721  2fd4					      endif
-  10722  2fd4				  -	      if	bankswitch == 32
-  10723  2fd4				  -	      ORG	$8FF4-bscode_length
-  10724  2fd4				  -	      RORG	$FFF4-bscode_length
-  10725  2fd4					      endif
-  10726  2fd4				  -	      if	bankswitch == 64
-  10727  2fd4				  -	      ORG	$10FE0-bscode_length
-  10728  2fd4				  -	      RORG	$1FFE0-bscode_length
-  10729  2fd4					      endif
-  10730  2fd4				  -	      else
-  10731  2fd4				  -	      ORG	$FFFC
-  10732  2fd4					      endif
-  10733  2fd4					      endif
-  10734  2fd4					      endif
-  10735  2fd4							; Provided under the CC0 license. See the included LICENSE.txt for details.
-  10736  2fd4
-  10737  2fd4							; every bank has this stuff at the same place
-  10738  2fd4							; this code can switch to/from any bank at any entry point
-  10739  2fd4							; and can preserve register values
-  10740  2fd4							; note: lines not starting with a space are not placed in all banks
-  10741  2fd4							;
-  10742  2fd4							; line below tells the compiler how long this is - do not remove
-  10743  2fd4							;size=32
-  10744  2fd4
-  10745  2fd4				   begin_bscode
-  10746  2fd4		       a2 ff		      ldx	#$ff
-  10747  2fd6				  -	      ifconst	FASTFETCH	; using DPC+
-  10748  2fd6				  -	      stx	FASTFETCH
-  10749  2fd6					      endif
-  10750  2fd6		       9a		      txs
-  10751  2fd7				  -	      if	bankswitch == 64
-  10752  2fd7				  -	      lda	#(((>(start-1)) & $0F) | $F0)
-  10753  2fd7					      else
-  10754  2fd7		       a9 f2		      lda	#>(start-1)
-  10755  2fd9					      endif
-  10756  2fd9		       48		      pha
-  10757  2fda		       a9 51		      lda	#<(start-1)
-  10758  2fdc		       48		      pha
-  10759  2fdd
-  10760  2fdd				   BS_return
-  10761  2fdd		       48		      pha
-  10762  2fde		       8a		      txa
-  10763  2fdf		       48		      pha
-  10764  2fe0		       ba		      tsx
-  10765  2fe1
-  10766  2fe1					      if	bankswitch != 64
-  10767  2fe1		       b5 04		      lda	4,x	; get high byte of return address
-  10768  2fe3
-  10769  2fe3		       2a		      rol
-  10770  2fe4		       2a		      rol
-  10771  2fe5		       2a		      rol
-  10772  2fe6		       2a		      rol
-  10773  2fe7		       29 01		      and	#bs_mask	;1 3 or 7 for F8/F6/F4
-  10774  2fe9		       aa		      tax
-  10775  2fea		       e8		      inx
-  10776  2feb				  -	      else
-  10777  2feb				  -	      lda	4,x	; get high byte of return address
-  10778  2feb				  -	      tay
-  10779  2feb				  -	      ora	#$10	; change our bank nibble into a valid rom mirror
-  10780  2feb				  -	      sta	4,x
-  10781  2feb				  -	      tya
-  10782  2feb				  -	      lsr
-  10783  2feb				  -	      lsr
-  10784  2feb				  -	      lsr
-  10785  2feb				  -	      lsr
-  10786  2feb				  -	      tax
-  10787  2feb				  -	      inx
-  10788  2feb					      endif
-  10789  2feb
-  10790  2feb				   BS_jsr
-  10791  2feb		       bd f7 1f 	      lda	bankswitch_hotspot-1,x
-  10792  2fee		       68		      pla
-  10793  2fef		       aa		      tax
-  10794  2ff0		       68		      pla
-  10795  2ff1		       60		      rts
-  10796  2ff2				  -	      if	((* & $1FFF) > ((bankswitch_hotspot & $1FFF) - 1))
-  10797  2ff2				  -	      echo	"WARNING: size parameter in banksw.asm too small - the program probably will not work."
-  10798  2ff2				  -	      echo	"Change to",[(*-begin_bscode+1)&$FF]d,"and try again."
-  10799  2ff2					      endif
-  10800  2ff2							; Provided under the CC0 license. See the included LICENSE.txt for details.
-  10801  2ff2
-  10802  2ff2					      ifconst	bankswitch
-  10803  2ff2					      if	bankswitch == 8
-  10804  2ffc					      ORG	$2FFC
-  10805  2ffc					      RORG	$FFFC
-  10806  2ffc					      endif
-  10807  2ffc				  -	      if	bankswitch == 16
-  10808  2ffc				  -	      ORG	$4FFC
-  10809  2ffc				  -	      RORG	$FFFC
-  10810  2ffc					      endif
-  10811  2ffc				  -	      if	bankswitch == 32
-  10812  2ffc				  -	      ORG	$8FFC
-  10813  2ffc				  -	      RORG	$FFFC
-  10814  2ffc					      endif
-  10815  2ffc				  -	      if	bankswitch == 64
-  10816  2ffc				  -	      ORG	$10FF0
-  10817  2ffc				  -	      RORG	$1FFF0
-  10818  2ffc				  -	      lda	$ffe0	; we use wasted space to assist stella with EF format auto-detection
-  10819  2ffc				  -	      ORG	$10FF8
-  10820  2ffc				  -	      RORG	$1FFF8
-  10821  2ffc				  -	      ifconst	superchip
-  10822  2ffc				  -	      .byte	"E","F","S","C"
-  10823  2ffc				  -	      else
-  10824  2ffc				  -	      .byte	"E","F","E","F"
-  10825  2ffc				  -	      endif
-  10826  2ffc				  -	      ORG	$10FFC
-  10827  2ffc				  -	      RORG	$1FFFC
-  10828  2ffc					      endif
+  10602  2f74				  -	      if	font == tiny
+  10603  2f74				  -	      include	"score_graphics.asm.tiny"
+  10604  2f74				  -	      endif
+  10605  2f74				  -	      if	font == hex
+  10606  2f74				  -	      include	"score_graphics.asm.hex"
+  10607  2f74				  -	      endif
+  10608  2f74					      else		; default font
+  10609  2f74
+  10610  2f74		       3c		      .byte.b	%00111100
+  10611  2f75		       66		      .byte.b	%01100110
+  10612  2f76		       66		      .byte.b	%01100110
+  10613  2f77		       66		      .byte.b	%01100110
+  10614  2f78		       66		      .byte.b	%01100110
+  10615  2f79		       66		      .byte.b	%01100110
+  10616  2f7a		       66		      .byte.b	%01100110
+  10617  2f7b		       3c		      .byte.b	%00111100
+  10618  2f7c
+  10619  2f7c		       7e		      .byte.b	%01111110
+  10620  2f7d		       18		      .byte.b	%00011000
+  10621  2f7e		       18		      .byte.b	%00011000
+  10622  2f7f		       18		      .byte.b	%00011000
+  10623  2f80		       18		      .byte.b	%00011000
+  10624  2f81		       38		      .byte.b	%00111000
+  10625  2f82		       18		      .byte.b	%00011000
+  10626  2f83		       08		      .byte.b	%00001000
+  10627  2f84
+  10628  2f84		       7e		      .byte.b	%01111110
+  10629  2f85		       60		      .byte.b	%01100000
+  10630  2f86		       60		      .byte.b	%01100000
+  10631  2f87		       3c		      .byte.b	%00111100
+  10632  2f88		       06		      .byte.b	%00000110
+  10633  2f89		       06		      .byte.b	%00000110
+  10634  2f8a		       46		      .byte.b	%01000110
+  10635  2f8b		       3c		      .byte.b	%00111100
+  10636  2f8c
+  10637  2f8c		       3c		      .byte.b	%00111100
+  10638  2f8d		       46		      .byte.b	%01000110
+  10639  2f8e		       06		      .byte.b	%00000110
+  10640  2f8f		       06		      .byte.b	%00000110
+  10641  2f90		       1c		      .byte.b	%00011100
+  10642  2f91		       06		      .byte.b	%00000110
+  10643  2f92		       46		      .byte.b	%01000110
+  10644  2f93		       3c		      .byte.b	%00111100
+  10645  2f94
+  10646  2f94		       0c		      .byte.b	%00001100
+  10647  2f95		       0c		      .byte.b	%00001100
+  10648  2f96		       7e		      .byte.b	%01111110
+  10649  2f97		       4c		      .byte.b	%01001100
+  10650  2f98		       4c		      .byte.b	%01001100
+  10651  2f99		       2c		      .byte.b	%00101100
+  10652  2f9a		       1c		      .byte.b	%00011100
+  10653  2f9b		       0c		      .byte.b	%00001100
+  10654  2f9c
+  10655  2f9c		       3c		      .byte.b	%00111100
+  10656  2f9d		       46		      .byte.b	%01000110
+  10657  2f9e		       06		      .byte.b	%00000110
+  10658  2f9f		       06		      .byte.b	%00000110
+  10659  2fa0		       3c		      .byte.b	%00111100
+  10660  2fa1		       60		      .byte.b	%01100000
+  10661  2fa2		       60		      .byte.b	%01100000
+  10662  2fa3		       7e		      .byte.b	%01111110
+  10663  2fa4
+  10664  2fa4		       3c		      .byte.b	%00111100
+  10665  2fa5		       66		      .byte.b	%01100110
+  10666  2fa6		       66		      .byte.b	%01100110
+  10667  2fa7		       66		      .byte.b	%01100110
+  10668  2fa8		       7c		      .byte.b	%01111100
+  10669  2fa9		       60		      .byte.b	%01100000
+  10670  2faa		       62		      .byte.b	%01100010
+  10671  2fab		       3c		      .byte.b	%00111100
+  10672  2fac
+  10673  2fac		       30		      .byte.b	%00110000
+  10674  2fad		       30		      .byte.b	%00110000
+  10675  2fae		       30		      .byte.b	%00110000
+  10676  2faf		       18		      .byte.b	%00011000
+  10677  2fb0		       0c		      .byte.b	%00001100
+  10678  2fb1		       06		      .byte.b	%00000110
+  10679  2fb2		       42		      .byte.b	%01000010
+  10680  2fb3		       3e		      .byte.b	%00111110
+  10681  2fb4
+  10682  2fb4		       3c		      .byte.b	%00111100
+  10683  2fb5		       66		      .byte.b	%01100110
+  10684  2fb6		       66		      .byte.b	%01100110
+  10685  2fb7		       66		      .byte.b	%01100110
+  10686  2fb8		       3c		      .byte.b	%00111100
+  10687  2fb9		       66		      .byte.b	%01100110
+  10688  2fba		       66		      .byte.b	%01100110
+  10689  2fbb		       3c		      .byte.b	%00111100
+  10690  2fbc
+  10691  2fbc		       3c		      .byte.b	%00111100
+  10692  2fbd		       46		      .byte.b	%01000110
+  10693  2fbe		       06		      .byte.b	%00000110
+  10694  2fbf		       3e		      .byte.b	%00111110
+  10695  2fc0		       66		      .byte.b	%01100110
+  10696  2fc1		       66		      .byte.b	%01100110
+  10697  2fc2		       66		      .byte.b	%01100110
+  10698  2fc3		       3c		      .byte.b	%00111100
+  10699  2fc4
+  10700  2fc4					      ifnconst	DPC_kernel_options
+  10701  2fc4
+  10702  2fc4		       00		      .byte.b	%00000000
+  10703  2fc5		       00		      .byte.b	%00000000
+  10704  2fc6		       00		      .byte.b	%00000000
+  10705  2fc7		       00		      .byte.b	%00000000
+  10706  2fc8		       00		      .byte.b	%00000000
+  10707  2fc9		       00		      .byte.b	%00000000
+  10708  2fca		       00		      .byte.b	%00000000
+  10709  2fcb		       00		      .byte.b	%00000000
+  10710  2fcc
+  10711  2fcc					      endif
+  10712  2fcc
+  10713  2fcc					      endif
+  10714  2fcc
+  10715  2fcc					      ifnconst	PXE
+  10716  2fcc				  -	      ifconst	ROM2k
+  10717  2fcc				  -	      ORG	$F7FC
+  10718  2fcc					      else
+  10719  2fcc					      ifconst	bankswitch
+  10720  2fcc					      if	bankswitch == 8
+  10721  2fd4					      ORG	$2FF4-bscode_length
+  10722  2fd4					      RORG	$FFF4-bscode_length
+  10723  2fd4					      endif
+  10724  2fd4				  -	      if	bankswitch == 16
+  10725  2fd4				  -	      ORG	$4FF4-bscode_length
+  10726  2fd4				  -	      RORG	$FFF4-bscode_length
+  10727  2fd4					      endif
+  10728  2fd4				  -	      if	bankswitch == 32
+  10729  2fd4				  -	      ORG	$8FF4-bscode_length
+  10730  2fd4				  -	      RORG	$FFF4-bscode_length
+  10731  2fd4					      endif
+  10732  2fd4				  -	      if	bankswitch == 64
+  10733  2fd4				  -	      ORG	$10FE0-bscode_length
+  10734  2fd4				  -	      RORG	$1FFE0-bscode_length
+  10735  2fd4					      endif
+  10736  2fd4				  -	      else
+  10737  2fd4				  -	      ORG	$FFFC
+  10738  2fd4					      endif
+  10739  2fd4					      endif
+  10740  2fd4					      endif
+  10741  2fd4							; Provided under the CC0 license. See the included LICENSE.txt for details.
+  10742  2fd4
+  10743  2fd4							; every bank has this stuff at the same place
+  10744  2fd4							; this code can switch to/from any bank at any entry point
+  10745  2fd4							; and can preserve register values
+  10746  2fd4							; note: lines not starting with a space are not placed in all banks
+  10747  2fd4							;
+  10748  2fd4							; line below tells the compiler how long this is - do not remove
+  10749  2fd4							;size=32
+  10750  2fd4
+  10751  2fd4				   begin_bscode
+  10752  2fd4		       a2 ff		      ldx	#$ff
+  10753  2fd6				  -	      ifconst	FASTFETCH	; using DPC+
+  10754  2fd6				  -	      stx	FASTFETCH
+  10755  2fd6					      endif
+  10756  2fd6		       9a		      txs
+  10757  2fd7				  -	      if	bankswitch == 64
+  10758  2fd7				  -	      lda	#(((>(start-1)) & $0F) | $F0)
+  10759  2fd7					      else
+  10760  2fd7		       a9 f2		      lda	#>(start-1)
+  10761  2fd9					      endif
+  10762  2fd9		       48		      pha
+  10763  2fda		       a9 51		      lda	#<(start-1)
+  10764  2fdc		       48		      pha
+  10765  2fdd
+  10766  2fdd				   BS_return
+  10767  2fdd		       48		      pha
+  10768  2fde		       8a		      txa
+  10769  2fdf		       48		      pha
+  10770  2fe0		       ba		      tsx
+  10771  2fe1
+  10772  2fe1					      if	bankswitch != 64
+  10773  2fe1		       b5 04		      lda	4,x	; get high byte of return address
+  10774  2fe3
+  10775  2fe3		       2a		      rol
+  10776  2fe4		       2a		      rol
+  10777  2fe5		       2a		      rol
+  10778  2fe6		       2a		      rol
+  10779  2fe7		       29 01		      and	#bs_mask	;1 3 or 7 for F8/F6/F4
+  10780  2fe9		       aa		      tax
+  10781  2fea		       e8		      inx
+  10782  2feb				  -	      else
+  10783  2feb				  -	      lda	4,x	; get high byte of return address
+  10784  2feb				  -	      tay
+  10785  2feb				  -	      ora	#$10	; change our bank nibble into a valid rom mirror
+  10786  2feb				  -	      sta	4,x
+  10787  2feb				  -	      tya
+  10788  2feb				  -	      lsr
+  10789  2feb				  -	      lsr
+  10790  2feb				  -	      lsr
+  10791  2feb				  -	      lsr
+  10792  2feb				  -	      tax
+  10793  2feb				  -	      inx
+  10794  2feb					      endif
+  10795  2feb
+  10796  2feb				   BS_jsr
+  10797  2feb		       bd f7 1f 	      lda	bankswitch_hotspot-1,x
+  10798  2fee		       68		      pla
+  10799  2fef		       aa		      tax
+  10800  2ff0		       68		      pla
+  10801  2ff1		       60		      rts
+  10802  2ff2				  -	      if	((* & $1FFF) > ((bankswitch_hotspot & $1FFF) - 1))
+  10803  2ff2				  -	      echo	"WARNING: size parameter in banksw.asm too small - the program probably will not work."
+  10804  2ff2				  -	      echo	"Change to",[(*-begin_bscode+1)&$FF]d,"and try again."
+  10805  2ff2					      endif
+  10806  2ff2							; Provided under the CC0 license. See the included LICENSE.txt for details.
+  10807  2ff2
+  10808  2ff2					      ifconst	bankswitch
+  10809  2ff2					      if	bankswitch == 8
+  10810  2ffc					      ORG	$2FFC
+  10811  2ffc					      RORG	$FFFC
+  10812  2ffc					      endif
+  10813  2ffc				  -	      if	bankswitch == 16
+  10814  2ffc				  -	      ORG	$4FFC
+  10815  2ffc				  -	      RORG	$FFFC
+  10816  2ffc					      endif
+  10817  2ffc				  -	      if	bankswitch == 32
+  10818  2ffc				  -	      ORG	$8FFC
+  10819  2ffc				  -	      RORG	$FFFC
+  10820  2ffc					      endif
+  10821  2ffc				  -	      if	bankswitch == 64
+  10822  2ffc				  -	      ORG	$10FF0
+  10823  2ffc				  -	      RORG	$1FFF0
+  10824  2ffc				  -	      lda	$ffe0	; we use wasted space to assist stella with EF format auto-detection
+  10825  2ffc				  -	      ORG	$10FF8
+  10826  2ffc				  -	      RORG	$1FFF8
+  10827  2ffc				  -	      ifconst	superchip
+  10828  2ffc				  -	      .byte	"E","F","S","C"
   10829  2ffc				  -	      else
-  10830  2ffc				  -	      ifconst	ROM2k
-  10831  2ffc				  -	      ORG	$F7FC
-  10832  2ffc				  -	      else
-  10833  2ffc				  -	      ORG	$FFFC
-  10834  2ffc				  -	      endif
-  10835  2ffc					      endif
-  10836  2ffc		       52 f2		      .word.w	(start & $ffff)
-  10837  2ffe		       52 f2		      .word.w	(start & $ffff)
+  10830  2ffc				  -	      .byte	"E","F","E","F"
+  10831  2ffc				  -	      endif
+  10832  2ffc				  -	      ORG	$10FFC
+  10833  2ffc				  -	      RORG	$1FFFC
+  10834  2ffc					      endif
+  10835  2ffc				  -	      else
+  10836  2ffc				  -	      ifconst	ROM2k
+  10837  2ffc				  -	      ORG	$F7FC
+  10838  2ffc				  -	      else
+  10839  2ffc				  -	      ORG	$FFFC
+  10840  2ffc				  -	      endif
+  10841  2ffc					      endif
+  10842  2ffc		       52 f2		      .word.w	(start & $ffff)
+  10843  2ffe		       52 f2		      .word.w	(start & $ffff)

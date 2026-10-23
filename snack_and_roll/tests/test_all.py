@@ -291,11 +291,12 @@ def static_checks(s, r, level):
                 sides = [rr for rr in range(top, top + 5) if r.pf(col - 1, rr) or r.pf(col + 1, rr)]
                 if i == model.DOUBLE_PRESS:
                     # pressa doppia: un perno dal soffitto e uno dal piano,
-                    # teste alle righe h e 4 - h (h = 0-2, unite al centro)
+                    # teste alle righe h e 4 - h (h = 0-2, unite al centro); sulla
+                    # riga 4, sopra il piano, solo il perno (il varco accanto resta libero)
                     ok = False
                     for h in range(3):
                         want = [1 if d <= h else 0 for d in (0, 1, 2, 1, 0)]
-                        heads = sorted({h, 4 - h})
+                        heads = sorted({h, 4 - h} - {4})
                         if on == want and sides == heads and all(r.pf(col - 1, x) and r.pf(col + 1, x) for x in heads):
                             ok = True
                 else:
@@ -647,8 +648,8 @@ def mouth_phase(s, level):
     check(level, "suoni: sparo e bocca uccisa", SFX["bocca"] in heard and SFX["sparo"] in shot_heard | heard,
           f"effetti sentiti={sorted(shot_heard)} poi {sorted(heard)}")
     check(level, "cioccolatino colpisce la bocca: +10 (una volta sola) e bocca colpita",
-          # (+1 se il cioccolatino rompe prima un pezzo di pressa, al livello 6)
-          r.flag(5) == 0 and r.score() - score0 in ((10, 11) if level == model.PRESS_LEVEL else (10,)),
+          # (+1 per ogni pezzo di pressa che il cioccolatino rompe prima, al livello 6)
+          r.flag(5) == 0 and (10 <= r.score() - score0 < 20 if level == model.PRESS_LEVEL else r.score() == score0 + 10),
           f"flag5={r.flag(5)} score {score0}->{r.score()} tentativi={attempts}")
     dead = [i for i in (0, 1) if r.v(f"mouth{i}wait") > 0]
     check(level, "la bocca colpita sparisce (attesa prima di ricomparire)",

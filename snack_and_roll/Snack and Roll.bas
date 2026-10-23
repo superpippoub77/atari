@@ -1980,6 +1980,9 @@ pd_loop
  .byte $2C
 pd_head
  ldy #$E0
+ cpx #18
+ bne pd_set
+ ldy #$40
 pd_set
  sty temp2
  lda playfield,x
