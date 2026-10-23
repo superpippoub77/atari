@@ -1179,10 +1179,12 @@ def boss_phase(s):
         got = False
         for _ in range(4):
             r = s.save()
-            # (la Bocca Gigante appena colpita non si puo' colpire: _hitCooldown a 0)
+            # (la Bocca Gigante appena colpita non si puo' colpire: _hitCooldown a 0;
+            # niente sputi in volo e il prossimo fra 15 frame: dopo il quarto colpo
+            # sputa ogni 16 frame e uno sputo appena partito arriva prima del colpo)
             s.poke({V["hitCooldown"]: 0, PFSCORE1: 0xFF, PFSCORE2: 0xAA, V["mouth0x"]: 100, V["mouth0y"]: 60,
                     V["mouth1y"]: 200, PLAYER0X: 110, PLAYER0Y: 84, V["flags"]: r.v("flags") & ~0xC0,
-                    **({} if SIXTEEN else {V["spit2y"]: 200})})
+                    **({} if SIXTEEN else {V["spit2y"]: 200, MISSILE1Y: 200, V["frame"]: 1})})
             s.down("Up", "space")
             s.wait(0.06)
             s.up("Up", "space")
