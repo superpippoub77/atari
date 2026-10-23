@@ -1281,6 +1281,17 @@ tk_os
  sta temp4
  sta temp6
  sta g
+ ; rincorsa sotto il terreno: la bocca a x = h, il biscotto 28 pixel
+ ; davanti (fino al bordo destro, largo 16); un pixel per frame, poi si
+ ; ricomincia da sinistra (h e'
+ ; _mouth0y: nel titolo non serve, il livello lo rimette)
+ inc h
+ lda h
+ cmp #110
+ bcc tk_ch
+ lda #0
+ sta h
+tk_ch
 tk_vb
  lda INTIM
  bne tk_vb
@@ -1394,19 +1405,49 @@ tk_c
  stx PF0
  stx PF1
  stx PF2
- ldx #3
- jsr tk_skip
+ ; (le 3 linee del terreno: intanto si posizionano biscotto e bocca)
+ ldx #0
+ lda h
+ clc
+ adc #28
+ jsr tk_pos
+ inx
+ lda h
+ jsr tk_pos
+ sta WSYNC
  jsr tk_pfoff
- ; ---- firma "by FM" sotto il terreno (P1 di nuovo accanto a P0) ----
- ldx #1
+ ; ---- la bocca insegue il biscotto: i disegni del logo (7 righe da 4
+ ; linee; la bocca mastica e ha i suoi colori per riga). La grafica del
+ ; gioco no: batari Basic la tiene nel banco 2 ----
+ sta WSYNC
+ sta HMOVE
+ ldx #27
+tk_r
+ sta WSYNC
+ txa
+ lsr
+ lsr
+ tay
+ lda (temp3),y
+ sta COLUP1
+ lda tk_cookie,y
+ sta GRP0
+ lda (temp1),y
+ sta GRP1
+ dex
+ bpl tk_r
+ jsr tk_pfoff
+ ; ---- firma "by FM" (P0 e P1 di nuovo accanto) ----
+ ldx #0
+ lda #68
+ jsr tk_pos
+ inx
  lda #92
  jsr tk_pos
  sta WSYNC
  sta HMOVE
  lda #$2C
  sta COLUP1
- ldx #10
- jsr tk_skip
  ldx #19
 tk_s
  sta WSYNC
@@ -1469,7 +1510,7 @@ tk_p1
    ; alto e arriva a 0 (attesa di INTIM = 0); quello di fine schermo ha il
    ; bit 7 acceso come in drawscreen (attesa finche' INTIM e' negativo):
    ; quello delle linee vuote in basso, poi la logica del titolo
-TK_VBLANK = 86
+TK_VBLANK = 61
 TK_OVERSCAN = 67
 
    ; la bocca chiusa e le L piegate sono 8 byte dopo i disegni normali e le

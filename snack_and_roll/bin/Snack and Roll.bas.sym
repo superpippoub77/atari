@@ -568,13 +568,13 @@
 0.L0354                  dcad                  
 0.L0355                  dcc5                  
 0.L0356                  dcc8                  
-0.L0357                  df02                  
-0.L0358                  df07                  
-0.L0359                  df12                  
+0.L0357                  df3b                  
+0.L0358                  df40                  
+0.L0359                  df4b                  
 0.L036                   d000                  
-0.L0360                  df45                  
-0.L0361                  df88                  
-0.L0362                  df9b                  
+0.L0360                  df7e                  
+0.L0361                  dfc1                  
+0.L0362                  dfd4                  
 0.L0363                  f4d8                  
 0.L0364                  f4e4                  
 0.L0365                  f4e5                  
@@ -969,11 +969,11 @@
 0.skipL0332              dbe8              (R )
 0.skipL0341              dc27              (R )
 0.skipL0347              dc4f              (R )
-0.skipL0357              df07              (R )
-0.skipL0358              df12              (R )
-0.skipL0359              df45              (R )
-0.skipL0360              df88              (R )
-0.skipL0361              df9b              (R )
+0.skipL0357              df40              (R )
+0.skipL0358              df4b              (R )
+0.skipL0359              df7e              (R )
+0.skipL0360              dfc1              (R )
+0.skipL0361              dfd4              (R )
 0.skipL0365              f4ee              (R )
 0.skipL0372              f5d6              (R )
 0.skipL0373              f5df              (R )
@@ -1199,7 +1199,7 @@ frame_limit              002f              (R )
 G                        00da                  
 g                        00da              (R )
 game                     d000              (R )
-gamemusic                df8b              (R )
+gamemusic                dfc4              (R )
 gamemusic_length         0010                  
 gm_pause                 d10c              (R )
 goback                   f072              (R )
@@ -1263,9 +1263,9 @@ missile0y                0091              (R )
 missile1height           0087              (R )
 missile1x                0083              (R )
 missile1y                0088              (R )
-mouthcolors              df05              (R )
+mouthcolors              df3e              (R )
 mouthcolors_length       0002                  
-mouthspeed               df0a              (R )
+mouthspeed               df43              (R )
 mouthspeed_length        0008                  
 multisprite              0000 ????         (R )
 N                        00e1                  
@@ -1428,9 +1428,9 @@ ret_point8               d76e              (R )
 ret_point9               d915              (R )
 retroputer               0005                  
 rightloop                f380              (R )
-ro2                      dedb              (R )
-ro4                      de74              (R )
-ro5                      de83              (R )
+ro2                      df14              (R )
+ro4                      dead              (R )
+ro5                      debc              (R )
 ROM2k                    0000 ????         (R )
 RSYNC                    0003                  
 S                        00e6                  
@@ -1473,12 +1473,12 @@ sfx_sugar_length         001c
 shakescreen              0000 ????         (R )
 shiftdown                f3a1              (R )
 skc_1                    d3b7              (R )
-sn0                      deb1              (R )
-sn1                      deb8              (R )
-sn2                      debf              (R )
-sn3                      dec6              (R )
-sn4                      decd              (R )
-sn5                      ded4              (R )
+sn0                      deea              (R )
+sn1                      def1              (R )
+sn2                      def8              (R )
+sn3                      deff              (R )
+sn4                      df06              (R )
+sn5                      df0d              (R )
 spit2                    fb50              (R )
 spit_done                fbb6              (R )
 spit_fire                faa4              (R )
@@ -1503,7 +1503,7 @@ start                    f252              (R )
 start_bank1              dfd4              (R )
 statusbarlength          00f5                  
 steamcol                 f91b              (R )
-sugar                    df15              (R )
+sugar                    df4e              (R )
 sugar_length             0030                  
 superchip                0000 ????         (R )
 SWACNT                   0281                  
@@ -1532,28 +1532,30 @@ TIM8T                    0295
 TIMINT                   0285                  
 tiny                     0007                  
 title_kernel             dcc8              (R )
-titlemusic               df48              (R )
+titlemusic               df81              (R )
 titlemusic_length        0040                  
-tk_a                     dd49              (R )
-tk_an                    dee9              (R )
-tk_b                     dd84              (R )
-tk_by                    def8              (R )
-tk_c                     ddc1              (R )
-tk_c0                    ddbf              (R )
-tk_cookie                dee2              (R )
-tk_d                     deee              (R )
-tk_fm                    defd              (R )
-tk_line                  def3              (R )
-tk_mouth                 de92              (R )
+tk_a                     dd55              (R )
+tk_an                    df22              (R )
+tk_b                     dd90              (R )
+tk_by                    df31              (R )
+tk_c                     ddcd              (R )
+tk_c0                    ddcb              (R )
+tk_ch                    dd4e              (R )
+tk_cookie                df1b              (R )
+tk_d                     df27              (R )
+tk_fm                    df36              (R )
+tk_line                  df2c              (R )
+tk_mouth                 decb              (R )
 tk_os                    dcc8              (R )
 TK_OVERSCAN              0043                  
-tk_p1                    de65              (R )
-tk_pfoff                 de4b              (R )
-tk_pos                   de62              (R )
-tk_s                     de26              (R )
-tk_skip                  de5c              (R )
-tk_vb                    dd42              (R )
-TK_VBLANK                0056                  
+tk_p1                    de9e              (R )
+tk_pfoff                 de84              (R )
+tk_pos                   de9b              (R )
+tk_r                     de2f              (R )
+tk_s                     de5f              (R )
+tk_skip                  de95              (R )
+tk_vb                    dd4e              (R )
+TK_VBLANK                003d                  
 U                        00e8                  
 u                        00e8              (R )
 up2                      f3b7              (R )

@@ -1029,6 +1029,13 @@ def cup_phase(s, level):
     ks = [k for k in range(8) if cups >> k & 1]
     base = lambda k: 3 + 7 * (k % 4)
     top = lambda k: 2 if k < 4 else 8
+    # il buco nella riga in cima, il piu' lontano dagli zuccherini nascosti nelle
+    # tazze (se no la prova degli zuccherini dopo trova la strada gia' aperta)
+    sugars = {sugar_cell(SUGAR[(level - 1) * 8 + j]) for j in range(8)}
+
+    def hole(k):
+        cols = range(base(k), base(k) + 5)
+        return max(cols, key=lambda c: min([abs(c - sc) for sc, sr in sugars if sr == top(k)] + [99])), top(k)
     steam = {k: (base(k) + 3, top(k) - 2) for k in ks}
     protect(s)
     s.poke({V["mouth0y"]: 200, V["mouth1y"]: 200, V["mouth0wait"]: 250, V["mouth1wait"]: 250})
@@ -1044,7 +1051,7 @@ def cup_phase(s, level):
     # tazza 0 bucata: si rovescia (il caffe' scende accanto) e smette di fumare
     protect(s)
     r = s.save()
-    pf_hole(s, r, base(ks[0]), top(ks[0]))
+    pf_hole(s, r, *hole(ks[0]))
     rows = []
     t0 = time.time()
     while time.time() - t0 < 2.0:
@@ -1064,7 +1071,7 @@ def cup_phase(s, level):
     r = s.save()
     lives = r[PFSCORE2]
     s.poke({PLAYER0X: x, PLAYER0Y: y, V["hitCooldown"]: 0})
-    pf_hole(s, r, base(k), top(k))
+    pf_hole(s, r, *hole(k))
     t0 = time.time()
     while time.time() - t0 < 2.5 and s.save()[PFSCORE2] == lives:
         s.poke({PLAYER0X: x, PLAYER0Y: y})
@@ -1079,7 +1086,7 @@ def cup_phase(s, level):
     r = s.save()
     score0 = r.score()
     for k in ks[2:]:
-        pf_hole(s, s.save(), base(k), top(k))
+        pf_hole(s, s.save(), *hole(k))
     heard = sfx_seen(s, 1.0)
     r = s.save()
     check(level, "tutte le tazze bucate: +100 e il suono del super potere",
