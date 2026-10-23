@@ -41,6 +41,8 @@ V = {
     # muri spingibili (negli altri livelli): vettore var44-var47, a
     "wall0": PLAYFIELD + 44, "wall1": PLAYFIELD + 45, "wall2": PLAYFIELD + 46, "wall3": PLAYFIELD + 47, "wall4": A["a"],
     "spit2x": PLAYFIELD + 44, "spit2y": PLAYFIELD + 45, "spitDir": PLAYFIELD + 46, "spitTime": PLAYFIELD + 47,
+    # tazze del livello 2 (8K): tazze intere, caffe' rovesciato (riga, colonna)
+    "cups": A["a"], "spill_row": PLAYFIELD + 44, "spill_col": PLAYFIELD + 45,
 }
 
 

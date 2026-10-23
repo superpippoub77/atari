@@ -1015,6 +1015,80 @@ def press_phase(s, level):
             PFSCORE2: 0xAA, PFSCORE1: 0xFF})
 
 
+def pf_hole(s, r, col, row):
+    """spegne un pixel del playfield (come un colpo di cioccolatino)."""
+    idx = row * 4 + col // 8
+    bit = (7 - (col & 7)) if (col // 8) % 2 == 0 else (col & 7)
+    s.poke({PLAYFIELD + idx: r[PLAYFIELD + idx] & ~(1 << bit)})
+
+
+def cup_phase(s, level):
+    """Tazze di cappuccino: vapore, tazza bucata che si rovescia, caffe' che
+    toglie una vita, bonus con tutte le tazze bucate."""
+    cups = OBJECTS[level - 1][0]
+    ks = [k for k in range(8) if cups >> k & 1]
+    base = lambda k: 3 + 7 * (k % 4)
+    top = lambda k: 2 if k < 4 else 8
+    steam = {k: (base(k) + 3, top(k) - 2) for k in ks}
+    protect(s)
+    s.poke({V["mouth0y"]: 200, V["mouth1y"]: 200, V["mouth0wait"]: 250, V["mouth1wait"]: 250})
+    seen = {k: set() for k in ks}
+    t0 = time.time()
+    while time.time() - t0 < 3.0:
+        r = s.save()
+        for k in ks:
+            seen[k].add(r.pf(*steam[k]))
+        s.wait(0.1)
+    check(level, "vapore: sopra ogni tazza si accende e si spegne", all(v == {0, 1} for v in seen.values()),
+          str({k: sorted(v) for k, v in seen.items()}))
+    # tazza 0 bucata: si rovescia (il caffe' scende accanto) e smette di fumare
+    protect(s)
+    r = s.save()
+    pf_hole(s, r, base(ks[0]), top(ks[0]))
+    rows = []
+    t0 = time.time()
+    while time.time() - t0 < 2.0:
+        r = s.save()
+        if r[V["spill_row"]] < 200:
+            rows.append((r[V["spill_row"]], r.pf(r[V["spill_col"]], r[V["spill_row"]])))
+        s.wait(0.05)
+    col0 = base(ks[0]) + 5
+    check(level, "tazza bucata: il cappuccino si rovescia e il caffe' scende accanto fino al piano",
+          not r[V["cups"]] & 1 and r[V["spill_row"]] == 255 and
+          {x for x, on in rows if on} >= set(range(top(ks[0]), top(ks[0]) + 3 if ks[0] < 4 else top(ks[0]) + 2)),
+          f"cups={r[V['cups']]:08b} righe={sorted(set(rows))} colonna={col0}")
+    check(level, "la tazza bucata non fuma piu'", not r.pf(*steam[ks[0]]))
+    # il caffe' addosso toglie una vita (biscotto fermo nella colonna del caffe' della tazza 1)
+    k = ks[1]
+    x, y = (base(k) + 5) * 4 + 13, 36 if k < 4 else 76
+    r = s.save()
+    lives = r[PFSCORE2]
+    s.poke({PLAYER0X: x, PLAYER0Y: y, V["hitCooldown"]: 0})
+    pf_hole(s, r, base(k), top(k))
+    t0 = time.time()
+    while time.time() - t0 < 2.5 and s.save()[PFSCORE2] == lives:
+        s.poke({PLAYER0X: x, PLAYER0Y: y})
+        s.wait(0.05)
+    r = s.save()
+    check(level, "il caffe' rovesciato addosso al biscotto toglie una vita", r[PFSCORE2] != lives,
+          f"vite {lives:08b}->{r[PFSCORE2]:08b}")
+    s.poke({PFSCORE2: lives, PLAYER0X: 10, PLAYER0Y: 64})
+    protect(s)
+    s.wait(1.5)
+    # tutte le tazze bucate: +100 e il suono del super potere
+    r = s.save()
+    score0 = r.score()
+    for k in ks[2:]:
+        pf_hole(s, s.save(), base(k), top(k))
+    heard = sfx_seen(s, 1.0)
+    r = s.save()
+    check(level, "tutte le tazze bucate: +100 e il suono del super potere",
+          r.score() == score0 + 100 and SFX["potere"] in heard and not r[V["cups"]] & cups,
+          f"punti {score0}->{r.score()} effetti={sorted(heard)} cups={r[V['cups']]:08b}")
+    s.wait(1.5)
+    protect(s)
+
+
 def play_level(s, level, extra=True):
     r = s.save()
     check(level, "livello caricato", r.v("level") == level and r.flag(0) == 1, f"level={r.v('level')}")
@@ -1044,6 +1118,8 @@ def play_level(s, level, extra=True):
         # varchi): il rallentamento si prova negli altri livelli
         if level != model.PRESS_LEVEL:
             slow_sound_phase(s, level)
+        if OBJECTS[level - 1][0] and not SIXTEEN:
+            cup_phase(s, level)
     sugar_phase(s, level)
     mouth_phase(s, level)
     if extra and level != LEVELS:

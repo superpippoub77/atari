@@ -121,6 +121,13 @@
    ; I contatori qui sotto usano variabili che servono solo durante il
    ; caricamento del livello (j, r, n): vengono impostati dopo.
    dim _wall = var44
+   ; livello 2 (niente muri): tazze ancora intere (un bit per sezione, 1 =
+   ; intera; il caricamento lo mette a 255) e il caffe' rovesciato (riga,
+   ; 255 = nessuno, e colonna del pixel che cade)
+   dim _cups = a
+   dim _spill_row = var44
+   dim _spill_col = var45
+   dim _cup_row = var46
    ; bocche uccise: frame che mancano alla ricomparsa (0 = bocca viva)
    dim _mouth0wait = j
    dim _mouth1wait = r
@@ -895,11 +902,12 @@ __wall_hit
    stx temp2
    rts
 ; quale muro sta nella colonna A (+ 128 sul piano)? X = 0-4 e Z = 1, se no
-; X = 255 e Z = 0 (nel livello della Bocca Gigante mai: var44-47 sono gli sputi)
+; X = 255 e Z = 0 (i muri ci sono solo nel livello 5: negli altri var44-47 e a
+; servono agli sputi della Bocca Gigante e alle tazze del livello 2)
 wall_find
  ldx _level
- cpx #_Boss
- beq wf_none
+ cpx #5
+ bne wf_none
  ldx #4
 wf_loop
  cmp _wall,x
@@ -984,8 +992,23 @@ __game_collision
    if !_hitCooldown && collision(player0, player1) then goto __decrease_health_bar
    ; PRESSE (livello 6): il biscotto non entra mai da solo nel playfield,
    ; quindi se lo tocca e' una pressa che gli e' scesa addosso
-   if _level <> _Levels || _hitCooldown then goto __no_press_hit
-   if collision(player0, playfield) then goto __decrease_health_bar
+   ; Livello 2: mentre cade il caffe' rovesciato, toccare il playfield vuol
+   ; dire che il caffe' e' caduto addosso al biscotto
+   asm
+ lda _hitCooldown
+ bne .__no_press_hit
+ lda _level
+ cmp #_Levels
+ beq ph_chk
+ cmp #2
+ bne .__no_press_hit
+ lda _spill_row
+ bmi .__no_press_hit
+ph_chk
+ bit CXP0FB
+ bpl .__no_press_hit
+ jmp .__decrease_health_bar
+end
 __no_press_hit
    if collision(missile0, player1) then goto __destroy_mouth
    if collision(player0, ball) then goto __change_level
@@ -1579,7 +1602,7 @@ __boss_gfx
    %11111111
    %01111110
 end
-   return
+   return thisbank
 
    ;*************************************************************************************************************************
    ; COLORI DEL PLAYFIELD (chiamato ad ogni frame dal banco 1)
@@ -1628,7 +1651,7 @@ __pfc_dark
  ldx #5
  bne pc_set
 pc_row0
- .byte $05,$05,$05,$05,$28,$02
+ .byte $08,$08,$05,$05,$28,$02
 pc_lo
  .byte <(pc_tab0-84+0),<(pc_tab0-84+1),<(pc_tab0-84+2),<(pc_tab0-84+3),<(pc_tab1-84+0),<(pc_tab1-84+1)
 pc_hi
@@ -1647,7 +1670,7 @@ pc_tab0
  .byte $24,$24,$24,$24
  .byte $26,$26,$24,$24
  .byte $02,$02,$02,$02
- .byte $05,$05,$05,$05
+ .byte $08,$08,$05,$05
  .byte $2E,$28,$2E,$28
  .byte $0E,$0E,$24,$24
  .byte $24,$24,$24,$24
@@ -1866,6 +1889,8 @@ wh_n
  cpy #1
  bne wh_row
 end
+   gosub __place_walls
+   return otherbank
 __place_walls
    asm
  lda #255
@@ -1882,7 +1907,7 @@ end
    temp4 = objects[temp2]
    temp5 = 4 : temp6 = 2
 __wall_loop
-   if !temp4 then return
+   if !temp4 then return thisbank
    if !(temp4 & 1) then goto __wall_next
    temp1 = temp6 + 2
    pfvline temp5 temp6 temp1 on
@@ -1913,8 +1938,144 @@ __wall_next
    ; Sopra: righe 0-4 (dal soffitto al piano). Sotto: righe 6-10 (dal piano
    ; al pavimento).
    ;*************************************************************************************************************************
+   ;*************************************************************************************************************************
+   ; TAZZE DI CAPPUCCINO (livello 2)
+   ;*************************************************************************************************************************
+   ; Ogni frame nel livello 2:
+   ;  - il caffe' rovesciato (_spill_row/_spill_col, 255 = nessuno) scende
+   ;    di una riga ogni 16 frame fino al piano o al pavimento;
+   ;  - una tazza per frame (k = frame & 7, se nel livello c'e'): se la sua
+   ;    riga in cima (2 sopra il piano, 8 sotto; colonne s..s+4) ha un
+   ;    buco, la prima volta la tazza si rovescia (il caffe' parte dalla
+   ;    colonna s+5) e se sono bucate tutte: +100 e il suono del super
+   ;    potere (_cups: un bit per tazza ancora intera, 255 al caricamento);
+   ;  - il vapore della tazza (colonna s+3, due righe sopra la tazza: 0 o 6,
+   ;    grigie come i paralumi) e' acceso
+   ;    un secondo si' e uno no, sfasato da una tazza all'altra; spento se
+   ;    la tazza e' bucata.
+   ; pfhline: A = colonna, Y = riga, temp3 = ultima colonna, X = 0 accende,
+   ; 1 spegne; pfread: A = colonna, Y = riga, A = 0 se il pixel e' acceso
+   ; (usano temp1-temp3)
+__cups
+   asm
+ lda _frame_counter
+ and #15
+ bne cu_cup
+ ldy _spill_row
+ bmi cu_cup
+ lda _spill_col
+ sta temp3
+ ldx #1
+ jsr pfhline
+ ldy _spill_row
+ iny
+ cpy #5
+ beq cu_end
+ cpy #10
+ beq cu_end
+ sty _spill_row
+ lda _spill_col
+ sta temp3
+ ldx #0
+ jsr pfhline
+ jmp cu_cup
+cu_end
+ lda #255
+ sta _spill_row
+cu_cup
+ lda _frame_counter
+ and #7
+ sta temp4
+ tax
+ lda setbyte+8,x
+ and objects+8
+ beq cu_rts
+ txa
+ and #3
+ tax
+ lda steamcol,x
+ sta temp5
+ ldy #2
+ lda temp4
+ cmp #4
+ bcc cu_top
+ ldy #8
+cu_top
+ sty _cup_row
+ lda temp5
+ sec
+ sbc #3
+ sta temp6
+cu_hl
+ lda temp6
+ ldy _cup_row
+ jsr pfread
+ bne cu_hole
+ inc temp6
+ lda temp6
+ sec
+ sbc temp5
+ cmp #2
+ bne cu_hl
+ lda _seconds_counter
+ clc
+ adc temp4
+ and #1
+ tax
+ bpl cu_draw
+cu_hole
+ ldx temp4
+ lda setbyte+8,x
+ and _cups
+ beq cu_off
+ eor _cups
+ sta _cups
+ lda _spill_row
+ bpl cu_bonus
+ lda temp5
+ clc
+ adc #2
+ sta _spill_col
+ ldy _cup_row
+ dey
+ sty _spill_row
+cu_bonus
+ lda _cups
+ and objects+8
+ bne cu_off
+ sed
+ clc
+ lda score+1
+ adc #1
+ sta score+1
+ lda score
+ adc #0
+ sta score
+ cld
+ ldx #7
+ jsr sfx_go2
+cu_off
+ ldx #1
+cu_draw
+ ldy _cup_row
+ dey
+ dey
+ lda temp5
+ sta temp3
+ jsr pfhline
+cu_rts
+end
+   return otherbank
+   asm
+   ; colonna del vapore (s+3, verso il manico: in s+2 nel livello 2 c'e'
+   ; uno zuccherino sotto il piano) per sezione
+steamcol
+ .byte 6,13,20,27
+end
+
 __update_drops
    if _level = _Boss then goto __boss
+   if _level = 2 then goto __cups
    ; Una goccia (o pressa) per frame, a turno: quella con
    ; (colonna xor riga) & 7 = frame & 7 (le 8 hanno valori diversi).
    ; Ognuna si ridisegna ogni 8 frame, due volte per passo (16 frame).
@@ -2332,7 +2493,7 @@ end
    ; sotto. Il bit 0 di _ballx (sempre pari, riletto a ogni livello) ricorda
    ; che il pezzo e' gia' stato tolto. temp5 = colonna colpita.
 __piano_hit
-   if _ballx & 1 then return
+   if _ballx & 1 then return otherbank
    _ballx = _ballx | 1
    temp1 = temp5 - 1 : temp2 = temp5 + 2
    if !temp5 then temp1 = 0
@@ -2674,44 +2835,116 @@ end
    ;*************************************************************************************************************************
 
    ; TAZZA: blocco 5x3 (righe {2}..{2}+2) con il manico (pixel spento)
+   ; (in assembly, sezione _playfield_section e riga _playfield_down)
    macro cup
-      temp6 = {2} + 2
-      temp5 = {1} + 4
-      for temp4 = {2} to temp6
-         pfhline {1} temp4 temp5 on
-      next
-      pfpixel temp5 temp6 off
+   asm
+ ldy _playfield_down
+cup_row
+ sty temp4
+ lda _playfield_section
+ clc
+ adc #4
+ sta temp3
+ lda _playfield_section
+ ldx #0
+ jsr pfhline
+ ldy temp4
+ iny
+ tya
+ sec
+ sbc _playfield_down
+ cmp #3
+ bne cup_row
+ dey
+ lda temp3
+ ldx #1
+ jsr pfhline
+end
 end
 
    ; MURO DI CIOCCOLATO: colonna {1} righe {2}..{2}+2 e colonna {1}+4
    ; righe {2}-2..{2}
+   ; (in assembly, sezione _playfield_section e riga _playfield_down;
+   ; pfvline: A = colonna, Y = prima riga, temp3 = ultima)
    macro chocolate
-      temp6 = {2} + 2
-      pfvline {1} {2} temp6 on
-      temp5 = {1} + 4
-      temp6 = {2} - 2
-      pfvline temp5 temp6 {2} on
+   asm
+ lda _playfield_down
+ clc
+ adc #2
+ sta temp3
+ lda _playfield_section
+ ldy _playfield_down
+ ldx #0
+ jsr pfvline
+ lda _playfield_down
+ sta temp3
+ sec
+ sbc #2
+ tay
+ lda _playfield_section
+ clc
+ adc #4
+ ldx #0
+ jsr pfvline
+end
 end
 
    ; LAMPADA: paralume di 3 pixel nella riga {2} e lampadina sotto
+   ; (in assembly, sezione _playfield_section e riga _playfield_up)
    macro lamp
-      temp5 = {1} + 2
-      pfhline {1} {2} temp5 on
-      temp5 = {1} + 1
-      temp6 = {2} + 1
-      pfpixel temp5 temp6 on
+   asm
+ lda _playfield_section
+ clc
+ adc #2
+ sta temp3
+ lda _playfield_section
+ ldy _playfield_up
+ ldx #0
+ jsr pfhline
+ lda _playfield_section
+ clc
+ adc #1
+ sta temp3
+ ldy _playfield_up
+ iny
+ ldx #0
+ jsr pfhline
+end
 end
 
    ; TAVOLO + SEDIA: piano nella riga {2}+1, gambe e sedia nella riga {2}+2
+   ; (in assembly, sezione _playfield_section e riga _playfield_down: le
+   ; gambe nelle colonne s, s+2 e s+4)
    macro table
-      temp5 = {1} + 2
-      temp6 = {2} + 1
-      pfhline {1} temp6 temp5 on
-      temp6 = temp6 + 1
-      pfpixel {1} temp6 on
-      pfpixel temp5 temp6 on
-      temp5 = {1} + 4
-      pfpixel temp5 temp6 on
+   asm
+ ldy _playfield_down
+ iny
+ sty temp6
+ lda _playfield_section
+ clc
+ adc #2
+ sta temp3
+ lda _playfield_section
+ ldx #0
+ jsr pfhline
+ inc temp6
+ lda _playfield_section
+ sta temp5
+tab_leg
+ lda temp5
+ sta temp3
+ ldy temp6
+ ldx #0
+ jsr pfhline
+ lda temp5
+ clc
+ adc #2
+ sta temp5
+ sec
+ sbc _playfield_section
+ cmp #6
+ bne tab_leg
+end
 end
 
    ; APPOGGIO sul piano di lavoro (riga 5) dalla colonna {1} per {2}+1 pixel

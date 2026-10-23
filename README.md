@@ -51,6 +51,7 @@
 >   - *combo partita perfetta*: finché nel livello non perdi una vita ogni zuccherino vale doppio (100 punti invece di 50);
 >   - lo zuccherino dorato (super potere) è giallo.
 > - **Levette di difficoltà** (lette a ogni inizio livello): sinistra in A = Bocche più veloci; destra in A = il livello parte con 6 tacche di tempo invece di 8 e niente bonus tempo. In B il gioco è normale.
+> - **Livello 2, le tazze di cappuccino**: sopra ogni tazza esce il vapore (si accende e si spegne a onda). Bucando la riga in cima di una tazza con un cioccolatino la tazza si rovescia: accanto cade una goccia di caffè bollente fino al piano o al pavimento, e se ti cade addosso perdi una vita; la tazza bucata smette di fumare. Se le buchi tutte e 7: **+100 punti** con il suono del super potere.
 > - **Livello 6, le presse**: solo presse, 4 appese al soffitto e 4 al piano. Ogni pressa è uno stantuffo a T (perno sottile, testa larga) che scende fino in fondo a ritmo, sfasata dalle vicine come un'onda: se ti prende sotto perdi una vita. Il livello parte al buio.
 > - **Livello segreto: la Bocca Gigante** (boss, dopo il livello 6). Una bocca enorme con i denti insegue il biscotto e gli sputa contro, mirando al biscotto in 8 direzioni (anche di lato e in diagonale): lo sputo toglie una vita. Si batte con 8 colpi di cioccolatino; la barra dell'energia sul pavimento si svuota a ogni colpo. Colpita, resta ferma dov'è per un attimo e lampeggia (in quel momento non si può colpire di nuovo), poi riprende a inseguire, più veloce; dopo il quarto colpo sputa tre volte al secondo e ogni sputo a metà strada si divide in due che si allargano, dopo il quinto lampeggia. Ogni colpo vale 50 punti, la vittoria 500 in più, poi compare il sacchetto. Non si sceglie con Select, ma con una **combinazione segreta**: nel titolo tieni la leva in su e il pulsante premuti (la gobba sul terreno va in fondo, al 7° posto) e premi Reset.
 > - **Trucco del piano di lavoro**: in ogni livello il primo cioccolatino che colpisce il piano di lavoro ne toglie un pezzo (4 colonne) e apre una scorciatoia tra sopra e sotto. Un solo pezzo per livello: i colpi successivi riaccendono soltanto la luce.
@@ -151,6 +152,7 @@ Il punteggio al centro dello schermo è composto da due parti:
 Nella versione Atari aggiornata:
 - zuccherino: 50 punti, **100** se nel livello non hai ancora perso una vita (combo "partita perfetta");
 - bocca colpita o schiacciata da un muro: 10 punti;
+- tutte le tazze di cappuccino del livello 2 bucate: 100 punti;
 - bonus tempo a fine livello: 20 punti per ogni segmento rimasto della barra del tempo.
 - Bocca Gigante: 50 punti per ogni colpo, 500 in più quando è sconfitta.
 
