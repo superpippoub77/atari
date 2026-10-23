@@ -289,23 +289,11 @@ def static_checks(s, r, level):
                 n = sum(on)
                 head = top + n - 1
                 sides = [rr for rr in range(top, top + 5) if r.pf(col - 1, rr) or r.pf(col + 1, rr)]
-                if i == model.DOUBLE_PRESS:
-                    # pressa doppia: un perno dal soffitto e uno dal piano,
-                    # teste alle righe h e 4 - h (h = 0-2, unite al centro); sulla
-                    # riga 4, sopra il piano, solo il perno (il varco accanto resta libero)
-                    ok = False
-                    for h in range(3):
-                        want = [1 if d <= h else 0 for d in (0, 1, 2, 1, 0)]
-                        heads = sorted({h, 4 - h} - {4})
-                        if on == want and sides == heads and all(r.pf(col - 1, x) and r.pf(col + 1, x) for x in heads):
-                            ok = True
-                else:
-                    ok = (1 <= n <= 5 and on == [1] * n + [0] * (5 - n) and (top == 0 or r.pf(col, 5))
-                          and sides == [head] and r.pf(col - 1, head) and r.pf(col + 1, head))
+                ok = (1 <= n <= 5 and on == [1] * n + [0] * (5 - n) and (top == 0 or r.pf(col, 5))
+                      and sides == [head] and r.pf(col - 1, head) and r.pf(col + 1, head))
                 if not ok:
                     bad.append((col, top, on, sides))
-        check(level, "presse a T: perno appeso al soffitto o al piano, testa larga in fondo (la doppia si chiude al centro)",
-              not bad, str(bad))
+        check(level, "presse a T: perno appeso al soffitto o al piano, testa larga in fondo", not bad, str(bad))
 
 
 def footprint(x, y):

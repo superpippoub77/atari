@@ -1974,46 +1974,6 @@ tick16
  adc temp1
  rts
 
-   ; PRESSA DOPPIA (colonna 17, sopra il piano): un perno scende dal
-   ; soffitto e uno sale dal piano, con le teste larghe 3 colonne; le
-   ; teste stanno alla riga temp1 (0-2, la lunghezza delle altre presse
-   ; dimezzata) e 4 - temp1: chiusa, si uniscono alla riga 2. Si
-   ; ridisegnano le 5 righe (colonne 16-18 = bit 7-5 del byte 2 di ogni
-   ; riga del playfield): per riga d = distanza dal bordo (0 1 2 1 0),
-   ; perno se d < temp1, testa se d = temp1
-press_double
- ldx #18
-pd_loop
- txa
- lsr
- lsr
- tay
- lda pdist,y
- ldy #0
- cmp temp1
- beq pd_head
- bcs pd_set
- ldy #$40
- .byte $2C
-pd_head
- ldy #$E0
- cpx #18
- bne pd_set
- ldy #$40
-pd_set
- sty temp2
- lda playfield,x
- and #$1F
- ora temp2
- sta playfield,x
- txa
- sec
- sbc #4
- tax
- bcs pd_loop
- jmp .__drop_next
-pdist
- .byte 0,1,2,1,0
 end
    ; PRESSA (livello 6, al posto delle gocce): uno stantuffo a T, perno
    ; sottile (1 colonna) con la testa larga (3 colonne) in fondo, lungo
@@ -2038,17 +1998,6 @@ __press
  clc
  adc temp1
  tax
- ; la pressa alta della colonna 17 e' doppia (vedi press_double)
- lda temp6
- bne pr_norm
- lda temp5
- cmp #17
- bne pr_norm
- lda presslen,x
- lsr
- sta temp1
- jmp press_double
-pr_norm
  lda pressold,x
  clc
  adc temp6
@@ -2695,8 +2644,7 @@ end
    ; all'altra, e schiacciano il biscotto (una vita).
    ; Livello 7 (Bocca Gigante): arena vuota, il piano ha tre passaggi.
 
-   ; presse: su, su, scende, giu' di colpo (fino in fondo), giu', risale
-   ; (la pressa doppia della colonna 17 usa la meta' della lunghezza);
+   ; presse: su, su, scende, giu' di colpo (fino in fondo), giu', risale;
    ; la tabella e' periodica (9 valori = 6 + 3) per lo sfasamento 0-3
    ; gocce: scendono di 5 righe (fino al piano o al pavimento) e restano
    ; giu' un passo; periodica (9 valori = 6 + 3) per lo sfasamento 0-3
