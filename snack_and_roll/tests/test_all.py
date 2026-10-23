@@ -528,6 +528,11 @@ def sugar_phase(s, level):
             s.poke({V["choco_bits"]: r.v("choco_bits") | (1 << k), V["choco_count"]: k + 1})
             continue
         ok, r = walk_to(s, level, goals)
+        if not ok and model.wall_cols(level):
+            # camminando il biscotto puo' aver spinto un muro che chiude la
+            # strada: si riapre spingendone uno e si riprova
+            push_open(s, level, goals)
+            ok, r = walk_to(s, level, goals)
         heard = sfx_seen(s, 0.3, r) | (WALK_SFX - {0})
         r = s.save()
         got = (r.v("choco_bits") >> k) & 1
@@ -1038,6 +1043,8 @@ def cup_phase(s, level):
         return max(cols, key=lambda c: min([abs(c - sc) for sc, sr in sugars if sr == top(k)] + [99])), top(k)
     steam = {k: (base(k) + 3, top(k) - 2) for k in ks}
     protect(s)
+    r = s.save()
+    mouths = {V[n]: r.v(n) for n in ("mouth0x", "mouth0y", "mouth1x", "mouth1y", "mouth0wait", "mouth1wait")}
     s.poke({V["mouth0y"]: 200, V["mouth1y"]: 200, V["mouth0wait"]: 250, V["mouth1wait"]: 250})
     seen = {k: set() for k in ks}
     t0 = time.time()
@@ -1093,6 +1100,8 @@ def cup_phase(s, level):
           r.score() == score0 + 100 and SFX["potere"] in heard and not r[V["cups"]] & cups,
           f"punti {score0}->{r.score()} effetti={sorted(heard)} cups={r[V['cups']]:08b}")
     s.wait(1.5)
+    # le bocche tornano dov'erano (non ricompaiono nel loro angolo, vicino alle tazze)
+    s.poke(mouths)
     protect(s)
 
 
